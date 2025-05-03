@@ -1,0 +1,24 @@
+<div class="w100 cont-vert-start-center">
+    <div class="cont-vert-around">
+      <div class="closeModal" (click)="close()"></div>
+      <div class="cont-vert calendar_alert margin-bottom40 cont-horiz w100">
+        <div class="margin-top-bottom40">
+          Выберите количество часов проката
+        </div>
+        <div class="input-line-mini cont-horiz-start" style="margin-right: 20px;">
+          <select  class="w100" style="border: 0px solid;" [(ngModel)]="time" >
+            <option *ngFor="let group of count">
+              {{group}}
+            </option>
+
+          </select>
+          </div>
+        <!-- вкладка 1 end -->
+      </div>
+      <div class="w100 cont-horiz">
+        <div class="btn-green  margin-right40" (click)="sendTime()" style="max-width: 200px;">
+          Далее
+        </div>
+      </div>
+    </div>
+</div>

@@ -1,0 +1,28 @@
+.container-textarea{
+    display:grid;
+    position:relative;
+    margin-top:10px;
+  }
+  .textarea-ba-profile{
+    border: 1px solid #9196A4;
+    border-radius: 0;
+    resize: none;
+    outline: none;
+    max-width: 100%;
+    min-height:160px;
+    padding:20px;
+  }
+  .textarea-ba-profile:focus{
+    border: 1px solid #00DAB3;
+  }
+  .textarea-count{
+    position:absolute;
+    bottom:20px;
+    right:20px;
+  }
+  .add-foto-to-gallery, .add-foto-to-gallery360 {
+    background-color: #fff!important;
+}
+.file-input {
+    display: none;
+  }

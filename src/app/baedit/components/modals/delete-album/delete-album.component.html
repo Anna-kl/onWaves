@@ -1,0 +1,20 @@
+<!--Модалка-->
+<div class="w100 cont-horiz modal_540">
+  <div class="cont-vert-start-start"  style="max-width: 360px;">
+    <h2 class="margin-bottom50"> 
+      Удаление альбома
+    </h2>
+    <div class="txt-green-light w100 margin-bottom70" >
+      Вы действительно хотите удалить альбом?
+    </div>
+    <!--div class=" w100 margin-bottom70" >
+      <b>Название альбома</b>
+    </div-->
+    <div class="btn-danger_no_contour margin-bottom40 w100 cont-vert" (click)="deleteAlbum()" >
+      Удалить
+    </div>
+    <div class="btn-green w100 cont-vert" (click)="close()">
+      Отменить
+    </div>
+  </div>
+</div>

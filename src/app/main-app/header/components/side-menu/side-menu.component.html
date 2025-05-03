@@ -1,0 +1,32 @@
+<!--  -->
+<div class="b-menu" style="margin-left:20px; " [ngClass]="{'b-menu--active': menuActive }" (mouseleave)="closeCategory()">
+    <div class="b-categories">
+        <ng-container *ngFor="let heading of menu; trackBy: trackByFn" >
+            <div class="b-category" [ngClass]="{'b-category--active': selectedHeadId === heading.headId }" (mouseenter)="toggleCategory(heading)" (click)="routeCategory()" >
+                {{ heading.heading }}
+            </div>
+        </ng-container>
+    </div>
+
+    <div *ngIf="selectedCategory" class="b-sections" style="margin-left: 180px; top:150px;
+     position: absolute;  border-left: solid;">
+        <div *ngFor="let category of selectedCategory" [ngClass]="{'b-sections__section--active': category.categoryId === selectedCategoryId }" class="b-sections__section">
+            <div class="b-sections__head" (mouseenter)="selectSubcategory(category)">
+                {{ category.categoryName }}
+                <span *ngIf="category.subcategories.length" class="material-icons" style="font-size: 24px;color: #0d94a0;">
+                    arrow_right
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="selectedSubcategory" class="b-subcategories" style="margin-left: 500px;
+    top:150px; position: absolute;  border-left: solid;">
+        <div class="b-subcategory" *ngFor="let subCategory of selectedSubcategory">
+            {{ subCategory.subcategoryName}}
+        </div>
+    </div>
+</div>
+
+
+

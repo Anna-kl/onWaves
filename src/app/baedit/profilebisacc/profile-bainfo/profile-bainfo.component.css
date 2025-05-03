@@ -1,0 +1,36 @@
+.cont-vert-start{
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+}
+.ba-right-column-padding{
+    padding: 20px;
+}
+@media screen and (max-width: 480px) {
+	.ba-right-column-padding{
+        padding: 0px;
+    }
+}
+.column-right-footer {
+    width: 100%;
+}
+
+.container-fullwidth {
+    width: 100%; 
+    height: 400px; 
+    margin: 0 auto; 
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
+
+@media screen and (max-width: 480px) {
+    .container-fullwidth {
+        height: 320px; 
+    }
+}
+
+.container{
+    width: 100%;
+    height: 400px;
+}

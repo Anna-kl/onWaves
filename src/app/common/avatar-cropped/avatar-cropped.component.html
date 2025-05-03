@@ -1,0 +1,46 @@
+<div class="cont-vert">
+    <div class="margin-bottom30 margin-top30">
+        <h2>Загрузите фотографию</h2>
+    </div> 
+    <div class="cont-horiz block-image-avatar margin-bottom30" *ngIf="isShowCropped">
+        <img class="" [src]="getAvatar(avatar)" alt="" *ngIf="!newAvatar"/>
+        <img class="" [src]="newAvatar|safe" alt="" *ngIf="newAvatar"/>
+        <!--div class="delete-image-avatar"  >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M3 6.13672C3 5.69489 3.35817 5.33672 3.8 5.33672H19.8C20.2418 5.33672 20.6 5.69489 20.6 6.13672C20.6 6.57855 20.2418 6.93672 19.8 6.93672H3.8C3.35817 6.93672 3 6.57855 3 6.13672Z" fill="#E24414"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M6.6 6.2V18.7C6.6 18.826 6.65114 18.951 6.749 19.0464C6.84756 19.1425 6.98544 19.2 7.13333 19.2H16.4667C16.6146 19.2 16.7524 19.1425 16.851 19.0464C16.9489 18.951 17 18.826 17 18.7V6.2H18.6V18.7C18.6 19.2636 18.3702 19.7999 17.968 20.192C17.5664 20.5835 17.026 20.8 16.4667 20.8H7.13333C6.57398 20.8 6.03359 20.5835 5.63204 20.192C5.22981 19.7999 5 19.2636 5 18.7V6.2H6.6Z" fill="#E24414"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M9.4 5.33333V6H7.8V5.33333C7.8 4.44928 8.22143 3.60143 8.97157 2.97631C9.72172 2.35119 10.7391 2 11.8 2C12.8609 2 13.8783 2.35119 14.6284 2.97631C15.3786 3.60143 15.8 4.44928 15.8 5.33333V6H14.2V5.33333C14.2 4.97756 14.0326 4.56254 13.6041 4.20546C13.1671 3.84129 12.5213 3.6 11.8 3.6C11.0787 3.6 10.4329 3.84129 9.99587 4.20546C9.56737 4.56254 9.4 4.97756 9.4 5.33333Z" fill="#E24414"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8 9.2C10.2418 9.2 10.6 9.55817 10.6 10V15.3333C10.6 15.7752 10.2418 16.1333 9.8 16.1333C9.35817 16.1333 9 15.7752 9 15.3333V10C9 9.55817 9.35817 9.2 9.8 9.2Z" fill="#E24414"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M13.8 9.2C14.2418 9.2 14.6 9.55817 14.6 10V15.3333C14.6 15.7752 14.2418 16.1333 13.8 16.1333C13.3582 16.1333 13 15.7752 13 15.3333V10C13 9.55817 13.3582 9.2 13.8 9.2Z" fill="#E24414"/>
+            </svg>
+        </div-->
+    </div>  
+    <image-cropper 
+        class="margin-bottom30" 
+        style="max-height: 500px;"
+            [resizeToWidth]="256"
+            [cropperMinWidth]="128"
+            *ngIf="!isShowCropped"
+            [imageChangedEvent]="imageChangedEvent"
+            [maintainAspectRatio]="true"
+            [aspectRatio]="4/4"
+            (imageCropped)="imageCropped($event)"
+            (imageLoaded)="imageLoaded($event)"
+            (cropperReady)="cropperReady()"
+            (loadImageFailed)="loadImageFailed()">
+    </image-cropper> 
+    <div class="margin-bottom30 bntForAvatar"
+     (click)="cropImage()" *ngIf="this.imageChangedEvent && !isShowCropped">
+        Готово
+    </div>
+    <div class="margin-bottom30 bntForAvatar"
+     *ngIf="isSetAvatar" (click)="save()">
+       Сохранить
+   </div>
+    <a href="javascript:void(0)" style="border-bottom:  1px solid $green-basic;" class="choose-another-foto" 
+     (click)="fileUpload.click()">
+        <input type="file" class="file-input"  (change)="fileChangeEvent($event)"  #fileUpload/>
+        Выбрать изображение
+    </a> 
+</div>
+

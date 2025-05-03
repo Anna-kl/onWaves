@@ -1,0 +1,122 @@
+<!-- Правая колонка БА -->
+<div class="ba-right-column-padding">
+  <app-albums-show [profileId]="companyId"></app-albums-show>
+    <div class="cont-horiz-start-start wrap w100">
+
+        <!-- (click)="showAlbum()" -->
+<!--        <app-albums-show style="width: 100%;-->
+<!--    display: inline-flex;" [profileId]="companyId"></app-albums-show>--> 
+        <div class="cont-horiz-start-start wrap w100">
+            <!-- <div class="card-albom-ba-foto"  *ngFor="let image of images">
+                <img [src]="getImage(image.image)" class="edit-ba-gallery-foto" style=" position: absolute;z-index: 1;" alt="">
+                <div class="cont-horiz-end-start card_albom_ba_foto-before">
+                    <label class="tooltip">
+                        <div class="cebab-white30 cont-vert"  >
+                            <div class="cebab-point-white">  </div>
+                            <div class="cebab-point-white">  </div>
+                            <div class="cebab-point-white">  </div>
+                        </div>
+                        <input type="checkbox">
+                        <span>
+                            <div class="cont-vert-start-center tooltip-box">
+                                <div class="cont-horiz">
+                                    <svg class="cont-horiz v-white30"
+                                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+                                        <path fill="#11142D" fill-rule="evenodd" d="M20.566 6.434a.8.8 0 0 1 0 1.132l-10 10a.8.8 0 0 1-1.132 0l-5-5a.8.8 0 1 1 1.132-1.132L10 15.87l9.434-9.435a.8.8 0 0 1 1.132 0Z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <br><br><br><br>
+                                    <div>
+                                        Сделать главным фото
+                                    </div>
+                                </div>
+                                <div class="cont-horiz">
+                                    <div class="ico-del" >
+                                    </div>
+                                    <div>Удалить</div>
+                                </div>
+                            </div>
+                        </span>
+                    </label>
+                </div>
+                <div class="albom-ba-foto-control-panel cont-vert-around"
+                     (click)="setMain(image.id)">
+                    <div class="cont-vert">
+                        <div [ngClass]="image.isCover ? 'v-white-hover' : 'v-white'">
+                        </div>
+                        <div class="margin-top15" style="color: #fff;">
+                            Главное фото
+                        </div>
+                    </div>
+                    <div class="w100 cont-horiz-end-center" (click)="deleteImage(image.id)">
+                        <div class="ico-del" >
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+            <!-- <div class="add-foto-to-gallery cont-vert" *ngIf="albums.length > 0">
+                <div class="cont-horiz" style="position: absolute;">
+                    <div class="plus-green" >
+                    </div>
+                </div>
+                <div class="add-foto-to-gallery-c-panel cont-vert" (click)="saveImage()">
+                    <div class="plus-white" >
+                    </div>
+                    <div class="margin-top20">
+                        Добавить фото
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </div>
+    <!--Услуги-->
+    <!-- <div class="cont-vert-start wrap margin-top30 margin-bottom20" *ngIf="!isHasService" >
+        <h3>Услуги</h3>
+    </div>
+    <div class="margin-bottom20">
+        Создайте группу услуг.
+    </div>
+    <div class="margin-bottom30">
+        Объедините в прайсе – список услуг в группу. Так вашему клиенту будет легче ориентироваться.
+    </div> -->
+    <!-- <div class="cont-horiz wrap " >
+        <div style="max-width: 540px;">
+            <div class="uslugi-create-block cont-vert-around" style="margin: 35px;" (click)="openPopUpM()">
+                <div class="plus-gray cont-vert">
+                    <img src="/assets/img/ba-edit/plus-white.png">
+                </div>
+                <div class="" >
+                    Создать группу услуг
+                </div>
+            </div>
+        </div>
+        <div class="uslugi-create-block cont-vert-around"   (click)="openPopUpMS()">
+            <div class="plus-gray cont-vert">
+                <img src="/assets/img/ba-edit/plus-white.png">
+            </div>
+            <div>
+                Добавить услугу 2
+            </div>
+        </div>
+    </div> -->
+    <!--Услуги start-->
+    <app-accordion [viewCreate]="true" [isUpdate]="false"  [canSetService]="false" [profileId]="companyId"></app-accordion>
+    <app-reviews-carusel [id]="companyId"></app-reviews-carusel>
+    <!-- Отзывы-->
+
+    <!-- 2GIS -->
+    <div class="cont-vert-start-center wrap margin-top30" *ngIf="profile">
+        <div class="margin-bottom40">
+            <h3>Как нас найти</h3>
+            <span>{{getAddressProfile(profile.address!)}}</span>
+        </div>
+        <!--Карта 2GIS start -->
+        <div class="column-right-footer" *ngIf="geoPoint$|async as geo">
+            <div #mapContainer class="container" >
+                <!-- <ya-map [center]="[geo.lat, geo.lng]" [zoom]="14" >
+                    <ya-placemark [geometry]="[geo.lat, geo.lng]"></ya-placemark>
+                </ya-map> -->
+            </div>            
+        </div>
+        <!--Карта 2GIS END-->
+    </div>
+</div>

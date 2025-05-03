@@ -1,0 +1,93 @@
+
+  <div class="cont-vert w100" style="border:none;">
+    <!-- Крестик -->
+    <div class="cont-vert-end-start w100">
+      <img src="/assets/img/ba-edit/ico_close_pc.png" (click)="close()" alt="">
+    </div>
+    <div class="cont-vert-start-center w100" style="max-width: 360px; min-width: 300px ; padding: 10px;">
+      <div class="txt-green-light margin-bottom10">
+        Выберите дни, к которым нужно применить расписание
+      </div> 
+      <div class="cont-horiz-between w100" style="max-width: 280px;" style="padding-left: 7px;">
+        <!-- Кнопка назад -->
+        <div class="btn_arr_green" (click)="backMonth()">
+          <svg class="arr_green-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#006174" >
+            <path fill="#006174" fill-rule="evenodd" clip-rule="evenodd" d="M7.43353 12.566C7.12111 12.2536 7.12111 11.747 7.43353 11.4346L15.4335 3.43461C15.746 3.12219 16.2525 3.12219 16.5649 3.43461C16.8773 3.74703 16.8773 4.25356 16.5649 4.56598L9.13059 12.0003L16.5649 19.4346C16.8773 19.747 16.8773 20.2536 16.5649 20.566C16.2525 20.8784 15.746 20.8784 15.4335 20.566L7.43353 12.566Z" />
+          </svg>
+        </div>
+        <!-- Выбранный месяц -->
+        <div class="calendar_month cont-horiz w100" >
+          {{getNameMonth(month)}}
+        </div>
+        <!-- Кнопка вперед -->
+        <div class="btn_arr_green" (click)="nextMonth()">
+          <svg class="arr_green-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#006174">
+            <path fill="#006174" fill-rule="evenodd" clip-rule="evenodd" d="M16.5665 11.4345C16.8789 11.7469 16.8789 12.2535 16.5665 12.5659L8.56647 20.5659C8.25405 20.8783 7.74751 20.8783 7.4351 20.5659C7.12268 20.2535 7.12268 19.7469 7.4351 19.4345L14.8694 12.0002L7.4351 4.56588C7.12268 4.25346 7.12268 3.74693 7.4351 3.43451C7.74751 3.12209 8.25405 3.12209 8.56647 3.43451L16.5665 11.4345Z" />
+          </svg>
+        </div>
+      </div> 
+      <!-- календарь start-->
+      <div class="cont-horiz-around w100" style="max-width: 360px;">
+        <div class="day_off">пн</div>
+        <div class="day_off">вт</div>
+        <div class="day_off">ср</div>
+        <div class="day_off">чт</div>
+        <div class="day_off">пт</div>
+        <div class="day_off">сб</div>
+        <div class="day_off">вс</div>
+      </div>
+      <div class="cont-horiz-around w100" *ngFor="let week of days">
+        <div  *ngFor="let d of week"
+              [class.day_off]="!d.ifExist && !d.isChecked"
+              [class.calendar_work_day]="d.isChecked"
+              [class.day_is_busy]="d.isBusy"
+              [class.calendar_click]="d.isToday" (click)="addDays(d)">
+          {{d.day}}
+        </div>
+      </div>
+      <!-- календарь end -->
+    </div>
+  </div>
+  <div class="txt-green-light w100 cont-horiz margin-bottom10">
+    Выбрано {{monthDays.length}}  дней
+  </div>
+  <div class="cont-horiz w100 margin-bottom20"  >
+    <div class="w100 cont-horiz-around" style="max-width: 360px;">
+      <div class="cont-vert-start-center " *ngIf="work">
+        <div>
+          Время работы:
+        </div>
+        <div>
+          <b>{{workTime}}</b>
+        </div>
+      </div>
+      <div class="cont-vert-start-center"  *ngIf="break">
+        <div>
+          Перерыв:
+        </div>
+        <div>
+          <b>{{breakTime}}</b>
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
+  <div class="w100 cont-horiz">
+  <!-- <div class="input-line-mini"  >
+    <select [(ngModel)]="choosePeriod" (ngModelChange)="changePeriod(choosePeriod)">
+      <option *ngFor="let group of period" [ngValue]="group">
+        {{group}}
+      </option>
+
+    </select>
+  </div> -->
+</div>
+    <div></div>
+  <div class="w100 cont-horiz">
+
+    <div class="btn-green " (click)="saveChanges()">
+      Применить
+    </div>
+  </div>

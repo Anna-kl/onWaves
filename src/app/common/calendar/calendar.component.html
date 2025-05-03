@@ -1,0 +1,43 @@
+<div class="cont-vert">
+  <div class="cont-vert-start-center calendar_width_m" style="gap: 7px 7px;">
+    <div class="cont-horiz-between w100">
+      <!-- arr_right_black.png---->
+      <div class="block_arr_green">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" (click)="backMonth()" class="arr_green">
+          <path d="M7.43451 12.566C7.12209 12.2536 7.12209 11.747 7.43451 11.4346L15.4345 3.43461C15.7469 3.12219 16.2535 3.12219 16.5659 3.43461C16.8783 3.74703 16.8783 4.25356 16.5659 4.56598L9.13157 12.0003L16.5659 19.4346C16.8783 19.747 16.8783 20.2536 16.5659 20.566C16.2535 20.8784 15.7469 20.8784 15.4345 20.566L7.43451 12.566Z"/>
+        </svg> 
+      </div>
+      <div class="calendar_month cont-horiz w100">
+          {{getNameMonth(month)}}
+      </div>
+      <div class="block_arr_green">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" (click)="nextMonth()"  class="arr_green">
+          <path  d="M16.5655 11.4345C16.8779 11.7469 16.8779 12.2535 16.5655 12.5659L8.56549 20.5659C8.25307 20.8783 7.74654 20.8783 7.43412 20.5659C7.1217 20.2535 7.1217 19.7469 7.43412 19.4345L14.8684 12.0002L7.43412 4.56588C7.1217 4.25346 7.1217 3.74693 7.43412 3.43451C7.74654 3.12209 8.25307 3.12209 8.56549 3.43451L16.5655 11.4345Z" />
+        </svg> 
+      </div>
+    </div> 
+    <!-- календарь start-->
+    <!-- Дни недели -->
+    <div class="cont-horiz-around w100 calendar_width_m" style="">
+      <div class="day_off">пн</div>
+      <div class="day_off">вт</div>
+      <div class="day_off">ср</div>
+      <div class="day_off">чт</div>
+      <div class="day_off">пт</div>
+      <div class="day_off">сб</div>
+      <div class="day_off">вс</div>
+    </div>
+    <!-- Дни месяца -->
+    <div class="cont-horiz-around w100 calendar_width_m"  *ngFor="let week of days">
+      <div  *ngFor="let d of week" class="cont-horiz-between"
+        [class.day_off]="!d.ifExist && !d.isChecked"
+        [class.calendar_work_day]="d.ifExist"
+        [class.last_day]="d.isLast"
+        [class.calendar_click]="d.isChecked" 
+        (click)="chooseDay(d)">
+        {{d.day}}
+      </div>
+    </div>
+    <!-- календарь end --> 
+  </div>
+</div> 

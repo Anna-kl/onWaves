@@ -1,0 +1,84 @@
+@import '../../../../assets/styles/main/color.scss';
+
+.bell_main_menu{
+    cursor: pointer;
+    fill:#FFAB00;
+}
+.bell_main_menu:hover{
+    fill:$green-basic;
+}
+.count_bell_main_menu:hover > .bell_main_menu{
+    fill:$green-basic;
+}
+.round-number, .count_bell_main_menu{
+  height: 16px;
+  width: 16px;
+  position: absolute;
+  background: #00DAB3;
+}
+.round-number {
+  font-size: 10px;
+  font-weight: 600;
+  color: #11142D; 
+  border-radius: 100px;
+  text-align:center;  
+  margin-left: 120px;
+  padding-top:1px;
+  cursor: pointer;
+}
+.count_bell_main_menu{
+  padding-top:5px; 
+    border-radius: 100px;
+    border: 1px solid #FFF; 
+    top: 34px;
+    margin-left: 15px; 
+    font-size: 10px;
+    font-weight: 600;
+    color: #11142D;
+    cursor: pointer;
+}
+.ico_type_user{
+    background-color: #00DAB3;
+    border-radius: 40px;
+    border: 1px solid #FFF;
+    height: 20px;
+    width: 20px;
+    position: absolute;
+    top: 35px;
+    margin-left: 17px;
+}
+.countRecord{
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 600;
+    color: #11142D;
+} 
+.menu-avatar-client{
+  /*margin-left: 20px;*/
+  min-width:50px;
+  padding-left:20px;
+}
+.container-avatar-image{
+  position:relative;
+}
+.grande-image{
+  border:1px solid #00DAB3;
+  width: 32px;
+  height: 32px;
+  border-radius: 24px;
+  cursor: pointer;
+}
+.little-image{
+  position:absolute;
+  bottom:-2px;
+  left:19px;
+  z-index:5;
+  cursor: pointer;
+}
+.main-menu-item:hover{
+  color: #11142D ;
+}
+
+.main-menu-item:hover{
+  color: #409B89 ;
+}

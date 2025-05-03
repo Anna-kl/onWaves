@@ -1,0 +1,166 @@
+@import "../../../assets/styles/main/color.scss";
+
+/*--------------- Типографика -------------------*/
+
+
+a, h1, h2, h3, h4,div,p, .h4-name,.intro, 
+.txt-green-light, .txt-gray-light,.hrecent,.teg-green,
+.btn-eror,.btn-gray, .btn-green, .btn-white,
+.type-name,.txt-uslugi-time, .txt-uslugi-price, .currency-name, 
+.sms, .fio-text, .fio::placeholder, ::placeholder, .recommend-info, .price,
+.footer-text,.btn-recommend2 {
+	font-family: 'Montserrat';
+}
+a{ 
+	text-decoration:none;
+	color: $green-basic;
+	}
+a:visited {
+	text-decoration:none;
+    color: $green-basic;
+}
+a.btn-black:visited,a.btn-green:visited {
+    color: #fff;
+}
+/*Заголовки */
+/* H1  */
+h1, h2, h3, h4{ 
+	font-style: normal; 
+	line-height: 130%;  
+	color: #11142D;
+	font-weight: 700;
+	text-align: left;
+	margin: 0px;
+}
+@media screen and (max-width: 576px) { 
+/* H1 */
+h1{ font-size: 2.25rem; } 
+/* H2 */ 
+h2{ font-size: 2rem;}
+/* H3 */  
+h3{ font-size: 1.5rem; }
+/* H4 */
+h4{ font-size: 1.25rem;} 
+}
+
+/* H1 */
+h1{ font-size: 1.5rem; } 
+/* H2 */ 
+h2{ font-size: 1.25rem;}
+/* H3   */
+h3{ font-size: 1rem; }
+/* H4 */
+h4{ font-size: 1rem;} 
+
+.body_xl{
+	font-size: 1.25rem;
+}
+
+div{ font-size: 1rem; } 
+.h4-name{ 
+	font-size: 1rem;
+	font-style: normal;
+	font-weight: 700; 
+	line-height: 130%; 
+	color: #11142D;
+	margin: 10px 0px 10px 0px; 
+}
+.intro{ 
+  font-style: normal;
+  font-weight: 700;
+  font-size: 4em;
+  line-height: 60px;  
+  text-align: center;
+  color: #11142D;  
+} 
+p{ 
+	font-size: 1rem;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1.5;
+	letter-spacing: 0em;
+	text-align: left;
+	padding:0px;
+	margin:0px;
+	line-height: 130%
+}
+.marker-green{
+    color: $green-basic; 
+}
+.txt-gray-small{
+	font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 130%; 
+    color: #9196A4;
+}
+.txt-green-light,
+.txt-gray-light, .txt-green-light2{ 
+	line-height: 130%; 
+	font-style: normal;
+	font-size: 1em;	
+}  
+.txt-green-light, .txt-green-light2{ 
+	font-weight: 500; 
+}
+.txt-green-light{
+	color: $green-basic; 
+}
+.txt-green-light2{
+	color:$green-light
+}
+.txt-red-day{
+	color: $color-error;
+}
+.txt-red-night{
+	color: #FF6464;
+}
+.txt-red-day-bold{
+	color: #E24414;
+	font-weight: 700;
+}
+.txt-red-night-bold{
+	color: #FF6464;
+	font-weight: 700;
+}
+.txt-green-bold{
+	color: $green-basic;  
+	font-weight: 700;
+	line-height: 130%; 
+}
+
+.txt-gray-light{  
+	color:#C0C5D5
+}
+.txt-gray-dark{
+	color:#9196A4
+}
+.textarea1{
+	width: 100%; 
+	max-width: calc(100% - 40px);  
+} 
+.textarea-reg-ba{
+	width: 100%;
+	max-width: 500px;
+}
+.textarea1, .textarea-reg-ba { 
+	border: 1px solid #9196A4;
+	border-radius: 0px;
+	resize: none;
+	outline: none;
+}  
+.textarea1:focus-visible {
+    border: 1px solid $green-light;
+    outline: none;
+}
+.hrecent{
+	margin: 0px 10px; 
+	font-size: 20px;
+	font-style: normal;
+	font-weight: 700;
+	line-height: 25px;
+	letter-spacing: 0em;
+	text-align: left;
+	max-width: 500px;	
+}

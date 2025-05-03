@@ -1,0 +1,6 @@
+.choose {
+  border: 2px solid #00DAB3;
+}
+.tab50{  
+  width:calc( (100% + 60px)/2 ) 
+} 

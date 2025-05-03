@@ -1,0 +1,98 @@
+@import '../../../../assets/styles/main/color.scss';
+
+.container-ba-uslugi {
+  display: grid;
+  grid-template-rows: auto;
+  margin: 0px 0;
+}
+
+.text-title {
+  color: $green-light;
+  width: 100%;
+}
+
+.text-title-description {
+  margin-top: 27px;
+}
+
+/*------------------  block-card  ------------------*/
+.container-card {
+  display: flex;
+  justify-content: space-around;
+  /*grid-template-columns: repeat(auto-fill, minmax(250px,1fr));*/
+  gap: 0 10px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+  max-width: 1200px;
+}
+
+@media screen and (max-width: 480px) {
+  .container-card {
+    margin-top: 30px;
+    margin-bottom: 20px;
+  }
+}
+
+.card-vide {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 200px;
+  border: 1px solid #9196A4;
+  border-radius: 12px;
+  padding: 0 45px;
+  text-align: center;
+}
+
+.card-vide-title {
+  height: 50px;
+}
+
+.card-vide:hover {
+  border: 2px solid rgb(103, 196, 178);
+
+  .card-vide-img,
+  .card-vide-title {
+    fill: $green-basic;
+    color: $green-basic;
+  }
+
+}
+
+
+.card-vide-img {
+  fill: #C0C5D5;
+}
+
+.card-vide-img:hover {
+  fill: $green-basic;
+}
+
+.plus-margin {
+  margin-bottom: 30px;
+}
+
+@media screen and (max-width: 480px) {
+  .plus-margin {
+    margin-bottom: 15px;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .container-card {
+    display: flex;
+    gap: 0;
+  }
+
+  .card-vide {
+    max-width: 155px;
+    max-height: 155px;
+    padding: 5px 10px;
+  }
+
+  .text-title {
+    width: 90%;
+  }
+}

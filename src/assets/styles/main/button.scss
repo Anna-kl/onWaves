@@ -1,0 +1,168 @@
+@import "../../../assets/styles/main/color.scss";
+
+/* ----------- Кнопки START ------------*/
+.foo-btn-social{
+	margin-right:10px;
+	height:36px;
+	width:36px;
+	border-radius:8px ;
+	background-color: $black;
+}
+.foo-btn-social:hover{
+	background-color: $green-basic;
+}
+.round_tg:hover ~ .-txt-hover {
+	color: $green-basic;
+}
+.ico-green-with-txt:hover ~ .green-txt-hover{
+	color: $green-basic;
+} 
+.btn-back{
+	border: 1px solid #C0C5D5;
+	border-radius: 12px; 
+	width: 48px;
+	height: 48px;
+	margin-right: 20px;
+	background-image: url(/assets/img/ba-edit/ico_arrow_left_green.svg);
+	background-repeat: no-repeat;
+  	background-position: center center;
+	cursor: pointer;
+}
+.btn-back:hover{
+	border: 1px solid $green-light;
+	cursor: pointer;
+}
+.btn-eror{
+	min-width: 245px;
+    max-width: 245px;
+    color: #fff;
+    padding: 15px 37px;
+    background: $color-error;
+    border-radius: 25px;
+    font-size: 1.1em;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 130%;
+	cursor: pointer;
+}
+.btn-green-quad{
+	cursor: pointer;
+	font-weight: normal;
+	font-size:0.8em;
+	height:37px;
+	width: 110px;
+	background-color:$green-basic ;
+	color: #fff ;
+	border-radius: 6px;
+	line-height: 130%;
+
+	text-align: center;
+	display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.btn-green-quad:hover{
+	cursor: pointer;
+	background-color:$green-basic;
+}
+.btn-transparent{
+	/*background-color: #aaa;*/
+	max-width: 200px;
+}
+.btn-white, .btn-transparent{
+	/*padding: 0px 20px;*/
+}
+.btn-gray,.btn-gray-light, .btn-green, .btn-black, .btn-transparent,.btn-white{
+	min-width: 100px;
+	width: 100%;
+	max-width: 380px;
+	cursor: pointer;
+}
+
+.btn-gray, .btn-gray-light, .btn-green, .btn-white,.btn-transparent, .btn-black, .btn-danger_no_contour{
+    font-weight: bold;
+    padding: 15px 37px;
+	height:50px;
+    border-radius:40px;
+    font-size:1em;
+	line-height: 130%;
+	text-align: center;
+	display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.btn-danger_no_contour{ 
+	max-width: 380px;
+	background-color: transparent;
+	color:  $color-error;
+	width: 100%;
+}
+.btn-danger_no_contour:hover{ 
+	border: 1px solid $color-error;
+} 
+.btn-black{
+    color: #fff;
+	background: #11142D;
+}
+.btn-black:hover{
+	background: #409B89;
+}
+.button-download{
+    background-color:#11142D ;
+    border-radius: 8px;
+    padding: 12px;
+    display: inline-block;
+    color: #fff;
+}
+.btn-gray{
+	background: #C0C5D5;
+	color: #fff;
+	font-weight: 700;
+}
+.btn-green{
+    background: $green-light;
+	color: #fff;
+}
+.btn-green:hover {
+    background: $green-basic;
+}
+button.btn-green {/*bootsrap override*/
+	border-color: transparent;
+	cursor: pointer;
+}
+.btn-gray-light{
+	background: #FFFFFF;
+	color: #C0C5D5;
+	border: 1px solid #C0C5D5;
+}
+.btn-white{
+	/*background: #FFFFFF; */
+	color: $green-basic;
+	border: 1px solid $green-basic;
+	/*margin: 10px;  */
+}
+.btn-white:hover{
+	border: 1px solid  $green-light;
+	color:  $green-light;
+}
+
+.btn4{
+	background-color:$green-basic;
+	color: #fff;
+	height: 50px;
+	width: 244px;
+	border-radius: 100px;
+	padding: 12px, 130px, 12px, 130px;
+	cursor: pointer;
+}
+.white-btn{
+    background: #fff;
+    color: #000;
+    font-weight: bold;
+    padding: 0px 20px;
+    border-radius:40px;
+    font-size:1em;
+    margin-right: 20px;
+	cursor: pointer;
+}
+/* ----------- Кнопки END ------------*/

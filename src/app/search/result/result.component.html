@@ -1,0 +1,73 @@
+<div class="cont-horiz " style="background: #FAFAFC;  padding-bottom: 20px;" >
+	<div class="cont-vert list1200 left-right20mob">
+		<!-- Cтраница -->
+		<div class="width100">
+			<!-- Заголовок страницы  -->
+			<div class="cont-horiz-start margin-top50 margin-bottom50 left-right20">
+				<a (click)="back()" class="cont-horiz btn-back"> 
+				</a> 
+				<h1>Результаты поиска</h1> 
+			</div>
+		</div>
+		<div class="cont-vert-start w100" >
+			<!-- Строка поиска -->
+			<div class="cont-horiz margin-bottom50 left-right40 w100">
+				<!-- Иконка расширенный поиск -->
+				<a style="margin-left: 20px;" (click)="goExtSearch()">
+					<img src="/assets/img/search/search_full.png">
+				</a>
+				<!-- Строка поиска -->
+				<div class="width100" style="min-width:300px;">
+					<div class="search-line" name="test" method="post" action="input1.php"
+						style="margin-left: 20px; margin-right: 20px; max-width: calc(100% - 40px);">
+						<div class="cont-horiz-between search-line-in">
+							<!--   -->
+							<div>
+								<input type="text" [(ngModel)]="searchRequest"	size="11" placeholder="Что вы ищете?" style="border:0px;" >
+							</div>
+							<!-- Иконка лупы -->
+							<a class="round30 background-green-dark" (click)="search()">
+								<img src="/assets/img/reg-ba/Lupa.png" class="search-arr-right">
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="cont-horiz" style="width: 100%;" *ngIf="loading">
+				<p-progressSpinner ></p-progressSpinner>
+			</div>
+			<div *ngIf="_apiSearch.isResultSearch|async">
+				<p>Упс... к сожалению по вашему запросу ничего не нашлось, 
+					попробуйте еще раз!</p>
+				<app-clients-card-list [card-business]="cards$"
+				 *ngIf="cards$"></app-clients-card-list>
+			</div>
+			<!-- <div *ngIf="profiles$|async as profiles">
+				<p>Возможно, вас заинтересуют!</p>
+				<app-clients-card-list [card-business]="profiles"></app-clients-card-list>
+			</div> -->
+		
+			<!-- Результаты поиска --> 
+<!--			<app-clients-card-list class="disp1 cont-horiz-start-start wrap parent-grey-light " style="gap: 10px 4px;"> -->
+<!--			</app-clients-card-list> -->
+			<ng-container *ngIf="test$|async as cardsSearch">
+				
+						<div *ngFor="let category of filtered$|async" class="w100 left-right20mob" >
+						
+							<div class="cont-horiz-start-start margin-top50 margin-bottom30 w100 left-right20">
+								<div>
+									<h2>{{category.name}}</h2>
+								</div>
+							</div>
+
+							<app-clients-card-list [card-business]="getCards(category, cardsSearch)" class="disp1 cont-horiz-start-start wrap parent-grey-light " style="gap: 10px 4px;">
+							</app-clients-card-list>
+
+						</div> 
+
+			</ng-container>
+		</div>
+
+	</div>
+</div>
+<!-- List END -->  

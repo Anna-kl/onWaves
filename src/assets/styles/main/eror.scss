@@ -1,0 +1,45 @@
+a{
+	text-decoration:none;
+	color: $green-basic;
+	}
+.eror-head, .eror-txt{
+	font-family: 'Montserrat';
+	font-style: normal;
+	line-height: 130%; 
+	color: #E24414;
+}
+.eror-head{ 
+	font-weight: 700;
+	font-size: 24px; 
+}
+.eror-txt{  
+	font-weight: 400;
+	font-size: 15px;   
+}
+.eror-img{
+	width:260px;
+	height:245px;
+}
+.btn-eror{ 
+	min-width: 245px;
+	max-width: 245px;
+	color: #fff; 
+	padding: 15px 37px;
+	background: #E24414;
+	border-radius: 25px; 
+	
+	font-size: 1.1em; 
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 700; 
+	line-height: 130%; 
+} 
+.eror-card{
+	max-width:285px;
+	min-height:370px;
+	padding:40px; 
+	background-color:#FAFAFC;
+}
+.eror-list{
+	height:100vh;
+}

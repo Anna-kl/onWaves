@@ -1,0 +1,209 @@
+@import '../../../assets/styles/main/color.scss';
+
+.accordion_serv_in_tab-content{
+  background-color: #fff;
+}
+.accordion_head_pad{
+  margin-top: 50px;
+  margin-bottom: 50px ;
+}
+@media screen and (max-width: 480px) {
+  .accordion_head_pad{
+    margin-top: 30px;
+    margin-bottom: 20px ;
+  }
+}
+.accordion_tab>input {
+  display: none;
+}
+/* Accordion styles */
+.accordion_tabs {
+  /*border-radius: 8px;*/
+  overflow: hidden;
+  /*box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.5);*/
+}
+.accordion_tab {
+  width: 100%;
+  color: white;
+  overflow: hidden;
+}
+.accordion_tab-label {
+  display: flex;
+  justify-content: space-between;
+  line-height: 1.2;
+  padding: 5px 20px;
+  background: $green-basic;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius:12px;
+  margin:5px 0;
+  height: 54px;
+}
+.accordion_tab-label:hover {
+  background: $green-basic;
+}
+.accordion_tab-content {
+  max-height: 0;
+  /*padding: 0 1em;*/
+  color: #000;
+  /*color: $green-basic;
+  background: white;*/
+  transition: all 0.6s;
+}
+.accordion_tab-close {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1em;
+  font-size: 0.6em;
+  background: $green-basic;
+  cursor: pointer;
+}
+.accordion_tab-close:hover {
+  background: $green-basic;
+} 
+input:checked + .accordion_tab-label {
+  background: $green-basic;/**/
+}
+input:checked ~ .accordion_tab-content {
+  max-height: 100%;
+  /*padding: 1em;*/
+} 
+/* эти три класса связанны  start*/
+.accordion_tab-label::after {
+  /*content: "^";*/
+  content: url(/assets/img/ba-edit/arr-white-bottom.png); 
+  /*margin: 5px 10px 0 0 ;*/
+  text-align: center;
+  transition: all 0.7s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+input:checked + .accordion_tab-label::after {
+  transform: rotate(180deg);
+}
+
+/* эти три класса связанны  end*/
+.card-graphics{
+  width: 290px;
+  border: 2px solid $green-light;
+  border-radius: 12px;
+  padding: 20px;
+  background-color: #fff;
+}
+/* ba_edit4_graphics(1.64).html END */
+
+/* Мои записи  service_my_notes(1.54).html */
+.accordion_tab-label_white {
+  display: flex;
+  justify-content: space-between;
+  padding: 1em 4em;
+  background: #fff;
+  color: #11142D;
+  cursor: pointer;
+  border-top: 0 solid #C0C5D5;
+  border-left: 0 solid #C0C5D5 ;
+  border-bottom: 1px solid #C0C5D5 ;
+  border-right: 0 solid #C0C5D5 ;
+  margin-bottom: 20px;
+}/*
+.accordion_tab-label_white:hover {
+
+} */
+.accordion_tab-content_white {
+  max-height: 0;
+  /*padding: 0 1em;*/
+  color: #000;
+  /*color: $green-basic;
+  background: white;*/
+  transition: all 0.6s;
+  background-color: #fff;
+}
+input:checked ~ .accordion_tab-label_white {
+  margin-bottom: 0;
+  /*border-top: 1px solid #C0C5D5;
+  border-left: 1px solid #C0C5D5 ;
+  border-bottom: 1px solid #C0C5D5 ;
+  border-right: 1px solid #C0C5D5 ;*/
+} 
+/* эти три класса связанны  start*/
+.accordion_tab-label_white::after {
+  /*content: "^";*/
+  content: url("/assets/img/ba-edit/arr-green-bottom.png");
+  margin-right: 10px;
+  text-align: center;
+  transition: all 0.7s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+input:checked + .accordion_tab-label_white::after {
+  transform: rotate(180deg);
+  margin-top: 10px;
+}
+/* ba_edit4_graphics(1.64).html START before*/
+.accordion_tab-label-graphics {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  color: #11142D;
+}
+.accordion_tab-label-graphics::after {
+  content: url("/assets/img/ba-edit/arr-green-top.png");
+  margin-right: 10px;
+  text-align: center;
+  transition: all 0.7s;
+}
+.accordion_tab-label-graphics:hover {
+  color: #11142D;
+}
+input:checked + .accordion_tab-label-graphics::after {
+  transform: rotate(180deg);
+}
+/* эти три класса связанны  end*/ 
+/* ------------------ разделяющая зеленая линия----------------------- */
+.line-separateur{
+  width: 100%;
+  height: 2px;
+  margin: 20px 0;
+  background: $green-light;
+} 
+ /*   пытаюсь временно настроить какие то поля      */
+.price-group-uslygi{
+  /*border-top:0!important;*/
+  max-width: 200px;
+} 
+/*// это есть и в style.css- нужно все перененсти*/
+/*@media screen and (max-width: 640px) {*/
+/*.str_uslugi_podcategory {*/
+/*  padding: 20px 10px;*/
+/*}*/
+/*}*/
+.head-servise{
+  margin-top: 20px;
+  /* margin-bottom: 20px; */
+}
+@media screen and (max-width: 480px) {
+  .head-servise{
+    /*margin-left: 20px;
+    margin-right: 20px;*/
+  }
+} 
+@media screen and (max-width: 480px) {
+  .group-name{
+    max-width: 250px;
+    overflow: hidden;
+  }
+}
+
+
+.nullReviews{
+  margin: 0;
+  padding: 10px 0;
+  font-weight: 400;
+  line-height: 130%;
+  color: #9196A4;
+  min-width: 100px;
+}

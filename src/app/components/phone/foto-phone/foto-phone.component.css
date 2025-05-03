@@ -1,0 +1,43 @@
+.show-foto-head{
+    color: #fff; 
+    height: 30px; 
+    overflow: hidden;
+}
+
+.modal-content{
+    background-color: #00ffea; 
+}
+modal-dialog{
+    background-color: #15193C; 
+}  
+/* 
+p-carousel-container
+.p-carousel-content{
+    max-width: 100vw;
+}
+
+:host ::ng-deep p-carousel {
+//On later realease of PrimeNG, this can be done programmatically with [showIndicators | showNavigators]="false"
+.p-carousel-indicators {
+    display: none !important;
+}
+    .p-carousel-next, .p-carousel-prev {
+        display: none !important;
+    }
+}
+
+button.p-ripple.p-element.p-carousel-next.p-link.ng-star-inserted {
+    display: none!important;
+}
+
+.ui-carousel-dots-container{
+    display: none !important;
+}
+.p-hide-paginator{
+    .p-carousel-indicators{
+        display: none !important;
+    }
+}
+::ng-deep .p-carousel .p-carousel-content .p-carousel-prev:focus {
+    box-shadow: none!important;
+}*/

@@ -1,0 +1,61 @@
+@import '../../../../assets/styles/main/color.scss';
+
+.container-group-service { 
+  background-color:$green-basic;
+  position: fixed;
+  width: calc(100% - 360px); /* поправка на ширину левой колонки */
+  z-index: 2;
+  max-width: 840px;
+}  
+@media screen and (max-width: 640px){
+  .container-group-service {  
+    width: 100% ; /* поправки в мобильной версии нету */   
+  }  
+} 
+.count-uslugi-number{
+  display:flex;
+  justify-content: center;
+  align-content:center;
+  border-radius: 12px;
+  width:25px;
+  height: 25px;
+  background-color:#fff; 
+  font-weight: 600
+}
+.count-uslugi-shoose{ 
+  font-size: 16px;
+  font-weight: 400;
+  color:#fff;
+} 
+.total-price-uslugi{ 
+  font-size: 20px;
+  font-weight: 700;
+  color:#fff; 
+} 
+@media screen and (max-width: 480px){
+  .total-price-uslugi{
+    width: 320px;
+  }
+}
+.btn-uslugi-shoose-botton{
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius:40px;
+  font-size:1em;
+  line-height: 130%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  background: #11142D;
+  cursor: pointer;
+}
+.btn-uslugi-shoose-data{
+   margin-right: 20px;
+} 
+@media screen and (max-width: 640px){
+  .left-ba-profile{
+    display:none;
+  }  
+} 

@@ -1,0 +1,84 @@
+<div class="cont-horiz" style="background: #FAFAFC;  padding-bottom: 20px;" >
+    <div class="cont-vert list1200">
+        <!-- Cтраница -->
+        <form [formGroup]="settingsForm" class="cont-vert-center-start w100 left-right20"
+        (ngSubmit)="saveChanges()">
+            <div class="w100 " style="max-width: 600px;">
+                <!-- Заголовок страницы  -->
+                <div class="cont-horiz-start margin-top50 margin-bottom50">
+                    <div class="cont-horiz btn-back margin-right30"  (click)="goToBack()">
+                    </div>
+                    <div >
+                        <h1>Настройки</h1>
+                    </div>
+                </div>
+                <div class="txt-green-light">
+                    Укажите номер телефона
+                </div>
+                <div class=" input-line cont-horiz-start ">
+                    <input  type="text" placeholder="+7(123) 456 78 90"
+                            mask="+0(000)000-00-00"
+                    formControlName="phone">
+                </div>
+                <span [style]="errors.errorLinkStyle">
+                    {{errors.errorLink}}
+                  </span>
+                <div class="txt-green-light margin-top30">
+                    Укажите имя
+                </div> 
+                <div class="input-line cont-horiz-start">
+                    <input  type="text" size="13" placeholder="Константин" formControlName="name">
+                </div>
+                <div class="txt-green-light margin-top30">
+                    Укажите фамилию
+                </div>
+                <div class="input-line cont-horiz-start ">
+                    <input  type="text" size="13" placeholder="Констатинопольский" formControlName="family">
+                </div> 
+                <div class="h4-name margin-bottom20 margin-top30">
+                    Безопасность
+                </div>
+                <div class="txt-green-light">
+                    Укажите email для восстановления доступа и подтверждения
+                </div>
+                <div class="input-line cont-horiz-start margin-bottom30">
+                    <input  type="text" size="13" placeholder="romashka@kmail.com"
+                    formControlName="email">
+                </div>
+                <!--div class="h4-name margin-top30 margin-bottom20">Уведомления</div>
+                <div class="cont-horiz-start margin-bottom20">
+                    <input class="custom-checkbox" type="checkbox" id="lichnyj_akkaunt" name="#" value="#">
+                    <label for="lichnyj_akkaunt">
+                        Личный аккаунт
+                    </label>
+                </div>
+                <div class="cont-horiz-start margin-bottom20">
+                    <input class="custom-checkbox" type="checkbox" id="biznes_akkaunt" name="#" value="#">
+                    <label for="biznes_akkaunt">
+                        Бизнес–аккаунт
+                    </label>
+                </div>
+                <div class="cont-horiz-start margin-bottom20">
+                    <input class="custom-checkbox" type="checkbox" id="skryt_podskazki" name="#" value="#">
+                    <label for="skryt_podskazki">
+                        Скрыть подсказки
+                    </label>
+                </div>
+                <div class="h4-name margin-top30">Ночная тема</div>
+                <label class="cont-horiz-start margin-bottom50">
+                    <div class="checkbox-name margin-right10 margin-bottom10" >
+                        Перейти на тёмную сторону
+                    </div>
+                    <input type="checkbox"/>
+                    <i></i>
+                </label-->
+            </div>
+            <div class="w100 cont-horiz">
+                <button class="btn-green">
+                    Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<p-toast position="bottom-center" ></p-toast>

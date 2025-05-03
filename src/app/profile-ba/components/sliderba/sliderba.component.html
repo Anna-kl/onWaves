@@ -1,0 +1,101 @@
+<!--- Слайдер Start  --->
+                <!-- <div class="owl-carousel owl-theme">
+
+                    <div class="item-1-22 cont-vert-between">
+                            <div class="">
+                               <img src="/assets/img/1.22_b_a/manicure_1.jpg" style="width: 250px;">
+                            </div>
+                            <div class="slider-ba-img-name">
+                                Маникюр аппаратный
+                            </div>
+                            <div class="slider-ba-img-col">
+                                    15 фото
+                            </div>
+                    </div>
+
+                    <div class="item-1-22 cont-horiz">
+                        <div class="cont-vert">
+                            <div>
+                               <img src="/assets/img/1.22_b_a/manicure_2.jpg" >
+                            </div>
+                            <div>
+                                Маникюр аппаратный
+                            </div>
+                            <div>
+                                15 фото
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="item-1-22 cont-horiz">
+                        <div class="cont-vert">
+                            <div>
+                                <img src="/assets/img/1.22_b_a/manicure_3.jpg" >
+                            </div>
+                            <div>
+                                Маникюр аппаратный
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="item-1-22 cont-horiz">
+                        <div class="cont-vert">
+                            <div>
+                                <img src="/assets/img/1.22_b_a/manicure_4.jpg" class="">
+                            </div>
+                            <div>
+                                Маникюр аппаратный
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="item-1-22 cont-horiz">
+                        <div class="cont-vert">
+                            <div>
+                                <img src="/assets/img/1.22_b_a/manicure_5.jpg" class="">
+                            </div>
+                            <div>
+                                Маникюр аппаратный
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+                <!-- <p-carousel [value]="images" [numVisible]="5" [numScroll]="1">
+                    <ng-template let-image pTemplate="item">
+                      <img src="{{ image }}" alt="">
+                    </ng-template>
+                  </p-carousel> -->
+
+
+                  <!-- [responsiveOptions]="responsiveOptions" -->
+
+<p-carousel [value]="tutorials" [numVisible]="3" [numScroll]="1"
+            [responsiveOptions]="responsiveOptions">
+
+  <ng-template let-product pTemplate="item">
+    <div class="product-item">
+      <div class="product-item-content">
+        <div class="mb-3">
+          <img [src]="product.image" [alt]="product.name" class="product-image" />
+        </div>
+        <div>
+          <h4 class="mb-1">{{ product.name }}</h4>
+          <h6 class="mt-0 mb-3">{{ product.price }}</h6>
+
+          <div class="car-buttons mt-5">
+            <p-button type="button" styleClass="p-button p-button-rounded mr-2" icon="pi pi-search"></p-button>
+            <p-button type="button" styleClass="p-button-success p-button-rounded mr-2" icon="pi pi-star-fill"></p-button>
+            <p-button type="button" styleClass="p-button-help p-button-rounded" icon="pi pi-cog"></p-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+</p-carousel>
+       <!-- <p-carousel [value]="images" [numVisible]="numVisible" [circular]="true" [responsiveOptions]="responsiveOptions"  [showIndicators]="false"
+       [showNavigators]="true">
+        <ng-template let-image pTemplate="item">
+          <img src="{{image.src}}" alt="{{image.alt}}" />
+        </ng-template>
+      </p-carousel> -->

@@ -1,0 +1,45 @@
+ <div class="parent-grey-light">
+  <div class="disp1 top170" >
+    <div class="cont-horiz wrap768">
+      <!--- Левая колонка --->
+      <section class="left-ba-profile">
+        <app-column-baprofile [id]="id"> 
+        </app-column-baprofile>
+      </section >
+      <!-- Правая колонка DATA-->
+      <section class="w100 cont-vert">
+        <div class="cont-horiz-start w100" style="height: 108px; padding-left: 7px;">
+          <div class="btn-back" (click)="inBack()"></div>
+          <h3>Дата и время</h3>
+        </div> 
+          <app-calendar            
+            (onDate)="onDate($event)"
+            [userId]="id">
+          </app-calendar> 
+        <app-set-interval-start 
+            [id]="id" [day]="daySetInterval"
+            [duration]="duration" 
+            (setInterval)="setInterval($event)">
+        </app-set-interval-start>
+        <!--  <div class="calendar_alert margin-top30 margin-bottom30 cont-horiz w100">-->
+        <!--    Выберите время начала-->
+        <!--  </div>-->
+        <!--  &lt;!&ndash; Свободное ввремя &ndash;&gt; -->
+        <!--  <div class="w100 free-time-table cont-horiz"> -->
+        <!--     <div class="w100  cont-horiz wrap" style="gap: 10px 10px;">-->
+        <!--       <div [ngClass]="{'teg-white': !slot.isChoose, 'teg-green': slot.isChoose}"-->
+        <!--           (click)="chooseInterval(slot)" *ngFor="let slot of freeSlots">-->
+        <!--           {{slot.start}}--> 
+        <!--       </div> -->
+        <!--     </div>  -->
+        <!--  </div>-->
+        <div class="w100 cont-horiz " style="margin-top: 20px">
+          <a class="next-btn-calendar" (click)="nextConfirm()"
+            [ngClass]="{'btn-green': isChoosed, 'btn-gray': !isChoosed}">
+            Далее
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+</div> 

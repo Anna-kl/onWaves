@@ -1,0 +1,73 @@
+<!-- Вся страница -->
+<div class="cont-vert w100" style="margin-bottom: 20px;" *ngIf="records$|async as records">
+
+  <!-- Лист 1200 start-->
+  <div class="cont-vert-center-start page1200"><!--style="background-color: #aaa;"-->
+    <div class="margin-bottom50 cont-horiz-between w100">
+      <h1>Клиенты</h1>
+      <!-- <div class="cont-horiz-end-center w100" style="gap:30px 30px">
+        <img src="assets/img/ico/BtnDownload.png">
+        <img src="assets/img/ico/BtnPdf.png">
+      </div> -->
+    </div>
+    <!-- Фильтры -->
+    <div class="cont-horiz-start-start w100 row" style="gap:10px 10px;margin-left: 20px; margin-right: 20px;">
+      <div class="col" style="margin-left: 20px;margin-right: 20px;" [ngClass]="getTypeClient('all') ? 'btn-green'
+      :'btn-white' " (click)="setTypeClient('all')">Все клиенты</div>
+      <div class="col" style="margin-left: 20px;margin-right: 20px;" [ngClass]="getTypeClient('constant') ? 'btn-green'
+      :'btn-white' " (click)="setTypeClient('constant')">Постоянные</div>
+      <div class="col" style="margin-left: 20px;margin-right: 20px;" [ngClass]="getTypeClient('new') ? 'btn-green'
+      :'btn-white' " (click)="setTypeClient('new')">Новые</div>
+      <div class="col" style="margin-left: 20px;margin-right: 20px;" [ngClass]="getTypeClient('black') ? 'btn-green'
+      :'btn-white' " (click)="setTypeClient('black')">Черный список</div>
+    </div>
+  </div>
+  <!-- Лист 1200 end-->
+
+  <div class="row border-2 w-100" style="max-width: 1200px;
+     margin-top: 20px;
+     border: 1px solid #9196A4;
+     border-radius: 12px;
+     padding: 20px 20px;" *ngFor="let record of getClients(records)">
+    <div class="">
+      <div class="row">
+        <div class="col-2 m-1" style="max-width: 60px;">
+          <img [src]="getAvatar(record.avatar)" alt="" style="max-width: 50px;" class="avatar-ba">
+        </div>
+        <div class="col-10 row" style="flex: 0 0 auto;
+    width: 94%;">
+          <div class="col-6 cont-horiz-start">
+
+            <b>{{record.name}}</b>
+          </div>
+          <div class="col-6 cont-horiz-end-start">
+            <b style="display: flex;padding-top: 20px;" [style.color]="getColorLine(record)">{{getStatus(record)}}</b>
+          </div>
+        </div>
+
+
+        <div class="row">
+          <div class="col-6" style="min-width: 500px;">
+            Количество посещений:&nbsp;
+            <b class="col-2">{{record.visitCount}}</b>
+          </div>
+          <div class="col-6">
+            <!-- <b style="float: right; line-height: 80px;" 
+      [style.color]="getColorLine(record)">{{getStatus(record)}}</b> -->
+            <div style="justify-content: end;min-width: 300px;display: flex;">
+              Последнее посещение:&nbsp; <b>{{record.lastVisit|date: 'dd-MM-YYYY'}}</b></div>
+          </div>
+
+          <!-- </div>  -->
+
+        </div>
+      </div>
+    </div>
+    <!-- <div class="col-1 cont-horiz-end-center" style="padding: 0;">
+      <img style="padding-right: 10px;" src="/assets/img/ba-edit/arr-green-right.png">
+    </div> -->
+  </div>
+
+  <!-- <ng-template #loading >
+    У вас пока нет записей (:
+  </ng-template> -->

@@ -1,0 +1,71 @@
+<div class="container-contacts"  *ngIf="profile">
+  <!--  левая колонка-->
+  <div class="column-left">
+    <div class="container-column-left">
+      <div class="discription-column-left">
+        Укажите контакты для связи с клиентами.
+      </div>
+      <!-- Номер телефона -->
+      <span>Номер телефона</span>
+      <div>
+        <input type="text" placeholder="+7 123 456 78 90" 
+        [(ngModel)]="profile.phone" (ngModelChange)="change($event,'')" 
+        required>
+      </div>
+      <!-- WhatsApp  -->
+      <span>WhatsApp</span>
+      <div>
+        <input type="text" placeholder="+7 _ _ _  _ _  _ _" [(ngModel)]="profile.whatsApp" (ngModelChange)="change($event,'')" required>
+      </div>
+      <!-- Telegram  -->
+      <span>Telegram</span>
+      <div>
+        <input type="text" placeholder="@_ _ _ _ _ _ _" [(ngModel)]="profile.telegram" (ngModelChange)="change($event,'telegram')" required>
+      </div>
+      <div class="discription-text">
+        Разместите ссылку на сайт вашей организации или страницу в социальных сетях.
+      </div>
+      <!-- Ccылка на сайт  -->
+      <span>Ccылка на сайт</span>
+      <div class="">
+        <input type="text" placeholder="https://" [(ngModel)]="profile.webSite"
+         (ngModelChange)="change($event,'')" required>
+      </div>
+    </div>
+  </div>
+  <!-- правая колонка-->
+  <div class="column-right">
+    <div class="container-column-right">
+      <app-select-address [profile]="profile"
+      (changeAddress)="changeAddress($event)">
+      </app-select-address>
+    </div>
+ </div>
+
+</div>
+<!---------------****************----------------------->
+<!--Нижняя колонки-->
+<!--Нижняя колонка левая-->
+<div class="container-contacts-footer"  *ngIf="profile">
+  <div class="column-left-footer" >
+    <div class="container-column-left-footer">
+      <div class="discription-column-left">Убедитесь, что на карте правильно указано ваше местоположение.</div>
+        <div class="address-text-info">{{strAddress}}</div>
+    </div>
+  </div>
+  <!--Нижняя колонка правая-->
+  <div class="column-right-footer" *ngIf="geoPoint$|async as geo">
+    <div class="container">
+      <!-- <ya-map [center]="[geo.lat, geo.lng]" [zoom]="12">
+        <ya-placemark [geometry]="[geo.lat, geo.lng]"></ya-placemark>
+      </ya-map> -->
+    </div>
+  </div>
+</div>
+<div class="container-ba-contacts-btnSave"  *ngIf="profile">
+  <div class="saveBtn" [class]="isEdit ? 'btn-green' : 'btn-gray'" (click)="saveChanges()">
+    Сохранить
+  </div>
+</div>
+<!--   всплывающее уведомление-->
+<p-toast position="bottom-center" *ngIf="isEdit"></p-toast>

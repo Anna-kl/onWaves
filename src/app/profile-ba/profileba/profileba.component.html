@@ -1,0 +1,30 @@
+<!-- Профиль БА со стороны  через карточки -->
+<main>
+<!-- List start -->
+<div class="parent-grey-light">
+    <div class="disp1 top170" >
+        <div class="cont-horiz-start-start wrap768">
+            <!--- Левая колонка --->
+          <app-column-baprofile [id]="id" ></app-column-baprofile>
+            <!-- Правая колонка start-->
+            <div class="ba122-right-column">
+                <!--Переключатель-->
+                <!-- <div class="cont-horiz padding-top40 padding-bottom40"
+                style="max-width:100%;" >
+                 <div class=" cont-vert" [ngClass]="btnProfile ? 'btn-recommend1' : 'btn-recommend3'"
+                 (click)="setProfile()" >Профиль</div>
+                 <div class="cont-vert" [ngClass]="!btnProfile ? 'btn-recommend1' : 'btn-recommend2'"
+                  (click)="setLenta()">Лента</div>
+               </div> -->
+              <router-outlet></router-outlet>
+<!--               <app-group-service [id]="id" [isEdit]="false"></app-group-service>-->
+                    <!--Услуги end -->
+                <!-- Отзывы -->
+            </div>
+            <!-- Правая колонка END-->
+        </div>
+    </div> <!--disp1 END-->
+</div> <!-- parent-grey-light END -->
+<!-- List END -->
+
+</main>

@@ -1,0 +1,74 @@
+<div class="container-ba-prifile" *ngIf="profile">
+  <!--  левая колонка-->
+  <div class="column-left">
+    <div class="container-column-left">
+      <div class="input-name">
+        Придумайте имя для будущей страницы или укажите название организации.
+      </div>
+      <div>
+        <input type="text" placeholder="Название страницы*" [(ngModel)]="profile.name" (ngModelChange)="change()"
+          required />
+      </div>
+      <div class="input-website">
+        Странице будет присвоено собственное имя, а также именная ссылка, которую вы сможете размещать на любых
+        ресурсах.
+      </div>
+      <div class="cont-horiz-start-start" style="gap: 10px 10px;">
+        <!-- Неизменяемая часть адреса -->
+        <div class="cont-horiz" style="height: 50px; text-align: center;">
+          ocpio.ru/
+        </div>
+        <!-- Часть адреса, заполняемая БА [placeholder]="urlProfileLocal"  -->
+        <!-- (ngModelChange)="change()"  -->
+         <div class="groupe-input">
+          <div class="input-ocpio-nikname">
+            <input class="input-span-text" type="text" [(ngModel)]="profile.link" (ngModelChange)="onInputChange()"
+              required />
+            <!-- Иконка копировать адрес -->
+            <div class="cont-horiz ico_copy_green" (click)="getLink()">
+              <img src="/assets/img/ico/icons_all_size/ico_copy_pc_24_white.svg">
+            </div>
+          </div>
+          <span>(Только латинские символы)</span>
+         </div>
+
+      </div>
+     
+      <div class="discription-column-left">
+        Создайте описание профиля, чтобы клиенты знали, чем вы
+        занимаетесь и чем вы лучше конкурентов.
+      </div>
+      <div class="container-textarea">
+        <textarea class="textarea-ba-profile" rows="5" cols="45" name="text" maxlength="150"
+          placeholder="Добавьте описание" (ngModelChange)="setAbout()" [(ngModel)]="profile.about">
+        </textarea>
+        <!-- счетчик 0/150 -->
+        <span *ngIf="profile?.about">
+          {{ profile.about?.length }}/150
+        </span>
+
+      </div>
+    </div>
+  </div>
+  <!-- правая колонка-->
+  <div class="column-right">
+    <div class="container-column-right">
+      <app-avatar-cropped [id]="profile.id!" [avatar]="profile.avatar" (onSave)="onSave($event)">
+      </app-avatar-cropped>
+      <!-- <app-crop-image-modal [id]="profile.id" [avatar]="profile.avatar"
+         (getData)="getData($event)"></app-crop-image-modal> -->
+      <!-- (click)="OpenModalDelete()"  -->
+      <!-- (click)="deleteBaAccount()" -->
+      <div class="deleteBaProfile" (click)="OpenModalDelete()">
+        Удалить бизнес-аккаунт
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container-main-profile-btnSave">
+  <div class="saveBtn" [class]="isEdit ? 'btn-green' : 'btn-gray'" (click)="saveChanges()">
+    Сохранить
+  </div>
+</div>
+<!--   всплывающее уведомление-->
+<p-toast position="bottom-center" *ngIf="isEdit"></p-toast>

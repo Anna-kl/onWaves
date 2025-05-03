@@ -1,0 +1,23 @@
+<div class="w100 cont-vert-start-center">
+  <div class="cont-vert-around" fxLayout="column" fxLayoutAlign="center end" >
+    <div class="closeModal"  (click)="close()"></div>
+    <div class="cont-vert calendar_alert margin-bottom40 cont-horiz w100" fxLayout="column" fxLayoutAlign="center center" style=" margin-top: 15px">
+      <div class="modal-title" style="color: #E24414; font-size: 20px; font-weight: 1000;">Внимание!</div>
+      <div class="margin-top-bottom40">
+       Можно выбрать только одну услугу "Без ограничения по времени"
+      </div>
+
+      <!-- вкладка 1 end -->
+    </div>
+    <div class="w100 cont-horiz" fxLayoutAlign="center center">
+      <div class="btn-outline-danger  margin-right40" style="max-width: 200px; margin-bottom: 15px; color: #E24414;font-size: 20px; font-weight: 1000" (click)="cancel()">
+        Отмена
+      </div>
+    </div>
+    <div class="w100 cont-horiz" fxLayoutAlign="center center">
+      <div class="btn-green  margin-right40" style="max-width: 200px;" (click)="change()">
+        Изменить
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+<div 
+[style]="isAuth ? 'margin-top: 50px' : 'margin-top:0'"
+style="margin-top: 50px; width: 100%;">
+  <!--- Экран 1 --->
+  <div  style="margin-top: 10px;">
+    <app-main-menu *ngIf="isAuth" ></app-main-menu> 
+    <!--- Слайдер Start  --->
+    <app-slider  *ngIf="isAuth"></app-slider>
+    <!-- Рекламный блок о сервисе -->
+    <!-- Популярное рядом с Вами -->
+    <app-landingVersion2 *ngIf="!isAuth" ></app-landingVersion2>
+    <app-uaafter-register *ngIf="isAuth" ></app-uaafter-register>
+  </div>
+</div> 

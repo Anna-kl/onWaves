@@ -1,0 +1,56 @@
+@import '../../../../assets/styles/main/color.scss';
+
+.container-ba-modalka-uslugi-2{ 
+  width: 500px;
+  max-height: 550px; 
+  background-color: #fff; 
+}
+.container-ba-modalka-uslugi-2{
+  width: 320px; 
+}
+.btn-closeModal-uslugi {
+  width: 100%;
+  display:grid;
+  justify-content: end;
+}
+.block-uslugi {  
+  margin-top:40px;
+} 
+.input-uslugi-modal{
+  border: 2px solid #DDE2ED ; 
+  padding:30px 30px;
+  border-radius:12px;
+  cursor:pointer;
+  margin-top:40px;
+}
+@media screen and (max-width: 480px) {
+  .block-uslugi {  
+    margin-top:20px;
+  } 
+  .input-uslugi-modal{
+    margin-top:20px;
+  }
+}
+.text-first{
+  color:$green-light;
+}
+
+.text-under-input{
+  color:#9196A4;
+  size:14px;
+  margin-left:20px;
+} 
+/*  кнопка Создать   */
+.btn-uslugi-modalka{
+  display:grid;
+  margin-top:100px;
+  justify-items: center;
+}
+.saveBtn { 
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius:24px;
+  padding: 13px 130px; 
+  background-color: $green-basic;
+} 

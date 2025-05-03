@@ -1,0 +1,75 @@
+.page1200{
+    width: 100%;
+    max-width: 1200px;
+}
+
+.row{
+  overflow: hidden!important;
+}
+.head-notes{
+    margin-top: 30px;
+    margin-bottom: 50px;
+    margin-right: 20px;
+  }
+  @media screen and (max-width: 480px) {
+    .head-notes{
+      margin-top: 0px;
+      margin-bottom: 20px;
+      margin-right: 20px;
+    }
+  }
+  .color-note_ready {
+    color: #4FB229;
+  } 
+  .color-note_no_confirm {
+    color: #FFAB00;
+  } 
+  .color-note_wait {
+    color: #0A6ED8;
+  } 
+  .color-note_cancel{
+    color: #E24414;
+  }
+  .around_1024-beetween_large{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  @media screen and (max-width: 1024px) {
+    .around_1024-beetween_large{
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        gap: 30px 10px;
+    }
+  }
+  .stl-cancel{
+    color:#E24414 ; 
+    border: 0px solid #E24414;
+    max-width: 240px;
+    display: flex;
+    align-items: center; 
+  } 
+  @media screen and (max-width: 768px) {
+    .stl-cancel{ 
+      display: flex;
+      justify-content: center;
+      align-items: center; 
+    }
+  }
+  .ua-my-notes{
+    border-bottom: 1px solid #DDE2ED ;
+    padding: 20px 0em;
+  }
+  .type-of-pay{ 
+    min-width: calc(245px);
+  }
+  .stl-feedback{
+    max-width: 410px; 
+    width: calc(50% - 20px);
+  }
+  @media screen and (max-width: 480px) {
+    .stl-feedback{ 
+      width: 100%;
+    }
+  }

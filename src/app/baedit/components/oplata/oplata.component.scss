@@ -1,0 +1,193 @@
+@import '../../../../assets/styles/main/color.scss';
+
+.container-ba-oplata {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  margin-bottom:30px; 
+  background-color:white;
+}
+.column-left{
+  display:grid;
+  justify-items: center;
+  align-items: start;
+}
+.container-column-left{
+  display:grid;
+  justify-content: center;
+  width: 70%;
+}
+.discription-column-left{
+  margin:50px 0 35px 0;
+  color: $green-light;
+  font-size: 20px;
+}
+.cards{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid #fff;
+  border-radius:12px;
+  padding:5px 10px;
+  margin:5px 0 15px;
+}
+.cards:hover{
+  border: 2px solid $green-basic;
+}
+.mini-card-name{
+  display:grid;
+  grid-template-areas: "a b";
+  align-items: center;
+}
+.cards-name{
+  grid-area:a;
+  width: 55px;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.25em;
+  color: #11142D;
+}
+.cards-money-name{
+  grid-area:b;
+  font-size: 0.9rem;
+}
+/*   ------  правая колонка ---------     */
+.column-right{
+  display:grid;
+  justify-items: center;
+  align-items: start;
+}
+.container-column-right{
+  display:grid;
+  justify-content: center;
+  width: 70%;
+}
+.container-box-oplata{
+  display: grid;
+  justify-self: center;
+  gap:20px;
+  grid-template-columns: repeat(2, minmax(40%, 1fr));
+  margin-top:5px;
+}
+.box-oplata{
+  display:grid;
+  grid-template-rows: 1fr 1fr;
+  align-items: center;
+  justify-items: center;
+  width: 140px;
+  height: 140px;
+  border: 1px solid #9196A4;
+  border-radius: 12px; 
+}
+.oplata-box-round{
+  background-color: #C0C5D5;
+  border-radius: 100px;
+  align-self: end;
+} 
+/*   ---------------------  КАРТОЧКИ ОПЛАТЫ  ---------------------- */ 
+/*.box-oplata:hover, .box-oplata:active {*/
+/*  border: 1px solid #00DAB3;*/
+/*  background-color: $green-basic;*/
+/*  color: #fff;*/
+/*} */
+.box-oplata:hover > .oplata-box-round {
+  border: 1px solid #00DAB3;
+  background-color: #fff;
+}
+.box-oplata:hover .oplata-box-round > .oplata-box-cash {  background-image: url('/assets/img/ba-edit/oplata/ico_cash_pc_24_green.svg');}
+.box-oplata:hover .oplata-box-round > .oplata-box-banccart { background-image: url('/assets/img/ba-edit/oplata/ico_card_pc_24_green.svg');}
+.box-oplata:hover .oplata-box-round > .oplata-box-online { background-image: url('/assets/img/ba-edit/oplata/ico_phone_mob_pc_24_green.svg');}
+.box-oplata:hover .oplata-box-round > .oplata-box-transfer { background-image: url('/assets/img/ba-edit/oplata/ico_money_transfer_pc_24_green.svg');}
+
+/*   делаем изображение для - Наличными  */
+.oplata-box-cash{  background-image: url('/assets/img/ba-edit/oplata/ico_cash_pc_24_white.svg');}
+/*   делаем изображение для - Картой  */
+.oplata-box-banccart {  background-image: url('/assets/img/ba-edit/oplata/ico_card_pc_24_white.svg'); }
+/*   делаем изображение для - Онлайн в приложении  */
+.oplata-box-online{ background-image: url('/assets/img/ba-edit/oplata/ico_phone_mob_pc_24_white.svg'); }
+/*   делаем изображение для - Перевод  */
+.oplata-box-transfer {  background-image: url('/assets/img/ba-edit/oplata/ico_money_transfer_pc_24_white.svg');}
+
+.oplata-box-cash, .oplata-box-banccart, .oplata-box-online, .oplata-box-transfer{
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 40px;
+  height: 40px;
+  z-index: 1;
+  border-radius: 100px;
+  border: 0;
+}
+.oplata-box-text{
+  align-self: center;
+  text-align:center;
+}   
+/*   ------  **********************************************-----------------    */ 
+ /*  кнопка сохранить   */
+.container-ba-oplata-bntSave{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+.saveBtn {
+  display:grid;
+  justify-self: center; 
+  text-align:center;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius:24px;
+  padding: 13px 130px;
+  margin-top:20px; 
+} 
+@media screen and (max-width: 920px) {
+  .container-column-left{
+    width: 100%;
+  }
+} 
+@media screen and (max-width: 640px) {
+  .container-column-left{
+    width: 90%;
+  }
+  .cards{
+    padding:5px 0;
+    border: 2px solid #fff;
+  }
+  .cards:hover{
+    border: 2px solid transparent;
+  } 
+  .container-column-right {
+    width: 90%;
+  } 
+} 
+/* Нажатое состояние кнопки Start */
+.payment {
+  border: 1px solid #00DAB3;
+  background-color: $green-basic;
+  color: #fff; 
+}
+
+.box-oplata.payment > .oplata-box-round {
+  background-color: #fff;  
+}
+.box-oplata.payment > .oplata-box-round > .oplata-box-cash ,
+.box-oplata.payment > .oplata-box-round > .oplata-box-banccart ,
+.box-oplata.payment > .oplata-box-round > .oplata-box-online ,
+.box-oplata.payment > .oplata-box-round > .oplata-box-transfer  { 
+  background-repeat: no-repeat;
+  background-position: center center; 
+}
+.box-oplata.payment > .oplata-box-round > .oplata-box-cash{
+  background-image: url('/assets/img/ba-edit/oplata/ico_cash_pc_24_green.svg');
+}
+.box-oplata.payment > .oplata-box-round > .oplata-box-banccart{
+  background-image: url('/assets/img/ba-edit/oplata/ico_card_pc_24_green.svg');
+}
+.box-oplata.payment > .oplata-box-round > .oplata-box-online{
+  background-image: url('/assets/img/ba-edit/oplata/ico_phone_mob_pc_24_green.svg');
+}
+.box-oplata.payment > .oplata-box-round > .oplata-box-transfer{
+  background-image: url('/assets/img/ba-edit/oplata/ico_money_transfer_pc_24_green.svg');
+} 
+/* Нажатое состояние кнопки End */
+.payment {
+  background-color: $green-basic;
+  color: #fff;
+} 

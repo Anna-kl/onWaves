@@ -1,0 +1,77 @@
+<div class="tabs padding-bottom40 w100">
+
+      <p-progressSpinner *ngIf="!cards"></p-progressSpinner>
+
+  <article class="article-container wrap" style="gap:5px 4px;"  *ngIf="cards">
+    <div class="card-client" *ngFor="let bisiness of cards " (click)="goToProfile(bisiness)"
+   >
+      <!-- Фото -->
+      <img [src]="getAvatar(bisiness.avatar)" 
+       class="card-img card-client-avatar" alt="" />
+      <!-- Описание -->
+      <div class="card-info cont-vert-start-start">
+        <!-- Комментарии и рейтинг --> 
+        <div class="cont-horiz-start" style="gap: 10px 10px;">
+          <!-- Иконка рейтинга -->
+          <img src="./assets/img/ico/ico_rating_pc24.svg" alt=""/>
+          <!-- Количество звезд рейтинга -->
+          <span>{{bisiness.rating}}</span>
+          <!-- Иконка комментария -->
+          <img src="./assets/img/ico/ico_feedback_pc24.svg" alt=""/>
+          <!-- Количество комментариев -->
+          <span>{{bisiness.countReviews}}</span>
+        </div>  
+        <!-- Имя Бизнес Аккаунта -->
+        <div class="card-client-title">{{bisiness.name}}</div>  
+        <!-- Описание БА -->
+				<div style="height: 100px; word-wrap: break-word;
+        " class="bisines-about txt-gray-dark">{{prepareAbout(bisiness.about)}}</div>   
+        <div class="bisines-address">
+          <!-- Город -->
+          г.{{bisiness.address?.city}}<br>
+          <!-- Адрес --> 
+          {{getAddressProfileStreet(bisiness.address)}}
+        </div>  
+        <!-- Телефон  
+        <div>{{bisiness.phone}}</div> -->
+        <div class="row justify-content-start svg_i" >
+          <button (click)="confirm($event, bisiness.bestProductType)" style=" border: none;
+                  background: transparent; ">
+       
+          <!-- <svg version="1.1" id="Icons"  *ngIf="bisiness.bestProductType === BestProductType.BEST_PRICE"
+           class="svg_icon" xmlns="http://www.w3.org/2000/svg"
+           xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32"
+            xml:space="preserve" fill="#f4ed15">
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier">
+               <style type="text/css"> .st0{fill:none;stroke:#e6d40a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;} .st1{fill:none;stroke:#e6d40a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:3;} .st2{fill:none;stroke:#e6d40a;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:10;} .st3{fill:none;} </style> <path class="st0" d="M6.5,9.9L7,9.5c0.8-0.6,1.4-1.6,1.5-2.6l0.1-0.4c0.4-2.6,3.2-4.2,5.8-3.2l0,0c1.1,0.4,2.2,0.4,3.3,0l0,0 c2.5-1.1,5.4,0.5,5.8,3.2l0.1,0.4c0.1,1,0.7,2,1.5,2.6l0.5,0.4c2.1,1.6,2.1,4.6,0,6.2L25,16.5c-0.8,0.6-1.4,1.6-1.5,2.6l-0.1,0.4 c-0.4,2.6-3.2,4.2-5.8,3.2l0,0c-1.1-0.4-2.2-0.4-3.3,0l0,0c-2.5,1.1-5.4-0.5-5.8-3.2l-0.1-0.4c-0.1-1-0.7-2-1.5-2.6l-0.5-0.4 C4.5,14.5,4.5,11.5,6.5,9.9z"></path>
+                <polyline class="st0" points="22,22 22,29 16,26 10,29 10,22 "></polyline> <line class="st0" x1="16" y1="9" x2="16" y2="10"></line>
+                 <line class="st0" x1="16" y1="16" x2="16" y2="17"></line> <path class="st0" d="M17,10h-1.5c-0.8,0-1.5,0.7-1.5,1.5v0c0,0.8,0.7,1.5,1.5,1.5h1c0.8,0,1.5,0.7,1.5,1.5v0c0,0.8-0.7,1.5-1.5,1.5 H15"></path> 
+                 <rect x="-72" y="-360" class="st3" width="53" height="68"></rect> </g></svg> -->
+                </button>
+ 
+                </div>
+      </div> 
+   
+            </div>
+  </article>
+</div>
+ <div class=""> <!-- card flex justify-content-center gap-2 -->
+<!-- <p-toast  position="100,100"/> -->
+<p-confirmPopup 
+[style]="{   
+  top: positionPopup[0], 
+  left: positionPopup[1]
+}"> 
+  <ng-template pTemplate="headless" let-message let-test>
+      <div class="border-round p-3">
+          <span>{{ message.message }}</span>
+      </div>
+  </ng-template>
+</p-confirmPopup>
+</div>
+<!--div class="card-client-category">{{bisiness.mainCategory}}</div-->
+<!-- Если нет оценок 
+<div class="cont-horiz-start" style="gap: 10px 10px;" *ngIf="bisiness.countReviews === 0">
+  Нет оценок
+</div>-->

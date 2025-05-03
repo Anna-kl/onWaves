@@ -1,0 +1,27 @@
+<!-- Профиль БА от хозяина через меню -->
+<div class="parent-grey-light" >
+  <div class="disp1" >
+    <div class="cont-horiz-start-start wrap768" >
+      <!-- Левая колонка --->
+      <app-column-ba-edit-profile [id]="companyId" [isEdit]="true"
+          (onAddress)="onAddress($event)"> </app-column-ba-edit-profile>
+      <!-- Правая колонка start -->
+        <div class="ba122-right-column">
+          <!-- <div class="cont-horiz padding-top40 padding-bottom40"
+           style="max-width:100%;" >
+            <div class=" cont-vert" [ngClass]="btnProfile ? 'btn-recommend1' : 'btn-recommend3'"
+            (click)="setProfile()" >Профиль</div>
+            <div class="cont-vert" [ngClass]="!btnProfile ? 'btn-recommend1' : 'btn-recommend2'"
+             (click)="setLenta()">Лента</div>
+          </div> -->
+          <router-outlet></router-outlet>
+        </div>
+      <!-- Правая колонка END-->
+    </div>
+  </div>
+</div>
+<p-toast position="bottom-center"  >
+
+</p-toast>
+<!-- <app-mobmenu></app-mobmenu> -->
+<!-- List END -->

@@ -1,0 +1,146 @@
+@import '../../../../../assets/styles/main/color.scss';
+
+.line-gray-ba {
+  height: 5px;
+  width: 50%;
+  max-width: 300px;
+  border-radius: 50px;
+  background-color: #DDE2ED;
+  margin: 50px 10px 50px 0;
+  display:grid;
+  justify-content: center;
+}
+.line-green-ba {
+  height: 5px;
+  width: 50%;
+  max-width: 300px;
+  border-radius: 50px;
+  background-color: #00DAB3;
+  margin: 50px 10px 50px 0;
+  display:grid;
+  justify-content: center;
+}
+.line-green-ba span{
+  margin: 10px 0;
+  font-weight:700;
+  color:$green-basic;
+}
+.line-green-ba span .grey{
+  margin: 10px 0;
+  font-weight:400;
+}
+.line-gray-ba span{
+  margin: 10px 0;
+}
+
+/* ----------------------------*/
+.textarea-wrapper {
+  position:relative;
+}
+.remaning {
+  position:absolute;
+  bottom: 10px;
+  right:10px;
+}
+
+
+/*----- раздел добавить фотографию------------------*/
+.container-for-images-arenda{
+  /*border:1px solid red;*/
+  position:relative;
+  padding:0 50px
+}
+.container-images{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px ,1fr));
+  gap:10px;
+}
+.green-kub{
+  aspect-ratio:1/1;
+  /*object-fit: contain;*/
+  display:grid;
+  background-color:$green-basic;
+  background-image: url("/assets/img/ba-edit/plus-white.png");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.green-kub:hover span {
+  display:grid;
+  background-color: $green-light;
+  opacity:0.9;
+  background-image: url("/assets/img/ba-edit/uslugi/plus_buttons_desktop.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  align-content: center;
+  justify-content: center;
+}
+.green-kub span {
+  display:none;
+  padding-top:70px;
+  color:white;
+}
+/*------------------  раздел добавить фотографию  ------------------*/
+.image-blocks {
+  aspect-ratio:1/1;
+  /*object-fit: contain;*/
+  position:relative;
+}
+.image-taille {
+  height: 100%;
+  width: 100%;
+}
+.image-icon-position {
+  position:absolute;
+  right:15px;
+  bottom:15px;
+}
+
+
+@media screen and (max-width: 640px) {
+  .container-images{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px ,1fr));
+    gap:4px;
+  }
+  .image-icon-position {
+    position:absolute;
+    right:10px;
+    bottom:10px;
+  }
+}
+.character-count{
+  width: 52px;
+  display: none;
+}
+
+.error-checkbox {
+    border-color: red! important;
+
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  -o-appearance: none;
+  outline: none;
+  content: none;
+}
+
+textarea:focus, input:focus{
+  outline: none;
+}
+
+.form-control:focus {
+  border-color: inherit;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+input.ng-pristine.ng-valid.ng-touched {
+  background: transparent;
+  outline: none;
+  border: none;
+}
+
+.own-input{
+  background: transparent;
+  outline: none;
+  border: none;
+}

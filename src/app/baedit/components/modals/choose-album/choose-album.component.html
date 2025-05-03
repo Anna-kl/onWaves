@@ -1,0 +1,82 @@
+<!-- Модальное окно выбора альбома и модальное окно выбор фото при создании услуги в БА -->
+<div class="cont-horiz list1200">
+  <div class="cont-vert w100">  
+    <!-- Модальное окно 1 Выбор альбома START -->
+    <div class="cont-vert" *ngIf="step === 0">
+      <!-- Крестик --> 
+      <div class="cont-horiz-end-start w100 margin-bottom10" >         
+        <img src="./assets/img/ba-edit/ico_close_pc.png" (click)="close()">        
+      </div> 
+      <!-- Заголовок страницы  --> 
+      <div class="margin-bottom30">
+        <H2>Выберите альбом</H2>
+      </div> 
+      <!-- Предупреждение -->
+      <div class="choose-albom w100 cont-horiz-center-start" *ngIf="albums.length === 0 && step === 0" > 
+        <div class="txt-green-light margin-bottom10">
+          У вас нет ни одного фотоальбома
+        </div> 
+      </div>
+      <!-- кнопка создать Альбом --> 
+      <div class="cont-horiz-center-start wrap" style="gap: 5px 5px">
+        <div class="choose-card-albom-ba" *ngFor="let album of albums" (click)="setAlbum(album)"> 
+          <div class="cont-horiz choose-edit-ba-foto-tab" >
+            <!-- Иконка когда нет обложки альбома -->
+            <svg *ngIf="album.image === null" width="228" height="228" viewBox="0 0 228 228" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0.5" y="0.5" width="227" height="227" fill="#006174"/>
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M109.644 100.667C109.934 100.659 110.218 100.75 110.449 100.925C110.681 101.101 110.844 101.35 110.914 101.632L110.915 101.635L111.653 104.588C111.777 105.082 112.221 105.429 112.731 105.429H127.017C127.353 105.429 127.676 105.563 127.914 105.801C128.153 106.04 128.286 106.363 128.286 106.699V126.937C128.286 127.274 128.153 127.597 127.914 127.835C127.676 128.073 127.353 128.207 127.017 128.207H123.649L110.633 116.016C110.617 116.001 110.601 115.987 110.585 115.973C110.155 115.615 109.614 115.419 109.054 115.419C108.51 115.419 107.983 115.605 107.559 115.944L99.5562 121.7V101.937C99.5562 101.601 99.69 101.278 99.9281 101.039C100.166 100.801 100.489 100.668 100.826 100.668H109.612C109.623 100.668 109.633 100.667 109.644 100.667ZM99.5562 124.437V126.937C99.5562 127.274 99.69 127.597 99.9281 127.835C100.166 128.073 100.489 128.207 100.826 128.207H120.398L109.149 117.67C109.121 117.651 109.088 117.641 109.054 117.641C109.015 117.641 108.977 117.655 108.946 117.68C108.926 117.697 108.905 117.713 108.884 117.729L99.5562 124.437ZM123.187 130.429H100.826C99.8999 130.429 99.0117 130.062 98.3568 129.407C97.7019 128.752 97.334 127.864 97.334 126.937V101.937C97.334 101.011 97.7019 100.123 98.3568 99.4681C99.0117 98.8133 99.8999 98.4453 100.826 98.4453H109.597C110.389 98.4263 111.163 98.6768 111.794 99.1562C112.429 99.6387 112.88 100.324 113.071 101.098L113.071 101.1L113.598 103.207H127.017C127.943 103.207 128.831 103.575 129.486 104.23C130.141 104.885 130.509 105.773 130.509 106.699V126.937C130.509 127.864 130.141 128.752 129.486 129.407C128.831 130.062 127.943 130.429 127.017 130.429H123.233C123.218 130.43 123.202 130.43 123.187 130.429ZM120.729 110.498C122.088 110.498 123.19 111.6 123.19 112.959C123.19 114.317 122.088 115.419 120.729 115.419C119.37 115.419 118.269 114.317 118.269 112.959C118.269 111.6 119.37 110.498 120.729 110.498ZM125.412 112.959C125.412 110.373 123.315 108.276 120.729 108.276C118.143 108.276 116.047 110.373 116.047 112.959C116.047 115.545 118.143 117.641 120.729 117.641C123.315 117.641 125.412 115.545 125.412 112.959Z" fill="white"/>
+              <rect x="0.5" y="0.5" width="227" height="227" stroke="#9196A4"/>
+            </svg>         
+            <!-- Изображение альбома -->
+            <img [src]="getImage(album.image)" class="choose-edit-ba-foto-albom" *ngIf="album.image !== null">
+          </div>
+          <!-- Информация альбома -->
+          <div class="choose-card-albom-text">
+            <!-- Имя альбома -->
+            <div class="choose-card-albom-name">
+              {{album.name}}
+            </div>
+            <!-- Количество фотографий -->
+            <div class="color-grey-dark">
+              {{album.countImages}} фото
+            </div>
+          </div>
+        </div> 
+      </div>  
+    </div>
+    <!-- Модальное окно 1 Выбор альбома END -->
+    <!-- Модальное окно 2 Выбор фотографии START -->
+    <div  *ngIf="step === 1">
+      <div class="cont-vert w100">
+        <!-- Крестик --> 
+        <div class="cont-horiz-end-start w100 margin-bottom10" >         
+          <img src="./assets/img/ba-edit/ico_close_pc.png" (click)="close()">        
+        </div> 
+        <!-- Заголовок страницы  -->
+        <div class="margin-bottom30">
+          <H2>Выберите фото</H2>
+        </div>
+        <div class="cont-horiz-start-start wrap gallery-tab" >
+          <div class="choose-card-albom-ba-foto"  *ngFor="let image of images" (click)="setMain(image.id)" >
+            <!-- Подгрузка фото из альбома -->
+            <img [src]="getImage(image.image)" class="choose-edit-ba-gallery-foto " >
+            <div class="choose-albom-ba-foto-control-panel cont-vert-around" >
+              <div class="cont-vert">
+                <div [ngClass]="image.isChoose ? 'v-white' : 'v-white-hover'">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> 
+      <div class="cont-horiz"  style="margin: 30px 10px 30px 10px">
+        <div class="btn-green" (click)="saveChanges()">
+          Сохранить
+        </div>
+      </div>
+    </div>
+    <!-- Модальное окно 2 Выбор фотографии End --> 
+  </div> 
+</div> 
+
+

@@ -1,0 +1,167 @@
+<!-- Уведомления --->
+<div class="cont-vert left-right20mob" >
+    <div class="w100" style="background-color: #fafafa; max-width: 1200px;">
+        <div  class="cont-horiz-start margin-top50 margin-bottom50" >
+            <div class="cont-horiz btn-back"   style="cursor: pointer" (click)="goToMain()"> 
+            </div> 
+            <h1>Уведомления</h1> 
+        </div>  
+        <div>
+            <ul>
+                <li *ngFor="let notification of notificationsList">
+                <button (click)="openNotification(notification.id)">{{ notification.title }}</button>
+                </li>
+            </ul>
+        </div> 
+        <div *ngIf="openMessage && selectedNotification">
+            <h2>{{ selectedNotification.title }}</h2>
+            <p>{{ selectedNotification.body }}</p>
+            <button (click)="closeNotification()">
+                Close
+            </button>
+        </div> 
+        <div class="cont-vert w100" > 
+            <div style="max-width: 600px;" class="w100 tabs padding-bottom40">  
+                <input type="radio" name="tab-btn" id="tab-btn-1" value="" checked>
+                <label for="tab-btn-1" class="tab50">
+                    Заявки
+                </label> 
+                <input type="radio" name="tab-btn" id="tab-btn-2" value="">
+                <label for="tab-btn-2"  class="tab50" style="margin-left: -60px;">
+                    Оповещения
+                </label>
+                <!-- Заявки-->
+                <div id="content-1">
+                    <div class="cont-horiz-around wrap" *ngFor="let message of messages"> 
+                        <div class="w100 cont-vert-start-center" >
+                            <div class="cont-horiz-start-start margin-bottom10">
+                                <!-- Дата записи на услугу -->
+                                <div class="margin-bottom20" style="color: #9196A4; margin-right: 10px; ">
+                                    {{message.recordDateTime|date: 'short'}}
+                                </div>
+                                <!-- Дата создания 
+                                <div style="color: #9196A4; margin-right: 10px; ">
+                                    {{message.created|date: 'medium'}}
+                                </div>-->
+                                <!-- галочка -->
+                                <div> 
+                                <img [src]="getIconStatus(message.recordStatus)">
+                                </div>
+                            </div>    
+                            <div class="margin-bottom20 cont-horiz-start">
+                                <!-- Аватар -->
+                                <div class="margin-right10" >
+                                    <img [src]="getAvatar(message.avatar)" style="width: 48px; height: 48px ; border-radius: 50px;">
+                                </div>
+                                <!-- Имя клиента -->
+                                <div>
+                                    <b>{{message.clientName}}</b>
+                                </div>
+                            </div>
+                            <div class="margin-bottom10">
+                                Новая запись
+                            </div> 
+                            <!-- Услуги -->
+                            <div class="margin-bottom10">
+                                <a href="javascript:void(0)" (click)="goToRecords(message)">{{getNameServices(message.services)}}</a>
+                            </div> 
+<!--                            <a class="txt-green-light" *ngIf="getStatus(message)" style="text-decoration: underline;" (click)="goToRecords(message)">-->
+<!--                                Посмотреть и подтвердить запись-->
+<!--                            </a>-->
+                        </div>
+                        <div class="hr30" ></div> 
+                    </div><!-- Популярное END  -->
+                </div>  
+                <!-- <div id="content-2">
+             
+                  <div  class="notification-container" >
+                    <div class="notificationItem" *ngFor="let list of messages" >
+                      <div  class="notificationBlock" >
+                        <div class="titleNotifications"
+                             [ngClass]="{'openMessage': idMessage==list.id && openMessage}">
+                          <div class="dataTimes" >
+                            <span>23 августа 2023 00:00</span>
+                            <span style="margin:-2px 0 0 10px">
+                                <img src="/assets/img/ico/icons_all_size/ico_notification_v3_pc_24.svg" alt=""></span>
+                          </div>
+                          <div class="textTitle">В частности, дальнейшее развитие различных форм деятельности не даёт нам иного выбора, кроме определения своевременного выполнения сверхзадачи.</div>
+                          <div class="textArticle">Задача организации, в особенности же постоянный количественный рост и сфера нашей активности однозначно фиксирует необходимость приоретизации разума над эмоциями. Следует отметить, что граница обучения кадров не даёт нам иного выбора, кроме определения укрепления моральных ценностей. Но сложившаяся структура организации обеспечивает широкому кругу (специалистов) участие в формировании модели развития.</div>
+
+                          <div class="razvernut">
+                            <div *ngIf="idMessage==list.id && openMessage; else svernut">свернуть</div>
+                            <ng-template #svernut>развернуть</ng-template>
+                          </div>
+                        </div>
+                      </div> 
+                    </div>
+                  </div>
+            
+                  <div class="cont-vert-start-start wrap">   
+    
+                    <div class="cont-vert-start-start">
+                        <div class="cont-horiz-start-start">
+                            <div class="margin-bottom20" style="color: #9196A4; margin-right: 10px; ">
+                                25 февраля 2023 16:14
+                            </div>
+                            <div class="margin-bottom20"> 
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M20.5657 6.43433C20.8781 6.74675 20.8781 7.25328 20.5657 7.5657L10.5657 17.5657C10.2533 17.8781 9.74673 17.8781 9.43431 17.5657L4.43431 12.5657C4.12189 12.2533 4.12189 11.7467 4.43431 11.4343C4.74673 11.1219 5.25326 11.1219 5.56568 11.4343L10 15.8686L19.4343 6.43433C19.7467 6.12191 20.2533 6.12191 20.5657 6.43433Z" fill="#00DAB3"/>
+                                </svg>
+                            </div>
+                        </div>    
+                        <div class="margin-bottom20">
+                            <b>Мы обновили мобильное приложение</b>
+                        </div>
+                        <div>У нас отличные новости: мы обновили мобильное приложение OCPIO.
+                            Теперь еще красивее, удобнее и быстрее. 
+                        </div>
+                    </div> 
+                    <div class="hr30" ></div>
+             
+                    <div class="cont-vert-start-start">
+                        <div class="cont-horiz-start-start">
+                            <div class="margin-bottom20" style="color: #9196A4; margin-right: 10px; ">
+                                29 февраля 2023 00:11
+                            </div>
+                            <div class="margin-bottom20"> 
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8V13C11 13.5523 11.4477 14 12 14C12.5523 14 13 13.5523 13 13V8Z" fill="#E24414"/>
+                                    <path d="M12.7071 16.7071C12.5196 16.8946 12.2652 17 12 17C11.7348 17 11.4804 16.8946 11.2929 16.7071C11.1054 16.5196 11 16.2652 11 16C11 15.7348 11.1054 15.4804 11.2929 15.2929C11.4804 15.1054 11.7348 15 12 15C12.2652 15 12.5196 15.1054 12.7071 15.2929C12.8946 15.4804 13 15.7348 13 16C13 16.2652 12.8946 16.5196 12.7071 16.7071Z" fill="#E24414"/>
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 20.4C16.6392 20.4 20.4 16.6392 20.4 12C20.4 7.36081 16.6392 3.6 12 3.6C7.36081 3.6 3.6 7.36081 3.6 12C3.6 16.6392 7.36081 20.4 12 20.4ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="#E24414"/>
+                                </svg>
+                            </div>
+                        </div>    
+                        <div class="margin-bottom20">
+                            <b>Мы обновили мобильное приложение</b>
+                        </div>
+                        <div>
+                            Вы удалили свой бизнес-аакаунт вместе со всеми записями без возможности восстановления.
+                        </div>
+                    </div> 
+                    <div class="hr30" ></div>
+              
+                    <div class="cont-vert-start-start">
+                        <div class="cont-horiz-start-start">
+                            <div class="margin-bottom20" style="color: #9196A4; margin-right: 10px; ">
+                                29 февраля 2023 00:11
+                            </div>
+                            <div class="margin-bottom20"> 
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M20.5657 6.43433C20.8781 6.74675 20.8781 7.25328 20.5657 7.5657L10.5657 17.5657C10.2533 17.8781 9.74673 17.8781 9.43431 17.5657L4.43431 12.5657C4.12189 12.2533 4.12189 11.7467 4.43431 11.4343C4.74673 11.1219 5.25326 11.1219 5.56568 11.4343L10 15.8686L19.4343 6.43433C19.7467 6.12191 20.2533 6.12191 20.5657 6.43433Z" fill="#00DAB3"/>
+                                </svg>
+                            </div>
+                        </div>    
+                        <div class="margin-bottom20">
+                            <b>Мы обновили мобильное приложение</b>
+                        </div>
+                        <div>
+                            Новогодний конкурс: сними креативное фото/видео и выиграй 10 000 руб.
+                        </div>
+                    </div>  
+                  </div> 
+                </div>  -->
+            <!-- partial -->
+            </div> 
+        </div>
+    </div>
+</div> 

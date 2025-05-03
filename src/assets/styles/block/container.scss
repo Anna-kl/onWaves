@@ -1,0 +1,8 @@
+.container {
+    //min-width: 70rem; // С min-width было бы правильно потому что идет заплнение всего пространства сайта. А с max-width только маленький кусочек.
+   
+    max-width: 70rem;
+    margin: 0 auto;
+    padding-left: 5rem;
+    padding-right: 5rem; 
+}

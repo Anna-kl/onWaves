@@ -1,0 +1,35 @@
+<div style="
+    width: 540px;
+    padding: 30px 30px 50px 30px;
+    background-color: #fff;">
+     <div class="cont-horiz-start">   
+        <div class="margin-bottom20">
+            <h3>Выберите формат работы с клиентами:</h3>
+        </div>
+        <div class="closeModal" (click)="closeModal()"></div> 
+    </div>
+    <div class="box-white margin-bottom10" *ngIf="!checkPermissionBA()" (click)="createBAProfile()">
+        <div class="txt-green-light margin-bottom10">
+            Услуга
+        </div>
+        <div>
+            Оплата производится за оказанную услугу.
+        </div>
+    </div>
+    <div class="box-white margin-bottom10" *ngIf="!checkPermissionBA()" (click)="createBAProfile()">
+        <div class="txt-green-light margin-bottom10">
+            Час
+        </div>
+        <div>
+            Оплата производится за час оказываемой услуги или арендуемого имущества.
+        </div>
+    </div>
+    <div class="box-white" *ngIf="!checkPermissionBA()" (click)="createBAProfile()">
+        <div class="txt-green-light margin-bottom10">
+            Аренда посуточная
+        </div>
+        <div>
+            Оплата производится за сутки арендуемого помещения.
+        </div>
+    </div>
+</div>

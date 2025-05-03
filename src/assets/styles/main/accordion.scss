@@ -1,0 +1,321 @@
+@charset "UTF-8";
+
+/*label>input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  z-index: -1;
+}*/
+
+/* --------  Accordion styles  ----------*/
+.accordion_tab>input {
+  display: none;
+}
+
+.accordion_tabs {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.5);
+}
+
+.accordion_tab {
+  width: 100%;
+  color: white;
+  overflow: hidden;
+}
+
+.accordion_tab-label {
+  display: flex;
+  justify-content: space-between;
+  padding: 1em;
+  background: $green-basic;
+  font-weight: bold;
+  cursor: pointer;
+  max-width: 1200px;
+}
+
+.accordion_tab-label:hover {
+  background: #409B89;
+}
+
+.accordion_tab-label::after {
+  /*content: "^";*/
+  content: url(/assets/img/ba-edit/ico_arrow_down_white_pc.svg);
+  text-align: center;
+  transition: all 0.7s;
+}
+
+.accordion_tab-content {
+  max-height: 0;
+  /*padding: 0 1em;*/
+  color: #000;
+  /*color: $green-basic;
+  background: white;*/
+  transition: all 0.6s;
+}
+
+.accordion_tab-close {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1em;
+  font-size: 0.6em;
+  background: $green-basic;
+  cursor: pointer;
+}
+
+.accordion_tab-close:hover {
+  background: #409B89;
+}
+
+input:checked+.accordion_tab-label {
+  background: #409B89;
+  /**/
+}
+
+input:checked+.accordion_tab-label::after {
+  transform: rotate(180deg);
+}
+
+input:checked~.accordion_tab-content {
+  max-height: 100%;
+  /*padding: 1em;*/
+}
+
+/* --------  Accordion styles end ----------*/
+
+/* --------  Accordion styles cписок услуг у БА подробно внутри услуги----------*/
+.accordion_serv_in_tab>input {
+  display: none;
+}
+
+.accordion_serv_in_tabs {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.5);
+}
+
+.accordion_serv_in_tab {
+  width: 100%;
+  color: #000;
+  overflow: hidden;
+}
+
+.accordion_serv_in_tab-label {
+  display: flex;
+  justify-content: space-between;
+  padding: 1em;
+  background: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  max-width: 1200px;
+}
+
+.accordion_serv_in_tab-label:hover {
+  /*background: #DDE2ED;*/
+}
+
+.accordion_serv_in_tab-label::after {
+  /*content: "^";*/
+  content: url(/assets/img/ba-edit/ico_arrow_down_pc.svg);
+  text-align: center;
+  transition: all 0.7s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.accordion_serv_in_tab-content {
+  max-height: 0;
+  /*padding: 0 1em;*/
+  color: #000;
+  /*color: $green-basic;
+  background: white;*/
+  transition: all 0.6s;
+}
+
+.accordion_serv_in_tab-close {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1em;
+  font-size: 0.6em;
+  background: $green-basic;
+  cursor: pointer;
+}
+
+.accordion_serv_in_tab-close:hover {
+  background: #DDE2ED;
+}
+
+input:checked+.accordion_serv_in_tab-label {
+  /*background: #DDE2ED;*/
+}
+
+input:checked+.accordion_serv_in_tab-label::after {
+  transform: rotate(180deg);
+}
+
+input:checked~.accordion_serv_in_tab-content {
+  max-height: 100%;
+  padding: 1em;
+  max-width: 1200px;
+}
+
+app-accordion {
+  max-width: 1200px;
+}
+
+/* --------  Accordion styles END cписок услуг у БА подробно внутри услуги----------*/
+
+/* эти три класса связанны  start*/
+/* эти три класса связанны  end*/
+.card-graphics {
+  width: 290px;
+  border: 2px solid #00dab3;
+  border-radius: 12px;
+  padding: 20px;
+  background-color: #fff;
+}
+
+/* ba_edit4_graphics(1.64).html END */
+
+/* Мои записи  service_my_notes(1.54).html */
+.accordion_tab-label_white {
+  display: flex;
+  justify-content: space-between;
+  padding: 1em 4em;
+  background: #fff;
+  color: #11142D;
+  cursor: pointer;
+  border-top: 0px solid #C0C5D5;
+  border-left: 0px solid #C0C5D5;
+  border-bottom: 0px solid #C0C5D5;
+  border-right: 0px solid #C0C5D5;
+  margin-bottom: 20px;
+}
+
+.accordion_tab-label_white_rigth {
+  display: flex;
+  justify-content: space-between;
+  padding: 1em 4em;
+  background: #fff;
+  color: #11142D;
+  cursor: pointer;
+  border-top: 0px solid #C0C5D5;
+  border-left: 0px solid #C0C5D5;
+  border-bottom: 0px solid #C0C5D5;
+  border-right: 0px solid #C0C5D5;
+  margin-bottom: 20px;
+}
+
+@media screen and (max-width: 480px) {
+  .accordion_tab-label_white {
+    padding: 1em 0em;
+  }
+}
+
+.accordion_tab-content_white {
+  border-radius: 0 0 12px 12px;
+  max-height: 0;
+  /*padding: 0 1em;*/
+  color: #000;
+  /*color: $green-basic;
+  background: white;*/
+  transition: all 0.6s;
+  background-color: #fff;
+}
+
+input:checked~.accordion_tab-label_white {
+  margin-bottom: 0px;
+  /*border-top: 1px solid #C0C5D5;
+  border-left: 1px solid #C0C5D5 ;
+  border-bottom: 1px solid #C0C5D5 ;
+  border-right: 1px solid #C0C5D5 ;*/
+}
+
+input:checked~.accordion_tab-label_white_rigth {
+  margin-bottom: 0px;
+  /*border-top: 1px solid #C0C5D5;
+  border-left: 1px solid #C0C5D5 ;
+  border-bottom: 1px solid #C0C5D5 ;
+  border-right: 1px solid #C0C5D5 ;*/
+}
+
+input:checked~.accordion_tab-content_white {
+  max-height: 100%;
+  margin: 0em 4em 2em 4em;
+  border-top: 0px solid #C0C5D5;
+  border-left: 1px solid #C0C5D5;
+  border-bottom: 1px solid #C0C5D5;
+  border-right: 1px solid #C0C5D5;
+  margin-bottom: 0px;
+}
+
+@media screen and (max-width: 689px) {
+  .accordion_tab-label_white {
+    padding: 0;
+  }
+
+  input:checked~.accordion_tab-content_white {
+    padding: 0em 1em 2em 1em;
+    margin: 0;
+  }
+}
+
+.accordion_tab-label_white_rigth::after {
+  /*content: "^";*/
+  content: url(/assets/img/ba-edit/arr-green-right.png);
+  /*margin-right: 10px;*/
+  text-align: center;
+  transition: all 0.7s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+input:checked+.accordion_tab-label_white_rigth::after {
+  transform: rotate(180deg);
+  /*margin-top: 10px;*/
+}
+
+/* эти три класса связанны  start*/
+.accordion_tab-label_white::after {
+  /*content: "^";*/
+  content: url(/assets/img/ba-edit/arr-green-bottom.png);
+  /*margin-right: 10px;*/
+  text-align: center;
+  transition: all 0.7s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+input:checked+.accordion_tab-label_white::after {
+  transform: rotate(180deg);
+  /*margin-top: 10px;*/
+}
+
+/* ba_edit4_graphics(1.64).html START before*/
+.accordion_tab-label-graphics {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  color: #11142D;
+}
+
+.accordion_tab-label-graphics::after {
+  content: url(/assets/img/ba-edit/arr-green-top.png);
+  margin-right: 10px;
+  text-align: center;
+  transition: all 0.7s;
+}
+
+.accordion_tab-label-graphics:hover {
+  color: #11142D;
+}
+
+input:checked+.accordion_tab-label-graphics::after {
+  transform: rotate(180deg);
+}
+
+/* эти три класса связанны  end*/

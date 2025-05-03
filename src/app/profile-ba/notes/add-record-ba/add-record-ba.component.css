@@ -1,0 +1,36 @@
+/*input {border:0;outline:0;}
+input:focus {outline:none!important;}*/
+.textarea-ba-profile{
+    border: 1px solid #9196A4;
+    border-radius: 0;
+    resize: none;
+    outline: none;
+    max-width: 500px;
+    min-height:160px;
+    padding:20px; 
+    position:relative; 
+  }
+  @media screen and (max-width: 480px) {
+    .textarea-ba-profile{ 
+      max-width: 320px; 
+    }
+  }
+  .textarea-ba-profile:focus{
+    border: 1px solid #00DAB3;
+  }
+  .container-textarea{
+    display: flex;
+    position:relative;
+    margin-top:10px;
+    max-width: 500px;
+  }
+  .textarea-count{
+    position:absolute;
+    bottom:20px;
+    right:20px;
+  }
+  .count-words{
+    position: absolute;
+    bottom: 20px; 
+    right: 20px;
+  }

@@ -1,0 +1,50 @@
+.accordion_tab_simple {
+  width: 120px; 
+  overflow: hidden;
+}
+.accordion_tab_simple>input {
+  display: none;
+}
+.accordion_tab-label_simple {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center; 
+  height: 50px;
+  padding: 0 20px;
+  margin-left: 20px;
+  margin-right: 0px;
+  max-width: calc(100% - 60px) ;
+   
+  background: #fff;
+  font-weight: bold;
+  cursor: pointer; 
+  color: #11142D; 
+  border: 1px solid #9196A4;
+  border-radius: 100px;
+} 
+input:checked + .accordion_tab-label_simple{
+  border: 1px solid #9196a4;
+  border-radius: 25px 25px 0px 0px;
+}
+.accordion_numb_simple{
+	padding: 13px 20px;
+	width: calc(100% - 62px);
+  margin-left: 20px;
+	height: 25px; 
+	background: #FFFFFF;  
+	border-bottom: 1px solid #9196A4;
+  border-left: 1px solid #9196A4;
+  border-right: 1px solid #9196A4;
+}  
+/* эти три класса связанны  start*/
+.accordion_tab-label_simple::after {
+  /*content: "^";*/
+  content: url(/assets/img/ba-edit/arr-green-bottom.png); 
+  margin-right: 10px;
+  text-align: center;
+  transition: all 0.7s;
+}
+input:checked + .accordion_tab-label_simple::after {
+  transform: rotate(180deg);
+} 

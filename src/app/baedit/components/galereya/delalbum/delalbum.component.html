@@ -1,0 +1,23 @@
+<div class="w100 cont-horiz modal_540">
+    <div class="cont-vert" *ngFor="let album of albums" (click)="setAlbum(album)" [style.border]="album.id === chooseAlbum?.id ? '2px solid $green-basic' : '2px solid #fff'" style="max-width: 360px; text-align: center;" > 
+        <h2 class="margin-bottom40" >
+            Удаление альбома
+        </h2>
+        <div class="w100 margin-bottom10 txt-green-light" >
+            Вы действительно хотите удалить альбом 
+        </div>  
+        <div class="cont-horiz-start-start w100 margin-bottom10 txt-green-bold" >
+            Прически ? 
+        </div>  
+        <div class="cont-horiz-start-start w100 margin-bottom100 txt-red-day" *ngIf="images && images.length > 0">
+            В альбоме есть фотографии.
+        </div>
+        
+        <div class="btn-danger_no_contour margin-bottom40 w100 cont-vert" (click)="deleteAlbum(album)" (click)="close()" >
+            Удалить
+        </div> 
+        <div class="btn-green w100 cont-vert" (click)="close()" >
+            Отменить
+        </div>
+    </div>
+</div> 

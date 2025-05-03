@@ -1,0 +1,21 @@
+/*--------------- Шрифт -------------------*/
+@font-face {
+	font-family: 'Montserrat';
+	src: url('/assets/Fonts/Montserrat/Montserrat-Regular.eot');
+	src: local('/assets/Fonts/Montserrat/Montserrat Regular'), local('Fonts/Montserrat/Montserrat-Regular'),
+		url('/assets/Fonts/Montserrat/Montserrat-Regular.eot?#iefix') format('embedded-opentype'),
+		url('/assets/Fonts/Montserrat/Montserrat-Regular.woff') format('woff'),
+		url('/assets/Fonts/Montserrat/Montserrat-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'Montserrat';
+	src: url('/assets/Fonts/Montserrat/Montserrat-Bold.eot');
+	src: local('/assets/Fonts/Montserrat/Montserrat Bold'), local('Fonts/Montserrat/Montserrat-Bold'),
+		url('/assets/Fonts/Montserrat/Montserrat-Bold.eot?#iefix') format('embedded-opentype'),
+		url('/assets/Fonts/Montserrat/Montserrat-Bold.woff') format('woff'),
+		url('/assets/Fonts/Montserrat/Montserrat-Bold.ttf') format('truetype');
+	font-weight: bold;
+	font-style: normal;
+}

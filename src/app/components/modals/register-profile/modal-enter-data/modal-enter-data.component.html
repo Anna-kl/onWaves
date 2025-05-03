@@ -1,0 +1,41 @@
+<div class="cont-vert box-register-ua">
+  <div class="modal_540">
+    <div class="w100 cont-horiz-end-center" style="height: 48px;">
+      <div class="closeModal" (click)="closeModal()"></div> 
+    </div>
+    <form class="frmalign" [formGroup]="codeForm" (ngSubmit)="onSubmitCode()" >
+      <div class="cont-vert">
+        <h3 class="margin-bottom10" style="text-align: center; font-size: 1.25rem;">
+          Введите 4 последние цифры номера
+        </h3>
+        <div class="margin-bottom30">
+          с которого сейчас поступил звонок
+        </div>
+        <!--div class="phone-text margin-bottom40" style="font-size: 1.25rem; text-align: center;">
+          {{code}}{{ phone|mask: mask }}
+        </div-->
+        <!-- Прислать код повторно события -->
+        <div class="cont-horiz margin-bottom25" >
+          <input class="sms" id="sms1" type="text"  maxlength="1" placeholder="0" formControlName="a1" (input)="setCell(0); validateInput($event, 0)" [disabled]="!flagError" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
+          <input class="sms" id="sms2" type="text"  maxlength="1" placeholder="0" formControlName="a2" (input)="setCell(1); validateInput($event, 1)" [disabled]="!flagError" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
+          <input class="sms" id="sms3" type="text"  maxlength="1" placeholder="0" formControlName="a3" (input)="setCell(2); validateInput($event, 2)" [disabled]="!flagError" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
+          <input class="sms" id="sms4" type="text"  maxlength="1" placeholder="0" formControlName="a4" (input)="setCell(3); validateInput($event, 3)" [disabled]="!flagError" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
+        </div>
+        <small id="passwordHelp" class="cont-horiz text-danger margin-bottom25" *ngIf="flagError" style="color: #E24414" >
+          {{textError}}
+        </small>
+        <div class="cont-horiz-around w100 margin-bottom30"> 
+          <div>Нет звонка? </div>
+          <a class="margin-bottom40" (click)="returnToPhone()" class="txt-green-light" style="text-decoration: underline;"> 
+            Позвонить повторно
+          </a>
+        </div> 
+        <button class="btn-green button-text cont-vert margin-bottom40" (click)="next()" [disabled]="!checkCode">
+          Подтвердить
+        </button> 
+      </div>
+    </form>
+  </div>
+</div>
+
+

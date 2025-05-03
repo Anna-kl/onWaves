@@ -1,0 +1,208 @@
+<div class="container-ba-oplata" >
+
+  <!--  левая колонка-->
+  <div class="column-left">
+    <div class="container-column-left">
+  <!-- Контакты  START -->
+    <div class="discription-column-left">Выберите, в каких валютах возможна оплата услуг.</div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+               <div class="cards-name">RUB</div>
+               <div class="cards-money-name">Российский рубль</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(0)" (change)="setCurrency(0)" />
+              <i></i>
+            </label>
+        </div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+              <div class="cards-name">USD</div>
+              <div class="cards-money-name">Американский&nbsp;доллар</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(1)" (change)="setCurrency(1)" />
+              <i></i>
+            </label>
+        </div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+              <div class="cards-name">EUR</div>
+              <div class="cards-money-name">Евро</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(2)" (change)="setCurrency(2)" />
+              <i></i>
+            </label>
+        </div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+              <div class="cards-name">AZN</div>
+              <div class="cards-money-name">Азербайджанский&nbsp;манат</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(3)" (change)="setCurrency(3)" />
+              <i></i>
+            </label>
+        </div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+              <div class="cards-name">AMD</div>
+              <div class="cards-money-name">Армянский&nbsp;драм</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(4)" (change)="setCurrency(4)" />
+              <i></i>
+            </label>
+        </div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+              <div class="cards-name">UZS</div>
+              <div class="cards-money-name">Узбекский&nbsp;сум</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(6)" (change)="setCurrency(6)" />
+              <i></i>
+            </label>
+        </div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+              <div class="cards-name">BYN</div>
+              <div class="cards-money-name">Белорусский&nbsp;рубль</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(5)" (change)="setCurrency(5)" />
+              <i></i>
+            </label>
+        </div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+              <div class="cards-name">KZT</div>
+              <div class="cards-money-name">Казахстанский&nbsp;тенге</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(7)" (change)="setCurrency(7)" />
+              <i></i>
+            </label>
+        </div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+              <div class="cards-name">KGS</div>
+              <div class="cards-money-name">Киргизский&nbsp;сом</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(8)" (change)="setCurrency(8)" />
+              <i></i>
+            </label>
+        </div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+              <div class="cards-name">LEU</div>
+              <div class="cards-money-name">Румынский лей</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(9)" (change)="setCurrency(9)" />
+              <i></i>
+            </label>
+        </div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+              <div class="cards-name">TJS</div>
+              <div class="cards-money-name">Таджикский&nbsp;сомони</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(10)" (change)="setCurrency(10)" />
+              <i></i>
+            </label>
+        </div>
+
+        <div class="cards">
+            <div class="mini-card-name">
+              <div class="cards-name">TMT</div>
+              <div class="cards-money-name">Туркменский&nbsp;манат</div>
+            </div>
+            <label>
+              <input type="checkbox" [checked]="currency.includes(11)" (change)="setCurrency(11)" />
+              <i></i>
+            </label>
+        </div>
+
+    </div>
+  </div>
+
+
+  <!-- правая колонка-->
+  <div class="column-right">
+    <div class="container-column-right">
+
+      <!-- Доступные способы оплаты start -->
+        <div class="discription-column-left">Выберите способы оплаты, которые будут доступны вашим клиентам.</div>
+
+      <div class="container-box-oplata">
+
+         <!-- Наличными-->
+          <div class="box-oplata" (click)="addPayment(0)"
+               [ngClass]="getMethodsPayment(0) ? 'payment' : ''" >
+            <div class="oplata-box-round" >
+                <!-- [ngClass]="{'choose': getMethodsPayment(2)}" -->
+              <div class="oplata-box-cash"></div>  <!-- online-pay фото в backgraund-e  -->
+            </div>
+            <div class="oplata-box-text">Наличными</div>
+          </div>
+
+           <!-- Картой-->
+          <div class="box-oplata" (click)="addPayment(2)"
+               [class]="{'payment': getMethodsPayment(2)}">
+            <div class="oplata-box-round"> <!-- [ngClass]="{'choose': getMethodsPayment(2)}" -->
+              <div class="oplata-box-banccart"></div>  <!-- online-pay фото в backgraund-e  -->
+            </div>
+            <div class="oplata-box-text">Картой</div>
+          </div>
+
+          <!-- Онлайн в приложении-->
+          <div class="box-oplata" (click)="addPayment(1)"
+               [class]="{'payment': getMethodsPayment(1)}">
+            <div class="oplata-box-round">
+              <div class="oplata-box-online"></div>  <!-- online-pay фото в backgraund-e  -->
+            </div>
+            <div class="oplata-box-text">Онлайн в приложении</div>
+          </div>
+
+          <!--  Перевод -->
+          <div class="box-oplata" (click)="addPayment(3)"
+               [class]="{'payment': getMethodsPayment(3)}">
+            <div class="oplata-box-round"> <!-- [ngClass]="{'choose': getMethodsPayment(3)}" -->
+              <div class="oplata-box-transfer"></div>  <!-- online-pay фото в backgraund-e  -->
+            </div>
+            <div class="oplata-box-text">Перевод</div>
+          </div>
+
+      </div>
+
+
+  </div>
+</div>
+
+</div>
+
+<!--  Колонка сохранить-->
+<div class="container-ba-oplata-bntSave" >
+  <div class="saveBtn" [class]="isEdit ? 'btn-green' : 'btn-gray'"
+       (click)="saveChanges()">Сохранить</div>
+</div>
+<!--   всплывающее уведомление-->
+<p-toast position="bottom-center" *ngIf="isEdit"></p-toast>
+<!--   //   Старый вариант-->
+
+

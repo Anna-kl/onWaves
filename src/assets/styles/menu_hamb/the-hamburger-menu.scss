@@ -1,0 +1,89 @@
+.btn1 {
+	position: absolute;
+    width: 30px; /*width: 60px;*/
+    height: 30px; /*height: 60px;*/
+    top: 0px;
+    left: 0px;
+    transition-duration: 0.5s;
+} 
+.btn1 .icon-left:before, 
+.btn1 .icon-right:before, 
+.btn1 .icon-left, 
+.btn1 .icon-right, 
+.btn1 .icon-left:after,
+.btn1 .icon-right:after{
+  position: absolute;
+  background-color: #11142D;
+  width: 15px; /* width: 30px; */
+  height: 4px; /* height: 8px; */
+}
+.btn1:hover .icon-left:before,
+.btn1:hover .icon-right:before, 
+.btn1:hover .icon-left, 
+.btn1:hover .icon-right, 
+.btn1:hover .icon-left:after,
+.btn1:hover .icon-right:after{
+  background-color: #00DAB3;
+}
+/*1*/ 
+.btn1 .icon-left:before {
+	transition-duration: 0.5s;  
+  content: "";
+  top: -14px; /*top: -20px;*/
+}
+/*2*/ 
+.btn1 .icon-right:before {
+	transition-duration: 0.5s;  
+  content: "";
+  top: -14px; /*top: -20px;*/
+}	
+/*3*/ 
+.btn1 .icon-left {
+    transition-duration: 0.5s;  
+    top: 14px; /*top: 30px; */
+    left: 0px;
+}
+/*4*/ 
+.btn1 .icon-right {
+	transition-duration: 0.5s;  
+    top: 14px; /*top: 30px;*/
+    left: 15px;/*left: 30px;*/
+}
+/*5*/ 
+.btn1 .icon-left:after {
+	transition-duration: 0.5s;  
+  content: "";
+  top: 12px;/*top: 20px;*/
+}
+/*6*/ 
+.btn1 .icon-right:after {
+	transition-duration: 0.5s;  
+  content: "";
+  top: 12px; /*top: 20px;*/
+}
+.btn1 .icon-left:hover {
+  cursor: pointer;
+} 
+.btn1.open .icon-left {
+  transition-duration: 0.5s;
+  background: transparent;
+}
+.btn1.open .icon-left:before {
+  transform: rotateZ(45deg) scaleX(1.4) translate(4px, 4px);
+}
+.btn1.open .icon-left:after {
+  transform: rotateZ(-45deg) scaleX(1.4) translate(4px, -4px);
+}
+.btn1.open .icon-right {
+  transition-duration: 0.5s;
+  background: transparent;
+}
+.btn1.open .icon-right:before {
+  transform: rotateZ(-45deg) scaleX(1.4) translate(-4px, 4px);
+}
+.btn1.open .icon-right:after {
+  transform: rotateZ(45deg) scaleX(1.4) translate(-4px, -4px);
+}
+.btn1:hover {
+  cursor: pointer;
+} 

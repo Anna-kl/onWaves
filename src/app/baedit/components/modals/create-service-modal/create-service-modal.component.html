@@ -1,0 +1,111 @@
+<div class="cont-horiz" style="background: #FAFAFC;  padding-bottom: 20px;" >
+  <div class="list1200 cont-vert-center-start modal-list">
+    <!-- Cтраница -->
+    <div class="width100">
+      <!-- Заголовок страницы  -->
+      <div class="cont-horiz-start">
+        <div  class="cont-horiz btn-back" (click)="closeModal()"> 
+        </div>
+        <div>
+          <h1>Добавить&nbsp;услугу</h1>
+        </div>
+        <div class="closeModal" (click)="closeModal()"></div>
+      </div>
+    </div>
+    <div class="cont-vert-start w100" style="max-width: 700px;">
+      <div class="cont-horiz w100 left-right20 margin-top-bottom50">
+        <div class="cont-vert w100">
+          <div class="line-green3"></div>
+          <div class="steps-line3-active cont-vert-center-start">
+            Описание
+          </div>
+        </div>
+        <div class="cont-vert w100">
+          <div class="line-gray3"></div>
+          <div class="steps-line3 cont-vert-center-start">
+            Рубрики
+          </div>
+        </div>
+        <div class="cont-vert w100">
+          <div class="line-gray3"></div>
+          <div class="steps-line3 cont-vert-center-start">
+            Оплата
+          </div>
+        </div>
+      </div>
+      <!-- Введите название услуги -->
+      <div class="input-line cont-horiz-start margin-bottom30 w100" style="margin-top: 0px;">
+        <input  type="text" size="26" [(ngModel)]="nameService" placeholder="Введите название услуги">
+      </div>
+      <!-- Выберите группу услуг. cont-horiz-between-->
+      <div class="txt-green-light w100" style="margin: 30px 20px 30px 20px ;">
+        Выберите соответствующую группу услуг.
+      </div>
+      <div class="input-line cont-horiz-start margin-bottom30"  >
+        <select [(ngModel)]="myGroup" (change)="chooseGroup()" style="border: 0px solid;">
+          <option value="" selected >
+            Группы *
+          </option>
+          <option *ngFor="let group of groups" [ngValue]="group">
+            {{group.name}}
+          </option>
+        </select>
+      </div>
+      <div class="textarea-wrapper">
+        <textarea [(ngModel)]="text" (input)="updateCounter()" maxlength="150" rows="10" cols="45" placeholder="Добавьте описание" >
+        </textarea>
+      <span class="remaning">
+        {{remainingChars}}
+      </span>
+    </div>
+      <!-- Выберите кому подходит услуга -->
+      <div style="margin-left: 20px;">
+        <div style="margin-bottom: 20px;" class="color-green-dark">
+          Выберите кому подходит услуга
+        </div>
+<!--        <div class="cont-horiz-start" style="margin-bottom: 20px;">-->
+<!--          <input class="custom-checkbox" type="checkbox" [(ngModel)]="allSelected" (change)="setGender(4)" id="dlja_vseh" >-->
+<!--          <label for="dlja_vseh">-->
+<!--            Для всех-->
+<!--          </label>-->
+<!--        </div>-->
+<!--        <div class="cont-horiz-start" style="margin-bottom: 20px;">-->
+<!--          <input class="custom-checkbox" type="checkbox"-->
+<!--                  [checked]="getGender(0)"  (change)="setGender(0)"id="dlja_zhenshhin">-->
+<!--          <label for="dlja_zhenshhin">-->
+<!--            Для женщин-->
+<!--          </label>-->
+<!--        </div>-->
+<!--        <div class="cont-horiz-start" style="margin-bottom: 20px;">-->
+<!--          <input class="custom-checkbox" type="checkbox"-->
+<!--            [checked]="getGender(1)" (change)="setGender(1)" id="dlja_muzhchin" >-->
+<!--          <label for="dlja_muzhchin">-->
+<!--            Для мужчин-->
+<!--          </label>-->
+<!--        </div>-->
+<!--        <div class="cont-horiz-start" style="margin-bottom: 20px;">-->
+<!--          <input class="custom-checkbox"-->
+<!--                [checked]="getGender(2)" (change)="setGender(2)"-->
+<!--              type="checkbox" id="dlja_detej">-->
+<!--          <label for="dlja_detej">-->
+<!--            Для детей-->
+<!--          </label>-->
+<!--        </div>-->
+<!--        <div class="cont-horiz-start" style="margin-bottom: 20px;">-->
+<!--          <input class="custom-checkbox" type="checkbox" id="dlja_zhivotnyhh"-->
+<!--            [checked]="getGender(3)" (change)="setGender(3)">-->
+<!--          <label for="dlja_zhivotnyhh">-->
+<!--            Для животных-->
+<!--          </label>-->
+<!--        </div>-->
+      </div>
+      <div class="w100 cont-horiz margin-top-bottom50">
+        <button class="btn-green" (click)="onNext()"
+            [ngStyle]="{'background-color': checkConditions() ? 'gray' : '#0d94a0' }"
+            [disabled]="checkConditions()">
+          Далее
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

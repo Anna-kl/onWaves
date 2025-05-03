@@ -1,0 +1,16 @@
+.modal-content{ 
+    max-width:540px ;
+    /*height: 349px;*/
+    width: 100%;
+    background-color: white;
+} 
+.closeModal {
+    position: absolute; 
+    top: 20px;
+    right: 20px;
+    width: 24px;
+    height: 24px; 
+    opacity: 1;
+    cursor: pointer;
+    transition: opacity ease 0.5s; 
+  }

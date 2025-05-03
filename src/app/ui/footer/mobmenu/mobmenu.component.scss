@@ -1,0 +1,33 @@
+@import '../../../../assets/styles/main/color.scss';
+
+.mob_menu{
+    background-color: #fafafa;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width:100%;
+    position: fixed;
+    bottom:0;
+    z-index:9999;
+}
+.ico_mob_menu-background{
+    padding: 10px;
+    cursor: pointer;
+}
+.ico_mob_menu-background:hover{
+  background-color: $green-basic; 
+}
+.ico_mob_menu{
+  fill:#409B89;
+}
+.ico_mob_menu:hover{
+  fill: #fff;
+}
+
+
+
+@media screen and (min-width: 640px){
+  .menunone{
+    display:none;
+  }
+}

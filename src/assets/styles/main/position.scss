@@ -1,0 +1,246 @@
+/*--------------- Расположение -------------------*/
+.test-parent-box{
+	background-color:#C0C5D5;
+	height:150px;
+	width: 350px; 
+    border: 2px dashed #fff;
+}
+.test-parent-box2{
+	background-color:#DDE2ED;
+	height:150px;
+	width: 350px; 
+	border: 2px dashed #fff;
+}
+.test-box{
+	width:60px;
+	height:20px;
+	border: 2px solid #aaa;
+} 
+/*---------1---------*/
+.cont-horiz-start-start{
+	display: flex; 
+	align-items: flex-start;
+} 
+ /*2*/ 
+ .cont-horiz-start{
+	display: flex;
+	justify-content: start;
+	align-items: center;
+}  
+ /*3*/
+.cont-horiz-start-end{
+	display: flex;
+	align-items: flex-end;
+} 
+/*---------4---------*/
+.cont-horiz-center-start{
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+}
+/*5*/
+.cont-horiz {
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ }
+/*6*/
+.cont-horiz-center-end{
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+}
+/*7*/
+.cont-horiz-end-start{
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-start;
+}
+/*8*/
+.cont-horiz-end-center{
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+} 
+/*9*/
+.cont-horiz-end-end{
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-end;
+}
+/*10*/
+.cont-horiz-around-start{
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-around;
+}
+/*11*/
+.cont-horiz-around{
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+} 
+/*12*/
+.cont-horiz-around-end{
+	display: flex;
+	justify-content: space-around;
+	align-items: flex-end;
+}  
+/*13*/
+.cont-horiz-between-start {
+ display: flex;
+ justify-content: space-between; 
+ align-items: flex-start;
+}
+/*14*/
+.cont-horiz-between {
+	display: flex;
+	justify-content: space-between; 
+	align-items: center; 
+}	
+/*15*/ 
+.cont-horiz-between-end {
+	display: flex;
+	justify-content: space-between; 
+	align-items: flex-end; 
+}
+/*16*/
+.cont-vert-start-start {
+	display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+	flex-direction: column;
+}
+/*дубль 16*/
+.cont-vert-start{
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: flex-start; 
+} 
+/*17*/
+.cont-vert-start-center{
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: flex-start;
+	justify-content: center;
+	} 
+/*18*/
+.cont-vert-start-end{
+	display: flex;
+	flex-flow: column nowrap; 
+	align-items: flex-start;
+	justify-content: flex-end;
+}
+/*19*/
+.cont-vert-center-start{
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: center; 
+} 
+/*20*/
+.cont-vert {
+ display: flex;
+ flex-flow: column nowrap;
+ justify-content: center;
+ align-items: center;
+}
+/*21*/
+.cont-vert-center-end{
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: center;
+	justify-content: flex-end; 
+}
+/*22*/
+.cont-vert-end-start{
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: flex-end;
+}
+/*23*/
+.cont-vert-end-center{
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: center;
+	align-items: flex-end;
+}
+/*24*/
+.cont-vert-end-end{
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: flex-end;
+	align-items: flex-end;
+}
+/*25*/
+.cont-vert-around-left{
+ display: flex;
+ flex-flow: column nowrap;
+ justify-content: space-around;
+ align-items: left;
+}
+/*26*/
+.cont-vert-around{
+ display: flex;
+ flex-flow: column nowrap;
+ justify-content: space-around;
+ align-items: center;
+}
+/*27*/
+.cont-vert-around-end{
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-around;
+	align-items: flex-end;
+}
+/*28*/ 
+.cont-vert-between-start{
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+	justify-content: space-between;
+}
+/*29*/
+.cont-vert-center-between{
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-between;
+	align-items: center;
+}
+/*30*/
+.cont-vert-between-end{
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-between;
+	align-items: flex-end;
+}
+
+/* --------Разобрать start --------*/
+/* дубль для 28 cont-vert-between-start*/
+.cont-vert-between{
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-between;
+}
+ /* START перенос по столбцам на  следующую строку*/
+.flex-container{
+    display: flex;
+    flex-wrap: nowrap;
+    counter-reset: flex-item-counter;
+ }
+ .my-flex-cont2 {
+	 display: flex;
+	 justify-content: space-between;
+	 align-items: flex-start;
+	 height: 300px;
+	} 
+.flex-item {
+    position: relative; 
+    }/* END перенос по столбцам на  следующую строку*/
+/* --------Разобрать End --------*/	
+
+.wrap {flex-wrap: wrap;}
+@media screen and (max-width: 768px) {
+  .wrap768 {flex-wrap: wrap;} 
+}
+.wrap-reverse{flex-wrap: wrap-reverse;} 
+.vhfull{ height:100vh;}

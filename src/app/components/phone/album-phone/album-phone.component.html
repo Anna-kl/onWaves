@@ -1,0 +1,47 @@
+<!-- Просмотр альбома у БА в модальном окне -->
+<div class="w100 cont-vert-start-center" >
+    <!-- Начало модального окна wrap-->
+    <div class="cont-vert-start-start modal-album-ba w100 "  >
+        <!-- крестик -->
+        <div class="cont-vert-end-start w100">
+            <img src="/assets/img/ba-edit/ico_close_pc.png" (click)="close()">
+        </div>
+        <!-- Название альбома -->
+        <div class="cont-horiz w100 margin-bottom20">
+            <h2>{{albumName}}</h2>
+        </div>
+        <!-- Изображения альбома -->
+        <div class="w100 wrap img-albom-ba-position"  fxLayout="row" fxLayoutAlign="center start" >
+            <img [src]="getImage(image.image)" class="img-albom-ba" style="margin-top: 5px"
+                 *ngFor="let image of images" (click)="showImage(image)" alt="">
+        </div>
+    </div>
+</div>
+<!-- <app-modalalbum [albumId]="selectedAlbumId"></app-modalalbum> -->
+
+
+<!--<div class="card">-->
+<!--    <div *ngIf="images" class="grid" style="max-width: 800px;">-->
+<!--        <div *ngFor="let image of images; let index = index" class="col-3" key="index">-->
+<!--            <img [src]="getImage(image.image)"style="cursor: pointer"-->
+<!--                 (click)="showImage(index)" />-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <p-galleria-->
+<!--            [value]="images"-->
+<!--            [(visible)]="displayBasic"-->
+<!--            [(activeIndex)]="activeIndex"-->
+<!--            [responsiveOptions]="responsiveOptions"-->
+<!--            [containerStyle]="{ 'max-width': '850px' }"-->
+<!--            [numVisible]="7"-->
+<!--            [circular]="true"-->
+<!--            [fullScreen]="true"-->
+<!--            [showItemNavigators]="true"-->
+<!--            [showThumbnails]="false"-->
+<!--    >-->
+<!--        <ng-template pTemplate="item" let-item>-->
+<!--            <img [src]="getImage(item.image)" style="width: 100%; display: block;" />-->
+<!--        </ng-template>-->
+<!--    </p-galleria>-->
+<!--</div>-->
+

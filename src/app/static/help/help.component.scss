@@ -1,0 +1,57 @@
+@import "../../../assets/styles/main/color.scss";
+
+
+.help-phone{
+    margin-right: 30px;
+} 
+
+.help-cont{
+    width: 100%;
+    max-width: 1200px;
+    gap: 30px 10px;  
+    flex-wrap: wrap;
+    margin-bottom: 30px ;
+  }
+  @media screen and (max-width: 480px) {
+    .help-cont{
+      max-width: 320px;
+    }
+  }
+  .help-video{
+    width: 280px;
+    overflow: hidden; 
+    /*background-color: #11142D;*/
+  }
+  .help-video-head{
+    width: 280px;
+    height: 50px;
+    margin-bottom: 10px; 
+  }
+  .help-video-question{
+    border-radius: 20px; 
+    border: 3px solid $green-basic; 
+    padding: 30px 25px 30px 25px;
+  }
+  @media screen and (max-width: 480px) {
+    .help-phone{
+        margin-right: 10px;
+        width: 100px;
+    }  
+    .help-video{
+      width: 100%;
+    }
+    
+}
+
+.faq-question{
+  width: 100%;
+  background: none;
+   border: none;
+    font-size: 15px;
+    font-weight: bold;
+     color: #494444; 
+     text-align: left;
+      cursor: pointer; 
+      padding: 10px;
+       border-bottom: 1px solid #333;
+}

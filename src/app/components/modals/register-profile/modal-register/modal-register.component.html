@@ -1,0 +1,61 @@
+<div class="box-register-ua">
+  <div class="modal_540">
+    <div class="w100 cont-horiz-end-center" style="height: 48px;">
+      <div class="closeModal" (click)="closeModal()"></div>
+    </div>
+    <h4 class="margin-bottom40" style="text-align: center;">
+      Войдите по номеру телефона
+    </h4>
+    <!-- номер телефона  cont-horiz-end-center-->
+    <div class="w100 cont-horiz margin-bottom30">
+      <div class="phone cont-horiz-start" style="position: relative;"> 
+        <!-- Флаг 1 -->
+        <div class="cont-horiz-end-center flag_area" type="button"  ngbDropdownToggle>
+          <span *ngIf="chCountry">
+            <img  [src]="chCountry.icon" class="ico_flag" alt="">
+            {{chCountry.code}}
+        </span>
+        </div> 
+        <div class="dropdown-menu country-label" ngbDropdownMenu style="position: absolute;">
+          <div class="cont-vert-start-start">
+            <span  *ngFor="let country of iconsFlags" (click)="chooseCountry(country)">
+              <img class="imgsp" [src]="country.icon"  alt=''/>
+              {{country.name}}
+            </span>
+          </div>
+        </div>
+        <div class="v-line"></div>  
+        <!-- Телефон -->
+        <input class="input-text" [(ngModel)]="phone" (ngModelChange)="getPhone($event)"
+         type="tel"
+          name="name" [mask]="chCountry.mask"  [placeholder]="chCountry.mask"
+           [style.border-style]="'none'" />
+      </div>
+    </div>
+
+    <!-- Правила и условия -->
+    <div class="cont-horiz-start margin-bottom40" style="align-items: center;">
+      <!-- событие ошибки-->
+      <span class="text-decoration-underline" style="margin-top: -30px;color: red" *ngIf="flagError">
+        {{messageError}}
+      </span>
+      <div class=" cont-horiz w100 form-check" >
+        <input class="form-check-input" type="checkbox" [(ngModel)]="checkRule" id="flexCheckChecked" for="flexCheckChecked">
+        <label class="form-check-label margin-left10" >
+          <p>Согласен с
+            <span class="txt-green-light" (click)="goToRulePage()" >
+              правилами и условиями.
+            </span>
+          </p>
+        </label>
+      </div>
+    </div>
+    <!-- Далее  -->
+    <div class="w100 cont-horiz ">
+      <button class="btn-green button-text" style="max-width: 360px;" [disabled]="!isFormValid()"
+        (click)="next()" [ngStyle]="{'background-color': isFormValid() ? '#0d94a0' : 'gray'}">
+        Далее
+      </button>
+    </div>
+  </div>
+</div> 

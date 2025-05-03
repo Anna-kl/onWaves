@@ -1,0 +1,10 @@
+.ico_rating_default{
+    background-image:url(/assets/svg/rating_default.svg);
+    height: 50px;
+    width: 50px;
+} 
+.ico_rating_color{
+    background-image:url(/assets/svg/rating_color.svg);
+    height: 50px;
+    width: 50px;
+}

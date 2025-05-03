@@ -1,0 +1,36 @@
+
+/*Текст в аккордионе*/
+.accordion_tab {
+    width: 100%;
+    color: #11142D;
+    overflow: hidden;
+  }
+/*Заголовок аккордиона*/
+.accordion_tab-label {
+  display: flex;
+  justify-content: space-between;
+  padding: 1em;
+  background: #fff;/*$green-basic*/ 
+  font-weight: normal;
+  cursor: pointer;
+  border-bottom: 1px solid #C0C5D5;
+}
+/*Заголовок аккордиона при наведении*/
+.accordion_tab-label:hover {
+  background: #fff;
+}
+/* Выделение цветом активного пункта */
+input:checked + .accordion_tab-label {
+    background: #fafafa;
+  }
+/*  Стрелочка */
+.accordion_tab-label::after {
+    /*content: "^";*/
+    content: url(/assets/img/ba-edit/arr-green-top.png); 
+    text-align: center;
+    transition: all 0.7s;
+  }
+  /* Переворот стрелочки при нажатии*/
+  input:checked + .accordion_tab-label::after {
+    transform: rotate(180deg);
+  }

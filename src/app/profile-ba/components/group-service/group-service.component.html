@@ -1,0 +1,51 @@
+<main>
+  <!-- List start -->
+  <div class="parent-grey-light">
+    <div class="disp1 top170" >
+      <div class="cont-horiz-start-start wrap768"> 
+        <!--- Левая колонка --->
+        <section class="left-ba-profile">
+        <app-column-baprofile [id]="businessProfile?.id!" ></app-column-baprofile>
+        </section> 
+        <!-- Правая колонка start-->
+        <section class="w100"> 
+          <!-- Выбрать дату -->
+          <section  class="container-group-service margin-bottom10">
+            <article class="cont-horiz padding-top10 padding-bottom10 wrap768" style="gap: 10px 10px;">
+              <div class="cont-horiz" style="gap: 10px 10px;">
+                <!-- Счетчик услуг -->
+                <div class="count-uslugi-number">
+                  {{countService}}
+                </div>                
+                <div class="cont-horiz-start count-uslugi-shoose">
+                  услуги&nbsp;выбрано
+                </div> 
+              </div> 
+              <!-- Стоимость услуг -->
+              <div class="cont-horiz total-price-uslugi" >
+                {{getPriceString(chooseServices)}}₽
+              </div> 
+              <!-- Кнопка выбрать дату -->
+              <button (click)="chooseDate()" class="btn-uslugi-shoose-botton ">
+                <div class="btn-uslugi-shoose-data">
+                  {{getTextBtn()}}
+                </div>
+                <img src="/assets/img/ba-edit/ico-calendar-white.png" alt="">
+              </button>
+            </article>
+          </section>  
+          <!-- Список услуг -->
+          <section class="margin-top10 " style="margin-top: 140px;" *ngIf="businessProfile">
+            <article>
+              <app-accordion 
+                [isUpdate] = false 
+                [profileId]="businessProfile.id!"
+                (setServices)="setService($event)">
+              </app-accordion>
+            </article>
+          </section>
+        </section> 
+      </div>
+    </div> <!--disp1 END-->
+  </div> <!-- parent-grey-light END --> 
+</main>  

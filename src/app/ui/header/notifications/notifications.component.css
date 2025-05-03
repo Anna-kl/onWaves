@@ -1,0 +1,46 @@
+.notification-container{
+  display:grid;
+  justify-items:center;
+}
+.notificationItem {
+  display:grid;
+  margin-bottom:10px;
+  width:100%;
+}
+.notificationBlock{
+  white-space: nowrap; /* Запрещаем перенос строк */
+  overflow: hidden; /* Обрезаем все, что не помещается в область */  
+}
+.dataTimes{
+  font-size:0.7em;
+  color:#9196A4;
+  display:flex;
+}
+.titleNotifications{
+   font-size:1.5em; 
+   position:relative; 
+}
+.textTitle{
+  font-size:1em; 
+  color:black;
+  font-weight:700;
+  overflow: hidden; /* Обрезаем все, что не помещается в область */
+  text-overflow: ellipsis; /* Добавляем многоточие */
+}
+.textArticle{
+  overflow: hidden; /* Обрезаем все, что не помещается в область */
+  text-overflow: ellipsis; /* Добавляем многоточие */
+}
+.razvernut{
+  position:absolute;
+  right:10px;
+  color:#409B89;
+  border-bottom:1px solid #409B89;
+}
+.titleNotifications.openMessage { 
+  white-space: normal; /* Запрещаем перенос строк */
+  overflow:visible ; /* Обрезаем все, что не помещается в область */ 
+} 
+.tab50{  
+  width:calc( (100% + 60px)/2 ) 
+} 

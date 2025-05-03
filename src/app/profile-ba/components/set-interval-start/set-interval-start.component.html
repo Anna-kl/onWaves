@@ -1,0 +1,13 @@
+<div class="calendar_alert margin-top30 margin-bottom30 cont-horiz w100" *ngIf="duration > 0">
+  Выберите время начала
+</div>
+<!-- Свободное ввремя -->
+<div class="w100 free-time-table cont-horiz">
+  <div class="w100  cont-horiz wrap" style="gap: 10px 10px;">
+    <div [ngClass]="{'teg-white': !slot.isChoose, 'teg-green': slot.isChoose}"
+         (click)="chooseInterval(slot)" *ngFor="let slot of freeSlots$|async">
+      {{slot.start}}
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,71 @@
+/* настройка мелкого меню редактирования БА профиля*/
+.ba-menu-profile-container{
+  display:flex;
+  /*justify-content: space-evenly;*/
+  justify-content: start;
+  gap:10px;
+  flex-wrap: wrap;
+  margin-bottom:20px;
+}
+.ba-menu-profile{
+  text-align:center;
+  min-width:150px;
+  max-width:195px;
+  flex:1 1 auto;
+}
+.ba-menu-profile li{
+  border:1px solid #9196A4;
+  border-radius:100px;
+  padding:15px 25px;
+}
+li:hover{
+  cursor: pointer;
+}
+/*******************************************************/
+@media screen and (max-width: 640px){
+  .ba-menu-profile-container {
+    margin-left:10px;
+  }
+  .ba-menu-profile {
+    min-width:100px;
+    max-width:200px;
+    flex:0 0 auto;
+  }
+}
+@media screen and (max-width: 320px){
+  .ba-menu-profile-container {
+    margin-left:10px;
+  }
+  .ba-menu-profile li {
+    padding:10px 16px;
+  }
+}
+
+/* настройка мелкого меню редактирования БА профиля тут растянуто на всю ширину*/
+/*.ba-menu-profile-container{*/
+/*  display:flex;*/
+/*  justify-content: start;*/
+/*  gap:10px;*/
+/*  flex-wrap: wrap;*/
+/*  margin-bottom:20px;*/
+/*}*/
+/*.ba-menu-profile{*/
+/*  display:flex;*/
+/*  !*justify-content: start;*!*/
+/*  justify-content: space-between;*/
+/*  !*min-width:145px;*!*/
+/*  max-width:194px;*/
+/*  flex:1 1 auto;*/
+/*}*/
+/*.ba-menu-profile ul {*/
+/*  width:100%;*/
+/*}*/
+/*.ba-menu-profile li{*/
+/*  text-align:center;*/
+/*  border:1px solid #9196A4;*/
+/*  border-radius:100px;*/
+/*  padding:15px 25px;*/
+/*}*/
+/*li:hover{*/
+/*  cursor: pointer;*/
+/*}*/

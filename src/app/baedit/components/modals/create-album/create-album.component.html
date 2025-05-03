@@ -1,0 +1,23 @@
+<div  class="container-ba-modalka-album cont-vert-center-start" >
+  <div class="btn-closeModal-uslugi" (click)="closeModal()">
+    <img src="/assets/img/modalki/uslugi_close_pc.svg" alt=""/>
+  </div> 
+  <div  class="block-uslugi">
+    <h2>Создать альбом</h2> 
+    <div class="text-first">Придумайте название альбома</div>
+    <!--    <div class="text-first" >Изменить название группы услуг</div>--> 
+    <div class="input-uslugi-modal" style="margin-bottom: 0">
+      <input  type="text" size="16" placeholder="Маникюр - пример" [(ngModel)]="albumName" maxlength="20">
+    </div>
+    <small style="margin-left: 20px; color: red">{{errorMessage}}</small>
+    <div class="text-under-input"> 
+      До 20 символов
+    </div>
+  </div> 
+  <div  class="btn-uslugi-modalka" >
+    <div class="saveBtn" 
+      [class]="albumName.length === 0 ? 'btn-gray' : 'btn-green'"
+      (click)="saveAlbum()">Сохранить
+    </div>
+  </div>
+</div>   

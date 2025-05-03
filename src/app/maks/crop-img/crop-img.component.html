@@ -1,0 +1,56 @@
+<div style="margin-top: 100px; width: 100%">
+  test
+  <div>
+    <input type="file" (change)="fileChangeEvent($event)" />
+
+    <image-cropper
+      [imageChangedEvent]="imageChangedEvent"
+      [maintainAspectRatio]="true"
+      [aspectRatio]="4 / 3"
+      format="png"
+      (imageCropped)="imageCropped($event)"
+      (imageLoaded)="imageLoaded($event)"
+      (cropperReady)="cropperReady()"
+      (loadImageFailed)="loadImageFailed()"
+    ></image-cropper>
+
+    <img [src]="croppedImage" />
+</div>
+</div>
+<div class="cont-horiz" style="height: 100vh; width: 100vw">
+  <div style="max-width: 360px;" class="cont-vert">
+    <h2 style="text-align: center;" class="margin-bottom30">
+      Загрузите свой аватар
+    </h2>
+    <br/>
+
+    <div style="text-align: center;" class="margin-bottom30">
+      Подходят изображения в форматах png, jpg. gif, bmp до 10 МБ
+    </div>
+    <br/>
+    <div class="btn-green margin-bottom30">
+      <!--   -->
+      <input type="file" class="btn-green " style="text-align: center;"
+             (change)="fileChangeEvent($event)" />
+      <image-cropper
+        [imageChangedEvent]="imageChangedEvent"
+        [maintainAspectRatio]="true"
+        [aspectRatio]="4 / 4"
+        format="png"
+        (imageCropped)="imageCropped($event)"
+        (imageLoaded)="imageLoaded($event)"
+        (cropperReady)="cropperReady()"
+        (loadImageFailed)="loadImageFailed()">
+      </image-cropper>
+      <!--img [src]="croppedImage" style="max-width: 250px;" /-->
+      Выбрать изображение
+    </div>
+    <br/>
+    <div class="margin-bottom30">
+      vajhgfajhldvjsh.jpg
+    </div>
+    <div class="btn-green" >
+      Готово
+    </div>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+@import '../../../../assets/styles/main/color';
+
+@media screen and (min-width: 640px){
+  #group-service {
+    display:none;
+  }
+}
+.addressPersonalPageUser{
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px; 
+  color: $green-basic;
+  font-weight: 700;
+  font-size:1em;
+}    
+
+.btns-container{
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+  margin: 0;
+  width: 100%;
+}
+
+.btns-container a{
+  width: 49%;
+  font-weight: bold;
+  padding: 15px 1rem;
+  height: 50px;
+  border-radius: 40px;
+  font-size: 1em;
+  line-height: 130%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

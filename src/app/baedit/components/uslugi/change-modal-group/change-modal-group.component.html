@@ -1,0 +1,24 @@
+
+<div class="cont-horiz" style="background: #FAFAFC; z-index: 0">
+  <div class="cont-vert box_create_service" >
+    <div class="w100 margin-bottom60 margin-top30">
+      <h2>Отправить услугу в группу</h2>
+    </div> 
+    <div class="margin-bottom30 txt-green-light"> 
+      Выберите соответствующую группу услуг
+    </div> 
+    <select class="input-line cont-horiz-between margin-bottom100" style="max-width:320px"
+      [(ngModel)]="myGroup"
+      (change)="chooseGroup()">
+      <option [ngValue]="myGroup">
+        {{myGroup.name}}
+      </option>
+      <option *ngFor="let group of groups" [ngValue]="group">
+        {{group.name}}
+      </option>
+    </select>
+    <a class="btn-green button-text cont-vert" style="width: 100%; max-width: 320px;" (click)="changeGroup()">
+      Добавить
+    </a>
+  </div> 
+</div>

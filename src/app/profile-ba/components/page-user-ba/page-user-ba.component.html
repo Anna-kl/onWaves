@@ -1,0 +1,19 @@
+<app-albums-show [isEdit]=false [profileId]="id"></app-albums-show>
+<app-accordion [isUpdate] = false [canSetService]="false" [profileId]="id" (setServices)="setServices($event)">
+</app-accordion>
+<div class="cont-vert-start-center wrap margin-top30" *ngIf="profile">
+    <div class="margin-bottom40">
+        <h3>Как нас найти</h3>
+        <span>{{getAddressProfile(profile.address!)}}</span>
+    </div>
+    <!--Карта 2GIS start -->
+    <!-- <div class="column-right-footer" *ngIf="geoPoint$|async as geo">
+        <div class="container" >
+            <ya-map [center]="[geo.lat, geo.lng]" [zoom]="14" >
+                <ya-placemark [geometry]="[geo.lat, geo.lng]"></ya-placemark>
+            </ya-map>
+        </div>
+    </div> -->
+    <!--Карта 2GIS END-->
+</div>
+<app-reviews-carusel [id]="id"></app-reviews-carusel>

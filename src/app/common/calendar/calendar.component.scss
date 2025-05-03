@@ -1,0 +1,36 @@
+@import "../../../assets/styles/main/color.scss";
+
+.block_arr_green{
+    width: 60px;
+    height: 48px;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+}
+.block_arr_green:hover{
+    background-color: $green-light;
+}
+.arr_green{
+    width: 24px;
+    height: 24px; 
+    fill: $green-light2 ;
+}
+.block_arr_green:hover > .arr_green{
+    fill: #fff;
+}
+.last_day{
+    background: #b4c5bd;
+}
+@media screen and (max-width: 768px) { 
+	.calendar_width_m{
+        width: 320px;
+    }
+}
+@media screen and (min-width: 769px) { 
+	.calendar_width_m{
+        width: 360px;
+    }
+}
+

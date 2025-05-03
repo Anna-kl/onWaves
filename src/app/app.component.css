@@ -1,0 +1,29 @@
+.container {
+    width: 320px;
+    height: 320px;
+}
+.menu-top-bottom{
+    margin-top: 30px;  
+    margin-left: 50px;
+    margin-right: 50px;
+} 
+@media (max-width: 480px){ 
+	.menu-top-bottom{
+        margin-top: 30px; 
+        margin-bottom: 46px
+    }
+} 
+
+@media (max-width: 780px){ 
+	.menu-top-bottom{
+        margin-top: 30px; 
+        margin-bottom: 46px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+} 
+
+body{
+    max-width: 1200px;
+}
+

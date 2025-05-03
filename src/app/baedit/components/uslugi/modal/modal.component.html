@@ -1,0 +1,24 @@
+<div  class="container-ba-modalka-uslugi cont-vert-center-start" >
+  <div class="btn-closeModal-uslugi" (click)="closeModal()">
+    <img src="/assets/img/modalki/uslugi_close_pc.svg" alt=""/>
+  </div> 
+  <div  class="block-uslugi">
+    <h2 class="margin-bottom50">
+      Создание группы услуг
+    </h2> 
+    <div class="txt-green-light margin-bottom20" >
+      Придумайте название группе услуг
+    </div> 
+    <div class="input-uslugi-modal">
+      <input  type="text" size="16" placeholder="Маникюр - пример" [(ngModel)]="groupName" maxlength="50">
+    </div> 
+    <div class="text-under-input">
+      До 50 символов
+    </div> 
+    <div  class="btn-uslugi-modalka" >
+      <div class="saveBtn" (click)="saveGroup()">
+        Создать
+      </div>
+    </div> 
+  </div>
+</div> 

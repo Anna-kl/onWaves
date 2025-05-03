@@ -1,0 +1,281 @@
+<a name="top"></a>
+<div class=" cont-horiz-center-start modal-reg-ba1 "><!-- Зеленый -->
+  <div class="modal-list" ><!-- голубой -->
+    <div *ngIf="numberStreetPage===1" class="head-1-12" style="text-align: center;">
+      Основная информация
+    </div>
+    <div *ngIf="numberStreetPage===2" class="head-1-12" style="text-align: center;">
+      Основная информация
+    </div>
+    <div class="cont-horiz w100" id="groupModal">
+      <!-- Профиль -->
+      <div *ngIf="numberStreetPage===1" class="line-green-ba">
+        <span>Профиль</span>
+      </div>
+      <!-- Контакты -->
+      <div *ngIf="numberStreetPage===1" class="line-gray-ba">
+        <span class="grey">
+          Контакты
+        </span>
+      </div>
+      <!-- Профиль -->
+      <div *ngIf="numberStreetPage===2" class="line-gray-ba">
+        <span class="grey">
+          Профиль
+        </span>
+      </div>
+      <!-- Контакты -->
+      <div *ngIf="numberStreetPage===2" class="line-green-ba">
+        <span>Контакты</span>
+      </div>
+      <div *ngIf="numberStreetPage===3" [ngStyle]="{ 'display': 'none' }"></div>
+      <div *ngIf="numberStreetPage===3" [ngStyle]="{ 'display': 'none' }"></div>
+    </div>
+    <div [ngSwitch]="numberStreetPage">
+      <form [formGroup]="registrationForm" #formDir="ngForm">
+        <div [hidden]="formDir.submitted">
+          <!-- Страница 1 start-->
+          <div  *ngSwitchCase="1" class="container-ba-prifile">
+            <!--  левая колонка-->
+            <div class="column-left">
+              <div class="container-column-left cont-vert-start-start">
+                <div class="input-name">
+                  Придумайте имя для будущей страницы или укажите название организации.
+                </div>
+                <div>
+                  <input type="text" size="16"   formControlName="name" placeholder="Название страницы*">
+                </div>
+                <div class="input-website">
+                  Странице будет присвоено  собственное имя, а также именная ссылка,
+                   которую вы сможете размещать на любых ресурсах.
+                </div>
+                <div class="cont-horiz-start-start w100" style="gap: 10px 10px;">
+                  <!-- Неизменяемая часть адреса -->
+                  <div class="cont-horiz" style="height: 50px; text-align: center;">
+                    ocpio.ru/#/id
+                  </div>
+                  <!-- Часть адреса, заполняемая БА  [placeholder]="urlProfileLocal" -->
+
+                  <div class="input-ocpio-nikname">
+                    <input
+                    class="input-span-text"
+                    type="text"
+                    size="16" [style]="errors.errorLinkStyle"
+                    formControlName="link" >
+
+                    <span [style]="errors.errorLinkStyle">
+                      {{errors.errorLink}}
+                    </span>
+                <!-- Иконка копировать адрес -->
+<!--                  <div class="cont-horiz ico_copy_green" >-->
+<!--                    <img src="/assets/img/ico/icons_all_size/ico_copy_pc_24_white.svg">-->
+<!--                  </div>-->
+                  </div>
+                  
+                </div>
+
+                <div class="discription-column-left">
+                  Создайте описание профиля, чтобы клиенты знали, чем вы
+                  занимаетесь и чем вы лучше конкурентов.
+                </div>
+                <div class="container-textarea">
+                  <textarea
+                    class="textarea-ba-profile" rows="5" cols="45"
+                    type="text"
+                    formControlName="about"
+                    maxlength="150"
+                    placeholder="Добавьте описание">
+                  </textarea>
+                  <span class="textarea-count">
+                    {{remainingText}}/150
+                  </span>
+                </div>
+              </div>
+            </div>
+            <!-- правая колонка-->
+            <div class="column-right">
+              <div class="container-column-right">
+
+                <app-avatar-cropped [id]="null"
+                 [avatar]="null" (onSave)="getData($event)"> 
+                </app-avatar-cropped>  
+              </div>
+            </div>
+          </div>
+            <!-- Страница 2 start style="height: 560px; "-->
+            <div  *ngSwitchCase="2"  >
+              <div class="cont-vert-start w100">
+                <div class="cont-horiz-around w100 wrap">
+                  <!-- Левая колонка 1  -->
+                  <div class="border2px cont-vert-start-start contact_col_50">
+                    <div class="txt-green-light">
+                      Укажите контакты для связи с клиентами.
+                    </div>
+                    <br/>
+                    <div class="w100">
+                      <div class="w100">
+                        <h3 class="label margin-bottom10" for="phone">
+                          Номер телефона
+                        </h3>
+                        <!-- Номер телефона -->
+                        <div class="input-line cont-horiz-start margin-bottom30"  >
+                          <input type="text" size="16" id="phone" formControlName="phone"
+                                 placeholder="+7(000) 000-0000"
+                                 mask="+0(000) 000-0000" [showMaskTyped]="true"
+                                />
+                          <!-- {{phone}} -->
+                        </div>
+                        <div *ngIf="phone.invalid &&(phone.dirty || phone.touched)" class="alert-validation">
+                          <div *ngIf="phone.errors?.['minlength']">
+                            *Введите не менее 10 цифр
+                          </div>
+                          <div *ngIf="phone.errors?.['required']" >
+                            *Неразрешенные символы
+                          </div>
+                        </div>
+                        <!--  WhatsApp -->
+                        <h3 class="label margin-bottom10" for="whatsApp">
+                          WhatsApp
+                        </h3>
+                        <div class="block-input margin-bottom30">
+                          <div class="input-line cont-horiz-start "  >
+                            <input type="text" size="16" id="whatsApp" formControlName="whatsApp"  placeholder="+7(000) 000-0000"
+                                   mask="+0(000) 000-0000" [showMaskTyped]="true" name="whatsApp"   />
+                          </div>
+                          <div *ngIf="whatsApp.invalid &&(whatsApp.dirty || whatsApp.touched)" class="alert-validation">
+                            <div *ngIf="whatsApp.errors?.['minlength']">
+                              *Введите не менее 4 цифр
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Telegram -->
+                        <h3 class="label margin-bottom10" for="telegram">
+                          Telegram
+                        </h3>
+                        <div class="block-input margin-bottom30">
+                          <div class="input-line cont-horiz-start" >
+                            <input class="form-control borderNone" type="text" size="16" id="telegram"  formControlName="telegram"  placeholder="@______"  />
+                          </div>
+                          <div *ngIf="telegram.invalid &&(telegram.dirty || telegram.touched)" class="alert-validation">
+                            <div *ngIf="telegram.errors?.['minlength']">
+                              *Введите не менее 3 символов
+                            </div>
+                          </div>
+                        </div>
+                       
+                        <!-- Ссылка на сайте -->
+                        <h3 class="label margin-bottom10" for="webSite">
+                          Ссылка на сайт
+                        </h3>
+                        <div class="block-input margin-bottom30">
+                          <div class="input-line cont-horiz-start" >
+                            <input class="form-control borderNone" type="text" size="16" id="webSite"
+                            formControlName="webSite"   placeholder=""  />
+                                   <!-- formControlName="webSite"   placeholder="https://"  /> -->
+                          </div>
+                          <!-- Событие при ошибки -->
+                          <div *ngIf="webSite.invalid &&(webSite.dirty || webSite.touched)" class="alert-validation">
+                            <div class="margin-bottom10" *ngIf="webSite.errors?.['minlength']">
+                              *Введите не менее 3 символов
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                    <div class="txt-green-light margin-top10">
+                      Разместите ссылку на сайт вашей организации или страницу в социальных сетях.
+                    </div>
+                    <br/>
+                    <!-- Контакты end -->
+                  </div>
+                  <!-- Правая колонка -->
+                  <div class="border2px cont-vert-start-start contact_col_50">
+                    <!-- Адрес start -->
+<app-select-address [profile]="null"
+   (changeAddress)="changeAddress($event)">
+</app-select-address>
+                  </div>
+                  <!-- Адрес end -->
+                </div>
+                <!-- Cтрока 2 -->
+                <div class="view-map">
+                  <!-- Left Column -->
+                  <div class="border2px cont-vert-center-start contact_col_50-2 phone-view-map-content">
+                    <div class="txt-green-light">
+                      Убедитесь, что на карте правильно указано ваше местоположение.<br>
+                      <p style="color: black">{{ strAddress }}</p>
+                    </div>
+                  </div>
+                
+                  <!-- Right Column -->
+                  <div class="cont-vert-center-start contact_col_50-2 phone-view-map-content"  style="padding: 40px 0;" *ngIf="geoPoint$ | async as geo">
+                    <!-- <div class="container">
+                      <ya-map [center]="[geo.lat, geo.lng]" [zoom]="12">
+                        <ya-placemark [geometry]="[geo.lat, geo.lng]"></ya-placemark>
+                      </ya-map>
+                    </div> -->
+                    <div class="container">
+                      <y-map
+                        [props]="{
+                          location: {
+                            center: [geo.lng,geo.lat],
+                            zoom: 12,
+                          },
+                        }"
+                      >
+                      
+                      <y-map-default-scheme-layer />
+                      <y-map-default-features-layer />
+                        <y-map-marker
+                          [props]="{
+                            coordinates: [geo.lng,geo.lat],
+                            draggable: true,
+                          }"
+                      >
+                      <svg fill="#043c48" width="64px" height="64px" viewBox="0 0 24 24" id="place" data-name="Line Color" xmlns="http://www.w3.org/2000/svg" class="icon line-color" stroke="#043c48"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle id="secondary" cx="12" cy="9" r="2" style="fill: none; stroke: #7dcfbd; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></circle><path id="primary" d="M12,21S6,14,6,9A6,6,0,0,1,18,9C18,14,12,21,12,21Z" style="fill: none; stroke: #043c48; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></path></g></svg>
+                    </y-map-marker>
+                      </y-map>
+                    </div>
+
+                  </div>
+                </div>
+                
+              </div>  <!-- Страница 2 end -->
+            </div>
+            <!-- Страница 3 start -->
+            <div *ngSwitchCase="3" class="cont-horiz" >
+              <div>
+                <!-- Поздравления start -->
+                <div class="cont-vert">
+                  <h1 style="text-align: center;" class="margin-bottom15">
+                    Поздравляем!
+                  </h1>
+                  <p style="text-align:center; max-width:326px;" class="margin-bottom30">
+                    Вы создали Бизнес-аккаунт! Теперь его необходимо заполнить:
+                    Нажмите кнопку «Редактировать профиль» и дополните информацию о вашем Бизнесе,
+                    укажите график работы и создавайте первые услуги.
+                  </p>
+                  <img src="/assets/img/IllustrationWelcome.png"  style="max-width: 250px; max-height: 250px;" alt="">
+                </div>
+                <!-- Поздравления end -->
+              </div>
+            </div>
+            <!-- Страница 4 end -->
+            <!-- кнопки -->
+            <div class="cont-horiz-around w100 two-bnt-position margin-top50" style="gap: 10px 10px">
+              <button *ngIf="numberStreetPage===2" type="button" class="btn-green open"  (click)="decrement() "
+                      [ngStyle]="{ 'display': 'block' }"  >
+                Назад
+              </button>
+              <button type="button" class="btn-green"   [ngStyle]="{'background-color': isFormValid() ? 'gray' : '#006174' }"
+                      (click)="increment()" [disabled]="isFormValid()">
+                {{textBtn}}
+              </button>
+            </div>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>

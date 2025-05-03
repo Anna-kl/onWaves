@@ -1,0 +1,205 @@
+@import '../../../assets/styles/main/color.scss';
+
+li.p-breadcrumb-chevron.pi.pi-chevron-right.ng-star-inserted {
+ color: $green-light; 
+}
+p-breadcrumb.p-element.max-w-full.ng-tns-c29-0 {
+  border-color: transparent;
+}
+.p-breadcrumb {
+  background: #ffffff;
+  border: none;
+  border-radius: 3px;
+  padding: 0;
+} 
+.p-breadcrumb ul li:last-child .p-menuitem-text {
+  color: $green-light;
+} 
+.row>* ,.row{
+  padding-right: 0px;
+  padding-left: 0px;
+  margin-left: 0px;
+  max-height: 635px;
+  overflow: auto;
+}
+:host {
+  color: $green-basic; /* color: #000000; */
+}
+.chooseItem {
+  background-color: $green-basic;
+  color: white;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.none-item {
+  background-color: #FFF;
+  color: #11142D;
+}
+.menu-trigger {
+  text-align: center;
+  cursor: pointer;
+  padding: 10px;
+  background-color: #FFFFFF;
+}
+.menu { 
+  overflow-x: hidden;
+  background: #FFFFFF;
+} 
+.menu-item{
+  width: 100vw ;
+}
+.menu-item-2{
+  margin-left: 10px;
+  margin-right: 10px;
+  width: calc(100% - 10px) ;
+}
+.menu-item-3{
+  width: calc(100% - 10px) ;
+}
+.menu-item:last-child, .menu-item-2:last-child, .menu-item-3:last-child { 
+  border-bottom: none;
+}
+.menu-item, .menu-item-2, .menu-item-3  { 
+  padding: 7.5px 15px; /*padding: 10px 20px;*/
+  border-bottom: 1px solid #DDE2ED;
+  /*max-width: 300px;*/ 
+  cursor: pointer;
+}
+.menu-item:active , .menu-item:hover, .menu-item-2:hover, .menu-item-2:active, .menu-item-3:hover, .menu-item-3:active {
+  /*border-radius: 0px 30px 30px 0px;*/
+  border-radius: 0px;
+  background: $green-basic;
+  color: #FFFFFF;
+} 
+.menu-item:hover, .menu-item-2:hover, .menu-item-3:hover { 
+  font-weight: bold;
+  border-radius: 12px;
+}
+/*  1. Авто, мото  */
+.ico_menu_all_cat_avto{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_auto_moto_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_avto,
+.menu-item:hover > .ico_menu_all_cat_avto{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_auto_moto_pc_24_white.svg)
+}
+/* 2. Аренда, прокат */
+.ico_menu_all_cat_arenda_prokat{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_rent_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_arenda_prokat,
+.menu-item:hover > .ico_menu_all_cat_arenda_prokat{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_rent_pc_24_white.svg)
+}
+/* 3. Бытовые услуги */
+.ico_menu_all_cat_home_services{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_household_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_home_services,
+.menu-item:hover > .ico_menu_all_cat_home_services{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_household_pc_24_white.svg)
+}
+/* 4. Доставка груза */
+.ico_menu_all_cat_delivery{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_delivery_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_delivery,
+.menu-item:hover > .ico_menu_all_cat_delivery{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_delivery_pc_24_white.svg)
+}
+/* 5. Животные */
+.ico_menu_all_cat_animals{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_animals_pc_24.svg)
+}
+.chooseItem > .ico_menu_all_cat_animals,
+.menu-item:hover > .ico_menu_all_cat_animals{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_animals_pc_24_white.svg)
+}
+/* 6. Здоровье */
+.ico_menu_all_cat_health{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_health_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_health,
+.menu-item:hover > .ico_menu_all_cat_health{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_health_pc_24_white.svg)
+}
+/* 7. Компьютеры и IT */
+.ico_menu_all_cat_IT{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_IT_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_IT,
+.menu-item:hover > .ico_menu_all_cat_IT{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_IT_pc_24_white.svg)
+}
+/* 8. Красота  */
+.ico_menu_all_cat_beauty{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_beauty_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_beauty,
+.menu-item:hover > .ico_menu_all_cat_beauty{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_beauty_pc_24_white.svg)
+}
+/* 9. Мероприятия */
+.ico_menu_all_cat_events{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_party_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_events,
+.menu-item:hover > .ico_menu_all_cat_events{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_party_pc_24_white.svg)
+}
+/* 10. Обучение и курсы  */
+.ico_menu_all_cat_courses{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_education_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_courses,
+.menu-item:hover > .ico_menu_all_cat_courses{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_education_pc_24_white.svg)
+}
+/* 11. Отдых и туризм */
+.ico_menu_all_cat_tourism{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_tourism_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_tourism,
+.menu-item:hover > .ico_menu_all_cat_tourism{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_tourism_pc_24_white.svg)
+}
+/* 12. Ремонт техники  */
+.ico_menu_all_cat_repair{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_repair_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_repair,
+.menu-item:hover > .ico_menu_all_cat_repair{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_repair_pc_24_white.svg)
+}
+/* 13. Спорт */
+.ico_menu_all_cat_sport{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_sport_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_sport,
+.menu-item:hover > .ico_menu_all_cat_sport{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_sport_pc_24_white.svg)
+}
+/* 14. Строительство */
+.ico_menu_all_cat_building{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_building_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_building,
+.menu-item:hover > .ico_menu_all_cat_building{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_building_pc_24_white.svg)
+}
+/* 15. Фото, видео, аудио */
+.ico_menu_all_cat_photo{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_photo_video_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_photo,
+.menu-item:hover > .ico_menu_all_cat_photo{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_photo_video_pc_24_white.svg)
+}
+/* 16. Эзотерика  */
+.ico_menu_all_cat_esoterics{
+  background-image:url(/assets/img/ico_rubric/menu_all_cat/ico_esoteric_pc_24_green.svg)
+}
+.chooseItem > .ico_menu_all_cat_esoterics,
+.menu-item:hover > .ico_menu_all_cat_esoterics{
+  background-image: url(/assets/img/ico_rubric/menu_all_cat/ico_esoteric_pc_24_white.svg)
+}

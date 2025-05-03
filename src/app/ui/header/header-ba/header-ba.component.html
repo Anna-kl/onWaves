@@ -1,0 +1,66 @@
+  <div class="w100 cont-horiz-between" style="height: 90px;">
+    <div (click)="redirectMainPage()" class="cont-horiz-start" >
+      <!--img src="/assets/img/logo-ocpio.png" class="logo" -->
+      <!-- (click)="GoToMainPage()" -->
+      <!-- logo_large от 640px и более -->
+<img src="/assets/img/svg/logo10.svg" width="250px">
+    </div>
+    <div class="cont-horiz" *ngIf="auth$|async as auth">
+      <!-- Эти блоки пропадают в мобильной версии Start -->
+      <div class="gb-st1 none768" (click)="GoToProfile(auth)"
+       style="cursor: pointer;">
+        <div class="main-menu-item">
+          Профиль
+        </div>
+      </div>
+      <!-- Мои записи -->
+      <div class="cont-horiz gb-st1 none768" (click)="myNotes(auth)" style="cursor: pointer;">
+        <div class="main-menu-item">
+          Мои записи
+        </div>
+        <div class="round-number">
+            {{countRecord}}
+        </div>
+      </div>
+      <!-- Сообщения -->
+      <div class="cont-horiz gb-st1 none768">
+        <!--div href="" class="cont-horiz" >
+          Сообщения&nbsp;
+          <div class="numb-round-light-green">
+              9+&nbsp;
+          </div>
+        </div-->
+      </div>
+      <!-- Эти блоки пропадают в мобильной версии End -->
+
+      <!-- Эта часть остается в мобильной версии -->
+      <div class="cont-horiz-start">
+        <!-- Колокольчик уведомления: Заявки и оповещения -->
+        <div (click)="GoToNotifications()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="bell_main_menu" width="23" height="24" viewBox="0 0 23 24" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M5.12 2.56C6.72 0.96 8.8 0 11.04 0C13.28 0 15.36 0.96 16.96 2.56C18.56 4.16 19.36 6.4 19.36 8.64V15.04C19.36 15.36 19.52 15.84 19.84 16.16C20.16 16.48 20.48 16.64 20.8 16.64C21.44 16.64 22.08 17.28 22.08 17.92C22.08 18.56 21.6 19.2 20.8 19.2H1.28C0.64 19.2 0 18.56 0 17.92C0 17.28 0.48 16.64 1.28 16.64C1.6 16.64 2.08 16.48 2.24 16.16C2.56 15.84 2.72 15.52 2.72 15.04V8.8C2.72 6.4 3.52 4.32 5.12 2.56ZM9.28 21.44C8.64 21.44 8 21.92 8 22.72C8 23.36 8.48 24 9.28 24H12.8C13.44 24 14.08 23.52 14.08 22.72C14.08 22.08 13.6 21.44 12.8 21.44H9.28Z" />
+          </svg>
+          <span class="badge badge-danger cont-horiz count_bell_main_menu" style="color: #11142D" >
+            {{notification$|async}}
+          </span>
+        </div>
+        <!-- Аватарка пользователя -->
+        <div class="menu-avatar-client"  *ngIf="auth">
+          <div  class="container-avatar-image">
+            <img [src]="getAvatar(auth?.avatar)" class="grande-image "  alt="">
+            <img [src]="getIconAvatar(auth.userType!, true)" class="little-image" alt="">
+          </div>
+          <!-- <ng-template #baImage>
+            <div  class="container-avatar-image">
+              <img [src]="getAvatar(auth.avatar)" class="grande-image "  alt="">
+              <img src="/assets/img/ui/sac-avatar-action.svg" class="little-image" alt="">
+            </div>
+          </ng-template> -->
+        </div>  
+        <!-- Гамбургер -->
+        <app-hamb-menu-register
+          (setProfile)="setProfile($event)">
+        </app-hamb-menu-register>
+      </div>
+    </div>
+  </div> 

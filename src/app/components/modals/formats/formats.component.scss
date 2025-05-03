@@ -1,0 +1,38 @@
+@import '../../../../assets/styles/main/color.scss';
+
+.closeModal {
+    position: absolute;
+    /* top: 23%; */
+    right: 20px;
+    width: 24px;
+    height: 24px;
+    /* opacity: 0.2; */
+    opacity: 1;
+    cursor: pointer;
+    transition: opacity ease 0.5s;
+    
+  
+    /* &:hover {
+      opacity: 1;
+    } */
+  }
+  
+  .closeModal::before,
+  .closeModal::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    display: block;
+    width: 24px;
+    height: 3px;
+    /* background: #000; */
+    background-color: $green-basic;
+  }
+  
+  .closeModal::before {
+    transform: rotate(45deg);
+  }
+  
+  .closeModal::after {
+    transform: rotate(-45deg);
+  }

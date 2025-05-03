@@ -1,0 +1,497 @@
+<div class="container-ba-grafik" >
+<div class="container-ba-grafik" >
+  <!--  верхняя надпись текст-->
+  <div class="text-title">
+    Вы можете создать несколько вариантов графика работы и применить их
+    к необходимым дням, которые можно выбрать в календаре.
+  </div>
+  <!--  блок toggle -->
+  <div class="block-toggle" *ngIf="profile">
+    <div class="text-block-toggle" >
+      Принимать заказы
+      <label>
+        <!-- [disabled]="getStatusDisable()" -->
+        <input type="checkbox" [(ngModel)]="profile.isGetOrder" (ngModelChange)="changeGetOrder()"/>
+        <i></i>
+      </label>
+    </div>
+  </div>
+  <!------------------------  block-card ----------------------------->
+  <div class="container-card wrap" *ngIf="schedules$|async as schedules">
+    <div *ngFor="let sch of schedules" >
+      <!-------------------- сам квадрат --------------------->
+      <div class="card" [class.grey]="!sch.isActive || !profile?.isGetOrder">
+        <!-- Включить выключить графики работы-->
+        <div  class="toggle-card" >
+          <div *ngIf="sch.isActive && profile?.isGetOrder; else notIsActive">
+            <span class="checkbox-toggle-card">
+              Активно
+            </span>
+            <label>
+              <input type="checkbox" [(ngModel)]="sch.isActive" (ngModelChange)="changeStatus(sch)" />
+              <i></i>
+            </label>
+          </div>
+          <ng-template  #notIsActive>
+              <span class="checkbox-toggle-card">
+              Отключено
+              </span>
+            <label>
+              <input type="checkbox" (ngModelChange)="changeStatus(sch)"
+                     [(ngModel)]="sch.isActive" *ngIf="profile?.isGetOrder"/>
+              <i></i>
+            </label>
+          </ng-template>
+        </div>
+        <!-------------------- activation/desactivation в квадрате --------------------->
+        <div class="title-card">
+          <div *ngIf="!sch.isActive || !profile?.isGetOrder; else elseBlock">
+            <!-- 1. До нажатия -->
+            <div *ngIf="!sch.isActive; else elseInput" class="cart-noinput">
+              <!-- Заголовок Введите название  -->
+              <div class="name-card">
+                {{ sch.name || 'Введите название'}}
+              </div>
+              <!-- Иконка карандаша -->
+              <div class="title-card-icon-vide" ></div>
+            </div>
+            <!-- 2. Во время редактирования -->
+            <ng-template  #elseInput >
+              <div class="cart-input">
+                <!-- Заголовок Введите название после нажатия  -->
+                <div>
+                  <input [(ngModel)]="sch.name"  placeholder="Введите название" readonly>
+                </div>
+                <!-- Иконка галочки -->
+                <div class="title-card-icon-complet"></div>
+              </div>
+            </ng-template>
+          </div>
+          <ng-template  #elseBlock >
+            <div *ngIf="!sch.isName; else elseInput" class="cart-noinput">
+              <div class="name-card">
+                {{ sch.name || 'Введите название'}}
+              </div>
+              <div class="title-card-icon-vide" (click)="onEditName(sch)"></div>
+            </div>
+            <ng-template #elseInput>
+              <div class="cart-input cart-complet">
+                <div>
+                  <input [(ngModel)]="sch.name" (ngModelChange)="changeStatus(sch)"
+                         placeholder="Введите название" required minlength="4" maxlength="20">
+                </div>
+                <div class="title-card-icon-complet" (click)="onEditName(sch)"></div>
+              </div>
+            </ng-template>
+          </ng-template>
+        </div>
+        <!-------------------- начальное время --------------------->
+        <div class="container-times">
+          <div *ngIf="!sch.isActive || !profile?.isGetOrder; else elseNoActive">
+            <label class="accordion-times-noactive ">
+              <div class="cont-horiz-between w100" >
+                Выбрать время
+              </div>
+            </label>
+          </div>
+          <ng-template  #elseNoActive >
+            <label class="accordion-times" (click)="showWork(sch)">
+              <div class="cont-horiz-between w100" >
+                <div>
+                  Выбрать время
+                </div>
+              </div>
+            </label>
+            <!-- внутри Выбрать время-->
+            <div class="accordion_tab-content" [style.max-height]="sch.isShowWork ? 'none' : 0">
+              <!-- Выбор начала рабочего графика -->
+              <div class="cont-horiz-start margin-bottom10  card-day-text">
+                Начало:
+              </div>
+              <div class="w100 cont-horiz">
+                <!-- Часы -->
+                <div>
+                  <div class="w100 cont-horiz color-grey-dark">
+                    часы
+                  </div>
+                  <div class="input-line-mini cont-horiz-start" style="width: 100px">
+                    <select style="border: none" [(ngModel)]="sch.work.start.hour" (ngModelChange)="changeStatus(sch)">
+                      <option *ngFor="let group of groupsHours" [ngValue]="group">
+                          {{group}}
+                      </option>
+                      <!-- *ngFor="let group of groups" [ngValue]="group" {{group.name}}
+                      <option>
+                      </option>--->
+                    </select>
+                  </div>
+                </div>
+                <!-- Двоеточие -->
+                <img src="assets/img/ba-edit/uslugi/Frame%204605.png" class="margin-right10 margin-left10">
+                <!-- Минуты -->
+                <div>
+                  <div class="w100 cont-horiz color-grey-dark">
+                    минуты
+                  </div>
+                  <div class="input-line-mini cont-horiz-start" style="width: 100px">
+                    <select style="border: none" [(ngModel)]="sch.work.start.minutes" (ngModelChange)="changeStatus(sch)">
+                      <option *ngFor="let group of groupsMinutes" [ngValue]="group">
+                        {{group}}
+                      </option>
+                      <!-- *ngFor="let group of groups" [ngValue]="group" {{group.name}}
+                      <option>
+                      </option>--->
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <!-- Выбор конца рабочего графика -->
+              <div class="cont-horiz-start margin-top20 margin-bottom10 card-day-text" >
+                Конец
+              </div>
+              <div class="w100 cont-horiz">
+                <!-- Часы -->
+                <div>
+                  <div class="w100 cont-horiz color-grey-dark">
+                    часы
+                  </div>
+                  <div class="input-line-mini cont-horiz-start" style="width: 100px">
+                    <select style="border: none" [(ngModel)]="sch.work.end.hour" (ngModelChange)="changeStatus(sch)">
+                      <option *ngFor="let group of groupsHours" [ngValue]="group">
+                          {{group}}
+                      </option>
+                      <!-- *ngFor="let group of groups" [ngValue]="group" {{group.name}}
+                      <option>
+                      </option>--->
+                    </select>
+                  </div>
+                </div>
+                <!-- Двоеточие -->
+                <img src="assets/img/ba-edit/uslugi/Frame%204605.png" class="margin-right10 margin-left10">
+                <!-- Минуты -->
+                <div >
+                  <div class="w100 cont-horiz color-grey-dark">
+                    минуты
+                  </div>
+                  <div class="input-line-mini cont-horiz-start" style="width: 100px">
+                    <select style="border: none" [(ngModel)]="sch.work.end.minutes" (ngModelChange)="changeStatus(sch)">
+                      <option *ngFor="let group of groupsMinutes" [ngValue]="group">
+                        {{group}}
+                      </option>
+                      <!-- *ngFor="let group of groups" [ngValue]="group" {{group.name}}
+                      <option>
+                      </option>--->
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <!--div class="cont-horiz-start width100">
+                <div class="input-line-mini margin-right10 cont-horiz-start">
+                  <input  type="time" size="1"  style="border: none" placeholder="10:00" [(ngModel)]="sch.work.end">
+                </div>
+              </div-->
+            </div>
+          </ng-template>
+        </div>
+
+
+       
+
+        <!-------------------- Перерыв--------------------->
+        <div class="container-times" >
+          <div *ngIf="!sch.isActive || !profile?.isGetOrder; else elseNoActivePause">
+            <label class="accordion-times-noactive ">
+              <div class="cont-horiz-between w100" >
+                <div>
+                  Перерыв
+                </div>
+              </div>
+            </label>
+          </div>
+          <ng-template  #elseNoActivePause >
+            <label class="accordion-times" (click)="showBreak(sch)">
+              <div class="cont-horiz-between w100" >
+                <div>
+                  Перерыв
+                </div>
+              </div>
+            </label>
+            <!-- внутри Перерыва-->
+            <div class="accordion_tab-content" [style.max-height]="sch.isShowBreak ? 'none' : 0">
+              <!-- Начало -->
+              <div class="cont-horiz-start margin-bottom10 card-day-text">
+                Начало:
+              </div>
+              <div class="w100 cont-horiz">
+                <!-- Часы -->
+                <div>
+                  <div class="w100 cont-horiz color-grey-dark">
+                    часы
+                  </div>
+                  <div class="input-line-mini cont-horiz-start" style="width: 100px">
+                    <select style="border: none" [(ngModel)]="sch.break.start.hour" (ngModelChange)="changeStatus(sch)">
+                      <option *ngFor="let group of groupsHours" [ngValue]="group">
+                          {{group}}
+                      </option>
+
+                    </select>
+                  </div>
+                </div>
+                <!-- Двоеточие -->
+                <img src="assets/img/ba-edit/uslugi/Frame%204605.png" class="margin-right10 margin-left10">
+                <!-- Минуты -->
+                <div >
+                  <div class="w100 cont-horiz color-grey-dark">
+                    минуты
+                  </div>
+                  <div class="input-line-mini cont-horiz-start" style="width: 100px">
+                    <select style="border: none" [(ngModel)]="sch.break.start.minutes" (ngModelChange)="changeStatus(sch)">
+                      <option *ngFor="let group of groupsMinutes" [ngValue]="group">
+                        {{group}}
+                      </option>
+                      <!-- *ngFor="let group of groups" [ngValue]="group" {{group.name}}
+                      <option>
+                      </option>--->
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Конец: -->
+              <div class="cont-horiz-start margin-top20 margin-bottom10 card-day-text" >
+                Конец:
+              </div>
+              <div class="w100 cont-horiz">
+                <!-- Часы -->
+                <div>
+                  <div class="w100 cont-horiz color-grey-dark">
+                    часы
+                  </div>
+                  <div class="input-line-mini cont-horiz-start" style="width: 100px">
+                    <select style="border: none" [(ngModel)]="sch.break.end.hour" (ngModelChange)="changeStatus(sch)">
+                      <option *ngFor="let group of groupsHours" [ngValue]="group">
+                          {{group}}
+                      </option>
+
+                    </select>
+                  </div>
+                </div>
+                <!-- Двоеточие -->
+                <img src="assets/img/ba-edit/uslugi/Frame%204605.png" class="margin-right10 margin-left10">
+                <!-- Минуты -->
+                <div >
+                  <div class="w100 cont-horiz color-grey-dark">
+                    минуты
+                  </div>
+                  <div class="input-line-mini cont-horiz-start" style="width: 100px">
+                    <select style="border: none" [(ngModel)]="sch.break.end.minutes" (ngModelChange)="changeStatus(sch)">
+                      <option *ngFor="let group of groupsMinutes" [ngValue]="group">
+                        {{group}}
+                      </option>
+
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </ng-template>
+        </div>
+
+         <div class="cont-horiz-between w100" >
+          Укажите перерыв между началом записей
+        </div>
+        <div class="input-line-mini cont-horiz-start" style="width: 100%;">
+          <select style="border: none" [(ngModel)]="sch.period" (ngModelChange)="setStartPeriod(sch)">
+            <option *ngFor="let group of startHours" [ngValue]="group">
+                {{getStrText(group)}}
+            </option>
+            <!-- *ngFor="let group of groups" [ngValue]="group" {{group.name}}
+            <option>
+            </option>--->
+          </select>
+        </div>
+        <!-- нижние кнопки удалить или календарь-->
+        <div class="w100 cont-horiz">
+          <div *ngIf="!sch.isActive || !profile?.isGetOrder; else bntCalandrier" class="no-bntCalandier"
+                (click)="deleteCalandrierCart(sch.id)" >
+            Удалить график
+          </div>
+        </div>
+        <ng-template #bntCalandrier>
+          <button class="btn-green blockBntCalandier"
+                 *ngIf="sch.id" [ngStyle]="{'background-color': checkTimer(sch) ? 'gray' : '#0d94a0' }"
+                  [disabled]="checkTimer(sch)"  (click)="chooseDays(sch)" >
+
+            <div> Применить к дням </div>
+            <div class="bntCalandier">
+              <img src="/assets/img/ba-edit/ico-calendar-white.png" alt="">
+            </div>
+
+          </button>
+          <button class="btn-green blockBntCalandier"
+                  *ngIf="!sch.id" [ngStyle]="{'background-color': checkTimer(sch) ? 'gray' : '#0d94a0' }"
+                  [disabled]="checkTimer(sch)"  (click)="addScheduler(sch)" >
+
+            <div> Создать </div>
+
+          </button>
+        </ng-template>
+      </div>
+    </div>
+    <!---------------Создать группу услуг *---------------->
+    <div class="card-vide" (click)="createNewSchedule(schedules)">
+      <div class="plus-gray cont-vert card-vide-img">
+        <img src="/assets/img/ba-edit/plus-white.png" alt="">
+      </div>
+      <div>
+        Создать график работы <!-- еще один -->
+      </div>
+    </div>
+  </div>
+</div>
+<!--    кнопка сохранить-->
+<div class="container-ba-grafik-btnSave">
+<!--    <button class="btn-danger" (click)="showModalTime()">Вид часов</button>-->
+<!--  <div class="saveBtn" [class]="isEdit ? 'btn-green' : 'btn-gray'"-->
+<!--       (click)="saveChanges()">Сохранить</div>-->
+<!--</div>-->
+<!--   всплывающее уведомление-->
+<p-toast position="bottom-center" *ngIf="isEdit"></p-toast>
+
+<!-------------------- квадрат --------------------->
+<!-------------------- включено-отключено --------------------->
+<!--<div class="position_card-graphics wrap margin-top50" >-->
+<!--  &lt;!&ndash; Карточка график работы start&ndash;&gt;-->
+<!--  <div class="card-graphics" *ngFor="let sch of schedules | slice:0:3">-->
+<!--    <div class="w100 cont-horiz-end-start margin-bottom30">-->
+<!--      <label class="labl_1 cont-horiz" >-->
+<!--        <div class="checkbox-name" *ngIf="sch.isActive" style="float: left; margin-right: 20px;" >-->
+<!--          Активно-->
+<!--        </div>-->
+<!--        <div class="checkbox-name" *ngIf="!sch.isActive" style="float: left; margin-right: 20px;" >-->
+<!--          Отключено-->
+<!--        </div>-->
+<!--        <input type="checkbox" [(ngModel)]="sch.isActive"/>-->
+<!--        <i></i>-->
+<!--      </label>-->
+<!--    </div>-->
+
+
+<!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; сам квадрат -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
+<!--    <div class="cont-horiz-between margin-bottom30" style="float: none" >-->
+<!--      <div *ngIf="!sch.isName">-->
+<!--        &lt;!&ndash; <b>{{sch.name}}</b> &ndash;&gt;-->
+<!--        <b>{{ sch.name || 'Введите название' }}</b>-->
+<!--      </div>-->
+<!--      <input [(ngModel)]="sch.name" *ngIf="sch.isName" style="width: 150px; border: none" placeholder="Введите название">-->
+<!--      <div class="edit-pen-small" (click)="onEditName(sch)" >-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    &lt;!&ndash; вкладка 1 &ndash;&gt;-->
+<!--    <div class="accordion_tab" >-->
+<!--      <label class="accordion_tab-label-graphics" (click)="showWork(sch)">-->
+<!--        <div class="cont-horiz-between w100" >-->
+<!--          <div>-->
+<!--            Выбрать время-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </label>-->
+<!--      &lt;!&ndash; Содержимое вкладки Start&ndash;&gt;-->
+<!--      <div class="accordion_tab-content" [style.max-height]="sch.isShowWork ? 'none' : 0">-->
+<!--        &lt;!&ndash; Начало &ndash;&gt;-->
+<!--        <div class="cont-horiz-start margin-bottom10  card-day-text">-->
+<!--          Начало:-->
+<!--        </div>-->
+<!--        <div class="cont-horiz-start width100">-->
+<!--          &lt;!&ndash; Циферблат со временем &ndash;&gt;-->
+<!--          <div class="input-line-mini margin-right10 cont-horiz-start">-->
+<!--            <input  type="time" size="1" placeholder="10:00"  style="border: none" [(ngModel)]="sch.work.start" >-->
+<!--          </div>-->
+<!--        </div>-->
+
+
+<!--        &lt;!&ndash; Конец: &ndash;&gt;-->
+<!--        <div class="cont-horiz-start margin-top20 margin-bottom10 card-day-text" >-->
+<!--          Конец-->
+<!--        </div>-->
+<!--        <div class="cont-horiz-start width100">-->
+<!--          <div class="input-line-mini margin-right10 cont-horiz-start">-->
+<!--            <input  type="time" size="1"  style="border: none" placeholder="10:00"[(ngModel)]="sch.work.end">-->
+<!--          </div>-->
+<!--          &lt;!&ndash; <div class="edit-pen" *ngIf="sch.work.end">          </div> &ndash;&gt;-->
+<!--          &lt;!&ndash;img src="/assets/img/plus_gray.png" *ngIf="sch.work.end === null" (click)="setTime('work-end', sch)"&ndash;&gt;-->
+<!--        </div >-->
+<!--      </div >-->
+<!--    </div>-->
+
+
+
+<!--    &lt;!&ndash; Перерыв &ndash;&gt;-->
+<!--    <div class="accordion_tab margin-top30" >-->
+<!--      <label class="accordion_tab-label-graphics" (click)="showBreak(sch)">-->
+<!--        <div class="cont-horiz-between w100">-->
+<!--          <div>-->
+<!--            Перерыв-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </label>-->
+<!--      &lt;!&ndash; Содержимое вкладки Start&ndash;&gt;-->
+<!--      <div class="accordion_tab-content" *ngIf="sch.break" [style.max-height]="sch.isShowBreak ? 'none' : 0">-->
+<!--        &lt;!&ndash; Начало &ndash;&gt;-->
+<!--        <div class="cont-horiz-start margin-bottom10 card-day-text">-->
+<!--          Начало:-->
+<!--        </div>-->
+<!--        <div class="cont-horiz-start width100" >-->
+<!--          <div>-->
+<!--            <div class="input-line-mini margin-right10 cont-horiz-start">-->
+<!--              <input  type="time" size="1"  style="border: none" placeholder="10:00" [(ngModel)]="sch.break.start">-->
+<!--            </div>-->
+<!--          </div>-->
+<!--          &lt;!&ndash; <div class="edit-pen" *ngIf="sch.break.start"></div> &ndash;&gt;-->
+<!--          &lt;!&ndash;img src="/assets/img/plus_gray.png" *ngIf="sch.break.start === null" (click)="setTime('break-start', sch)"&ndash;&gt;-->
+<!--        </div>-->
+<!--        &lt;!&ndash; Конец: &ndash;&gt;-->
+<!--        <div class="cont-horiz-start margin-top20 margin-bottom10 card-day-text" >-->
+<!--          Конец:-->
+<!--        </div>-->
+<!--        <div class="cont-horiz-start width100">-->
+<!--          <div>-->
+<!--            <div class="input-line-mini margin-right10 cont-horiz-start">-->
+<!--              <input  type="time" size="1"   style="border: none" placeholder="10:00" [(ngModel)]="sch.break.end">-->
+<!--            </div>-->
+<!--          </div>-->
+<!--          &lt;!&ndash; <div class="edit-pen" *ngIf="sch.break.end">-->
+<!--          </div> &ndash;&gt;-->
+<!--          &lt;!&ndash; img src="/assets/img/plus_gray.png" *ngIf="sch.break.end === null" (click)="setTime('break-end', sch)"&ndash;&gt;-->
+<!--        </div>-->
+<!--      </div >-->
+<!--    </div>-->
+<!--    <button class="btn-green margin-top20 cont-horiz" [ngStyle]="{'background-color': checkTimer(sch) ? 'gray' : '#409B89' }"-->
+<!--          [disabled]="checkTimer(sch)"  (click)="chooseDays(sch)" >-->
+<!--      <div>Применить к дням&nbsp;&nbsp;</div>-->
+<!--      <div><img src="/assets/img/ba-edit/ico-calendar-white.png"></div>-->
+<!--    </button>-->
+
+<!--  </div>-->
+
+
+<!--  -->
+<!--  &lt;!&ndash; Карточка график работы End &ndash;&gt;-->
+<!--  &lt;!&ndash; Создать группу услуг &ndash;&gt;-->
+<!--  <div class="uslugi-create-block cont-vert-around" (click)="createNewSchedule()" style="margin:0;">-->
+<!--    <div class="plus-gray cont-vert">-->
+<!--      <img src="/assets/img/ba-edit/plus-white.png">-->
+<!--    </div>-->
+<!--    <div style="text-align: center;">-->
+<!--      Создать еще один график работы-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+<!--<div class="w100 cont-horiz">-->
+<!--  <div class="btn-green margin-top50" (click)="saveChanges()">-->
+<!--    Сохранить-->
+<!--  </div>-->
+<!--</div>-->
+
+</div>
+</div>

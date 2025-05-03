@@ -1,0 +1,42 @@
+<!-- МОИ ЗАПИСИ БА-->
+<main id="top">
+  <!-- Фон-->
+  <div class="cont-vert w100" style="background: #FAFAFC;  padding-bottom: 20px;" >
+    <!-- Лист 1200 background-color: aqua; -->
+    <div class="cont-horiz w100 " 
+      style=" background-color: #fff;  max-width: 1200px; padding: 0px 20px 50px 20px;">
+      <div class="cont-vert-center-start list1200 left-right20" 
+        style=" max-width: 960px;">
+        <!--  Мои записи -->
+        <div class="w100 cont-horiz-start-start">
+          <h3 class="margin-top-bottom30" *ngIf="isMyNote()">
+            Мои записи
+          </h3>
+        </div>
+        <div class="cont-horiz-start margin-bottom50 w100" *ngIf="!isMyNote()">
+          <a class="cont-horiz btn-back" (click)="returnToNote()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M7.43353 12.5665C7.12111 12.254 7.12111 11.7475 7.43353 11.4351L15.4335 3.4351C15.746 3.12268 16.2525 3.12268 16.5649 3.4351C16.8773 3.74752 16.8773 4.25405 16.5649 4.56647L9.13059 12.0008L16.5649 19.4351C16.8773 19.7475 16.8773 20.254 16.5649 20.5665C16.2525 20.8789 15.746 20.8789 15.4335 20.5665L7.43353 12.5665Z" fill="#006174"/>
+            </svg>
+          </a>
+          <div>
+            <h1>Добавить вручную</h1>
+          </div>
+        </div> 
+        <div class="w100 margin-bottom30" >
+          <app-calendar (onDate)="onDate($event)" [userId]="id" >
+          </app-calendar>
+        </div>
+        <h2 *ngIf="!isWorkDay">
+          не рабочий день
+        </h2> 
+        <!-- Деление \src\app\profile-ba\notes\notes-routing.module.ts -->
+        <!-- 1. Записи БА -->
+        <!-- src\app\profile-ba\notes\ba-notes\ba-notes.component.html-->
+        <!-- 2. Добаить запись БА -->
+        <!--src\app\profile-ba\notes\add-record-ba\add-record-ba.component.html-->
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
+</main>

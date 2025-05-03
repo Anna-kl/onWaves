@@ -1,0 +1,26 @@
+<!--h2 style="color: green">GeeksforGeeks</h2-->
+<!--h4>Angular PrimeNG Form  Calendar Time Component</h4-->
+
+<!--h3>TimeOnly in 24-hour Format</h3-->
+<div  class="modal_540 cont-vert-start-center">
+  <div class="w100 margin-bottom70">
+    <h3 style="text-align: center;">
+      Продолжительность услуги
+    </h3>
+  </div>
+  <div class="w100 cont-horiz">
+    <p-calendar 
+      class="margin-bottom100 w100" 
+        
+        [showTime]="true"
+        [timeOnly]="true"
+        hourFormat="24"
+        [(ngModel)]="calendarVal" >
+    </p-calendar>
+  </div>
+  <div class="w100 cont-horiz">
+    <div class="btn-green">
+      Применить
+    </div>
+  </div>
+</div>

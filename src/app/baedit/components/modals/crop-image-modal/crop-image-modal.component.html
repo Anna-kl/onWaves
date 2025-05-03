@@ -1,0 +1,51 @@
+<div  class="container-ba-modalka-crop cont-vert" >
+  <div class="btn-closeModal-crop" (click)="closeModal()">
+    <img src="/assets/img/modalki/uslugi_close_pc.svg" alt=""/>
+  </div>
+  <h2 class="margin-bottom30">
+    Загрузите фотографию
+  </h2>
+  <!--  добавляем  Аватар-->
+  <div class="column-right cont-vert">
+    <div  (click)="fileUpload.click()" class="margin-bottom30 w100">
+      <input type="file" class="file-input"  (change)="fileChangeEvent($event)"  #fileUpload/>
+      <div class="block-image-avatar" *ngIf="isShowCropped">
+        <img [src]="croppedImage" alt="" style="border-radius: 12px;" />
+      </div>
+    </div>
+    <image-cropper
+    style="border-radius: 12px;" 
+      class="margin-bottom30"
+      [resizeToWidth]="256"
+      [cropperMinWidth]="128"
+      *ngIf="!isShowCropped"
+      [imageChangedEvent]="imageChangedEvent"
+      [maintainAspectRatio]="true"
+      [aspectRatio]="4/4"
+      (imageCropped)="imageCropped($event)"
+      (imageLoaded)="imageLoaded($event)"
+    (loadImageFailed)="showErrorImage()">
+    </image-cropper>
+
+    <div  class="btn-crop-modalka margin-bottom30" >
+      <div class="saveBtn" 
+      *ngIf="this.imageChangedEvent && this.isShowCropped"
+       style="padding-left: 80px;    padding-right: 80px;    padding-top: 10px;    padding-bottom: 10px;"
+        (click)="cropImage()">
+        Сохранить
+      </div>
+    </div>
+
+    <div class="bntForAvatar margin-bottom30"
+     (click)="cropImage()" 
+     *ngIf="this.imageChangedEvent && !this.isShowCropped">
+      Готово
+    </div>
+    <!-- Выбрать другое  -->
+    <a href="javascript:void(0)" [ngClass]="textCropImage !== 'Выбрать другое' ? 'inputAvatar margin-bottom30 cont-horiz' : 'choose-another-foto'" (click)="fileUpload.click()">
+      <input type="file" class="file-input "  (change)="fileChangeEvent($event)"  #fileUpload/>
+      {{textCropImage}}
+    </a>
+  </div>
+
+</div>

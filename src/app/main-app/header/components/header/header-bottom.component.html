@@ -1,0 +1,61 @@
+<!--<div class="b-header b-header&#45;&#45;bottom b-main-container">-->
+<div class="cont-vert-around" style="padding-left: 20px; padding-right: 20px;">
+  <div class="cont-horiz width100 margin-bottom10 wrap" style=" min-width:300px; gap: 15px;">
+    <!-- Кнопка все категории-->
+    <div class="btn-green cont-horiz all-cat">
+      <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20" viewBox="0 0 21 20" fill="none">
+        <rect x="0.5" width="4" height="4" fill="white"/>
+        <rect x="0.5" y="8" width="4" height="4" fill="white"/>
+        <rect x="0.5" y="16" width="4" height="4" fill="white"/>
+        <rect x="8.5" width="4" height="4" fill="white"/>
+        <rect x="8.5" y="8" width="4" height="4" fill="white"/>
+        <rect x="8.5" y="16" width="4" height="4" fill="white"/>
+        <rect x="16.5" width="4" height="4" fill="white"/>
+        <rect x="16.5" y="8" width="4" height="4" fill="white"/>
+        <rect x="16.5" y="16" width="4" height="4" fill="white"/>
+        </svg>
+      <div class="margin-left10" style="color: #fff;">
+        Все категории
+      </div>
+    </div> 
+    <!-- Строка поиска -->
+    <div class="search-line w100" style="flex: 1; min-width: 220px;" >
+      <div class="cont-horiz-between search-line-in">
+        <!-- Строка ввода -->
+        <input type="text" size="11" [(ngModel)]="search" placeholder="Что вы ищете?" style="border:0px;" >
+        <!-- Иконка Лупы -->
+        <div (click)=goToExtSearch() class="round30 ico-background-green">
+          <svg  width="24" height="24" fill="none">
+            <path  class="svg-ico1" fill-rule="evenodd" d="M4.6 10.723a6.123 6.123 0 1 1 12.246 0 6.123 6.123 0 0 1-12.246 0ZM10.723 3a7.723 7.723 0 1 0 4.866 13.72l4.009 4.01a.8.8 0 0 0 1.131-1.132l-4.008-4.009A7.723 7.723 0 0 0 10.723 3Z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cont-horiz-between w100  margin-bottom50">
+    <!--div (click)=goToStranica() >
+      Модальные&nbsp;окна
+    </div-->
+    <div (click)=goToExtSearch() class="search-position txt-green-light">
+      Расширенный&nbsp;поиск
+    </div>
+  </div> 
+</div>
+<sections-menu [menuActive]="menuActive" #menu></sections-menu>
+<!--- Девиз  --->
+<div class="cont-horiz">
+  <div>
+    <div class="intro margin-top30">
+      Социальная сеть бронирования
+      <span class="marker-green">
+        OCPIO.
+      </span>
+    </div>
+    <br />
+    <div class="margin-bottom40" style="text-align: center;">
+      <span class="tagline" >
+        Выбирай, бронируй и создавай услуги
+      </span>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,18 @@
+.free-time-table{
+
+  max-width: 645PX;  
+  margin-left:20px ;
+  margin-right: 20px;
+
+  margin-bottom: 30px;
+}  
+@media screen and (max-width: 640px){
+    .left-ba-profile{
+      display:none;
+    }  
+}  
+.next-btn-calendar{
+  margin-left: 40px;
+  margin-right: 40px;
+  max-width: 200px;
+}

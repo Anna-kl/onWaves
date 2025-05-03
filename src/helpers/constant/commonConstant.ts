@@ -1,0 +1,1 @@
+export const urlProfile = 'https://ocpio.ru/#/id/';

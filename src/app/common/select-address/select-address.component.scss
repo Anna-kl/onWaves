@@ -1,0 +1,152 @@
+@import '../../../assets/styles/main/color.scss';
+
+.container-contacts {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(277px, 1fr)); 
+}
+.container {
+  width: 320px;
+  height: 320px;
+}
+ /*левая колонка*/
+.column-left{
+  display:grid;
+  justify-items: center;
+}
+.container-column-left{
+  display:grid; 
+  width: 70%;
+}
+.discription-column-left{
+  margin:50px 0 30px 0;
+  color:#409B89;
+}
+.column-left span{
+  font-size:1em;
+  font-weight:700;
+  margin-bottom:5px;
+} 
+.discription-text{
+  margin-bottom:10px;
+  color:#409B89;
+} 
+ /*ДЛЯ всех*/
+input{
+  border: 1px solid #9196A4;
+  padding: 13px 20px;
+  border-radius:100px;
+  margin-bottom:30px; 
+}
+input:focus{
+  border: 1px solid #00DAB3;
+} 
+/*   ------ ------------ правая колонка ---------    */
+.column-right{
+  display:grid;
+  justify-items: center;
+  align-items: start;
+}
+.container-column-right{
+  display:grid; 
+  width: 70%;
+}
+select {
+  border: 1px solid #9196A4;
+  padding: 13px 20px;
+  border-radius:100px;
+  margin-bottom:30px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;  /*!* -убираем стандартную стрелку *!*/
+  cursor: pointer;
+  width: 100%;
+}
+/* правим стрелочку у selecta */
+.select {
+  position: relative;
+}
+.select:after { 
+
+  content: url('../../../assets/img/ba-edit/ico_arrow_down_pc.svg'); /* ставим стрелку свою */ 
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  z-index: 1; 
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+} 
+/*--------------------Нижний раздел---------------------------*/
+.container-contacts-footer{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); 
+}
+.column-left-footer{
+  display:grid;
+  justify-items: center;
+  align-items:start;
+}
+.container-column-left-footer{
+  display:grid;
+  justify-content: center;
+  align-items:start;
+  width: 70%;
+}
+.address-text-info{
+  padding-bottom:20px;
+}
+.column-right-footer{
+  display:grid;
+  justify-items: center;
+}
+.map{
+  width: 100%;
+  height: 300px
+} 
+/*  кнопка сохранить   */
+.container-ba-contacts-btnSave{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+.saveBtn {
+  display:grid;
+  justify-self: center; 
+  text-align:center;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius:24px;
+  padding: 13px 130px;
+  margin-top:20px; 
+}   
+@media screen and (max-width: 920px) {
+  .container-column-left{
+    width: 90%;
+  }
+  .container-column-right{
+    width: 90%;
+  }
+  .discription-column-left{
+    margin-top:20px;
+  }
+  .container-column-left-footer{
+    width: 90%;
+  }
+} 
+@media screen and (max-width: 640px) {
+  .container-column-left{
+    width: 90%;
+  }
+  .container-column-right{
+    width: 90%;
+  }
+  .discription-column-left{
+    margin-top:20px;
+  }
+  .container-column-left-footer{
+    width: 90%;
+  }
+  .map{
+    width: 90%;
+  }
+}  

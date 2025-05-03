@@ -1,0 +1,154 @@
+input[type="file"] {
+  display: none;
+}
+app-crop-image-modal {
+  background: #FFFFFF;
+}
+.app-crop-image-modal {
+  background: #FFFFFF;
+} 
+.tooltip-box{
+  height: 180px;
+} 
+.tooltip-cebab-layer{
+  width: 52px;
+  float: right;
+  margin-top: -240px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start; 
+  padding: 0;
+}
+@media screen and (max-width: 640px) {
+  .tooltip-cebab-layer{
+    width: 52px;
+    margin-top: -204px; 
+    float: right;
+  }
+} 
+.layer-ico-del{
+  position: absolute; 
+  width: 225px; 
+  height: 225px; 
+  padding: 15px;
+}
+.albom-name-position{
+  margin-top: 50px;
+  margin-bottom: 50px; 
+}
+@media screen and (max-width: 480px) {
+  .albom-name-position{
+    margin-top: 0px;
+    margin-bottom: 0px; 
+  }
+}
+.ico-del-position{
+  position: absolute; 
+}
+.ico-no-albom-mob{
+  display: none;
+}
+.ico-no-albom-pc{
+  display: block;
+}
+@media screen and (max-width: 480px) {
+  .ico-no-albom-mob{
+    display: block;
+  }
+  .ico-no-albom-pc{
+    display: none;
+  }
+}
+
+.context-menu {
+  position: absolute;
+  z-index: 1000;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 10px 0 rgba(16, 16, 16, 0.2);
+  background: #fff;
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    list-style: none;
+    padding: 5px 0;
+    margin: 0;
+
+    li {
+      cursor: pointer;
+
+      /* &:hover {
+        background-color: #f0f0f0;
+      } */
+
+      .menu-item {
+        display: flex;
+        flex-direction: row;
+        gap: 15px;
+        align-items: center;
+
+        p {
+          margin: 0;
+        }
+
+        &.delete-item p {
+          color: red;
+        }
+      }
+    }
+  }
+}
+
+.menu-icon {
+  width: 24px;
+  height: 24px;
+}
+
+
+@media (max-width: 768px) {
+  .context-menu {
+    padding: 20px; 
+    box-shadow: 0 2px 5px rgba(16, 16, 16, 0.1); 
+
+    ul {
+      gap: 10px; 
+
+      li {
+        .menu-item {
+          flex-direction: column; 
+          align-items: flex-start; 
+        }
+      }
+    }
+  }
+}
+
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .context-menu {
+    padding: 25px; 
+    box-shadow: 0 3px 8px rgba(16, 16, 16, 0.15);
+
+    ul {
+      gap: 12px; 
+
+      li {
+        .menu-item {
+          flex-direction: row;
+          align-items: center;
+        }
+      }
+    }
+  }
+}
+
+.menu-icon {
+  width: 24px;
+  height: 24px;
+
+  @media (max-width: 768px) {
+    width: 20px; 
+    height: 20px;
+  }
+}

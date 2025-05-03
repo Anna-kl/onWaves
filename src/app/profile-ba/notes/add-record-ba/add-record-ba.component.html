@@ -1,0 +1,93 @@
+<div class="parent-grey-light ">
+  <div class="disp1">
+    <!-- колонка start-->
+    <div class="cont-horiz-start-start">
+      <div class="w100" style="background-color: #fff; padding: 50px 20px 20px 20px;">
+        <div class="width100">
+          <!-- Заголовок страницы  -->
+          <!-- Номер телефона + ФИО-->
+          <form [formGroup]="formClient" (ngSubmit)="saveRecord()">
+            <!-- Номер телефона и фио -->
+            <div class="cont-vert" >
+              <!-- Номер телефона -->
+              <input  type="tel" formControlName="phone"
+                  size="13"
+                  placeholder="Введите номер телефона"
+                  mask="+X(XXX)XXX-XX-XX"
+                  class="input-line cont-horiz-start margin-bottom30 w100"
+                  style="margin-top: 0px; max-width: 600px;">
+              <!-- фамилию и имя -->
+              <div class="input-line cont-horiz-start margin-bottom50 w100"
+                style="margin-top: 0px; max-width: 600px;">
+                <input  type="text" formControlName="name" size="18" placeholder="Введите ФИО">
+              </div>
+            </div>
+            <!-- календарь 1 Неделя END -->
+            <!--Услуги start-->
+            <div class="cont-horiz-start wrap" >
+              <div class="margin-bottom30">
+                Добавьте услугу из списка
+              </div>
+              <app-accordion [isUpdate]="false" [profileId]="id"
+                             (setServices)="setService($event)"></app-accordion>
+            </div>
+            <!--Услуги end -->
+
+            <!-- Продолжительность всех услуг , сумма -->
+            <div class="cont-horiz-between" style="padding: 20px;">
+              <div *ngIf="!isTimeLimit">
+                <b>Общее время: {{getHours(duration)}} ч. {{getMinutes(duration)}}  мин.</b>
+              </div>
+            <!-- Сумма стоимости всех услуг  -->
+              <div class="txt-green-bold">
+                Общая сумма: {{getPriceString(chooseServices)}} руб.
+              </div>
+            </div>
+            <!-- Свободное время -->
+            <app-set-interval-start [id]="id" [day]="day$|async" [duration]="duration"
+                                    (setInterval)="setInterval($event)"></app-set-interval-start>
+<!--            <div class="cont-horiz margin-bottom30 margin-top50" style="font-weight: 500;">-->
+<!--              <b>Время начала услуги</b>-->
+<!--            </div>-->
+<!--            <div class="cont-horiz wrap margin-bottom50" style="gap: 20px 10px;">-->
+<!--              <div class="btn-green-quad"  *ngFor="let free of schedulesListFree" (click)="chooseInterval(free)"-->
+<!--                   [style.background-color]="free.isChoose ? '$green-basic' : '#9196A4'">-->
+<!--                {{free.start|date: 'shortTime'}}-->
+<!--              </div> -->
+<!--            </div>-->
+            <!--div class="cont-horiz-start margin-bottom50" style="gap: 10px 10px;">
+              <input type="checkbox">
+              <div>Закрыть время для записи</div>
+            </div-->
+
+            <!-- Комментарий -->
+            <!--      тут нужно еще поставить счетчик 0/150
+              (ngModelChange)="setAbout()"
+              [(ngModel)]="profile.about"
+              {{profile?.about?.length}}
+            class="textarea-count"-->
+            <div class="cont-horiz w100">
+              <div class="container-textarea cont-horiz-end-end margin-bottom50" >
+                <textarea
+                  class="cont-horiz-start-start textarea-ba-profile" rows="5" cols="45"
+                  name="text" formControlName="about" maxlength="150" placeholder="Оставьте комментарий..." >
+                </textarea>
+                <span class="count-words">
+                 {{countSuivi}}/150
+                </span>
+              </div>
+            </div>
+            <!-- Добавить запись -->
+            <div class="cont-horiz w100">
+              <button type="submit" class="margin-bottom50"
+                      [disabled]="isAvailable()" [class]="isAvailable() ? 'btn-gray' : 'btn-green'">
+                Добавить запись
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- колонка END-->
+  </div>
+</div>

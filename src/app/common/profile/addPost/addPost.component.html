@@ -1,0 +1,61 @@
+<div class="w-100 cont-vert">
+
+  <div class="container-textarea cont-horiz-center-start">
+    <textarea
+      class="textarea-ba-profile" rows="5" cols="45"
+      type="text"
+      [(ngModel)]="postText"
+      maxlength="150"
+      placeholder="Добавьте описание">
+    </textarea>
+    <span class="textarea-count">
+      {{remainingText}}/150
+    </span>
+
+  </div>
+
+  <div class="add-foto-to-gallery cont-vert m-3" *ngIf="!outputBoxVisible">
+    <!--до наведения -->
+    <div class="cont-horiz" style="position: absolute;"
+   >
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19.4952 4.79999C18.8281 4.80001 18.1741 4.98538 17.6063 5.33543C17.0384 5.68548 16.5789 6.18643 16.2792 6.78239L14.8632 9.59999H10.8072C9.21589 9.59999 7.68977 10.2321 6.56455 11.3573C5.43933 12.4826 4.80719 14.0087 4.80719 15.6V34.8C4.80719 36.3913 5.43933 37.9174 6.56455 39.0426C7.68977 40.1678 9.21589 40.8 10.8072 40.8H19.2072C19.2264 40.5264 19.2696 40.248 19.3392 39.9672L20.2392 36.372C20.5176 35.2584 21.0432 34.2216 21.7728 33.3408C19.4906 32.7893 17.4894 31.4209 16.1475 29.4942C14.8056 27.5676 14.2158 25.2161 14.4897 22.8843C14.7637 20.5524 15.8822 18.4016 17.6341 16.8383C19.3859 15.2751 21.6497 14.4077 23.9976 14.4C26.1498 14.4003 28.2395 15.1234 29.9316 16.4534C31.6237 17.7834 32.82 19.6432 33.3288 21.7344L33.8472 21.2184C35.0754 19.9903 36.7223 19.2716 38.458 19.2061C40.1937 19.1407 41.89 19.7334 43.2072 20.8656V15.5976C43.2072 14.0063 42.575 12.4802 41.4498 11.3549C40.3246 10.2297 38.7985 9.59759 37.2072 9.59759H33.1536L31.7496 6.78959C31.4505 6.19156 30.9907 5.68865 30.4218 5.33723C29.853 4.98582 29.1975 4.79979 28.5288 4.79999H19.4952ZM31.2 23.868C31.1743 22.4554 30.7336 21.0817 29.9329 19.9177C29.1321 18.7538 28.0065 17.8512 26.6965 17.3223C25.3864 16.7935 23.9497 16.6617 22.5653 16.9434C21.1809 17.2252 19.91 17.908 18.9108 18.9068C17.9117 19.9056 17.2285 21.1763 16.9463 22.5607C16.6641 23.945 16.7954 25.3817 17.3238 26.6919C17.8523 28.0022 18.7545 29.128 19.9182 29.9292C21.0818 30.7303 22.4554 31.1715 23.868 31.1976L31.2 23.868ZM35.544 22.9152L23.952 34.5072C23.2773 35.1828 22.7986 36.0289 22.5672 36.9552L21.6672 40.5504C21.5784 40.908 21.5837 41.2824 21.6824 41.6373C21.7811 41.9923 21.97 42.3157 22.2306 42.5761C22.4912 42.8365 22.8148 43.025 23.1698 43.1234C23.5249 43.2218 23.8993 43.2267 24.2568 43.1376L27.852 42.24C28.7787 42.0082 29.6249 41.5287 30.3 40.8528L41.892 29.2608C42.7227 28.4168 43.1862 27.2786 43.1814 26.0943C43.1766 24.9101 42.7039 23.7757 41.8663 22.9385C41.0287 22.1012 39.8942 21.629 38.7099 21.6246C37.5257 21.6202 36.3877 22.0841 35.544 22.9152Z" fill="#409B89"/>
+        </svg>
+  
+    </div>
+
+  <div style="margin-top: 100px;">
+    <!-- <div class="margin-top20 m-2" style="margin-top: 70px;">
+      Добавить фото
+  </div> -->
+  <a href="javascript:void(0)" class=" link-underline under"
+  (click)="fileUpload.click()">
+    <input type="file" class="file-input m-2"  accept="video/*, image/*"   name="file"
+    id="file"  (change)="onFileSelected($event)" #fileUpload/>
+        Добавьте видео или фото
+      </a>
+  </div>
+
+
+</div>
+<div class=" border-1" *ngIf="outputBoxVisible">
+<img [src]="url" *ngIf="format==='image' && url" height="200"> <br/>
+<video [src]="url" *ngIf="format==='video' && url" height="200" controls></video> <br/>
+
+<a href="javascript:void(0)" class=" link-underline under cont-horiz-center-start"
+  (click)="fileUpload.click()">
+    <input type="file" class="file-input m-2"  accept="video/*, image/*"   name="file"
+    id="file"  (change)="onFileSelected($event)" #fileUpload/>
+       Выбрать другое фото или видео
+      </a>
+    </div>
+<div class="cont-horiz-start m-2">
+  {{textError}}
+</div>
+<div class=" w-100 justify-content-center" style="display: flex;">
+  <button class="m-3" [ngClass]="getStateSave() ? 'btn-gray':'btn-green'"
+   (click)="createPost()" [disabled]="getStateSave()">
+    Опубликовать
+  </button>
+</div>
+</div>

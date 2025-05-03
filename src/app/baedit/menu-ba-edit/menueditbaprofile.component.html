@@ -1,0 +1,11 @@
+<div class="ba-menu-profile-container">
+  <div class="ba-menu-profile"  *ngFor="let menu of menus">
+    <ul>
+      <li [style.background-color]="chooseMainMenu === menu ? 
+      '#0d94a0' : 'white'"  [style.color]="chooseMainMenu === menu ? 
+      'white' : 'black'" (click)="toMenu(menu)">
+        {{menu}}
+      </li>
+    </ul>
+  </div>
+</div> 

@@ -1,0 +1,40 @@
+<div class="cont-horiz" style="background: #FAFAFC;  padding-bottom: 20px;" >
+  <div class="list1200 cont-vert-center-start modal-list">
+    <!-- Cтраница -->
+    <div class="width100">
+      <!-- Заголовок страницы  -->
+      <div class="cont-horiz-start margin-top50 margin-bottom50">
+        <div class="cont-horiz btn-back" (click)="closeModal()">
+          <!--svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.43427 12.566C7.12185 12.2536 7.12185 11.747 7.43427 11.4346L15.4343 3.43461C15.7467 3.12219 16.2532 3.12219 16.5656 3.43461C16.8781 3.74703 16.8781 4.25356 16.5656 4.56598L9.13132 12.0003L16.5656 19.4346C16.8781 19.747 16.8781 20.2536 16.5656 20.566C16.2532 20.8784 15.7467 20.8784 15.4343 20.566L7.43427 12.566Z" fill="$green-basic"/>
+          </svg--> 
+        </div>
+        <div >
+          <h1>Добавить&nbsp;услугу</h1>
+        </div>
+      </div>
+    </div>
+    <div class="cont-horiz w100 left-right20">
+      <div class="cont-vert w100">
+        <div class="line-gray3"></div>
+        <div class="steps-line3-active cont-vert-center-start">
+          Описание
+        </div>
+      </div>
+      <div class="cont-vert w100">
+        <div class="line-green3"></div>
+        <div class="steps-line3 cont-vert-center-start">
+          Рубрики
+        </div>
+      </div>
+      <div class="cont-vert w100">
+        <div class="line-gray3"></div>
+        <div class="steps-line3 cont-vert-center-start">
+          Оплата
+        </div>
+      </div>
+    </div>
+    <app-rubric [isEditService]="true" [treeCategoryChoosed]="choosedCategory" (onSend)="onSend($event)"> 
+    </app-rubric> 
+  </div>
+</div> 

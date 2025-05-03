@@ -1,0 +1,49 @@
+@import '../../../assets/styles/main/color.scss';
+
+.avatartext{
+    color: $green-light;
+    margin:50px 0 20px 0;
+}
+.file-input {
+    display: none;
+}
+.inputAvatar {
+    background-color: $green-basic;
+    text-align:center;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius:100px;
+    padding: 13px 30px;
+    margin-bottom:30px;
+    width: 100%;
+}
+.inputAvatar:hover {
+    background:$green-light;
+}
+.bntForAvatar{
+    background-color: $green-basic;
+    text-align:center;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius:100px;
+    padding: 13px 50px;
+    width: 100%; 
+}
+.block-image-avatar{
+    position:relative;
+}
+.delete-image-avatar{
+    position:absolute;
+    bottom:15px;
+    right:15px;
+    border-radius: 30px;
+    padding: 9px 10px;
+    border: 1px solid #E24414;
+    background: #FFF;
+} 
+
+img{
+    border-radius: 50%;
+}

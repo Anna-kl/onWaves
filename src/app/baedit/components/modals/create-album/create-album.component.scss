@@ -1,0 +1,112 @@
+@import '../../../../../assets/styles/main/color.scss';
+
+.container-ba-modalka-album{
+  display: flex;
+  justify-items: center; 
+  width: 500px;  
+  background-color: #fff; 
+}
+@media screen and (max-width: 480px) { 
+  .container-ba-modalka-album{
+    width: 320px;  
+  }
+}
+.btn-closeModal-uslugi {
+  width: 100%;
+  display:flex;
+  justify-content: end; 
+} 
+.block-uslugi { 
+  margin-top:10px;
+  width: 80%;
+}
+h2{
+  margin-bottom:10px;
+}
+.text-first{
+  color:$green-light;
+}
+.input-uslugi-modal{
+  border:1px solid #9196A4;
+  margin:20px 0 10px 0;
+  padding:10px 18px;
+  border-radius:24px;
+}
+.text-under-input{
+  color:#9196A4;
+  size:14px;
+  margin-left:20px;
+} 
+/*   ------  правая колонка - фото ---------    */
+.column-right{
+  display:flex;
+  align-items: start;
+  max-width: 80%;
+  min-width: 79%; 
+} 
+.avatartext{
+  color: $green-light;
+  margin:40px 0 20px 0;
+}
+.file-input {
+  display: none;
+}
+.inputAvatar {
+  display:grid;
+  background-color: $green-basic;
+  text-align:center;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius:100px;
+  padding: 13px 30px;
+  margin-bottom:30px;
+  width: 100%;
+}
+.inputAvatar:hover {
+  background:$green-light;
+}
+.bntForAvatar{
+  background-color: $green-basic;
+  text-align:center;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius:100px;
+  padding: 13px 0;
+  width: 100%;
+  margin-top:30px;
+}
+.block-image-avatar{
+  display:grid;
+    justify-content: center;
+    justify-items: center;
+  position:relative;
+}
+.delete-image-avatar{
+  position:absolute;
+  bottom:15px;
+  right:15px;
+  border-radius: 30px;
+  padding: 9px 10px;
+  border: 1px solid #E24414;
+  background: #FFF;
+} 
+/*  кнопка Сохранить   */
+.btn-uslugi-modalka{
+  display:grid;
+  margin-top:60px;
+  justify-items: center;
+}
+.saveBtn {
+  display:grid;
+  justify-self: center;
+  /*background-color: $green-basic;*/
+  text-align:center;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius:24px;
+  padding: 13px 130px;
+  margin-top:20px;
+}  

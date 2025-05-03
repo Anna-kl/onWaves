@@ -1,0 +1,18 @@
+
+<div class="cont-horiz" style="height: 100vh;" *ngIf="!(_login.isLoad$|async)">
+    <p-progressSpinner ></p-progressSpinner>
+</div>
+{{message|async}}
+<!-- Шапка для не зарегистрированного пользователя -->
+<app-hamb-menu-no-register class="hmenu"   *ngIf="!(_login.isAutentificate$|async)" >
+</app-hamb-menu-no-register>
+<app-header-ba class="hmenu" *ngIf="(_login.isAutentificate$|async)">
+</app-header-ba>
+<div  *ngIf="(_login.isLoad$|async)" style="max-width: 1200px; width: 100%; margin: 0 auto; margin-top: 100px;">
+    <!-- Шапка для пользователя БА  -->
+    <router-outlet  (activate)="onActivate($event)">
+    </router-outlet>
+
+</div>
+
+<!-- <app-footer *ngIf="(_login.isLoad$|async)"></app-footer> -->

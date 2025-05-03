@@ -1,0 +1,142 @@
+.around_1024-beetween_large {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media screen and (max-width: 1024px) {
+  .around_1024-beetween_large {
+    display: flex;
+    justify-content: center;
+    /* align-items: center; */
+    gap: 30px 10px;
+  }
+}
+
+.notes_total {
+  /*padding-left: 4em ;
+ padding-right: 4em ;*/
+}
+
+.сommunication {
+  gap: 20px 20px;
+  width: 100%;
+  flex-wrap: wrap;
+  /*-left: 4em ;
+    padding-right: 4em ;*/
+}
+
+.notes-ava-ba {
+  max-width: 60px;
+  border-radius: 30px;
+}
+
+.stl-cancel {
+  color: #E24414;
+  border: 0px solid #E24414;
+  max-width: 240px;
+  display: flex;
+  align-items: center;
+}
+
+@media screen and (max-width: 768px) {
+  .stl-cancel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.сonfirm_stl {
+  max-width: 240px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+
+.ba-my-notes {
+  padding: 20px 1em;
+  border-bottom: 1px solid #DDE2ED;
+}
+
+.type-of-pay {
+  min-width: 152px;
+}
+
+.time_stl {
+  width: 120px;
+  /*background-color: #E24414;*/
+  overflow: hidden;
+  height: 25px;
+}
+
+.add_notes_stl {
+  width: calc(100%);
+  background-color: rgb(255, 255, 255);
+  padding: 1em 4em;
+  margin-bottom: 20px;
+}
+
+@media screen and (max-width: 480px) {
+  .add_notes_stl {
+    padding: 1em 0em;
+  }
+}
+
+.desctop-time {
+  display: block;
+}
+
+.mobile-time {
+  display: none;
+}
+
+@media screen and (max-width: 480px) {
+  .mobile-time {
+    display: block;
+  }
+
+  .desctop-time {
+    display: none;
+  }
+}
+
+
+.btns-actions {
+  gap: 10px 40px;
+  max-width: 600px;
+}
+
+.btns-contacts {
+  display: flex;
+  gap: 15px;
+}
+
+@media screen and (max-width: 689px) {
+  .around_1024-beetween_large {
+    flex-direction: column;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .btns-actions {
+    flex-direction: column;
+  }
+
+  .btns-contacts {
+    padding-top: 10px;
+    gap: 20px;
+    flex-direction: column-reverse;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+  }
+
+  .btns-contacts div {
+    margin-left: 0;
+  }
+
+  .btns-contacts div a {
+    display: flex;
+    flex-direction: row;
+    margin-left: 0;
+  }
+}

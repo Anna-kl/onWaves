@@ -1,0 +1,20 @@
+  <p-carousel [value]="tutorials"
+    [showIndicators]="false"
+    [showNavigators]="true"
+    
+    [responsiveOptions]="responsiveOptions"
+    [circular]="true">
+    <ng-template let-item pTemplate="item" class="comment-item">
+      <div class="item cont-horiz">
+        <div class="cont-vert" (click)="chooseCardForSearch(item)">
+          <div>
+            <p-image [src]="item.images" width="200px"></p-image>
+          </div>
+          <div class="text-center" [ngStyle]="getFontStyles()">
+            {{ item.name }}
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </p-carousel>
+

@@ -1,0 +1,38 @@
+
+<div class="w100" style="max-width: 540px;" >
+    <div class="cont-vert">
+        <div class="w100  cont-horiz-start margin-bottom30" >
+            <img [src]="avatar" style="max-width:60px; height: 60px; border-radius: 60px; margin-right: 20px;"/>
+            <!-- Имя БА которому ставим отзыв -->
+            <h2 style="font-size:  1.25rem; ">
+                {{name}}
+            </h2>
+        </div>
+        <div class="margin-bottom20 w100" style="text-align: left;" >
+            <b>Сеанс окончен!</b>
+        </div>
+        <p style="max-width:500px;" class="margin-bottom30">
+            Напишите отзыв об исполнителе и оказанных услугах. <br/><br/>
+            Хороший отзыв мотивирует исполнителя, а негативный убережет других пользователей
+            от недобросовестных исполнителей!
+        </p>
+        <p style="text-align: center;">
+            <b>Поставьте оценку </b>
+        </p>
+        <div class="cont-horiz-around w100 margin-top-bottom30" style="max-width: 320px;" >
+            <div [class]="rating.class"   *ngFor="let rating of ratings" (click)="setRating(rating)" > 
+            </div> 
+        </div>
+        <textarea
+            [(ngModel)]="text"
+            class="textarea-reg-ba margin-bottom50" rows="5" cols="45"
+            name="text"
+            placeholder="Добавьте описание" >
+            </textarea>
+        <div class="w100 margin-bottom30"
+             (click)="saveRating()"
+             [class]="getColor()" style="text-align:center">
+            Оставить отзыв
+        </div>
+    </div>
+</div> 

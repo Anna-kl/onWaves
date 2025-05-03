@@ -1,0 +1,45 @@
+
+@import '../../../../assets/styles/main/color.scss';
+
+.write-to-rewiev{
+    background-color: $green-basic;
+    padding: 20px;
+    width: 100%;  
+    gap: 15px 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+}
+.write-to-rewiev-2{
+    height: 50px;
+    padding: 13px 20px;
+    border-radius: 100px;
+    background-color: #fff;
+    /*color: #C0C5D5;*/
+    width: 100%;
+}
+.ico-send{
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+    fill: $green-light;
+} 
+.ico-send:hover{
+    fill:$green-light2;
+}
+.del-rewiev{
+    text-decoration: underline;
+    width: 100%;
+    background-color: #fff;
+    padding: 0px 20px 20px 20px;
+} 
+.answer-to-rewiev{
+    text-decoration: underline;
+    width: 100%;
+    background-color: #fff;
+    padding: 0px 20px 20px 20px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}

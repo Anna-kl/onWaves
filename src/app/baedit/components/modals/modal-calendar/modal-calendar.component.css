@@ -1,0 +1,21 @@
+.day_is_busy {
+  border: 1px solid #bd3a3a;
+  color: #11142d;
+}
+
+select {
+  border: none!important;
+}
+
+
+
+select:focus-visible{
+  border: none!important;
+}
+select{
+  border-color: transparent;
+}
+
+*:focus {
+  outline: none;
+}

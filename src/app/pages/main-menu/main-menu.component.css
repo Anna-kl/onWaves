@@ -1,0 +1,9 @@
+.tagline{
+    text-align: center; 
+    font-size: 1.5em
+}  
+@media screen and (max-width: 1920px) {
+    .tagline{ 
+        font-size: 1em
+    }
+}

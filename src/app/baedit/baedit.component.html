@@ -1,0 +1,19 @@
+
+<main>
+  <div class="cont-horiz" style="background: #FAFAFC;  padding:0 10px 20px 10px" >
+	<div class="cont-vert  list1200 " style="background: #FAFAFC;  padding-bottom: 20px;" >
+		<div class="width100" >
+				<!-- [routerLink]="['/profilebisacc']"  -->
+				<div class="cont-horiz-start margin-top50 margin-bottom50">
+					<div class="cont-horiz btn-back" (click)="backToProfile()" style="cursor: pointer"> 
+					</div>
+					<div >
+						<h1>Редактор бизнес-аккаунта</h1>
+					</div>
+				</div>
+				<app-menueditbaprofile class="w100" [chooseMainMenu]="menu"></app-menueditbaprofile>
+        			<router-outlet class="w100"></router-outlet>
+			</div>
+		</div>
+  </div> 
+</main>

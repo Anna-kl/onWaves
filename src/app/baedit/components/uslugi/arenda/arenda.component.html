@@ -1,0 +1,227 @@
+<div class="cont-horiz" style="background: #FAFAFC;  padding-bottom: 20px;" id="groupModal">
+    <div class="list1200 cont-vert-center-start margin-top70 " style="padding: 10px; ">
+      <!-- Cтраница background-color: aqua-->
+        <div class="width100" (click)="goToBackInUslugi()">
+        <!-- Заголовок страницы  -->
+            <div class="cont-horiz-start">
+            <!-- href="javascript:void(0)"   (click)="closeModal()"-->
+            <div  class="cont-horiz btn-back"> 
+            </div>
+                <div >
+                    <h1>Добавить почасовую услугу</h1>
+                </div>
+            </div>
+        </div> 
+        <!-- Навигация новая -->
+        <div class="cont-horiz w100" >
+            <div  [ngClass]="isRubric ? 'line-green-ba' : 'line-gray-ba'">
+                <span>Рубрики</span>
+            </div>
+            <div [ngClass]="!isRubric ? 'line-green-ba' : 'line-gray-ba'">
+                <span> Описание</span>
+            </div>
+        </div> 
+        <!-- Навигация старая -->
+        <!--        <div class="cont-vert-start w100" style="max-width: 1200px; width: 100vw;"-->
+        <!--             >-->
+        <!--            <div class="cont-horiz w100 left-right20 margin-top-bottom50">-->
+        <!--                <div class="cont-vert w100 margin-right20" style="max-width: 250px;">-->
+        <!--                    <div [ngClass]="isRubric ? 'line-green3 w100' : 'line-gray w100'"></div>-->
+        <!--                    <div class="steps-line3-active cont-vert-center-start "-->
+        <!--                         [ngClass]="isRubric ? 'steps-line3-active cont-vert-center-start':'steps-line3 cont-vert-center-start'">-->
+        <!--                        Рубрики3-->
+        <!--                    </div>-->
+        <!--                </div>-->
+        <!--                <div class="cont-vert w100 " style="max-width: 250px;">-->
+        <!--                    <div [ngClass]="!isRubric ? 'line-green3 w100' : 'line-gray3 w100'"></div>-->
+        <!--                    <div class="steps-line3 cont-vert-center-start"-->
+        <!--                         [ngClass]="!isRubric ? 'steps-line3-active cont-vert-center-start':'steps-line3 cont-vert-center-start'" >-->
+        <!--                        Описание-->
+        <!--                    </div>-->
+        <!--                </div>-->
+        <!--            </div>-->
+        <!--        </div>--> 
+        <app-rubric-menu class="w100" [isOpen]="true" [isOption]="1" *ngIf="isRubric"  (setCategory)="setCategory($event)"></app-rubric-menu>
+        <form *ngIf="!isRubric" [formGroup]="serviceGroup" (submit)="save()">
+            <div class="cont-horiz-center-start w100  "
+                    style=" display: flex; gap: 10px 10px; flex-wrap: wrap; margin-left: auto; margin-right: auto;" >
+                <!-- Левая колонка -->
+                <div class="col50" >
+                    <!-- 1. Введите название услуги  --> <!-- [(ngModel)]="nameService" -->
+                    <!-- <div class="margin-bottom20 txt-green-light">
+                        Придумайте название услуги
+                    </div>
+                    <div class="input-line100 cont-horiz-start margin-bottom30 w100" style="margin-top: 0;">
+                        <input  type="text" size="26" placeholder="Маникюр"
+                            formControlName="name" class="w100">
+                    </div> -->
+                    <div class="margin-bottom20 txt-green-light">
+                        Придумайте название услуги
+                    </div>
+                    <div class="input-line100 cont-horiz-start margin-bottom30 w100" style="margin-top: 0;">
+                        <input type="text" size="26" placeholder="Маникюр" [style]="isErrorName ? errors.errorLinkStyle : ''"
+                               formControlName="name" class="w100" (input)="limitServiceName($event)">
+                        <span class="character-count"  >
+                            {{ characterCount }} / 70
+                        </span>
+                        <span *ngIf="isErrorName" [style]="errors.errorLinkStyle" >
+                    {{errors.errorLink}}
+                  </span>
+                    </div>
+                    
+                    <!-- 2. Выберите группу услуг. --> <!-- cont-horiz-between  -->
+                    <div class="txt-green-light w100 margin-bottom20">
+                        Выберите соответствующую группу услуг.
+                    </div><!-- [(ngModel)]="myGroup" (change)="chooseGroup()" -->
+                    <div class="input-line100 cont-horiz-start margin-bottom50 w100"  >
+                        <select  class="w100" style="border: 0 solid;"
+                                formControlName="group">
+                        <option [ngValue]="choosedGroup">{{choosedGroup.name}}</option>
+                            <option *ngFor="let group of groups" [ngValue]="group">
+                                {{group.name}}
+                            </option>
+                            <!-- *ngFor="let group of groups" [ngValue]="group" {{group.name}}--->
+                        </select>
+                    </div>
+                    <!-- 3. Дополнительная информация --> <!-- [(ngModel)]="text" (input)="updateCounter()"-->
+                    <div class="txt-green-light margin-bottom20" >
+                        Кратко опишите дополнительную информацию.
+                    </div>
+                    <div class="textarea-wrapper w100">
+                        <textarea class="w100" maxlength="150" formControlName="about"
+                                rows="5" cols="34" placeholder="Добавьте описание" >
+                        </textarea>
+                        <span class="remaning">
+                            {{remainingText}}
+                        </span>
+                    </div>
+                </div> 
+                <!-- Правая колонка -->
+                <div class="col50" >  
+                    <!-- 5. Выберите кому подходит услуга -->
+                    <div class="cont-vert-start-center" style="gap: 20px;">
+                        <div class="txt-green-light">
+                            Выберите кому подходит услуга
+                        </div>
+                        <div class="cont-horiz-start">
+                            <!-- [checked]="getGender(0)" (change)="setGender(0)"
+                                [checked]="getGender(1)" (change)="setGender(1)"
+                                [checked]="getGender(2)" (change)="setGender(2)"
+                                [checked]="getGender(3)" (change)="setGender(3)"-->
+                            <!--input class="custom-checkbox" type="checkbox" id="dlja_vseh"
+                                formControlName="isAll">
+                            <label for="dlja_vseh">
+                                Для всех
+                            </label-->
+                        </div>
+                        <div class="cont-horiz-start"
+                        [style.color]="isErrorGender ? 'red' : 'none'">
+                            <!--  [checked]="getGender(0)"  (change)="setGender(0)" -->
+                            <input class="custom-checkbox" 
+                             formControlName="isWoman" type="checkbox"
+                              id="dlja_zhenshhin"
+                              [class]="isErrorGender ? 'error-checkbox' : ''">
+                            <label for="dlja_zhenshhin">
+                                Для женщин
+                            </label>
+                        </div>
+                        <div class="cont-horiz-start"
+                        [style.color]="isErrorGender ? 'red' : 'none'">
+                            <!--[checked]="getGender(1)" (change)="setGender(1)" -->
+                            <input class="custom-checkbox"
+                                formControlName="isMen"
+                                type="checkbox" id="dlja_muzhchin"
+                                [class]="isErrorGender ? 'error-checkbox' : ''" >
+                            <label for="dlja_muzhchin">
+                                Для мужчин
+                            </label>
+                        </div>
+                        <div class="cont-horiz-start"
+                        [style.color]="isErrorGender ? 'red' : 'none'">
+                            <!-- [checked]="getGender(2)" (change)="setGender(2)"-->
+                            <input class="custom-checkbox"
+                                formControlName="isChildren"
+                                type="checkbox" id="dlja_detej"
+                                [class]="isErrorGender ? 'error-checkbox' : ''">
+                            <label for="dlja_detej">
+                                Для детей
+                            </label>
+                        </div>
+                        <div class="cont-horiz-start"
+                            [style.color]="isErrorGender ? 'red' : 'none'">
+                            <!-- id="dlja_zhivotnyhh" [checked]="getGender(3)" (change)="setGender(3)"-->
+                            <input 
+                            class="custom-checkbox"
+                                formControlName="isPet"
+                                type="checkbox" id="dlja_zhivotnyhh"
+                                [class]="isErrorGender ? 'error-checkbox' : ''">
+                            <label for="dlja_zhivotnyhh">
+                                Для животных
+                            </label>
+                        </div>
+                        <span *ngIf="isErrorGender" [style]="errors.errorLinkStyle" >
+                    {{errors.errorLink}}
+                  </span>
+                    </div>
+                </div>
+            </div> 
+            <!--------------------------------- Фотографии  новая ----------------------------->
+<!--            <div class="container-for-images-arenda" >-->
+<!--                <div class="txt-green-light margin-bottom10">-->
+<!--                    Добавьте фотографию-->
+<!--                </div>-->
+<!--                <div class="container-images">-->
+<!--                    <div class="green-kub" (click)="addFoto()" *ngIf="images.length<3;">-->
+<!--                        <span>-->
+<!--                            Добавить фото-->
+<!--                        </span>-->
+<!--                    </div>-->
+<!--                    <div class="image-blocks" *ngFor="let image of images">-->
+<!--                        <img class="image-taille" [src]=getImage(image.image) alt=""/>-->
+<!--                        <img class="image-icon-position" src="assets/img/ba-edit/uslugi/delete_button_desktop.svg" alt=""/>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>  -->
+            <!-- Цена -->
+            <div class="cont-vert-center-start w100" style=" padding: 50px;"
+            formGroupName="price"> 
+                <div class="w100 cont-horiz-start txt-green-light margin-bottom30 ">
+                    Укажите стоимость услуги
+                </div>
+                <!-- пишем цену -->
+                <div class="cont-horiz-start w100">
+                    <div class="input-line-mini cont-horiz-start" style="margin-right: 20px;"> 
+                        <input  type="number" size="3" placeholder="1500" 
+                        formControlName="price" class="own-input"
+                                [style]="isErrorPrice ? errors.errorLinkStyle :''">
+
+                    </div> 
+                    <!-- Выбор валюты start -->
+                    <select class="accordion_tab-label_mini cont-horiz-between"
+                            (change)="changeCurrency($event)"
+                            formControlName="currencyType" style="width: 100px;">
+
+                        <option  *ngFor="let currency of currencies" [ngValue]="currency">
+                            {{getNameCurrency(currency)}}
+                        </option>
+            
+                    </select>
+                </div>
+                <span class="cont-horiz-start w100" *ngIf="isErrorPrice" [style]="errors.errorLinkStyle">
+                    {{errors.errorLink}}
+                  </span>
+            </div> 
+            <div class="w100 cont-horiz margin-top-bottom50"  style="gap: 10px 10px ; flex-wrap: wrap;">
+                <button class="btn-green" style="flex: 1;" (click)="back()">
+                    Назад
+                </button>
+                <button  type="submit"
+                [class]="isFormValid() ? 'btn-green' : 'btn-gray'"
+                 style="flex: 1;" [disabled]="!isFormValid()">
+                    Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+    <p-toast position="bottom-center" ></p-toast>
+</div> 

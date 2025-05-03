@@ -1,0 +1,44 @@
+<div class="cont-horiz-start wrap w100" *ngIf="reviews$|async as reviews">
+  <h2 class="margin-top30">
+    Отзывы
+  </h2>
+
+  <ng-container *ngIf="reviews.length == 0">
+    <div class="w100">
+      <p class="nullReviews">
+        Отзывов пока нет 
+      </p>
+    </div>
+
+   
+  </ng-container>
+  <ng-container *ngIf="reviews.length > 0">
+    <div *ngFor="let product of reviews" class="w100 description_card comment cont-vert-start-start">
+      <div class="cont-horiz-start" style="gap: 10px 10px;">
+        <div>
+          <img [src]="getAvatar(product.avatar)" class="comment-foto">
+        </div>
+        <div class="cont-vert-start w100">
+          <div style="margin:0px!important; font-size: 1rem;">
+            <b>{{product.nameAuthor}}</b>
+          </div>
+          <div class="cont-horiz-between" style="gap: 10px 10px;">
+            <div class="cont-horiz-start-start" style="gap: 10px 10px;">
+              <img src="/assets/img/page1/popular/Star-24.png" class="comment-img-raiting ">
+              <div class="raiting-numb margin-right10">
+                {{product.estimate}}
+              </div>
+            </div>
+            <div class="txt-gray-dark">
+              {{product.dateCreated | date: 'mediumDate'}}
+            </div>
+          </div> 
+        </div>
+      </div>
+      <p *ngIf="product.text">
+        {{ product.text | slice:0:150 }}
+        <span *ngIf="product.text.length > 150">...</span>
+      </p>
+    </div>
+  </ng-container>
+</div> 

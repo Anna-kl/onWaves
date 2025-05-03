@@ -1,0 +1,108 @@
+.autocomplete-container{ 
+  border-radius: 20px;
+}  
+.autocomplete-container, 
+.autocomplete-container .input-container input,
+.autocomplete-container .suggestions-container ul li  {
+  max-width: 320px;
+}
+.autocomplete-container .input-container input{
+  border-radius: 20px; 
+}
+.autocomplete-container.active .input-container input {
+  border-radius: 20px 20px 0px 0px; 
+}
+/*Select варинат круг*/
+li.item.ng-star-inserted {
+  /*height: 30px;*/
+} 
+.autocomplete-container .suggestions-container ul li {
+  position: relative;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  height: auto; 
+}
+li{
+  height: auto!important;
+}
+.item{
+  height: auto!important;
+}
+.spisokListContainerR{
+  display:grid;
+  position: relative;
+  /*border:1px solid rgba(120, 7, 225, 0.68);*/
+  width: 250px;
+  margin: 0 auto;
+}
+.textTitleR{
+  font-size:16px;
+}
+.spisokR {
+  padding:13px 20px;
+  display:grid;
+  grid-template-columns: 93%  7%;
+  align-content: center;
+  align-self: center;
+  border:1px solid #9196A4;
+  border-radius:24px 24px;
+}
+.spisokR.openR {
+  border:1px solid #9196A4;
+  border-radius:24px 24px 1px 1px;
+}
+.spisokR.openR svg{
+  transform: rotate(180deg);
+} 
+.openListR {
+  display:none;
+}
+.openListR.openR {
+  display:grid;
+  opacity: 1;
+  max-width: 250px;
+  font-size: 1rem;
+  height: 250px;
+  overflow-y: scroll;
+  line-height: 1.5em;
+  border:1px solid #9196A4;
+}
+.openListR li{
+  border-bottom:1px solid #9196A4;
+  padding:13px 20px;
+  font-size:18px;
+}
+.spisokListContainerR div::-webkit-scrollbar {
+  width: 12px;
+}
+.spisokListContainerR div::-webkit-scrollbar-track {
+  outline:1px solid #9196A4;
+}
+.spisokListContainerR div::-webkit-scrollbar-thumb {
+  background-color: #50BDA7FF;
+  border-radius: 8px;
+  border: 4px solid #fff;
+}
+.openListR li:hover{
+  background-color:#00DAB3
+}
+/* -------------------------------- */
+.this-search-line{
+  /*margin-left: 20px;
+  margin-right: 20px; - 40px*/
+  max-width: calc(100% );
+}
+.autocomplete-container .suggestions-container{
+  box-shadow:none;
+}
+.types-of-auditory, .type-sort{
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  gap: 20px 20px; 
+  margin-bottom:20px ;
+} 

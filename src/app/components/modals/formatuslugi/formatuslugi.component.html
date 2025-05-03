@@ -1,0 +1,24 @@
+<div  class="container-ba-modalka-uslugi-2 cont-vert-center-start" >
+  <div class="btn-closeModal-uslugi" (click)="closeModal()">
+    <img src="/assets/img/modalki/uslugi_close_pc.svg" alt=""/>
+  </div> 
+  <div  class="block-uslugi" style="gap: 10px 10px;">
+    <h2>Выберите формат работы с клиентами:</h2> 
+    <div class="input-uslugi-modal w100 margin-bottom10"  (click)="goToUsluga()">
+      <div class="txt-green-light margin-bottom10">
+        Услуга
+      </div>
+      <div>
+        Оплата производится за оказанную услугу.
+      </div>
+    </div>
+    <div class="input-uslugi-modal w100" (click)="goToChas()" >
+      <div class="txt-green-light margin-bottom10">
+        Час
+      </div>
+      <div>
+        Оплата производится за час оказываемой услуги или арендуемого имущества.
+      </div>
+    </div> 
+  </div>
+</div> 

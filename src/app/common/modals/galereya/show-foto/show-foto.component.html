@@ -1,0 +1,45 @@
+<!-- НА КОМПЬЮТЕРЕ Галерея фотографий при клике на фото в альбоме  -->
+<!-- https://www.figma.com/file/dFJYCJoqHfzwdxvNNKWUMX/OCPIO?node-id=12145%3A114217&mode=dev --> 
+<div class="show-foto-modal" >
+    <!-- Крестик -->
+    <div class="cont-vert-end-start w100" style="padding-right: 35px;">
+        <img src="/assets/img/ba-edit/ico_close_pc.png" (click)="close()">
+    </div>
+    <!-- Название альбома border-1 w100 -->
+    <div class="cont-horiz  margin-bottom10">
+        <h4 class="show-foto-head" > 
+            {{nameAlbum}}
+        </h4>
+    </div>
+    <p-carousel 
+        [value]="images" 
+        [numVisible]="1" 
+        [circular]="true"
+        [responsiveOptions]="responsiveOptions"
+
+        [showIndicators]="true"
+        [numScroll]="1">
+        <ng-template pTemplate="item" let-product >
+            <div class="surface-border border-round  text-center " style="color: #fff;" *ngIf="product.url">                
+                <!-- Фото должно быть всего одно --> 
+                <img [src]="product.url"  [alt]="product.name" class="show-foto-img" />                 
+            </div>
+            <!-- Кнопки -->
+            <div class="cont-horiz-between" style="width: calc(100% - 20px); margin:10px; color: #fff;" *ngIf="isEdit">
+                <div (click)="delete(product)" class="link-foto-ba">
+                    <!-- Удалить --> 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M0 4.13672C0 3.69489 0.358172 3.33672 0.8 3.33672H16.8C17.2418 3.33672 17.6 3.69489 17.6 4.13672C17.6 4.57855 17.2418 4.93672 16.8 4.93672H0.8C0.358172 4.93672 0 4.57855 0 4.13672Z" fill="#C0C5D5"/>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M3.6 4.2V16.7C3.6 16.826 3.65114 16.951 3.749 17.0464C3.84756 17.1425 3.98544 17.2 4.13333 17.2H13.4667C13.6146 17.2 13.7524 17.1425 13.851 17.0464C13.9489 16.951 14 16.826 14 16.7V4.2H15.6V16.7C15.6 17.2636 15.3702 17.7999 14.968 18.192C14.5664 18.5835 14.026 18.8 13.4667 18.8H4.13333C3.57398 18.8 3.03359 18.5835 2.63204 18.192C2.22981 17.7999 2 17.2636 2 16.7V4.2H3.6Z" fill="#C0C5D5"/>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.4 3.33333V4H4.8V3.33333C4.8 2.44928 5.22143 1.60143 5.97157 0.976311C6.72172 0.351189 7.73913 0 8.8 0C9.86087 0 10.8783 0.351189 11.6284 0.976311C12.3786 1.60143 12.8 2.44928 12.8 3.33333V4H11.2V3.33333C11.2 2.97756 11.0326 2.56254 10.6041 2.20546C10.1671 1.84129 9.5213 1.6 8.8 1.6C8.0787 1.6 7.43287 1.84129 6.99587 2.20546C6.56737 2.56254 6.4 2.97756 6.4 3.33333Z" fill="#C0C5D5"/>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.8 7.2C7.24183 7.2 7.6 7.55817 7.6 8V13.3333C7.6 13.7752 7.24183 14.1333 6.8 14.1333C6.35817 14.1333 6 13.7752 6 13.3333V8C6 7.55817 6.35817 7.2 6.8 7.2Z" fill="#C0C5D5"/>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M10.8 7.2C11.2418 7.2 11.6 7.55817 11.6 8V13.3333C11.6 13.7752 11.2418 14.1333 10.8 14.1333C10.3582 14.1333 10 13.7752 10 13.3333V8C10 7.55817 10.3582 7.2 10.8 7.2Z" fill="#C0C5D5"/>
+                    </svg>  
+                </div> 
+                <div (click)="setMain(product)" *ngIf="getIsCover(product)" class="link-foto-ba"  >
+                    Сделать главной 
+                </div>
+            </div>
+        </ng-template> 
+    </p-carousel> 
+</div>

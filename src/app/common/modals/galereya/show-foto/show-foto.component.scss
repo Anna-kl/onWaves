@@ -1,0 +1,63 @@
+@import '../../../../../assets/styles/main/color.scss';
+
+.show-foto-head{
+    color: #fff; 
+    height: 30px; 
+    overflow: hidden;
+}
+.p-carousel-items-container {
+    margin-left: -10px!important;
+}
+.p-carousel-next,.p-carousel-prev{
+    margin: 10px!important;
+}
+ .show-foto-modal, .modal-content{ 
+    background: #fff;
+    max-width: 540px;
+} 
+.modal-content{
+    background-color: white; 
+} 
+.show-foto-img{
+    width: 436px;/*show-foto-modal = 540px - (32*2 кнопки) =  476px - 40px (отступы от кнопок по 10px слева и справа , кнопок две)*/
+    height: 436px; 
+    border-radius: 12px;
+}
+@media screen and (max-width: 480px) {
+    .show-foto-modal{ 
+        max-width: 100%;
+        height: 420px; 
+    } 
+    .show-foto-img{
+        width: 270px;
+        height: 270px;
+    }
+} 
+.link-foto-ba{
+    text-decoration: underline; 
+    font-weight: normal;
+    margin-left: 10px;
+    color: #9196A4;
+}
+.link-foto-ba:hover,.link-foto-ba:active{
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.p-carousel .p-carousel-indicators .p-carousel-indicator button:hover {
+    background: #dee2e6;
+    border-radius: 15px;
+}
+
+.p-carousel .p-carousel-indicators .p-carousel-indicator button {
+    background-color: #e9ecef;
+    width: 2rem;
+    height: 0.5rem;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    border-radius: 0;
+    border-radius: 15px;
+}
+
+.p-carousel .p-carousel-indicators .p-carousel-indicator.p-highlight button {
+    background: $green-basic;
+}

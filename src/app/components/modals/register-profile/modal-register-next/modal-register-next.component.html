@@ -1,0 +1,19 @@
+<form [formGroup]="formProfile" class="cont-vert box-register-ua">
+
+  <div class="w100 cont-horiz-end-center" style="height: 48px;">
+    <div class="closeModal" (click)="closeModal()"></div> 
+  </div> 
+  <div class="type-name margin-bottom40" style="text-align: center;">
+    Представьтесь, пожалуйста
+  </div>
+  <div class="cont-vert w100">
+
+    <input class="fio fio-text margin-bottom30 mobile360" type="text" placeholder="Имя" (input)="onInput()" formControlName="name"  />
+    
+    <input class="fio fio-text margin-bottom40 mobile360" type="text" placeholder="Фамилия" (input)="onInput()" formControlName="family" />
+    
+    <button class="btn-green button-text mobile360" [ngClass]="{'green-button': isFilled, 'gray-button': !isFilled}" [disabled]="!isFilled"  (click)="next()" >
+      Далее
+    </button>  
+  </div>
+</form> 

@@ -1,0 +1,398 @@
+<!-- Cтраница Редактор профиля БА: Добавить услугу -->
+<div class="cont-horiz" style="background: #FAFAFC;  padding-bottom: 20px;" >
+  <div class="list1200 cont-vert-center-start modal-list">
+    <!-- Cтраница -->
+    <!-- Заголовок страницы  -->
+    <div class="width100 cont-horiz-start margin-top50 margin-bottom50">
+      <div class="cont-horiz btn-back" (click)="closeModal()">
+      </div>
+      <h1>Добавить&nbsp;услугу</h1>
+    </div>
+    <div class="cont-vert-start w100"  >
+      <div class="cont-horiz w100 left-right20">
+        <div class="cont-vert w100">
+          <div class="line-gray3"></div>
+          <div class="steps-line3 cont-vert-center-start">
+            Описание
+          </div>
+        </div>
+        <div class="cont-vert w100">
+          <div class="line-gray3"></div>
+          <div class="steps-line3 cont-vert-center-start">
+            Рубрики
+          </div>
+        </div>
+        <div class="cont-vert w100">
+          <div class="line-green3"></div>
+          <div class="steps-line3-active cont-vert-center-start">
+            Оплата
+          </div>
+        </div>
+      </div>
+      <h4 class="margin-left20">
+        Выберите способы оплаты
+      </h4>
+      <div class="w100 cont-vert">
+        <!--Переключатель-->
+        <!-- partial:index.partial.html -->
+        <div class="tabs33 padding-top40 padding-bottom40 w100">
+          <input type="radio" name="tab-btn" id="tab-btn-1" [checked]="payMethodService" (change)="setPayment(0)">
+          <label for="tab-btn-1" class="tab50">
+            За услугу
+          </label>
+          <input type="radio" name="tab-btn" id="tab-btn-2" [(ngModel)]="payMethodHour" >
+          <label for="tab-btn-2" class="tab50" style="margin-left: -60px;">
+            За час
+          </label>
+          <input type="radio" name="tab-btn" id="tab-btn-3">
+          <label for="tab-btn-3" style="margin-left: -60px;">
+            Аренда
+          </label>
+          <!-- вкладка 1 -->
+          <div id="content-1" >
+            <div class="cont-horiz-around-start wrap">
+              <!-- левая колонка -->
+              <div class="str1-add-service cont-vert-start-start">
+                <!-- Время -->
+                <div class="txt-green-light margin-bottom25 w100" *ngIf="payMethodService">
+                  Укажите время продолжительности услуги
+                </div>
+                <div class="input-line-mini cont-horiz-start">
+                  <input  type="text" size="1" [(ngModel)]="duration" placeholder="1:23" appDisallowSymbols>
+                </div> 
+                <!--label class="cont-horiz margin-top-bottom50" >
+                  <div style="float: left; margin-right: 20px;" >
+                    Без ограничения по времени
+                  </div>
+                  <input type="checkbox"/>
+                  <i></i>
+                </label--> 
+                <!-- Цена -->
+                <div class="txt-green-light margin-bottom30 w100">
+                  Укажите стоимость услуги
+                </div>
+                <!-- пишем цену -->
+                <div class="cont-horiz-start">
+                  <div class="input-line-mini cont-horiz-start" style="margin-right: 20px;">
+                    <input  type="text" size="3"  [(ngModel)]="price" placeholder="1500" appDisallowSymbols>
+                  </div>
+
+                  <!-- Выбор валюты start (change)="chooseCurrency(myCurrency)" -->
+                  <select class="accordion_tab-label_mini cont-horiz-between"
+                    style="width: 100px;"
+                    [(ngModel)]="myCurrency"
+                    [ngModelOptions]="{standalone: true}">
+                      ЧТО ЭТО???
+                    <option value="" selected >
+                      Группы *
+                    </option>
+                    <option *ngFor="let currency of currencies" value="{{currency}}">
+                      {{currency}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <!-- левая колонка end -->
+              <!-- правая колонка Start -->
+              <div class="str1-add-service cont-vert-start-center">
+                <!-- Доступные способы оплаты start -->
+                <div class="cont-vert">    
+                  <div class="w100 margin-top-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="prepayment1" name="#" value="#">
+                    <label for="prepayment1">
+                      Предоплата
+                    </label>
+                  </div>
+                </div><!-- Доступные способы оплаты end -->
+              </div>
+            </div>
+          </div><!-- content-1 end -->
+          <div id="content-2" >
+            <div class="cont-horiz-around-start wrap">
+              <!-- левая колонка -->
+              <div class="str1-add-service cont-vert-start-start">
+                <!-- Цена -->
+                <div class="txt-green-light margin-bottom30 w100">
+                  Укажите стоимость услуги
+                </div>
+                <!-- пишем цену -->
+                <div class="cont-horiz-start">
+                  <div class="input-line-mini cont-horiz-start" style="margin-right: 20px;">
+                    <input  type="text" size="3"  [(ngModel)]="price" placeholder="1500" appDisallowSymbols>
+                  </div> 
+                  <!-- Выбор валюты start (change)="chooseCurrency(myCurrency)" -->
+                  <select class="accordion_tab-label_mini cont-horiz-between"
+                    style="width: 100px;"
+                    [(ngModel)]="myCurrency"
+                    [ngModelOptions]="{standalone: true}">
+                      ЧТО ЭТО???
+                    <option value="" selected >
+                      Группы *
+                    </option>
+                    <option *ngFor="let currency of currencies" value="{{currency}}">
+                      {{currency}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <!-- левая колонка end -->
+              <!-- правая колонка Start -->
+              <div class="str1-add-service cont-vert-start-center">
+                <!-- Доступные способы оплаты start -->
+                <div class="cont-vert"> 
+                  <div class="w100 margin-top-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="prepayment2" name="#" value="#">
+                    <label for="prepayment2">
+                      Предоплата
+                    </label>
+                  </div>
+                </div><!-- Доступные способы оплаты end -->
+              </div>
+            </div>
+          </div>
+          <div id="content-3" >
+            <!-- строка 1 -->
+            <div class="cont-horiz-around-start wrap">
+							<!-- левая колонка -->
+							<div class="str1-add-service cont-vert-start-start">
+								<!-- количество мест -->
+								<div class="txt-green-light margin-bottom25 w100" style="text-align: left;">
+									Укажите количество мест проживания
+								</div>
+								<div class="input-line-mini cont-horiz-start margin-bottom50">
+									<input  type="text" size="1" placeholder="4" appDisallowSymbols>
+								</div>
+								<!-- Цена -->
+                <div class="txt-green-light margin-bottom30 w100">
+                  Укажите стоимость услуги
+                </div>
+                <!-- пишем цену -->
+                <div class="cont-horiz-start">
+                  <div class="input-line-mini cont-horiz-start" style="margin-right: 20px;">
+                    <input  type="text" size="3"  [(ngModel)]="price" placeholder="1500" appDisallowSymbols>
+                  </div>
+
+                  <!-- Выбор валюты start (change)="chooseCurrency(myCurrency)" -->
+                  <select class="accordion_tab-label_mini cont-horiz-between"
+                    style="width: 100px;"
+                    [(ngModel)]="myCurrency"
+                    [ngModelOptions]="{standalone: true}">
+                      ЧТО ЭТО??
+                    <option value="" selected >
+                      Группы *
+                    </option>
+                    <option *ngFor="let currency of currencies" value="{{currency}}">
+                      {{currency}}
+                    </option>
+                  </select>
+                </div> 
+								<div class="txt-green-light margin-bottom25 w100" style="text-align: left;">
+									Укажите время начала и конца аренды
+								</div>
+								<div class="cont-horiz-start-start w100 margin-bottom50">
+									<!-- Начало -->
+									<div class="cont-horiz-start width100">
+										<div class="margin-right10">
+											<div class="cont-horiz-start card-day-text margin-bottom10 ">
+												Начало:
+											</div>
+											<div class="input-line-mini cont-horiz-start">
+												<input  type="text" size="1" placeholder="10:00" appDisallowSymbols>
+											</div>
+										</div>
+										<div class="edit-pen" style="margin-top: 28px ;">
+										</div>
+									</div>
+									<!-- Конец: -->
+									<div class="cont-horiz-start width100">
+										<div class="margin-right10">
+											<div class="cont-horiz-start card-day-text margin-bottom10 " >
+												Конец:
+											</div>
+											<div class="input-line-mini cont-horiz-start">
+												<input  type="text" size="1" placeholder="10:00" appDisallowSymbols>
+											</div>
+										</div>
+										<div class="edit-pen" style="margin-top: 28px ;">
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- правая колонка Start -->
+							<div class="str1-add-service cont-vert-start-center w100">
+								<!-- Доступные способы оплаты start -->
+                <div class="cont-vert"> 
+                  <div class="w100 margin-top-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="prepayment" name="#" value="#">
+                    <label for="prepayment">
+                      Предоплата
+                    </label>
+                  </div>
+                </div><!-- Доступные способы оплаты end -->
+							</div>
+						</div>
+            <!-- строка 2 -->
+            <div class="cont-horiz-around-start wrap">
+              <div class="txt-green-light margin-bottom30 w100" style="text-align: left;">
+                Выберите дополнительные опции:
+              </div>
+              <div class="cont-horiz-around w100">
+                <!-- 1 -->
+                <div class="cont-vert margin-right20" >
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="razdelnye_krovati" name="#" value="#">
+                      <label for="razdelnye_krovati">Раздельные кровати</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="dvuspalnaja_krovat" name="#" value="#">
+                      <label for="dvuspalnaja_krovat">Двуспальная кровать</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="ws" name="#" value="#">
+                      <label for="ws">Туалет</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="shower" name="#" value="#">
+                      <label for="shower">Душ</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="bed_dress" name="#" value="#">
+                      <label for="bed_dress">Постельные принадлежности</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="hair_dryer" name="#" value="#">
+                      <label for="hair_dryer">Фен</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="food" name="#" value="#">
+                      <label for="food">Завтрак (питание)</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="kitchen" name="#" value="#">
+                    <label for="kitchen">Кухня</label>
+                  </div>
+                </div>
+                <!-- 2 -->
+                <div class="cont-vert margin-right20">
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="dishes" name="#" value="#">
+                    <label for="dishes">Посуда</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="plate" name="#" value="#">
+                    <label for="plate">Плита</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="mini-bar" name="#" value="#">
+                    <label for="mini-bar">Мини-бар</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="conditioner" name="#" value="#">
+                    <label for="conditioner">Кондиционер</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="wi-fi" name="#" value="#">
+                    <label for="wi-fi">WI-FI</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="safe" name="#" value="#">
+                    <label for="safe">Сейф</label>
+                  </div>
+                 <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="kettle" name="#" value="#">
+                    <label for="kettle">Чайник</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="fridge" name="#" value="#">
+                    <label for="fridge">Холодильник</label>
+                  </div>
+                </div>
+                <!-- 3 -->
+                <div class="cont-vert margin-right20">
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="fireplace" name="#" value="#">
+                    <label for="fireplace">Камин</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="brazier" name="#" value="#">
+                      <label for="brazier">Мангал</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="pavilion" name="#" value="#">
+                      <label for="pavilion">Беседка</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="cafe1" name="#" value="#">
+                      <label for="cafe1">Кафе</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="cafe" name="#" value="#">
+                      <label for="cafe">Кафе</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="swimming_pool" name="#" value="#">
+                      <label for="swimming_pool">Бассейн</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="SPA" name="#" value="#">
+                      <label for="SPA">СПА</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="bath" name="#" value="#">
+                      <label for="bath">Баня</label>
+                  </div>
+                </div>
+                <!-- 4 -->
+                <div class="cont-vert margin-right20">
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                    <input class="custom-checkbox" type="checkbox" id="own_territory" name="#" value="#">
+                    <label for="own_territory">Собственная территория</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="playground" name="#" value="#">
+                      <label for="playground">Детская площадка</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="protected_area" name="#" value="#">
+                      <label for="protected_area">Охраняемая территория</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="parking" name="#" value="#">
+                      <label for="parking">Парковка</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="active_tours" name="#" value="#">
+                      <label for="active_tours">Активные туры</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="nature_view" name="#" value="#">
+                      <label for="nature_view">Активные туры</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="equipment_rental" name="#" value="#">
+                      <label for="equipment_rental">Прокат техники</label>
+                  </div>
+                  <div class="w100 margin-bottom20 cont-horiz-start" style="text-align: left;">
+                      <input class="custom-checkbox" type="checkbox" id="excursions" name="#" value="#">
+                      <label for="excursions">Экскурсии</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- строка 2 end -->
+          </div>
+        </div>
+        <!-- partial --> 
+        <!-- Кнопки  -->
+        <div class="cont-horiz-around w100 " style="height: 180px">
+          <div (click)="onBack()" class="btn-green" style="margin-left: 20px; margin-right: 20px;">
+            Назад
+          </div>
+          <div (click)="onSave()" class="btn-green" style="margin-right: 20px;">
+            Сохранить
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

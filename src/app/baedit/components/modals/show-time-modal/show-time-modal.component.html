@@ -1,0 +1,32 @@
+ <div class="cont-vert show-time-modal"  >
+  <h3 style="margin-bottom: 75px;">
+    Продолжительность услуги
+  </h3> 
+  <!--выподающий списко овалное-->
+  <div class="spisokListContainerR"> 
+    <div class="spisokR" (click)="openListItemsR()"  [class.openR]="activeItemR"> 
+        <div class="textTitle"> 
+          Выберите город *
+        </div>
+        <!-- Иконка стрелки -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12.5655 16.566C12.2531 16.8784 11.7465 16.8784 11.4341 16.566L3.43412 8.56598C3.1217 8.25356 3.1217 7.74702 3.43412 7.43461C3.74654 7.12219 4.25307 7.12219 4.56549 7.43461L11.9998 14.8689L19.4341 7.43461C19.7465 7.12219 20.2531 7.12219 20.5655 7.43461C20.8779 7.74703 20.8779 8.25356 20.5655 8.56598L12.5655 16.566Z" fill="#006174"/>
+        </svg>
+    </div> 
+    <div class="openListR" [class.openR]="activeItemR">
+      <ul>
+        <li>ООО Ромашка</li>
+        <li>Барнаул</li>
+        <li>Томск</li>
+        <li>Санкт-Питербург</li>
+        <li>Краснодар</li>
+        <li>Владивосток</li>
+        <li>Чита</li>
+        <li>Тюмень</li>
+      </ul>
+    </div>
+  </div>
+  <div class="btn-green" style="margin-top: 100px">
+    Сохранить
+  </div> 
+</div> 

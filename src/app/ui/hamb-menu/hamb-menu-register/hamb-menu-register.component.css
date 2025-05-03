@@ -1,0 +1,45 @@
+.nav-item,
+.cont-horiz-start,
+.cont-vert-between-start {
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  color: #00DAB3;
+}
+
+.container-avatar-image {
+  position: relative;
+  /*width: 45px;*/
+}
+
+.grande-image {
+  border: 1px solid #C0C5D5;
+  width: 32px;
+  height: 32px;
+  border-radius: 24px;
+  cursor: pointer;
+}
+
+/*.ifactive {*/
+/*  border: 1px solid #00DAB3;*/
+/*  background-color:#00DAB3;*/
+/*}*/
+.little-image {
+  position: absolute;
+  bottom: -2px;
+  left: 19px;
+  z-index: 5;
+  cursor: pointer;
+  /*border: 1px solid #fff;*/
+  /*border-radius: 24px;*/
+  /*background-color:#C0C5D5;*/
+}
+
+.ifactive-img {
+  border: 1px solid #00DAB3;
+}
+
+.toggle2 {
+  width: 35px;
+}

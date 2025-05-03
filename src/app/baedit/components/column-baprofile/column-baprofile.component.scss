@@ -1,0 +1,96 @@
+@import '../../../../assets/styles/main/color';
+
+.addressPersonalPageUser{
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    color: $green-basic;
+    font-weight: 700;
+    font-size: 1em;
+  }
+  .grafikPersonalPageUser{
+    font-weight:700 ;
+    margin:5px 0;
+   }
+  .vremyaPersonalPageUser{
+    margin-bottom:10px;
+  }
+  .timesPersonalPageUser{
+    width: 100%;
+     /*justify-content: center;*/
+     color:#FFFFFF;
+     text-align:center;
+     margin-bottom:20px;
+     align-items: stretch;
+  }
+  .free-time-on-day{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    gap:5px;
+    flex-wrap: wrap;
+    color: #fff;
+  }
+  .free-time-on-day li{
+    background-color: $green-basic;
+    padding: 3px 5px;
+    border-radius:6px;
+    min-width:100px;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .btnPersonalPageUser{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap:15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 100%;
+    /*background-color: burlywood; */
+  }
+  .btn50{
+    max-width: calc(50% - 8px);
+    min-width: 115px;
+    width: 100%;
+    /*background-color: aqua;*/
+  }
+
+.avatarMain{
+  margin-right: 20px;
+}
+.ico_type_user{
+  width: 30px;
+  height: 30px;
+  background-color: $green-light;
+  border-radius: 30px;
+  border: 1px solid #fff;
+  position: absolute;
+  top: 90px;
+  margin-left: 70px;
+}
+
+
+
+
+
+
+  @media screen and (max-width: 480px) {
+	.btn50{
+        width: 100%;
+        max-width: 100%;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+  }
+  .btn-edit-profile{
+    margin-top: 20px;
+    flex-wrap: wrap;
+    width: 100%;
+    min-width:210px;
+  }
+  .sign-up-online{
+    width: calc(100% - 0px);
+    margin-bottom: 15px;
+  }

@@ -1,0 +1,46 @@
+<p-carousel  [value]="tutorials"
+            [showIndicators]="false"
+            [showNavigators]="true"
+	>
+	<ng-template let-item pTemplate="item" class="comment-item">  
+		<div class="description_card comment">     
+			<div class="cont-horiz-start"> 
+				<!-- Фото -->
+				<div class="comment-foto">
+					<p-image [src]="item.image"></p-image>
+				</div>
+
+				<!-- Имя + ретинг + дата -->
+				<div class="cont-vert-start">
+					<!-- Имя -->
+					<div >
+						<h4 style="margin:0px!important;">
+							{{item.name}} 
+						</h4>
+					</div> 
+					<!-- Рейтинг -->
+					<div class="cont-horiz-between"> 
+						<div class="cont-horiz-between">
+ 							<!-- фото -->
+							<p-image [src]="item.ico" class="comment-img-raiting"></p-image> 
+							<div class="raiting-numb">
+								<p>4,6</p>
+							</div> 
+						</div> 
+						<!-- Дата  -->
+						<div class="cont-horiz-between"  > 
+							<div>
+								22 мая 2021
+							</div> 
+						</div>
+					</div> 
+				</div> 
+			</div>
+		</div>
+		<!-- Описание -->
+        <p> {{item.text}} {{item.text}} </p>
+	</ng-template>
+</p-carousel>
+<p-toast position="top-right"></p-toast>
+
+

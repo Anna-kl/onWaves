@@ -1,0 +1,125 @@
+@charset "UTF-8"; 
+.accordion_tab_mini {
+  width: 120px; 
+  overflow: hidden;
+}
+.accordion_tab_mini>input {
+  display: none;
+}
+.accordion_tab-label_mini {
+  display: flex;
+  justify-content: space-between; 
+  background: #fff;
+  /*font-weight: bold;*/
+  cursor: pointer; 
+  color: #11142D;
+  padding: 10px 20px;
+  /*margin-left: 20px;
+  margin-right: 20px;
+  max-width: calc(100% - 80px);*/
+  height: 50px;
+  border: 1px solid #9196A4;
+  border-radius: 100px;
+} 
+input:checked ~ .accordion_tab-content>.table-time {
+  // background-color: chocolate;
+  position: absolute;
+}
+input:checked + .accordion_tab-label_mini{
+  border: 1px solid #9196a4;
+  border-radius: 25px 25px 0px 0px;
+}
+.accordion_numb_hour{
+	padding: 13px 20px;
+	width: 110px;
+	height: 50px; 
+	background: #FFFFFF;
+	border-bottom: 1px solid #9196A4;
+  border-left: 1px solid #9196A4;
+  border-right: 1px solid #9196A4; 
+  z-index: 2;
+}
+
+/*.accordion_tab-label_mini:hover {
+  
+} */
+
+/* эти три класса связанны  start*/
+.accordion_tab-label_mini::after {
+  /*content: "^";*/
+  content: url(/assets/img/ba-edit/arr-green-bottom.png); 
+  margin-right: 10px;
+  text-align: center;
+  transition: all 0.7s;
+}
+input:checked + .accordion_tab-label_mini::after {
+  transform: rotate(180deg);
+}
+input:checked + .accordion_tab-label-graphics::after {
+  transform: rotate(180deg);
+}
+/* эти три класса связанны  end*/
+
+ /*
+
+/* Accordion styles 
+.accordion_tabs {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.5);
+} 
+
+
+
+.accordion_tab-content {
+  max-height: 0;
+  /*padding: 0 1em;
+  color: #000;*/
+  /*color: $green-basic;
+  background: white;
+  transition: all 0.6s;
+}*//*
+.accordion_tab-close {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1em;
+  font-size: 0.6em;
+  background: $green-basic;
+  cursor: pointer;
+}
+.accordion_tab-close:hover {
+  background: #409B89;
+} 
+input:checked + .accordion_tab-label {
+  background: #409B89;
+} 
+input:checked ~ .accordion_tab-content {
+  max-height: 100%; 
+}
+/* ba_edit4_graphics(1.64).html START */
+/*.accordion_tab-label-graphics {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 1em; 
+  font-weight: bold;
+  cursor: pointer; 
+  color: #11142D;
+}
+.accordion_tab-label-graphics::before { 
+  content: url(/assets/img/ba-edit/arr-green-top.png); 
+  margin-right: 10px;
+  text-align: center;
+  transition: all 0.7s; 
+} 
+.accordion_tab-label-graphics:hover { 
+  color: #11142D;
+}*/
+
+/*.card-graphics{
+  width: 260px;
+  border: 2px solid #00dab3;
+  border-radius: 12px;
+  padding: 20px;
+  background-color: #fff;
+}
+/* ba_edit4_graphics(1.64).html END */

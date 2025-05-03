@@ -1,0 +1,139 @@
+<div class=" w-100 justify-content-center" style="display: flex;" >
+
+  <div class="btn-green"  (click)="createPost()" *ngIf="isEdit">
+    Создать запись
+  </div>
+</div>
+<!-- <div *ngIf="posts$|async as posts1">  -->
+  
+    <p class=" cont-horiz-center-start" *ngIf="posts?.length === 0">
+    Нет ни одной записи
+  </p>
+
+<div class="cont-horiz" style="height: 100vh;" *ngIf="!posts">
+  <p-progressSpinner ></p-progressSpinner>
+</div>
+<app-commonLenta [posts]="posts!" *ngIf="posts" [id]="id"></app-commonLenta>
+   <!-- <div class="w100 cont-vert border2px" *ngFor="let post of posts"
+   style=" padding: 20px; margin-top: 15px; ">
+
+   <div class="margin-right10 w100" style="max-width:640px" >
+   
+       <div class="cont-horiz-start-start margin-bottom10" style="gap: 20px 20px ">
+ 
+           <div>                       
+               <svg xmlns="http://www.w3.org/2000/svg" width="59" height="59" viewBox="0 0 59 59" fill="none">
+                   <mask id="mask0_10146_48300" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="59" height="59">
+                   <circle cx="29.5" cy="29.5" r="29.5" fill="white"/>
+                   </mask>
+                   <g mask="url(#mask0_10146_48300)">
+                   <circle cx="29.5" cy="29.5" r="29.5" fill="#FAFAFC"/>
+                   <circle cx="29.4513" cy="21.5257" r="11.5919" fill="#C0C5D5"/>
+                   <path d="M11.5905 37.3757C7.14298 41.1609 4.2174 53.975 3.31055 59.3767H50.2697C50.0726 58.1938 49.4417 54.3141 48.4955 48.2579C47.3126 40.6877 43.0543 31.8163 37.1401 37.3757C32.4087 41.8233 25.8636 38.7557 23.1824 36.666C21.1716 35.3255 16.038 33.5906 11.5905 37.3757Z" fill="#C0C5D5"/>
+                   <circle cx="29.5" cy="29.5" r="29" stroke="#00DAB3"/>
+                   </g>
+               </svg>
+           </div>
+         
+           <div class="cont-vert w100">
+      
+               <div class="cont-horiz-start-start w100 margin-bottom10">
+                   <h4>{{post.profile.name}}</h4>
+               </div>
+               <div class="cont-horiz-start-start w100">
+
+                   <div class="txt-gray-light">
+                      {{post.dateCreated|date:'d MMMM YYYY'}}
+                   </div>
+               </div>
+           </div>
+           
+       </div>
+       <div class=" hr30"></div>
+       <div class="addressPersonalPageUser row">
+        <svg class="col-1" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M11.855 2.55752C10.1848 2.55752 8.58302 3.221 7.40201 4.40201C6.221 5.58302 5.55752 7.18481 5.55752 8.855C5.55752 9.65147 5.93303 10.843 6.59144 12.2689C7.23609 13.6649 8.10238 15.1832 8.97868 16.596C9.85333 18.0061 10.7293 19.2972 11.3872 20.2366C11.5596 20.4828 11.7169 20.7045 11.855 20.8977C11.9932 20.7045 12.1504 20.4828 12.3228 20.2366C12.9807 19.2972 13.8567 18.0061 14.7313 16.596C15.6076 15.1832 16.4739 13.6649 17.1186 12.2689C17.777 10.843 18.1525 9.65147 18.1525 8.855C18.1525 7.18481 17.489 5.58302 16.308 4.40201C15.127 3.221 13.5252 2.55752 11.855 2.55752ZM11.855 22.2212C11.2316 22.688 11.2314 22.6878 11.2314 22.6878L11.2258 22.6802L11.2098 22.6588L11.1491 22.5768C11.0962 22.5052 11.0191 22.4002 10.9211 22.2655C10.7253 21.9962 10.4461 21.608 10.1115 21.1301C9.44262 20.1752 8.54949 18.8589 7.65509 17.4169C6.76233 15.9776 5.85955 14.3991 5.1774 12.9218C4.50902 11.4744 4 10.0163 4 8.855C4 6.77173 4.82758 4.77378 6.30068 3.30068C7.77378 1.82758 9.77173 1 11.855 1C13.9383 1 15.9362 1.82758 17.4093 3.30068C18.8824 4.77378 19.71 6.77173 19.71 8.855C19.71 10.0163 19.201 11.4744 18.5326 12.9218C17.8505 14.3991 16.9477 15.9776 16.0549 17.4169C15.1605 18.8589 14.2674 20.1752 13.5985 21.1301C13.2639 21.608 12.9847 21.9962 12.7889 22.2655C12.691 22.4002 12.6138 22.5052 12.5609 22.5768L12.5002 22.6588L12.4842 22.6802L12.4789 22.6873C12.4789 22.6873 12.4784 22.688 11.855 22.2212ZM11.855 22.2212L12.4789 22.6873C12.3318 22.8837 12.1003 23 11.855 23C11.6097 23 11.3785 22.8842 11.2314 22.6878L11.855 22.2212Z" fill="#11142D"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M11.8548 7.27477C10.9822 7.27477 10.2748 7.98216 10.2748 8.85476C10.2748 9.72736 10.9822 10.4347 11.8548 10.4347C12.7274 10.4347 13.4347 9.72736 13.4347 8.85476C13.4347 7.98216 12.7274 7.27477 11.8548 7.27477ZM8.71725 8.85476C8.71725 7.12196 10.122 5.71725 11.8548 5.71725C13.5876 5.71725 14.9923 7.12196 14.9923 8.85476C14.9923 10.5876 13.5876 11.9923 11.8548 11.9923C10.122 11.9923 8.71725 10.5876 8.71725 8.85476Z" fill="#11142D"/>
+          </svg>
+          
+ 
+        <div class="col-8">{{getAddress(post.profile.address!)}}</div>
+
+
+      </div>
+      <div class="margin-bottom20" style="max-width: 640px">
+        {{post.text}}
+      </div>
+      <div class=" cont-horiz-center-start" *ngIf="post.images"> 
+      <img [src]="getSafeUrl(post.images.url!)" style="width: 100%;" 
+       *ngIf="post.images.typeImage !== TypeImage.MP4" />
+       <video style="width: 100%;" controls *ngIf="post.images.typeImage === TypeImage.MP4">
+        <source [src]="getSafeUrl(post.images.url!)" type="video/mp4">
+    </video>
+      <iframe [src]="getSafeUrl(post.images.url!)"
+       *ngIf="post.images.typeImage === TypeImage.MP4"
+      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen=""
+      width="560"
+      height="315"
+      frameborder="0"></iframe> 
+
+      </div>
+       <div class="row m-2">
+        <div class="col-3">
+          <div class="row">
+            <div class="col-2">
+          <svg width="30"  height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.05 0C11.484 0 9.981 0.79455 9 2.04033C8.019 0.79455 6.516 0 4.95 0C2.178 0 0 2.36403 0 5.3951C0 9.09319 3.06 12.1243 7.695 16.7052L9 18L10.305 16.7052C14.94 12.1243 18 9.09319 18 5.3951C18 2.36403 15.822 0 13.05 0Z" fill="rgb(221, 226, 237)"/>
+            </svg>
+          </div>
+            <span class="col-1" style="margin-left: 5px;">0</span>
+        </div>
+      </div>
+        <div class="col-3">
+          <div class="row">
+            <div class="col-2">
+          <svg width="21"  height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.0001 0C9.68689 0 8.38653 0.258658 7.17328 0.761205C5.96002 1.26375 4.85763 2.00035 3.92904 2.92893C2.05368 4.8043 1.00011 7.34784 1.00011 10C0.991368 12.3091 1.7909 14.5485 3.26011 16.33L1.26011 18.33C1.12135 18.4706 1.02736 18.6492 0.989982 18.8432C0.952608 19.0372 0.973531 19.2379 1.05011 19.42C1.13317 19.5999 1.26781 19.7511 1.43696 19.8544C1.6061 19.9577 1.80211 20.0083 2.00011 20H11.0001C13.6523 20 16.1958 18.9464 18.0712 17.0711C19.9465 15.1957 21.0001 12.6522 21.0001 10C21.0001 7.34784 19.9465 4.8043 18.0712 2.92893C16.1958 1.05357 13.6523 0 11.0001 0ZM11.0001 18H4.41011L5.34011 17.07C5.52636 16.8826 5.6309 16.6292 5.6309 16.365C5.6309 16.1008 5.52636 15.8474 5.34011 15.66C4.0307 14.352 3.21528 12.6305 3.0328 10.7888C2.85032 8.94705 3.31205 7.09901 4.33934 5.55952C5.36662 4.02004 6.8959 2.88436 8.66663 2.34597C10.4374 1.80759 12.34 1.8998 14.0503 2.60691C15.7607 3.31402 17.173 4.59227 18.0465 6.22389C18.9201 7.85551 19.201 9.73954 18.8412 11.555C18.4815 13.3705 17.5034 15.005 16.0736 16.1802C14.6439 17.3554 12.8509 17.9985 11.0001 18Z" fill="#DDE2ED"/>
+            </svg>
+            </div>
+            <span class="col-1" style="margin-left: 5px;">0</span>
+            </div>
+        </div>
+      </div>
+    
+      <div *ngFor="let answer of post.answers" class="w100 description_card comment cont-vert-start-start">
+        <div class="cont-horiz-start" style="gap: 10px 10px;">
+          <div>
+            <img [src]="getAvatar(answer.profile.avatar)" class="comment-foto">
+          </div>
+          <div class="cont-vert-start w100">
+            <div style="margin:0px!important; font-size: 1rem;">
+              <b>{{answer.profile.name}}</b>
+            </div>
+            <div class="txt-gray-dark">
+              {{answer.dateCreated | date: 'mediumDate'}}
+            </div>
+          </div>
+        </div>
+        <p>
+          {{ answer.text | slice:0:150 }}
+          <span *ngIf="answer.text.length > 150">...</span>
+        </p>
+      </div>
+
+      <div class="row m-2" >
+        <input type="text"  [(ngModel)]="postText" placeholder="Ответить"  style="border: 1px solid #9196A4;
+    padding: 13px 20px;
+    border-radius: 100px;" />
+        </div>
+        <div class="row m-2 cont-horiz-end-end">
+      <button class=" col-1" style="width: 50px;" 
+      [ngClass]="postText === null ? 'btn-gray':'btn-white'"
+      (click)="addAnswer(post.id!, post)" [disabled]="postText === null"
+      >Ответить</button>
+    </div>
+
+
+</div>
+</div> -->

@@ -1,0 +1,61 @@
+/* ---- ЦВЕТА START ----*/
+
+
+/*1*/
+$green-dark:#043c48;
+.color-green-dark     {color: $green-dark;}
+.background-green-dark{	background-color:$green-dark;}
+.ico-background-green { background-color:#006174;}
+.ico-background-green:hover { background-color:#043c48;}
+.green-txt-hover:hover{
+    cursor: pointer;
+    display: inline-block;
+    color: $green-dark;
+ }
+
+/*2*/
+$green-basic:#006174;
+.color-green-basic{	color:$green-basic;}
+.background-green-basic{background-color:$green-basic;}
+/*3*/
+$green-light:#0d94a0;
+.color-green-light{color:$green-light;}
+.background-green-light{background-color:$green-light;}
+/*4*/
+$green-light2:#5ecdd7;
+$black:#23262F;
+.color-black{color:$black;}
+.background-black{background-color:$black;}
+/*5*/
+$grey-dark:#9196A4 ; /*C0C5D5*/
+.color-grey-dark{color:$grey-dark;}
+.background-grey-dark{background-color:$grey-dark;}
+/*6*/
+$grey:#DDE2ED;
+.color-grey{color:$grey;}
+.background-grey{background-color:$grey;}
+/*7*/
+$grey-light:#FAFAFC;
+.color-grey-light{color:$grey-light;}
+.background-grey-light{background-color:$grey-light;}
+/*8*/
+$white:#fff;
+.color-white{color:$white;}
+.background-white{background-color:$white;}
+/*9*/
+$color-success:#4FB229;
+.color-success{color:$color-success;}
+.background-success{background-color:$color-success;}
+/*10*/
+$color-info:#0A6ED8;
+.color-info{ color:$color-info;}
+.background-info{ background-color:$color-info;}
+/*11*/
+$color-warning:#dbdf9b;
+.color-warning{color:$color-warning;}
+.background-warning{background-color:$color-warning;}
+/*12*/
+$color-error:#d46c54;
+.color-error{color:$color-error;}
+.background-error{background-color:$color-error;}
+/* ---- ЦВЕТА END ----*/

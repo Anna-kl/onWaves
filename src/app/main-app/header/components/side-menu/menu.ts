@@ -1,0 +1,7487 @@
+
+export interface ISubCategory {
+    subcategoryId: number;
+    subcategoryName: string;
+}
+
+export interface ICategory {
+    categoryId: number;
+    categoryName: string;
+    subcategories: ISubCategory[];
+}
+
+export interface IHeading {
+    headId: number;
+    heading: string;
+    categories: ICategory[];
+}
+
+export const menu: IHeading[] = [
+    {
+        headId: 1,
+        heading: "Красота",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Барбер",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Стрижка волос"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Стрижка бороды и усов"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Укладка волос"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Моделирование"
+                    }
+                ]
+            },
+            {
+                categoryId: 2,
+                categoryName: "Бровист",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Окрашивание"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Коррекция"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Татуаж"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Ламинирование"
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Волосы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Стрижка"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Укладка"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Обучение"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Процедуры для волос"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Окрашивание"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Кератиновое выпрямление"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Лечение для волос"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Наращивание"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Химическая завивка"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Афроплетение"
+                    }
+                ]
+            },
+            {
+                categoryId: 4,
+                categoryName: "Депиляция",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Шугаринг"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Депиляция воском"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Электроэпиляция"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Лазерная эпиляция"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Эпиляция"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Фотоэпиляция"
+                    }
+                ]
+            },
+            {
+                categoryId: 5,
+                categoryName: "Косметология",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Чистка"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Пилинг"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Уход за лицом"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Массаж лица"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Инъенкции"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Аппаратная косметология"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Биоревитализация"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Контурная пластика Губ"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Контурная пластика Скул"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Контурная пластика Носа"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Контурная пластика Лица"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Контурная пластика Подбородка"
+                    }
+                ]
+            },
+            {
+                categoryId: 6,
+                categoryName: "Макияж",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Дневной макияж"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Вечерний макияж"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Свадебный макияж"
+                    }
+                ]
+            },
+            {
+                categoryId: 7,
+                categoryName: "Массаж",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Классический"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Расслабляющий"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Лечебный"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Антицеллюлитный"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Массаж спины"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Гидромассаж"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Лимфодренажный"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Массаж Гуаша"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Тайский"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "LPG-массаж"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Криомассаж"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Миофасциальный"
+                    }
+                ]
+            },
+            {
+                categoryId: 8,
+                categoryName: "Маникюр",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "С покрытием"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Без покрытия"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Аппаратный"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Наращивание"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Укрепление"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Мужской"
+                    }
+                ]
+            },
+            {
+                categoryId: 9,
+                categoryName: "Педикюр",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Полный"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Мужской"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Лечебный"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "С покрытием"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Пальчики"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Полный с покрытием"
+                    }
+                ]
+            },
+            {
+                categoryId: 10,
+                categoryName: "Ресницы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Ламинирование"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Наращивание"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Коррекция"
+                    }
+                ]
+            },
+            {
+                categoryId: 11,
+                categoryName: "Солярий",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Солярий вертикальный"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Солярий горизонтальный"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Моментальный"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Автозагар"
+                    }
+                ]
+            },
+            {
+                categoryId: 12,
+                categoryName: "СПА",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Комплексные программы"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Для тела"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Для волос"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Для лица"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Для ног"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Для рук"
+                    }
+                ]
+            },
+            {
+                categoryId: 13,
+                categoryName: "Стилист",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Комплексная консультация"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Комплексное создание имиджа"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Шоппинг сопровождение"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Консультация перед шоппингом"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Разбор гардероба"
+                    }
+                ]
+            },
+            {
+                categoryId: 14,
+                categoryName: "Пирсинг",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Прокол ушей"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Пирсинг носа"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Пирсинг пупка"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Интимный"
+                    }
+                ]
+            },
+            {
+                categoryId: 15,
+                categoryName: "Тату",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Нанесение"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Удаление"
+                    }
+                ]
+            },
+            {
+                categoryId: 16,
+                categoryName: "Другое",
+                subcategories: []
+            }
+        ]
+    },
+    {
+        headId: 2,
+        heading: "Отдых и туризм",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Бронирование",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Коттеджи"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Гостевые дома"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Базы отдыха"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Гостиницы"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Детские лагеря"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Хостелы"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Бизнес-отели"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Resort-отели"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Бутик-отели"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Апартаменты"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Санатории"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Шале"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Мини-гостиницы"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Спа-отели"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Кемпинги"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Кондоминиумы"
+                    }
+                ]
+            },
+            {
+                categoryId: 2,
+                categoryName: "Активный отдых",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Пеший туризм"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Горный туризм, Альпинизм"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Водный туризм"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Конный туризм"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Велотуризм"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Лыжный туризм"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Автомототуризм"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Спелеотуризм"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Парусный туризм"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Джип-туры, путешествия на автомобилях"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Лыжные базы/Горнолыжные комплексы"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Охотничьи центры"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Рыболовные центры"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Йога-туризм"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Фитнес-туризм"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Комбинированные"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Детские программы"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Cеминары и тренинги"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Туры выходного дня"
+                    },
+                    {
+                        subcategoryId: 20,
+                        subcategoryName: "Авто-Мото"
+                    },
+                    {
+                        subcategoryId: 21,
+                        subcategoryName: "Экскурсии"
+                    },
+                    {
+                        subcategoryId: 22,
+                        subcategoryName: "Фототуры"
+                    },
+                    {
+                        subcategoryId: 23,
+                        subcategoryName: "Оздоровительные туры"
+                    },
+                    {
+                        subcategoryId: 24,
+                        subcategoryName: "Зимние туры"
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Аквапарки ",
+                subcategories: []
+            },
+            {
+                categoryId: 4,
+                categoryName: "Антикафе",
+                subcategories: []
+            },
+            {
+                categoryId: 5,
+                categoryName: "Аренда беседок",
+                subcategories: []
+            },
+            {
+                categoryId: 6,
+                categoryName: "Аттракционы",
+                subcategories: []
+            },
+            {
+                categoryId: 7,
+                categoryName: "Аэродинамические комплексы",
+                subcategories: []
+            },
+            {
+                categoryId: 8,
+                categoryName: "Бани / Сауны",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Русская баня"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Финская сауна"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Турецкий хаммам"
+                    }
+                ]
+            },
+            {
+                categoryId: 9,
+                categoryName: "Бильярдные залы",
+                subcategories: []
+            },
+            {
+                categoryId: 10,
+                categoryName: "Боулинг",
+                subcategories: []
+            },
+            {
+                categoryId: 11,
+                categoryName: "Верёвочные парки",
+                subcategories: []
+            },
+            {
+                categoryId: 12,
+                categoryName: "Дайвинг-центры",
+                subcategories: []
+            },
+            {
+                categoryId: 13,
+                categoryName: "Детские игровые залы / Игротеки",
+                subcategories: []
+            },
+            {
+                categoryId: 14,
+                categoryName: "Пляжи",
+                subcategories: []
+            },
+            {
+                categoryId: 15,
+                categoryName: "Спортивно-тактические клубы",
+                subcategories: []
+            },
+            {
+                categoryId: 16,
+                categoryName: "Стрелковые клубы",
+                subcategories: []
+            },
+            {
+                categoryId: 17,
+                categoryName: "Другое",
+                subcategories: []
+            }
+        ]
+    },
+    {
+        headId: 3,
+        heading: "Обучение и курсы",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Азербайджанский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 2,
+                categoryName: "Албанский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 3,
+                categoryName: "Английский язык",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Разговорный английский"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Общий английский"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Деловой английский"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Американский язык"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Технический английский"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Юридический английский"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Медицинский английский"
+                    }
+                ]
+            },
+            {
+                categoryId: 4,
+                categoryName: "Арабский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 5,
+                categoryName: "Армянский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 6,
+                categoryName: "Биология",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Общая биология"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Анатомия"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Зоология"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Ботаника"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Генетика"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Цитология"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Экология"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Природоведение"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Физиология"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Почвоведение"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Биофизика"
+                    }
+                ]
+            },
+            {
+                categoryId: 7,
+                categoryName: "Болгарский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 8,
+                categoryName: "Венгерский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 9,
+                categoryName: "Вокал",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Постановка голоса и дыхания"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Эстрадный вокал"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Академический вокал"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Подготовка к экзамену по вокалу"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Джазовый вокал"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Оперный вокал"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Рок-вокал"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Хоровое пение"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Народный вокал"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Церковное пение"
+                    }
+                ]
+            },
+            {
+                categoryId: 10,
+                categoryName: "Вьетнамский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 11,
+                categoryName: "География",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Физическая география"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Страноведение"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Экономическая география"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Краеведение"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Геология"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Геодезия"
+                    }
+                ]
+            },
+            {
+                categoryId: 12,
+                categoryName: "Голландский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 13,
+                categoryName: "Греческий язык",
+                subcategories: []
+            },
+            {
+                categoryId: 14,
+                categoryName: "Грузинский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 15,
+                categoryName: "Датский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 16,
+                categoryName: "Журналистика",
+                subcategories: []
+            },
+            {
+                categoryId: 17,
+                categoryName: "Иврит",
+                subcategories: []
+            },
+            {
+                categoryId: 18,
+                categoryName: "Изобразительное искусство",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Скетчинг"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Иллюстрация"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Коллаж"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Каллиграфия"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Графика"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Композиция"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Флористика"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Иконопись"
+                    }
+                ]
+            },
+            {
+                categoryId: 19,
+                categoryName: "Индонезийский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 20,
+                categoryName: "Информатика/Программирование",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Информатика"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Обучение MS Office"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Программирование "
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Компьютерная графика"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Обучение Java"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Разработка мобильных приложений"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Создание игр"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Робототехника"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Обучение 1С"
+                    }
+                ]
+            },
+            {
+                categoryId: 21,
+                categoryName: "Испанский язык",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Разговорный испанский"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Деловой испанский"
+                    }
+                ]
+            },
+            {
+                categoryId: 22,
+                categoryName: "История",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Всемирная история"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "История религии"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "История искусств"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Источниковедение"
+                    }
+                ]
+            },
+            {
+                categoryId: 23,
+                categoryName: "Итальянский язык",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Разговорный итальянский"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Деловой итальянский"
+                    }
+                ]
+            },
+            {
+                categoryId: 24,
+                categoryName: "Китайский язык",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Разговорный китайский"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Деловой китайский"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Занятие по вэньянь"
+                    }
+                ]
+            },
+            {
+                categoryId: 25,
+                categoryName: "Корейский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 26,
+                categoryName: "Латынь",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Курс по латыни"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Медицинская латынь"
+                    }
+                ]
+            },
+            {
+                categoryId: 27,
+                categoryName: "Латышский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 28,
+                categoryName: "Литература",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Русская литература"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Зарубежная литература"
+                    }
+                ]
+            },
+            {
+                categoryId: 29,
+                categoryName: "Литовский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 30,
+                categoryName: "Логика",
+                subcategories: []
+            },
+            {
+                categoryId: 31,
+                categoryName: "Логопед",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Постановка звуков"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Развитие речи"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Развитие фонематического слуха"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Артикуляционная гимнастика"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Коррекция Речи"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Коррекция дизартрии"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Коррекция нарушений устной и письменной речи"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Коррекция дислалии с огопедом"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Пальчиковая гимнастика"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Логопедический массаж"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Коррекция дислексии"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Коррекция дисграфии"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Коррекционная педагогика"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Коррекция дизорфографии"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Коррекция алалии"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Зондовый массаж"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Коррекция заикания"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Коррекция афазии"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Коррекция дисфонии"
+                    },
+                    {
+                        subcategoryId: 20,
+                        subcategoryName: "Коррекция брадилалии"
+                    },
+                    {
+                        subcategoryId: 21,
+                        subcategoryName: "Коррекция тахилалии"
+                    }
+                ]
+            },
+            {
+                categoryId: 32,
+                categoryName: "Македонский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 33,
+                categoryName: "Математика",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Подготовка к ОГЭ"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Подготовка к ЕГЭ"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Занятие по алгебре"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Занятие по геометрии"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Подготовка к экзамену"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Подготовка к ДВИ"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Подготовка к олимпиаде"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Элементарная математика"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Высшая математика"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Занятие математическому программированию"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Высшая математика"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Занятие по дифференциальной геометрии"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Финансовая математика"
+                    }
+                ]
+            },
+            {
+                categoryId: 34,
+                categoryName: "Музыка",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Подготовка в музыкальную школу"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Занятие по сольфеджио"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Обучение на фортепиано"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Обучение игре на гитаре"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Подготовка в музыкальное училище"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Обучение на акустической гитаре"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Подготовка в музыкальные вузы"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Обучение на электрогитаре"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Занятие по ритмике"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Обучение на укулеле"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Обучение на бас-гитаре"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Обучение на скрипке"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Обучение игре на барабанах"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Занятие по звукорежиссура"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Обучение дирижированию"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Обучение игре на саксофоне"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Обучение игре на флейте"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Обучение на аккордеоне"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Игра на виолончели"
+                    },
+                    {
+                        subcategoryId: 20,
+                        subcategoryName: "Обучение на альте"
+                    },
+                    {
+                        subcategoryId: 21,
+                        subcategoryName: "Обучение на балалайке"
+                    },
+                    {
+                        subcategoryId: 22,
+                        subcategoryName: "Обучение на кларнете"
+                    },
+                    {
+                        subcategoryId: 23,
+                        subcategoryName: "Обучение на трубе"
+                    },
+                    {
+                        subcategoryId: 24,
+                        subcategoryName: "Обучение на контрабасе"
+                    },
+                    {
+                        subcategoryId: 25,
+                        subcategoryName: "Обучение на тромбоне"
+                    },
+                    {
+                        subcategoryId: 26,
+                        subcategoryName: "Обучение на гуслях"
+                    },
+                    {
+                        subcategoryId: 27,
+                        subcategoryName: "Обучение на гобое"
+                    },
+                    {
+                        subcategoryId: 28,
+                        subcategoryName: "Обучение на валторне"
+                    },
+                    {
+                        subcategoryId: 29,
+                        subcategoryName: "Детские музыкальные школы"
+                    }
+                ]
+            },
+            {
+                categoryId: 35,
+                categoryName: "Начальная школа",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Подготовка к школе"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Занятие по подготовке к школе"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Обучение чтению"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Развитие логического мышления"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Психологическая подготовка"
+                    }
+                ]
+            },
+            {
+                categoryId: 36,
+                categoryName: "Немецкий язык",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Разговорный немецкий"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Деловой немецкий"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Юридический немецкий"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Медицинский немецкий"
+                    }
+                ]
+            },
+            {
+                categoryId: 37,
+                categoryName: "Норвежский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 38,
+                categoryName: "Обществознание",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Занятие по политологии"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Занятие по социологии"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Занятие по культурологии"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Занятие по религиоведению"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Международные отношения"
+                    }
+                ]
+            },
+            {
+                categoryId: 39,
+                categoryName: "Польский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 40,
+                categoryName: "Португальский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 41,
+                categoryName: "Правоведение",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Правоведение"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "История государства и права"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Гражданское право"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Конституционное право"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Уголовное право"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Процессуальное право"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Трудовое право"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Семейное право"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Административное право"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Предпринимательское право"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Международное право"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Земельномое право"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Жилищное право"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Налоговое право"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Коммерческое право"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Криминалистика"
+                    }
+                ]
+            },
+            {
+                categoryId: 42,
+                categoryName: "Румынский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 43,
+                categoryName: "Русский язык",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Подготовка к экзамену"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Курсы по русскому языку"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Изучение языка как иностранный"
+                    }
+                ]
+            },
+            {
+                categoryId: 44,
+                categoryName: "Санскрит",
+                subcategories: []
+            },
+            {
+                categoryId: 45,
+                categoryName: "Сербский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 46,
+                categoryName: "Словенский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 47,
+                categoryName: "Суахили",
+                subcategories: []
+            },
+            {
+                categoryId: 48,
+                categoryName: "Таджикский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 49,
+                categoryName: "Тайский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 50,
+                categoryName: "Турецкий язык",
+                subcategories: []
+            },
+            {
+                categoryId: 51,
+                categoryName: "Узбекский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 52,
+                categoryName: "Физика",
+                subcategories: []
+            },
+            {
+                categoryId: 53,
+                categoryName: "Философия",
+                subcategories: []
+            },
+            {
+                categoryId: 54,
+                categoryName: "Финский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 55,
+                categoryName: "Французский язык",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Разговорный французский"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Деловой французский"
+                    }
+                ]
+            },
+            {
+                categoryId: 56,
+                categoryName: "Химия",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Подготовка к экзамену"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Общая химия"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Биохимия"
+                    }
+                ]
+            },
+            {
+                categoryId: 57,
+                categoryName: "Хинди",
+                subcategories: []
+            },
+            {
+                categoryId: 58,
+                categoryName: "Хорватский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 59,
+                categoryName: "Чешский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 60,
+                categoryName: "Шведский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 61,
+                categoryName: "Экономика",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Микроэкономика"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Макроэкономика"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Экономический анализ"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Международная экономика"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Банковское дело"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Эконометрика"
+                    }
+                ]
+            },
+            {
+                categoryId: 62,
+                categoryName: "Эстонский язык",
+                subcategories: []
+            },
+            {
+                categoryId: 63,
+                categoryName: "Японский язык",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Разговорный японский"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Деловой японский"
+                    }
+                ]
+            },
+            {
+                categoryId: 64,
+                categoryName: "Кройка и шитьё",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Курс кройки и шитья"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Макраме"
+                    }
+                ]
+            },
+            {
+                categoryId: 65,
+                categoryName: "Бухгалтерский учет",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Курсы бухгалтерского учета"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Курсы по налоговому учету"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Курсы управленческого учета"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Курсы финансового учета"
+                    }
+                ]
+            },
+            {
+                categoryId: 66,
+                categoryName: "Менеджмент",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Курсы менеджмента"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Курсы управления проектами"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Курсы управления персоналом"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Курсы стратегического менеджмента"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Антикризисное управление"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Курсы финансового менеджмента"
+                    }
+                ]
+            },
+            {
+                categoryId: 67,
+                categoryName: "Мастера красоты",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Обучение визажу"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Обучение наращиванию ногтей"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Обучение педикюру"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Обучение маникюру"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Обучение парикмахеров"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Обучение косметологии"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Обучение стилистов"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Обучение массаж"
+                    }
+                ]
+            },
+            {
+                categoryId: 68,
+                categoryName: "Рукоделие",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Обучение вышивке"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Обучение лепке"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Обучение аппликации"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Обучение изготовлению мягких игрушек"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Курсы творчества и рукоделия"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Обучение декупажу"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Обучение оригами"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Курсы росписи по дереву"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Обучение папье-маше"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Курсы по валянию из шерсти"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Курсы по витражной росписи"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Курсы резьбе по дереву"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Вязание"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Обучение бисероплетению"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Обучение бумажным техникам рукоделия"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Обучение искусству керамики"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Обучение техникам декорирования и оформления"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Обучение художественной росписи"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Обучение искусству мозаики"
+                    }
+                ]
+            },
+            {
+                categoryId: 69,
+                categoryName: "Автоинструкторы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Курсы вождения "
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Занятие зимнего вождения"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Курс экстремального вождения"
+                    }
+                ]
+            },
+            {
+                categoryId: 70,
+                categoryName: "Фотография",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Студийная съемка"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Обработка фото"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Свадебная фотография"
+                    }
+                ]
+            },
+            {
+                categoryId: 71,
+                categoryName: "Другое",
+                subcategories: []
+            }
+        ]
+    },
+    {
+        headId: 4,
+        heading: "Фото, видео, аудио",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Видеосъемка",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Видеосъёмка рекламы"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Репортажная видеосъёмка"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Видеомонтаж"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Видеосъёмка свадьбы"
+                    }
+                ]
+            },
+            {
+                categoryId: 2,
+                categoryName: "Дикторы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Озвучка "
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Запись аудиороликов",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Аудиомонтаж"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Редактирование аудио"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Аудиореклама"
+                    }
+                ]
+            },
+            {
+                categoryId: 4,
+                categoryName: "Модели для съемок",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Фотомодель для съёмок"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Актриса массовки"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Актриса для съёмок"
+                    }
+                ]
+            },
+            {
+                categoryId: 5,
+                categoryName: "Монтаж",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Монтаж видеороликов"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Создание видеороликов"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Озвучка видеоролика"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Анимационный видеоролик"
+                    }
+                ]
+            },
+            {
+                categoryId: 6,
+                categoryName: "Написание музыки",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Запись музыки и песен"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Создание аранжировки"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Запись вокала"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Написание песен"
+                    }
+                ]
+            },
+            {
+                categoryId: 7,
+                categoryName: "Оцифровка",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Оцифровка видео"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Оцифровка фото"
+                    }
+                ]
+            },
+            {
+                categoryId: 8,
+                categoryName: "Постобработка",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Цветокоррекция"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Фоторетушь"
+                    }
+                ]
+            },
+            {
+                categoryId: 9,
+                categoryName: "Фотосессия",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Портретная фотосессия"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Студийная фотосессия"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Свадебный фотограф"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Семейная фотосессия"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Рекламная фотосессия"
+                    }
+                ]
+            },
+            {
+                categoryId: 10,
+                categoryName: "Другое",
+                subcategories: []
+            }
+        ]
+    },
+    {
+        headId: 5,
+        heading: "Компьютеры и IT",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Web-дизайн",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "UX-UI-дизайн"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Сайт-визитка"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Интернет-магазин"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Корпоративный сайт"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Баннеры"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Фирменного стиль"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Объявления"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Разработка 3D"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Анимация"
+                    }
+                ]
+            },
+            {
+                categoryId: 2,
+                categoryName: "Администрирование",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Системный администратор"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Консультация"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Настройка серверов"
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Настройка и установка",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка программного обеспечения"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Сборка"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Замена деталей"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Настройка программ и комплектующих"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Восстановление данных"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Помощь и консультации"
+                    }
+                ]
+            },
+            {
+                categoryId: 4,
+                categoryName: "Программирование",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Создание сайтов"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Верстка"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Создание мобильных приложений"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Создание базы данных"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Создание программ"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Создание игр"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Сайты под ключ"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Создание лендингов"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Создание интернет-магазинов"
+                    }
+                ]
+            },
+            {
+                categoryId: 5,
+                categoryName: "Графический дизайн",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Разработка логотипа"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Разработка визитки"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Разработка листовок"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Разработка баннера"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Фирменный стиль"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Рекламные материалы"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Афиши"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Многостраничные издания"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Вывески"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Обработка фото"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Помощь по фирменному стилю"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Брендирование авто"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Оформление"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Конструкции"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Мероприятия"
+                    }
+                ]
+            },
+            {
+                categoryId: 6,
+                categoryName: "Копирайтер",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Написание текстов"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Редактирование"
+                    }
+                ]
+            },
+            {
+                categoryId: 7,
+                categoryName: "Продвижение",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Реклама в соц.сетях"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Таргетолог"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "SEO"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "SMM специалист"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Реклама у блогеров"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Яндекс директ "
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Google реклама"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Авитолог"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Вконтакте"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Сториесмейкер"
+                    }
+                ]
+            },
+            {
+                categoryId: 8,
+                categoryName: "Другое",
+                subcategories: []
+            }
+        ]
+    },
+    {
+        headId: 6,
+        heading: "Мероприятия",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Ведущие",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Ведущий на мероприятие"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Диджей"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Аниматор"
+                    }
+                ]
+            },
+            {
+                categoryId: 2,
+                categoryName: "Декор и внешний вид",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Декор мероприятий"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Украшение свадеб"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Флорист"
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Кейтеринг",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Банкет"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Фуршет"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Барбекю"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Мобильный кейтеринг"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Услуги бариста"
+                    }
+                ]
+            },
+            {
+                categoryId: 4,
+                categoryName: "Организация бизнес-мероприятий",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Конференции"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Семинары"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Выставки"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Форумы"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Конгрессы"
+                    }
+                ]
+            },
+            {
+                categoryId: 5,
+                categoryName: "Организация мероприятия",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Дни рождения"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Юбилеи"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Свадьбы"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Организация салюта"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Выездные аттракционы"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Наряды"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Выездная регистрация"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Выпускной"
+                    }
+                ]
+            },
+            {
+                categoryId: 6,
+                categoryName: "Реклама и продвижение",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Флешмоб"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Промоутеры"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Расклеивание объявлений"
+                    }
+                ]
+            },
+            {
+                categoryId: 7,
+                categoryName: "Другое",
+                subcategories: []
+            }
+        ]
+    },
+    {
+        headId: 7,
+        heading: "Ремонт техники",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Аудиотехника",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Ремонт музыкального оборудования и техники"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Диагностика"
+                    }
+                ]
+            },
+            {
+                categoryId: 2,
+                categoryName: "Водонагреватели",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Чистка"
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Кондиционеры",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Заправка"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Чистка"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Профилактика"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Работы на высоте"
+                    }
+                ]
+            },
+            {
+                categoryId: 4,
+                categoryName: "Кухонные плиты",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка и подключение"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Диагностика"
+                    }
+                ]
+            },
+            {
+                categoryId: 5,
+                categoryName: "Медицинская техника",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Стоматологическая техника"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Косметологическая техника"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Физиотерапевтическая техника"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Медицинские холодильники"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Лабораторная техника"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Медицинские инструменты"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Техника для рентгена"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Медицинская мебель"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Аппараты узи"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Офтальмологическая техника"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Реанимационная техника"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Измерительные приборы"
+                    }
+                ]
+            },
+            {
+                categoryId: 6,
+                categoryName: "Мобильные телефоны и планшеты",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Замена аккумулятора"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Замена стекла"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Прошивка"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Ремонт дисплея"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Ремонт разъема"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Замена корпуса"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Чистка"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Замена деталей"
+                    }
+                ]
+            },
+            {
+                categoryId: 7,
+                categoryName: "Персональный электротранспорт",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Диагностика"
+                    }
+                ]
+            },
+            {
+                categoryId: 8,
+                categoryName: "Посудомоечные машины",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка и подключение"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Чистка фильтра"
+                    }
+                ]
+            },
+            {
+                categoryId: 9,
+                categoryName: "Ремонт мелкой бытовой техники",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Кофемашины"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Мелкая бытовая техника"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Микроволновки"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Пылесос"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Чайник"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Утюг"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Фен"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Вытяжка"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Мясорубка"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Мультиварка"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Кофеварка"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Пароварка"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Миксер"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Соковыжималка"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Обогреватель"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Кухонный комбайн"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Вентилятор"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Блендер"
+                    },
+                    {
+                        subcategoryId: 20,
+                        subcategoryName: "Тостер"
+                    },
+                    {
+                        subcategoryId: 21,
+                        subcategoryName: "Принтер"
+                    },
+                    {
+                        subcategoryId: 22,
+                        subcategoryName: "Гриль"
+                    },
+                    {
+                        subcategoryId: 23,
+                        subcategoryName: "Хлебопечка"
+                    },
+                    {
+                        subcategoryId: 24,
+                        subcategoryName: "Кофемолка"
+                    },
+                    {
+                        subcategoryId: 25,
+                        subcategoryName: "Электробритва"
+                    },
+                    {
+                        subcategoryId: 26,
+                        subcategoryName: "Термопот"
+                    },
+                    {
+                        subcategoryId: 27,
+                        subcategoryName: "Сушилка для овощей"
+                    },
+                    {
+                        subcategoryId: 28,
+                        subcategoryName: "Фритюрница"
+                    },
+                    {
+                        subcategoryId: 29,
+                        subcategoryName: "Измельчитель пищевых отходов"
+                    },
+                    {
+                        subcategoryId: 30,
+                        subcategoryName: "Фильтр для воды"
+                    },
+                    {
+                        subcategoryId: 31,
+                        subcategoryName: "Домофон"
+                    },
+                    {
+                        subcategoryId: 32,
+                        subcategoryName: "Мороженица и йогуртница"
+                    }
+                ]
+            },
+            {
+                categoryId: 10,
+                categoryName: "Ремонт промышленного оборудования",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Промышленные холодильники"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Станки"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Пневматические системы"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Полиграфическое оборудования"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Экструдеров"
+                    }
+                ]
+            },
+            {
+                categoryId: 11,
+                categoryName: "Ремонт торгового оборудования",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Холодильные установки"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Витрины и прилавки"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Оборудование для штрихового кодирования"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Торговые весы"
+                    }
+                ]
+            },
+            {
+                categoryId: 12,
+                categoryName: "Стиральные машины",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка и подключение"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Замена деталей"
+                    }
+                ]
+            },
+            {
+                categoryId: 13,
+                categoryName: "Строительная и садовая техника",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Газонокосилки"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Садовая техника"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Мотоблок"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Снегоуборщик"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Культиватор"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Мотопомп"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Мотобур"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Компрессоры"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Отбойные молотки"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Виброкатки"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Сварочные автоматы"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Трактора"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Погрузчик"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Экскаватор"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Бульдозер"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Автокран"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Комбайн"
+                    }
+                ]
+            },
+            {
+                categoryId: 14,
+                categoryName: "Сушильные машины",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка и подключение"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Ремонт"
+                    }
+                ]
+            },
+            {
+                categoryId: 15,
+                categoryName: "Телевизоры",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Установка и настройка"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Фото и видеотехника"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Чистка"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Замена деталей"
+                    }
+                ]
+            },
+            {
+                categoryId: 16,
+                categoryName: "Холодильники",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Установка и подключение"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Профилактика"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Заправка холодильника"
+                    }
+                ]
+            },
+            {
+                categoryId: 17,
+                categoryName: "Электрооборудование",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка и монтаж"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Обслуживание"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Испытания"
+                    }
+                ]
+            },
+            {
+                categoryId: 18,
+                categoryName: "Другое",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Газовое оборудование"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Квадрокоптеры"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Кассовые аппараты"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        headId: 8,
+        heading: "Аренда, прокат",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Автомобили",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Автомобиль"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Лимузин"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Дома на колесах"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Автомобили под такси"
+                    }
+                ]
+            },
+            {
+                categoryId: 2,
+                categoryName: "Оборудование",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Звуковое оборудование"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Осветительное оборудование"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Проектор"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Сцена"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Техника для видеосъемки"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Шатер"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Техника для фотосъемки"
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Спецтехника",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Экскаватор"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Манипулятор"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Самосвал"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Погрузчик"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Длинномер"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Гидромолот"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Бульдозер"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Каток"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Прицепа"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Компрессор"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Низкорамная платформа"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Автобетононасос"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Поливомоечная машина"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Илосос"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Автогрейдер"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Мусоровоз"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Дорожный фрез"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Асфальтоукладчик"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Грейфер"
+                    },
+                    {
+                        subcategoryId: 20,
+                        subcategoryName: "Гидроподъемник"
+                    }
+                ]
+            },
+            {
+                categoryId: 4,
+                categoryName: "Спортивный инвентарь",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Велосипед"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Лыжи"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Гироскутер"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Коньки"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Сноуборд"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Сигвей"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Ролики"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Уницикл"
+                    }
+                ]
+            },
+            {
+                categoryId: 5,
+                categoryName: "Строительные инструменты",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Перфоратор"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Болгарка"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Дрель"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Отбойный молоток"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Пылесос"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Генератор"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Тепловая пушка"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Штроборез"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Строительный фен"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Отрезная машина"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Монтажная пила"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Веер для колеровки краски"
+                    }
+                ]
+            },
+            {
+                categoryId: 6,
+                categoryName: "Спорт",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Аренда зала для бадминтона"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Аренда зала для баскетбола"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Аренда зала для волейбола"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Аренда поля для футбола"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Аренда зала для футбола"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Аренда стола для настольного тенниса"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Аренда столов для бильярда"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Аренда теннисного корта"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Аренда хоккейной площадки"
+                    }
+                ]
+            },
+            {
+                categoryId: 7,
+                categoryName: "Другое",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Студия для фотосессии"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Помещение для репитиций"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Теплоход"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Мотоцикл"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Вертолет"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Самолет"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Скутер"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Гидроцикл"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        headId: 9,
+        heading: "Животные",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Ветеринарный врач",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Консультация"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Анализы"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Прием врача"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Рентген"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Хирургия"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Стерилизация"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Кастрация"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Вакцинация"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Чипирование"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Лечение"
+                    }
+                ]
+            },
+            {
+                categoryId: 2,
+                categoryName: "Выгул",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Выгул животных"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Выгул собак"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Выгул кошек"
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Дрессировка",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Дрессировка животных"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Дрессировка собак"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Дрессировка кошек"
+                    }
+                ]
+            },
+            {
+                categoryId: 4,
+                categoryName: "Передержка животных",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Передержка собак"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Передержка кошек"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Передержка животных"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Передержка птиц"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Передержка рыб"
+                    }
+                ]
+            },
+            {
+                categoryId: 5,
+                categoryName: "Стрижка",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Стрижка собак"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Стрижка кошек"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Стрижка животных"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Стрижка когтей у собак"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Стрижка когтей у кошек"
+                    }
+                ]
+            },
+            {
+                categoryId: 6,
+                categoryName: "Гостиницы для животных",
+                subcategories: []
+            },
+            {
+                categoryId: 7,
+                categoryName: "Зооателье",
+                subcategories: []
+            },
+            {
+                categoryId: 8,
+                categoryName: "Клубы домашних животных / Питомники",
+                subcategories: []
+            },
+            {
+                categoryId: 9,
+                categoryName: "Обслуживание аквариума",
+                subcategories: []
+            },
+            {
+                categoryId: 10,
+                categoryName: "Составление родословной",
+                subcategories: []
+            },
+            {
+                categoryId: 11,
+                categoryName: "Другое",
+                subcategories: []
+            }
+        ]
+    },
+    {
+        headId: 10,
+        heading: "Бытовые услуги",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Изготовление ключей",
+                subcategories: []
+            },
+            {
+                categoryId: 2,
+                categoryName: "Пошив и ремонт одежды",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Ателье меховые / кожаные"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Ателье швейные"
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Ремонт часов",
+                subcategories: []
+            },
+            {
+                categoryId: 4,
+                categoryName: "Ювелирные услуги",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Изготовление"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Чистка"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт"
+                    }
+                ]
+            },
+            {
+                categoryId: 5,
+                categoryName: "Уборка",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Мытье окон"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Генеральная уборка"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Чистка ковров"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Уборка территории"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Уборка офиса"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Глажка белья"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Уборка после ремонта"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Чистка мягкой мебели"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Чистка бытовых приборов"
+                    }
+                ]
+            },
+            {
+                categoryId: 6,
+                categoryName: "Химчистка",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Химчистка одежды"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Химчистка мебели"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Химчистка ковров"
+                    }
+                ]
+            },
+            {
+                categoryId: 7,
+                categoryName: "Другое",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Муж на час"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        headId: 11,
+        heading: "Доставка груза",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Грузоперевозки",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Помощь при переезде"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Перевозка габаритных грузов"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Демонтаж и установка техники при переезде"
+                    }
+                ]
+            },
+            {
+                categoryId: 2,
+                categoryName: "Пассажирские перевозки",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Перевозка людей"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Заказ трансфера"
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Междугородные перевозки",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Груз"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Вещи"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Продукты"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Пассажиры"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Автомобили  "
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Контейнер"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Животные"
+                    }
+                ]
+            },
+            {
+                categoryId: 4,
+                categoryName: "Услуги грузчиков",
+                subcategories: []
+            },
+            {
+                categoryId: 5,
+                categoryName: "Перевозка стройматериалов",
+                subcategories: []
+            },
+            {
+                categoryId: 6,
+                categoryName: "Курьеры",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Экстренная доставка"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Курьер"
+                    }
+                ]
+            },
+            {
+                categoryId: 7,
+                categoryName: "Вывоз мусора",
+                subcategories: []
+            },
+            {
+                categoryId: 8,
+                categoryName: "Эвакуаторы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Для легковых авто"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Для автобусов"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Грузовой эвакуатор"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Эвакуатор с манипулятором"
+                    }
+                ]
+            },
+            {
+                categoryId: 9,
+                categoryName: "Другое",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Перевозка небольших грузов"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Транспортировка в контейнерах"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Транспортировка грузов на самолете"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Перевозка больных"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Транспортировка груза на поезде"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Транспортировка кораблем"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Похоронная служба"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        headId: 12,
+        heading: "Авто/Мото",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Автостекла",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Вклейка стекла"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Замена стекол"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт сколов и трещин"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Удаление царапин"
+                    }
+                ]
+            },
+            {
+                categoryId: 2,
+                categoryName: "Выхлопная система",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Замена оборудования"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Удаление катализатора"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Сварка"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Тюнинг выхлопной системы"
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Двигатель",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Замена масла"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Замена ремня"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Замена свечей"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Промывка"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Тюнинг двигателя"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Ремонт"
+                    }
+                ]
+            },
+            {
+                categoryId: 4,
+                categoryName: "Диагностика",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Двигателя"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Комплексная диагностика"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Электрооборудования"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Топливной системы"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Автокондиционера"
+                    }
+                ]
+            },
+            {
+                categoryId: 5,
+                categoryName: "Кондиционеры и отопление",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Заправка кондиционера"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Замена оборудования"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Опрессовка"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Промывка"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Антибактериальная обработка"
+                    }
+                ]
+            },
+            {
+                categoryId: 6,
+                categoryName: "Кузовной ремонт",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Ремонт кузова"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Бампера"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Капота"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Двери"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Ремонт деталей"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Крыла"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Сварка"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Рихтовка"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Стапельные работы"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Удаление вмятин"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Удаление царапин"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Тюнинг и допоборудование"
+                    }
+                ]
+            },
+            {
+                categoryId: 7,
+                categoryName: "Подвеска",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Замена деталей"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Сход-развал "
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Тюнинг"
+                    }
+                ]
+            },
+            {
+                categoryId: 8,
+                categoryName: "Ремонт грузовых авто",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Электрооборудования"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Двигателя"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Тормозной системы"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Техническое обслуживание"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Ремонт ходовой части Кузовной ремонт"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Грузовой шиномонтаж"
+                    }
+                ]
+            },
+            {
+                categoryId: 9,
+                categoryName: "Ремонт мототехники",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Мотоциклов"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Скутеров"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Вездеходов"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Багги"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Гидроциклов"
+                    }
+                ]
+            },
+            {
+                categoryId: 10,
+                categoryName: "Ремонт спецтехники",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Погрузчиков"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Тракторов"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Экскаваторов"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Манипуляторов"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Тягачей"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Автобусов"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Автокранов"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Полуприцепов"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Автовышек"
+                    }
+                ]
+            },
+            {
+                categoryId: 11,
+                categoryName: "Рулевое управление",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Замена оборудования"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Диагностика"
+                    }
+                ]
+            },
+            {
+                categoryId: 12,
+                categoryName: "Техническое обслуживание",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Замена воздушного фильтра"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Замена масла"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Плановое ТО"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Замена свечей"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Замена тормозной жидкости"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Предпродажная подготовка"
+                    }
+                ]
+            },
+            {
+                categoryId: 13,
+                categoryName: "Тормозная система",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Замена деталей"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт"
+                    }
+                ]
+            },
+            {
+                categoryId: 14,
+                categoryName: "Трансмиссия",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Диагностика"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Замена деталей"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт"
+                    }
+                ]
+            },
+            {
+                categoryId: 15,
+                categoryName: "Электрооборудование",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Замена оборудования"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Стартер"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Замок зажигания"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Проводка"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Стеклоочиститель"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Стеклоподъемник"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Оптика"
+                    }
+                ]
+            },
+            {
+                categoryId: 16,
+                categoryName: "Покраска и тонировка ",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Тонировка стекол"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Бронирование фар"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Оклейка пленкой"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Покраска"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Ремонт с покраской"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Матовая покраска"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Устранение сколов"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Покраска жидкой резиной"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Хромирование деталей"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Аэрография"
+                    }
+                ]
+            },
+            {
+                categoryId: 17,
+                categoryName: "Тюнинг и допоборудование",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка автозвука"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Установка видеотехники"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Кузовной тюнинг"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Сигнализация"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Подогрев"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Шумоизоляция"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Антикоррозийная обработка"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Тюнинг салона"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Перетяжка салона"
+                    }
+                ]
+            },
+            {
+                categoryId: 18,
+                categoryName: "Шины, колеса, диски",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Шиномонтаж"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Балансировка"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Покраска дисков"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Вулканизация"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Выездной шиномонтаж"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Ошиповка"
+                    }
+                ]
+            },
+            {
+                categoryId: 19,
+                categoryName: "Мойка и уход за авто",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Мойка"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Автохимчистка"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Абразивная полировка"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Нанесение покрытия"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Нанополировка автомобиля"
+                    }
+                ]
+            },
+            {
+                categoryId: 20,
+                categoryName: "Помощь на дорогах",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Помощь на дороге"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Замена аккумулятора "
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Замена колеса"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Компьютерная диагностика"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Экстренная доставка топлива"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Зарядка аккумулятора"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Подкачка шин"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Вскрытие авто"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Выездная диагностика"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Отключение сигнализации"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Буксировка"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Отогрев автомобилей"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Изготовление автоключей"
+                    }
+                ]
+            },
+            {
+                categoryId: 21,
+                categoryName: "Переоборудование",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Для внедорожья"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Дома на колесах"
+                    }
+                ]
+            },
+            {
+                categoryId: 22,
+                categoryName: "Другое",
+                subcategories: []
+            }
+        ]
+    },
+    {
+        headId: 13,
+        heading: "Строительство",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Ремонт квартир и домов",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Капитальный ремонт"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Косметический ремонт"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт ванной"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Чистовая отделка"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Косметический ремонт"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Черновая отделка"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Ремонт кухни"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Ремонт туалета"
+                    }
+                ]
+            },
+            {
+                categoryId: 2,
+                categoryName: "Дизайнер-интерьера",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Разработка интерьера дома"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Разработка интерьера офиса"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Авторский надзор"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Подбор материалов"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Визуализация"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Интерьер общественных мест"
+                    }
+                ]
+            },
+            {
+                categoryId: 3,
+                categoryName: "Электрика",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Монтаж электрокабеля"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Установка и замена автоматов защиты"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Установка и замена розеток"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Установка и замена выключателей"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Установка люстры"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Подключение варочной панели"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Подключение электрических приборов"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Установка электросчетчика"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Подключение водонагревателя"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Демонтаж электросети"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Установка точечного светильника"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Установка звонка"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Подключение душевой кабины"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Подключение телевизора"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Установка автономного электроснабжения"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Установка бензинового генератора"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Установка дизельного генератора"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Установка газового генератора"
+                    }
+                ]
+            },
+            {
+                categoryId: 4,
+                categoryName: "Сборка и ремонт мебели",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Изготовление мебели"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Сборка мебели"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Разбор мебели"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Ремонт мебели"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Замена столешницы"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Перетяжка мебели кожей"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Перетяжка мебели тканью"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Изготовление офисной мебели"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Изготовление мебели для детской"
+                    }
+                ]
+            },
+            {
+                categoryId: 5,
+                categoryName: "Вывоз строительного мусора",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Вывоз строительного мусора"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Прием металлолома"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Вывоз макулатуры"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Прием грунта"
+                    }
+                ]
+            },
+            {
+                categoryId: 6,
+                categoryName: "Сантехника",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Вызов специалиста"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Установка сантехники"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Демонтаж сантехники"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Ремонт смесителя"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Монтаж труб"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Монтаж радиаторов отопления"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Установка водонагревателя"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Монтаж полотенцесушителя"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Подключение стиральной машины"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Монтаж ванны"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Монтаж фильтра"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Подключение посудомоечной машины"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Подвод к водопроводной сети"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Подвод к канализационной сети"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Монтаж теплового пола"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Устранение протечки"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Прочистка канализации"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Установка счетчиков"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Монтаж сантехнического люка"
+                    },
+                    {
+                        subcategoryId: 20,
+                        subcategoryName: "Установка электрокотла"
+                    },
+                    {
+                        subcategoryId: 21,
+                        subcategoryName: "Устранение засора в туалете"
+                    },
+                    {
+                        subcategoryId: 22,
+                        subcategoryName: "Гидроиспытания труб"
+                    },
+                    {
+                        subcategoryId: 23,
+                        subcategoryName: "Ремонт электрокотла"
+                    },
+                    {
+                        subcategoryId: 24,
+                        subcategoryName: "Покраска ванны"
+                    }
+                ]
+            },
+            {
+                categoryId: 7,
+                categoryName: "Водоснабжение и канализация",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Монтаж канализационных труб"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Чистка канализационных труб"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Монтаж водонагревателя"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Монтаж труб водоснабжения"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Установка фильтра очистки воды"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Монтаж радиатора"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Установка водораспределительного оборудования"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Монтаж систем очистки"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Монтаж систем подачи"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Монтаж наружной канализации"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Монтаж газового котла"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Демонтаж радиатора"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Монтаж ливневой канализации"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Демонтаж канализационной сети"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Чистка отопления и водоснабжения"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Установка счетчика отопления"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Гидроизоляция труб канализации"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Демонтаж септика"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Замена фильтра"
+                    }
+                ]
+            },
+            {
+                categoryId: 8,
+                categoryName: "Мастер на час",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Мастер на любую работу"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Сборка мебели"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Подключение бытовой техники"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Сантехнические работы"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Электромонтажные работы"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Малярные работы"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Штукатурные работы"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Столярные и плотницкие работы"
+                    }
+                ]
+            },
+            {
+                categoryId: 9,
+                categoryName: "Полы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Укладка ламината"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Монтаж плинтуса"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Настил линолеума"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Настил фанеры"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Укладка паркета"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Настил ковровых покрытий"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Цементная стяжка пола"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Нанесение лака на пол"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Гидроизоляция бетонной поверхности"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Нанесение покрытия на деревянный пол"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Монтаж теплого пола"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Демонтаж бетонной стяжки"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Монтаж водяного теплого пола"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Шлифовка лакированного пола"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Монтаж теплого пола из нагревательного мата"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Циклевка деревянного пола"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Настил спортивных покрытий на пол"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Монтаж теплого пола из нагревательных секций"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Монтаж сенсора температуры пола"
+                    }
+                ]
+            },
+            {
+                categoryId: 10,
+                categoryName: "Строительство",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Возведение каркасного дома"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Строительство дома из бруса"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Строительство кирпичного дома"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Строительство дома из бетонных блоков"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Строительство быстровозводимого дома"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Строительство дома из бревна"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Строительство зданий из модулей"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Строительство монолитного дома"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Строительство из железобетонных панелей"
+                    }
+                ]
+            },
+            {
+                categoryId: 11,
+                categoryName: "Плиточные работы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Кладка керамической плитки"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Кладка керамогранита"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Стяжка пола под укладку плитки"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Демонтаж керамической плитки"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Кладка мозайки"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Кладка плитки на полу"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Кладка плитки на стене"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Кладка декоративной плитки"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Кладка плитки без шва"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Облицовка искусственным камнем"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Кладка клинкерной плитки"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Облицовка бордюра плиткой"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Отделка декоративным камнем"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Отделка декоративным кирпичом"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Кладка тротуарной плитки"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Кладка мрамора и гранита"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Облицовка фасада плиткой"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Кладка кварцвиниловой плитки"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Реставрация плитки"
+                    }
+                ]
+            },
+            {
+                categoryId: 12,
+                categoryName: "Потолки",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка натяжного потолка"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Установка гипсокартонного потолка"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Установка подвесного потолка Армстронг"
+                    }
+                ]
+            },
+            {
+                categoryId: 13,
+                categoryName: "Покраска и Обои",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Покраска"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Наклейка обоев"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Штукатурка стен"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Шпатлевание поверхности"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Демонтаж штукатурки"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Штукатурка оконных откосов"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Покраска радиаторов"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Демонтаж побелки"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Покраска водопроводных труб"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Покраска дверей"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Покраска окон"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Покраска пола"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Нанесение жидких обоев"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Нанесение венецианской штукатурки"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Покраска и лакировка плинтусов"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Покрытие дверей лаком"
+                    }
+                ]
+            },
+            {
+                categoryId: 14,
+                categoryName: "Ремонт для офиса",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Косметический ремонт офиса"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Капитальный ремонт офиса"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Косметический ремонт торговых площадей"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Капитальный ремонт торговых площадей"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Ремонт складов"
+                    }
+                ]
+            },
+            {
+                categoryId: 15,
+                categoryName: "Окна и балконы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Остекление балконов и лоджий"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Отделка балконов и лоджий"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Утепление балконов и лоджий"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Установка окон"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Ремонт окон"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Демонтаж окон"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Замена оконных стекол"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Остекление веранд"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Герметизация окон"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Установка балконной двери"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Изготовление окон"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Звукоизоляция окон"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Ремонт балконов и лоджий под ключ"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Демонтаж балконов и лоджий"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Покраска деревянных окон"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Утепление окон"
+                    }
+                ]
+            },
+            {
+                categoryId: 16,
+                categoryName: "Бани, сауны, бассейн",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Строительсво бань"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Строительство солевой сауны"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Строительство хаммама"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Строительсво бассейна"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Демонтаж бассейна"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Чистка бассейнов"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Ремонт саун"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Ремонт бань"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Отделка канатом"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Герметизация"
+                    }
+                ]
+            },
+            {
+                categoryId: 17,
+                categoryName: "Снос и демонтаж",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Снос стен"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Демонтаж пола"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Демонтаж металлоконструкций"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Снос зданий"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Снос строений"
+                    }
+                ]
+            },
+            {
+                categoryId: 18,
+                categoryName: "Заборы и ограждения",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Монтаж забора"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Демонтаж забора"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Покраска забора"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Установка автоматических ворот"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Изготовление кованых заборов"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Возведение кирпичного забора"
+                    }
+                ]
+            },
+            {
+                categoryId: 19,
+                categoryName: "Сварка",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Сварка электрическая"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Сварка газопламенная"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Резка плазменной струей"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Лазерная сварка"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Электронно-лучевая сварка"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Кузнечная сварка"
+                    }
+                ]
+            },
+            {
+                categoryId: 20,
+                categoryName: "Бетонные работы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Залив фундамента"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Возведение бетонных стен"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Демонтаж бетонных конструкций"
+                    }
+                ]
+            },
+            {
+                categoryId: 21,
+                categoryName: "Кровля",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Монтаж кровли"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Демонтаж кровли"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт кровли"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Монтаж водосточных систем"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Возведение стропильной системы"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Монтаж дымников"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Обогрев кровли"
+                    }
+                ]
+            },
+            {
+                categoryId: 22,
+                categoryName: "Замки и двери",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка дверей"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Установка замка"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Демонтаж дверей"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Демонтаж дверной коробки"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Монтаж дверной коробки"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Ремонт замков"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Вскрытие замков"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Изготовление двери"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Ремонт двери"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Покраска двери лаком"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Утепление двери"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Звукоизоляция двери"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Изготовление ключей"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Изготовление магнитного ключа"
+                    }
+                ]
+            },
+            {
+                categoryId: 23,
+                categoryName: "Охранные системы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка камер видеонаблюдения"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Демонтаж камер видеонаблюдения"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Установка домофона"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Установка охранной системы"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Установка турникета"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Демонтаж охранной системы"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Установка шлагбаума"
+                    }
+                ]
+            },
+            {
+                categoryId: 24,
+                categoryName: "Фасад",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Проектирование фасадов"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Монтаж фасадов"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Демонтаж фасадов"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Утепление"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Окраска"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Чистка фасадов"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Фасадное остекление"
+                    }
+                ]
+            },
+            {
+                categoryId: 25,
+                categoryName: "Проектирование и сметы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Составление сметы"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Проектирование"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Составление сметы на ремонтные работы"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Составление сметы на строительные работы"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Проектирование водоснабжения"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Проектирование электросетей"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Проектирование систем безопасности"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Проектирование телекоммуникаций"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Проектирование газовых сетей"
+                    }
+                ]
+            },
+            {
+                categoryId: 26,
+                categoryName: "Землянные работы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Копка колодцев"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Копка септиков"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Копка траншеи под воду"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Копка фундамента"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Доставка песка и щебня"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Вывоз грунта"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Ландшафтные работы"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Спил деревьев"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Корчевание деревьев и пней"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Вырубка зарослей"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Фундамент"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Копка котлована"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Демонтаж фундамента"
+                    }
+                ]
+            },
+            {
+                categoryId: 27,
+                categoryName: "Гараж и парковка",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Строительство гаража"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Строительсво парковки"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Демонтаж гаража"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Ремонт"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Утепление"
+                    }
+                ]
+            },
+            {
+                categoryId: 28,
+                categoryName: "Вентиляция",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка вентиляции"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Установка воздуховодов"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Установка вентилятора"
+                    }
+                ]
+            },
+            {
+                categoryId: 29,
+                categoryName: "Камины и печи",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Строительство печи"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Строительство камина"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Ремонт печей и каминов"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Чистка печей и каминов"
+                    }
+                ]
+            },
+            {
+                categoryId: 30,
+                categoryName: "Умный дом",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка системы умный дом"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Автоматизация системы умный дом"
+                    }
+                ]
+            },
+            {
+                categoryId: 31,
+                categoryName: "Бурение",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Бурение скважин"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Подключение к водопроводной сети"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Монтаж фильтров"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Анализ воды"
+                    }
+                ]
+            },
+            {
+                categoryId: 32,
+                categoryName: "Дороги",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Асфальтовое покрытие"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Покрытие асфальтобетон"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Песчаный асфальтобетон"
+                    }
+                ]
+            },
+            {
+                categoryId: 33,
+                categoryName: "Ремонт ям",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Погрузка и вывоз грунта"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Демонтаж дорог"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Устройство дорожного покрытия"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Консультация"
+                    }
+                ]
+            },
+            {
+                categoryId: 34,
+                categoryName: "Работы на высоте",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Монтаж сплит систем"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Высотные работы по мантожу"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Очистка крыш"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Установка рекламы"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Мойка окон"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Покраска фасадов"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Очистка крыш"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Покрасочные работы на высоте"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Монтаж электрокабеля"
+                    }
+                ]
+            },
+            {
+                categoryId: 35,
+                categoryName: "Озеленение",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Посев газона"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Посадка растений"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Стрижка газона"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Удаление растений"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Проект на озеленение"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Установка систем полива"
+                    }
+                ]
+            },
+            {
+                categoryId: 36,
+                categoryName: "Рольставни",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Установка рольставней"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Монтаж секционных ворот"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Демонтаж рольставней"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Ремонт рольставней"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Ремонт секционных ворот"
+                    }
+                ]
+            },
+            {
+                categoryId: 37,
+                categoryName: "Стекольные услуги",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Производство стекла"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Ремонт стекольных изделий"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Резка стекла"
+                    }
+                ]
+            },
+            {
+                categoryId: 38,
+                categoryName: "Изыскательные работы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Геодезическая съемка"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Проверка расположения"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Исследование подземных коммуникаций"
+                    }
+                ]
+            },
+            {
+                categoryId: 39,
+                categoryName: "Газ",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Подключение"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Замена оборудования"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Прокладка газопровода"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Демонтаж газовой плиты"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Установка и замена счетчиков"
+                    }
+                ]
+            },
+            {
+                categoryId: 40,
+                categoryName: "Кадастровые работы",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Геодезические работы"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Межевание"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Разработка плана"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Определение площади объекта"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Постановка на кадастровый учет"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Кадастровая съемка"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Изготовление технического паспорта"
+                    }
+                ]
+            },
+            {
+                categoryId: 41,
+                categoryName: "Другое",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Создание металлоконструкций"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Контроль качества"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Изготовление лестниц"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Покрытие стен гипсокартоном"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Монтаж карнизов"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Монтаж перегородок из гипсокартона"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Установка лестничного ограждения"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Демонтаж лестниц"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Установка стеновых панелей"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Установка антенного кабеля"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Алмазная резка"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Алмазное сверление"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Столярные и плотницкие работы"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "Монтаж антенн"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Подключение и настройка телевизора"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Монтаж интернет-кабеля"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Покраска лестниц"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Монтаж жалюзи"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Звукоизоляция"
+                    },
+                    {
+                        subcategoryId: 20,
+                        subcategoryName: "Монтаж лестниц"
+                    },
+                    {
+                        subcategoryId: 21,
+                        subcategoryName: "Ремонт антенны"
+                    },
+                    {
+                        subcategoryId: 22,
+                        subcategoryName: "Теплоизоляция"
+                    },
+                    {
+                        subcategoryId: 23,
+                        subcategoryName: "Роспись стен"
+                    },
+                    {
+                        subcategoryId: 24,
+                        subcategoryName: "Изготовление кованых решеток"
+                    },
+                    {
+                        subcategoryId: 25,
+                        subcategoryName: "Теплоизоляция труб"
+                    },
+                    {
+                        subcategoryId: 26,
+                        subcategoryName: "Пароизоляция"
+                    },
+                    {
+                        subcategoryId: 27,
+                        subcategoryName: "Монтаж кабелей"
+                    },
+                    {
+                        subcategoryId: 28,
+                        subcategoryName: "Покраска лепнины"
+                    },
+                    {
+                        subcategoryId: 29,
+                        subcategoryName: "Мозаичные работы"
+                    },
+                    {
+                        subcategoryId: 30,
+                        subcategoryName: "Восстановление ванны"
+                    },
+                    {
+                        subcategoryId: 31,
+                        subcategoryName: "Пошив штор"
+                    },
+                    {
+                        subcategoryId: 32,
+                        subcategoryName: "Производство кованой мебели"
+                    },
+                    {
+                        subcategoryId: 33,
+                        subcategoryName: "Работы по лепнине"
+                    },
+                    {
+                        subcategoryId: 34,
+                        subcategoryName: "Огнезащитные работы"
+                    },
+                    {
+                        subcategoryId: 35,
+                        subcategoryName: "Подключение интернета"
+                    },
+                    {
+                        subcategoryId: 36,
+                        subcategoryName: "Прочистка труб"
+                    },
+                    {
+                        subcategoryId: 37,
+                        subcategoryName: "Установка пожарного оборудования"
+                    },
+                    {
+                        subcategoryId: 38,
+                        subcategoryName: "Электроизоляция"
+                    },
+                    {
+                        subcategoryId: 39,
+                        subcategoryName: "Производство витражей"
+                    },
+                    {
+                        subcategoryId: 40,
+                        subcategoryName: "Установка маркиз"
+                    },
+                    {
+                        subcategoryId: 41,
+                        subcategoryName: "Создание водоема"
+                    },
+                    {
+                        subcategoryId: 42,
+                        subcategoryName: "Изготовление скульптур"
+                    },
+                    {
+                        subcategoryId: 43,
+                        subcategoryName: "Художественное литье"
+                    },
+                    {
+                        subcategoryId: 44,
+                        subcategoryName: "Установка датчика загазованности"
+                    },
+                    {
+                        subcategoryId: 45,
+                        subcategoryName: "Монтаж ветрогенераторов"
+                    },
+                    {
+                        subcategoryId: 46,
+                        subcategoryName: "Монтаж солнечной электростанции"
+                    },
+                    {
+                        subcategoryId: 47,
+                        subcategoryName: "Строительство фонтана"
+                    },
+                    {
+                        subcategoryId: 48,
+                        subcategoryName: "Монтаж солнечного водонагревателя"
+                    },
+                    {
+                        subcategoryId: 49,
+                        subcategoryName: "Монтаж газоанализатора"
+                    },
+                    {
+                        subcategoryId: 50,
+                        subcategoryName: "Устройство отбора газовой пробы"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        headId: 14,
+        heading: "Здоровье",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Аллерголог ",
+                subcategories: []
+            },
+            {
+                categoryId: 2,
+                categoryName: "Альтернативная медицина",
+                subcategories: []
+            },
+            {
+                categoryId: 3,
+                categoryName: "Анализы",
+                subcategories: []
+            },
+            {
+                categoryId: 4,
+                categoryName: "Анестезиолог",
+                subcategories: []
+            },
+            {
+                categoryId: 5,
+                categoryName: "Ведение беременности",
+                subcategories: []
+            },
+            {
+                categoryId: 6,
+                categoryName: "Вертебролог",
+                subcategories: []
+            },
+            {
+                categoryId: 7,
+                categoryName: "Врач-гомеопат",
+                subcategories: []
+            },
+            {
+                categoryId: 8,
+                categoryName: "Гастроэнтеролог",
+                subcategories: []
+            },
+            {
+                categoryId: 9,
+                categoryName: "Гематолог",
+                subcategories: []
+            },
+            {
+                categoryId: 10,
+                categoryName: "Гемостазиолог",
+                subcategories: []
+            },
+            {
+                categoryId: 11,
+                categoryName: "Генетические исследования",
+                subcategories: []
+            },
+            {
+                categoryId: 12,
+                categoryName: "Гепатолог",
+                subcategories: []
+            },
+            {
+                categoryId: 13,
+                categoryName: "Гериатр",
+                subcategories: []
+            },
+            {
+                categoryId: 14,
+                categoryName: "Гинеколог",
+                subcategories: []
+            },
+            {
+                categoryId: 15,
+                categoryName: "Гирудотерапевт",
+                subcategories: []
+            },
+            {
+                categoryId: 16,
+                categoryName: "Дерматовенеролог",
+                subcategories: []
+            },
+            {
+                categoryId: 17,
+                categoryName: "Детский специалист",
+                subcategories: []
+            },
+            {
+                categoryId: 18,
+                categoryName: "Диетолог",
+                subcategories: []
+            },
+            {
+                categoryId: 19,
+                categoryName: "Нутрициолог",
+                subcategories: []
+            },
+            {
+                categoryId: 20,
+                categoryName: "Иммунолог",
+                subcategories: []
+            },
+            {
+                categoryId: 21,
+                categoryName: "Инфекционист",
+                subcategories: []
+            },
+            {
+                categoryId: 22,
+                categoryName: "Кардиолог",
+                subcategories: []
+            },
+            {
+                categoryId: 23,
+                categoryName: "Лимфолог",
+                subcategories: []
+            },
+            {
+                categoryId: 24,
+                categoryName: "Логопед",
+                subcategories: []
+            },
+            {
+                categoryId: 25,
+                categoryName: "Маммолог",
+                subcategories: []
+            },
+            {
+                categoryId: 26,
+                categoryName: "Мануальная мезотерапия",
+                subcategories: []
+            },
+            {
+                categoryId: 27,
+                categoryName: "Мануальный терапевт",
+                subcategories: []
+            },
+            {
+                categoryId: 28,
+                categoryName: "Медицинские пиявки",
+                subcategories: []
+            },
+            {
+                categoryId: 29,
+                categoryName: "Миколог",
+                subcategories: []
+            },
+            {
+                categoryId: 30,
+                categoryName: "Микрохирургия глаза",
+                subcategories: []
+            },
+            {
+                categoryId: 31,
+                categoryName: "Многопрофильные медицинские центры",
+                subcategories: []
+            },
+            {
+                categoryId: 32,
+                categoryName: "Невролог",
+                subcategories: []
+            },
+            {
+                categoryId: 33,
+                categoryName: "Нейрохирург",
+                subcategories: []
+            },
+            {
+                categoryId: 34,
+                categoryName: "Нефролог",
+                subcategories: []
+            },
+            {
+                categoryId: 35,
+                categoryName: "Онколог",
+                subcategories: []
+            },
+            {
+                categoryId: 36,
+                categoryName: "Организация родов ",
+                subcategories: []
+            },
+            {
+                categoryId: 37,
+                categoryName: "Ортопедия и травматология",
+                subcategories: []
+            },
+            {
+                categoryId: 38,
+                categoryName: "Остеопат",
+                subcategories: []
+            },
+            {
+                categoryId: 39,
+                categoryName: "Офтальмолог",
+                subcategories: []
+            },
+            {
+                categoryId: 40,
+                categoryName: "Очищение организма",
+                subcategories: []
+            },
+            {
+                categoryId: 41,
+                categoryName: "Пантовые процедуры",
+                subcategories: []
+            },
+            {
+                categoryId: 42,
+                categoryName: "Пластическая хирургия",
+                subcategories: []
+            },
+            {
+                categoryId: 43,
+                categoryName: "Подолог",
+                subcategories: []
+            },
+            {
+                categoryId: 44,
+                categoryName: "Проктолог",
+                subcategories: []
+            },
+            {
+                categoryId: 45,
+                categoryName: "Профпатолог",
+                subcategories: []
+            },
+            {
+                categoryId: 46,
+                categoryName: "Процедурный кабинет",
+                subcategories: []
+            },
+            {
+                categoryId: 47,
+                categoryName: "Психиатр",
+                subcategories: []
+            },
+            {
+                categoryId: 48,
+                categoryName: "Психолог",
+                subcategories: []
+            },
+            {
+                categoryId: 49,
+                categoryName: "Психотерапевт",
+                subcategories: []
+            },
+            {
+                categoryId: 50,
+                categoryName: "Пульмонолог",
+                subcategories: []
+            },
+            {
+                categoryId: 51,
+                categoryName: "Ревматолог",
+                subcategories: []
+            },
+            {
+                categoryId: 52,
+                categoryName: "Рефлексотерапевт",
+                subcategories: []
+            },
+            {
+                categoryId: 53,
+                categoryName: "Сексолог",
+                subcategories: []
+            },
+            {
+                categoryId: 54,
+                categoryName: "Соляные комнаты",
+                subcategories: []
+            },
+            {
+                categoryId: 55,
+                categoryName: "Сомнолог",
+                subcategories: []
+            },
+            {
+                categoryId: 56,
+                categoryName: "Стоматолог",
+                subcategories: []
+            },
+            {
+                categoryId: 57,
+                categoryName: "Стоунтерапия",
+                subcategories: []
+            },
+            {
+                categoryId: 58,
+                categoryName: "Сурдолог",
+                subcategories: []
+            },
+            {
+                categoryId: 59,
+                categoryName: "Талассотерапия",
+                subcategories: []
+            },
+            {
+                categoryId: 60,
+                categoryName: "Терапевт",
+                subcategories: []
+            },
+            {
+                categoryId: 61,
+                categoryName: "Термальные процедуры",
+                subcategories: []
+            },
+            {
+                categoryId: 62,
+                categoryName: "Тонизирующие салоны",
+                subcategories: []
+            },
+            {
+                categoryId: 63,
+                categoryName: "Трансплантация волос",
+                subcategories: []
+            },
+            {
+                categoryId: 64,
+                categoryName: "Трихолог",
+                subcategories: []
+            },
+            {
+                categoryId: 65,
+                categoryName: "Уролог / Андролог",
+                subcategories: []
+            },
+            {
+                categoryId: 66,
+                categoryName: "Физиотерапевт",
+                subcategories: []
+            },
+            {
+                categoryId: 67,
+                categoryName: "Флеболог",
+                subcategories: []
+            },
+            {
+                categoryId: 68,
+                categoryName: "Фониатр",
+                subcategories: []
+            },
+            {
+                categoryId: 69,
+                categoryName: "Фтизиатр",
+                subcategories: []
+            },
+            {
+                categoryId: 70,
+                categoryName: "Хирург",
+                subcategories: []
+            },
+            {
+                categoryId: 71,
+                categoryName: "Центр борьбы со СПИДом",
+                subcategories: []
+            },
+            {
+                categoryId: 72,
+                categoryName: "Центр планирования семьи",
+                subcategories: []
+            },
+            {
+                categoryId: 73,
+                categoryName: "Челюстно-лицевая хирургия",
+                subcategories: []
+            },
+            {
+                categoryId: 74,
+                categoryName: "Школа для будущих мам",
+                subcategories: []
+            },
+            {
+                categoryId: 75,
+                categoryName: "Эндокринолог",
+                subcategories: []
+            },
+            {
+                categoryId: 76,
+                categoryName: "Эпилептолог",
+                subcategories: []
+            }
+        ]
+    },
+    {
+        headId: 15,
+        heading: "Спорт",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Авиамодельный спорт",
+                subcategories: []
+            },
+            {
+                categoryId: 2,
+                categoryName: "Авиационные виды спорта",
+                subcategories: []
+            },
+            {
+                categoryId: 3,
+                categoryName: "Автоспорт",
+                subcategories: []
+            },
+            {
+                categoryId: 4,
+                categoryName: "Аквааэробика",
+                subcategories: []
+            },
+            {
+                categoryId: 5,
+                categoryName: "Акробатика",
+                subcategories: []
+            },
+            {
+                categoryId: 6,
+                categoryName: "Альпинизм",
+                subcategories: []
+            },
+            {
+                categoryId: 7,
+                categoryName: "Армрестлинг",
+                subcategories: []
+            },
+            {
+                categoryId: 8,
+                categoryName: "Аэробика",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Стэп-аэробика"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Классическая-аэробика"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Вело-аэробика"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Спортивная-аэробика"
+                    }
+                ]
+            },
+            {
+                categoryId: 9,
+                categoryName: "Бадминтон",
+                subcategories: []
+            },
+            {
+                categoryId: 10,
+                categoryName: "Баскетбол",
+                subcategories: []
+            },
+            {
+                categoryId: 11,
+                categoryName: "Батутные центры",
+                subcategories: []
+            },
+            {
+                categoryId: 12,
+                categoryName: "Биатлон",
+                subcategories: []
+            },
+            {
+                categoryId: 13,
+                categoryName: "Бильярд",
+                subcategories: []
+            },
+            {
+                categoryId: 14,
+                categoryName: "Бобслей",
+                subcategories: []
+            },
+            {
+                categoryId: 15,
+                categoryName: "Бодибилдинг ",
+                subcategories: []
+            },
+            {
+                categoryId: 16,
+                categoryName: "Боевые виды спорта",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Айкидо"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Бокс "
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Борьба вольная"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Борьба греко-римская"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Грепплинг"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Джиу-джитсу"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Дзюдо"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Каратэ-до"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Кекусинкай"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Кендо"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Кикбоксинг"
+                    },
+                    {
+                        subcategoryId: 12,
+                        subcategoryName: "Кудо"
+                    },
+                    {
+                        subcategoryId: 13,
+                        subcategoryName: "Кунг-Фу"
+                    },
+                    {
+                        subcategoryId: 14,
+                        subcategoryName: "МиксФайт (ММА)"
+                    },
+                    {
+                        subcategoryId: 15,
+                        subcategoryName: "Ножевой бой"
+                    },
+                    {
+                        subcategoryId: 16,
+                        subcategoryName: "Панкратион"
+                    },
+                    {
+                        subcategoryId: 17,
+                        subcategoryName: "Рукопашный бой"
+                    },
+                    {
+                        subcategoryId: 18,
+                        subcategoryName: "Самбо"
+                    },
+                    {
+                        subcategoryId: 19,
+                        subcategoryName: "Сумо"
+                    },
+                    {
+                        subcategoryId: 20,
+                        subcategoryName: "Тайский бокс"
+                    },
+                    {
+                        subcategoryId: 21,
+                        subcategoryName: "Тэквондо"
+                    },
+                    {
+                        subcategoryId: 22,
+                        subcategoryName: "Ушу"
+                    }
+                ]
+            },
+            {
+                categoryId: 17,
+                categoryName: "Большой теннис",
+                subcategories: []
+            },
+            {
+                categoryId: 18,
+                categoryName: "Вейкбординг",
+                subcategories: []
+            },
+            {
+                categoryId: 19,
+                categoryName: "Велнес-залы",
+                subcategories: []
+            },
+            {
+                categoryId: 20,
+                categoryName: "Велоспорт",
+                subcategories: []
+            },
+            {
+                categoryId: 21,
+                categoryName: "Водное поло",
+                subcategories: []
+            },
+            {
+                categoryId: 22,
+                categoryName: "Военно-патриотические клубы",
+                subcategories: []
+            },
+            {
+                categoryId: 23,
+                categoryName: "Волейбол",
+                subcategories: []
+            },
+            {
+                categoryId: 24,
+                categoryName: "Гандбол",
+                subcategories: []
+            },
+            {
+                categoryId: 25,
+                categoryName: "Гольф-клубы",
+                subcategories: []
+            },
+            {
+                categoryId: 26,
+                categoryName: "Гребля",
+                subcategories: []
+            },
+            {
+                categoryId: 27,
+                categoryName: "Занятия по аквааэробике",
+                subcategories: []
+            },
+            {
+                categoryId: 28,
+                categoryName: "Кайтсерфинг",
+                subcategories: []
+            },
+            {
+                categoryId: 29,
+                categoryName: "Картинг ",
+                subcategories: []
+            },
+            {
+                categoryId: 30,
+                categoryName: "Керлинг",
+                subcategories: []
+            },
+            {
+                categoryId: 31,
+                categoryName: "Конный спорт",
+                subcategories: []
+            },
+            {
+                categoryId: 32,
+                categoryName: "Кроссфит",
+                subcategories: []
+            },
+            {
+                categoryId: 33,
+                categoryName: "Конькобежный спорт",
+                subcategories: []
+            },
+            {
+                categoryId: 34,
+                categoryName: "Легкая атлетика",
+                subcategories: []
+            },
+            {
+                categoryId: 35,
+                categoryName: "Лодочные станции",
+                subcategories: []
+            },
+            {
+                categoryId: 36,
+                categoryName: "Лыжный спорт",
+                subcategories: []
+            },
+            {
+                categoryId: 37,
+                categoryName: "Многоборье",
+                subcategories: []
+            },
+            {
+                categoryId: 38,
+                categoryName: "Мотоспорт",
+                subcategories: []
+            },
+            {
+                categoryId: 39,
+                categoryName: "Настольный теннис",
+                subcategories: []
+            },
+            {
+                categoryId: 40,
+                categoryName: "Оздоровительный спорт ",
+                subcategories: []
+            },
+            {
+                categoryId: 41,
+                categoryName: "Пауэрлифтинг ",
+                subcategories: []
+            },
+            {
+                categoryId: 42,
+                categoryName: "Пилатес",
+                subcategories: []
+            },
+            {
+                categoryId: 43,
+                categoryName: "Плавание",
+                subcategories: []
+            },
+            {
+                categoryId: 44,
+                categoryName: "Подводный спорт",
+                subcategories: []
+            },
+            {
+                categoryId: 45,
+                categoryName: "Профессиональные спортивные клубы",
+                subcategories: []
+            },
+            {
+                categoryId: 46,
+                categoryName: "Прыжки в воду",
+                subcategories: []
+            },
+            {
+                categoryId: 47,
+                categoryName: "Прыжки с парашютом",
+                subcategories: []
+            },
+            {
+                categoryId: 48,
+                categoryName: "Роллерспорт",
+                subcategories: []
+            },
+            {
+                categoryId: 49,
+                categoryName: "Санный спорт",
+                subcategories: []
+            },
+            {
+                categoryId: 50,
+                categoryName: "Синхронное плавание",
+                subcategories: []
+            },
+            {
+                categoryId: 51,
+                categoryName: "Скалодромы",
+                subcategories: []
+            },
+            {
+                categoryId: 52,
+                categoryName: "Скалолазание",
+                subcategories: []
+            },
+            {
+                categoryId: 53,
+                categoryName: "Сквош-корты",
+                subcategories: []
+            },
+            {
+                categoryId: 54,
+                categoryName: "Скейтбординг",
+                subcategories: []
+            },
+            {
+                categoryId: 55,
+                categoryName: "Скоростной спуск на байдарках",
+                subcategories: []
+            },
+            {
+                categoryId: 56,
+                categoryName: "Сноуборд",
+                subcategories: []
+            },
+            {
+                categoryId: 57,
+                categoryName: "Спортивная гимнастика",
+                subcategories: []
+            },
+            {
+                categoryId: 58,
+                categoryName: "Спортивная рыбалка",
+                subcategories: []
+            },
+            {
+                categoryId: 59,
+                categoryName: "Спортивно-интеллектуальные клубы",
+                subcategories: []
+            },
+            {
+                categoryId: 60,
+                categoryName: "Спортивно-технические клубы",
+                subcategories: []
+            },
+            {
+                categoryId: 61,
+                categoryName: "Спортивные секции",
+                subcategories: []
+            },
+            {
+                categoryId: 62,
+                categoryName: "Спортивные школы",
+                subcategories: []
+            },
+            {
+                categoryId: 63,
+                categoryName: "Стрелковый спорт",
+                subcategories: []
+            },
+            {
+                categoryId: 64,
+                categoryName: "Танцы ",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Бальные танцы"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Зумба"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Восточные танцы"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Латиноамериканские танцы"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Спортивные танцы"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Клубные танцы"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Постановка танца"
+                    },
+                    {
+                        subcategoryId: 8,
+                        subcategoryName: "Свадебные танцы"
+                    },
+                    {
+                        subcategoryId: 9,
+                        subcategoryName: "Хореография"
+                    },
+                    {
+                        subcategoryId: 10,
+                        subcategoryName: "Стретчинг"
+                    },
+                    {
+                        subcategoryId: 11,
+                        subcategoryName: "Онлайн Консультация"
+                    }
+                ]
+            },
+            {
+                categoryId: 65,
+                categoryName: "Теннисные корты",
+                subcategories: []
+            },
+            {
+                categoryId: 66,
+                categoryName: "Тренажёрные залы",
+                subcategories: []
+            },
+            {
+                categoryId: 67,
+                categoryName: "Тяжелая атлетика",
+                subcategories: []
+            },
+            {
+                categoryId: 68,
+                categoryName: "Фехтование",
+                subcategories: []
+            },
+            {
+                categoryId: 69,
+                categoryName: "Фигурное катание на льду",
+                subcategories: []
+            },
+            {
+                categoryId: 70,
+                categoryName: "Фитнес ",
+                subcategories: []
+            },
+            {
+                categoryId: 71,
+                categoryName: "Формула-1",
+                subcategories: []
+            },
+            {
+                categoryId: 72,
+                categoryName: "Футбол",
+                subcategories: []
+            },
+            {
+                categoryId: 73,
+                categoryName: "Хоккей",
+                subcategories: []
+            },
+            {
+                categoryId: 74,
+                categoryName: "Художественная гимнастика",
+                subcategories: []
+            },
+            {
+                categoryId: 75,
+                categoryName: "Йога",
+                subcategories: [
+                    {
+                        subcategoryId: 1,
+                        subcategoryName: "Йога для беременных"
+                    },
+                    {
+                        subcategoryId: 2,
+                        subcategoryName: "Йога для женщин"
+                    },
+                    {
+                        subcategoryId: 3,
+                        subcategoryName: "Йога дыхательные практики"
+                    },
+                    {
+                        subcategoryId: 4,
+                        subcategoryName: "Йога-терапия"
+                    },
+                    {
+                        subcategoryId: 5,
+                        subcategoryName: "Кундалини-йога"
+                    },
+                    {
+                        subcategoryId: 6,
+                        subcategoryName: "Хатха-йога"
+                    },
+                    {
+                        subcategoryId: 7,
+                        subcategoryName: "Йога Аштанга"
+                    }
+                ]
+            },
+            {
+                categoryId: 76,
+                categoryName: "Чирлидинг",
+                subcategories: []
+            },
+            {
+                categoryId: 77,
+                categoryName: "Шахматы",
+                subcategories: []
+            },
+            {
+                categoryId: 78,
+                categoryName: "Яхт-клубы",
+                subcategories: []
+            }
+        ]
+    },
+    {
+        headId: 16,
+        heading: "Эзотерика",
+        categories: [
+            {
+                categoryId: 1,
+                categoryName: "Нумерология",
+                subcategories: []
+            },
+            {
+                categoryId: 2,
+                categoryName: "Гадание",
+                subcategories: []
+            },
+            {
+                categoryId: 3,
+                categoryName: "Астрология",
+                subcategories: []
+            },
+            {
+                categoryId: 4,
+                categoryName: "Ясновидение",
+                subcategories: []
+            },
+            {
+                categoryId: 5,
+                categoryName: "Трансерфинг",
+                subcategories: []
+            },
+            {
+                categoryId: 6,
+                categoryName: "Дизайн человека",
+                subcategories: []
+            },
+            {
+                categoryId: 7,
+                categoryName: "Другое",
+                subcategories: []
+            }
+        ]
+    }
+]

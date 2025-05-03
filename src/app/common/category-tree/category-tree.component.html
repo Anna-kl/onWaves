@@ -1,0 +1,45 @@
+<div class='one_panel'>
+  <div class="pan-col">
+    <div class="pan-category-modal" *ngFor="let treeCat of treeCategory">
+      <ul>
+        <li ><!--категория -->
+          <div class="cont-horiz-start">
+            <input class="custom-checkbox"  (change)="setCategory()"
+                   [(ngModel)]="treeCat.isChecked" type="checkbox" [id]="treeCat.id">
+            <label [for]="treeCat.id">
+              {{treeCat.name}}
+            </label>
+          </div>
+          <!--подкатегории style="margin-top:10px" -->
+          <ul class="cont-vert-start" *ngIf="treeCat.childrens" style="margin-left: 30px;">
+            <!--подкатегория 1 -->
+            <div *ngFor="let cat of treeCat.childrens" class="cont-horiz" >
+              <input class="custom-checkbox" type="checkbox" [(ngModel)]="cat.isChecked"
+                     [id]="cat.id" *ngIf="checkStatusView(cat)" (change)="setCategory()">
+              <label [for]="cat.id" *ngIf="checkStatusView(cat)" style="color:red">
+                {{cat.name}}
+              </label>
+            </div>
+          </ul>
+          <a (click)="open(treeCat)" *ngIf="checkStatusOpen(treeCat)"
+            style="
+              font-weight: 400;
+              margin-top: 10px;
+              margin-left: 56px;
+              color: $green-basic;" >
+            Смотреть все
+          </a>
+          <a href="javascript:void(0)"
+            *ngIf="checkStatusClose(treeCat)" style=" font-weight: 400; margin-top: 10px;
+                margin-left: 56px; color: $green-basic;" (click)="close(treeCat)">
+            Свернуть
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<!--<div class="cont-horiz btn-green" (click)="saveChanges()" *ngIf="!isEditService">-->
+<!--  Сохранить-->
+<!--</div>-->
+

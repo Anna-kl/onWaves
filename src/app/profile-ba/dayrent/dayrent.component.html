@@ -1,0 +1,504 @@
+<div class="cont-horiz" style="background: #FAFAFC;  padding-bottom: 20px;" > 
+    <!-- Cтраница --> 
+    <div class="list1200 cont-vert-center-start margin-top70 " style="padding: 10px;"> 
+        <!-- Заголовок страницы  -->
+        <div class="cont-horiz-start"> 
+            <div  class="cont-horiz btn-back"> 
+                <div> 
+                    <h1>Добавить услугу посуточной аренды</h1> 
+                </div>
+            </div>
+        </div>
+        <!-- Навигация -->
+        <div class="cont-vert-start w100" style="max-width: 1200px; width: 100vw;"> 
+            <div class="cont-horiz w100 left-right20 margin-top-bottom50">
+                <div class="cont-vert w100 margin-right20" style="max-width: 250px;">
+                    <div class="line-gray3 w100"></div>
+                    <div class="steps-line3 cont-vert-center-start">
+                        Рубрики3
+                    </div>
+                </div> 
+                <div class="cont-vert w100 " style="max-width: 250px;">
+                    <div class="line-green3 w100"></div>
+                    <div class="steps-line3-active cont-vert-center-start">
+                        Описание
+                    </div>
+                </div>  
+            </div>
+        </div> 
+        <div class="cont-horiz-center-start w100  " 
+            style="  
+                display: flex; 
+                gap: 10px 10px; 
+                flex-wrap: wrap; 
+                margin-left: auto; 
+                margin-right: auto;">
+            <!-- Левая колонка background-color: aqua; style="background-color: rgb(98, 81, 60);"-->
+            <div class="col50" >
+                <!-- 1. Введите название услуги  --> <!-- [(ngModel)]="nameService" -->
+                <div class="margin-bottom20 txt-green-light">
+                    Придумайте название объекта бронирования
+                </div>
+                <div class="input-line100 cont-horiz-start margin-bottom50 w100" style="margin-top: 0px;">
+                    <input  type="text" size="13" placeholder="Домик №1" class="w100">
+                </div>
+
+                <div class="cont-horiz-center-start margin-bottom50 wrap480" style="gap: 30px 20px;">
+                    <div class="cont-vert-start-center w100"> 
+                        <div class="txt-green-light">
+                            Укажите количество мест проживания
+                        </div>
+                        <div class="input-line cont-horiz-start margin-top30">
+                            <input  type="text" size="15" placeholder="+7 123 456 78 90" >
+                        </div>
+                    </div>
+                    
+                    <div class="cont-vert-start-center w100"> 
+                        <div class="txt-green-light">
+                            Укажите количество дополнительных мест
+                        </div>
+                        <div class="input-line cont-horiz-start margin-top30">
+                            <input  type="text" size="15" placeholder="+7 123 456 78 90" >
+                        </div>
+                    </div>
+                </div>  
+                <div class="txt-green-light margin-bottom20" >
+                    Укажите время начала и конца аренды
+                </div> 
+                <div class="cont-horiz-between"> 
+                    <!-- Начало -->
+                    <div class="cont-vert">
+                        <div class="cont-horiz-start-start w100 margin-bottom10  card-day-text">
+                            Начало:
+                        </div>
+                        <!-- Циферблат со временем  [(ngModel)]="sch.work.start" --> 
+                        <div class="input-line-mini margin-right10 cont-horiz-start">
+                            <input  type="time" size="1" placeholder="10:00"  style="border: none" >
+                        </div> 
+                    </div>
+                    <!-- Конец: [(ngModel)]="sch.work.end" -->
+                    <div class="cont-vert">
+                        <div class="cont-horiz-start-start w100  margin-bottom10 card-day-text" >
+                            Конец
+                        </div>
+                        <div class="input-line-mini margin-right10 cont-horiz-start">
+                            <input  type="time" size="1"  style="border: none" placeholder="10:00">
+                        </div> 
+                    </div> 
+                </div>  
+            </div>   
+            <!-- Правая колонка style="background-color: burlywood;"-->
+            <div class="col50" >  
+                <!-- 3. Дополнительная информация --> <!-- [(ngModel)]="text" (input)="updateCounter()"-->        
+                <div class="txt-green-light margin-bottom20">
+                    Кратко опишите дополнительную информацию.
+                </div>
+                <div class="textarea-wrapper w100 margin-bottom50">
+                    <textarea class="w100" maxlength="150" rows="5" cols="34" placeholder="Добавьте описание" >
+                    </textarea>
+                    <span class="remaning">
+                        <!-- {{remainingChars}}-->            
+                    </span>
+                </div>  
+                <!-- 5. Выберите кому подходит услуга -->
+                <div class="cont-vert-start-center" style="gap: 20px;">
+                    <div class="txt-green-light">
+                        Выберите кому подходит услуга
+                    </div>
+                    <!--div class="cont-horiz-start">
+                        < [checked]="getGender(0)" (change)="setGender(0)" 
+                            [checked]="getGender(1)" (change)="setGender(1)" 
+                            [checked]="getGender(2)" (change)="setGender(2)" 
+                            [checked]="getGender(3)" (change)="setGender(3)">
+                        <input class="custom-checkbox" type="checkbox" id="dlja_vseh">
+                        <label for="dlja_vseh">
+                            Для всех
+                        </label>
+                    </div-->
+                    <div class="cont-horiz-start">
+                        <!--  [checked]="getGender(0)"  (change)="setGender(0)" -->
+                        <input class="custom-checkbox" type="checkbox" id="dlja_zhenshhin">
+                        <label for="dlja_zhenshhin">
+                            Для женщин
+                        </label>
+                    </div>
+                    <div class="cont-horiz-start">
+                        <!--[checked]="getGender(1)" (change)="setGender(1)" -->
+                        <input class="custom-checkbox" type="checkbox" id="dlja_muzhchin" >
+                        <label for="dlja_muzhchin">
+                            Для мужчин
+                        </label>
+                    </div>
+                    <div class="cont-horiz-start">
+                        <!-- [checked]="getGender(2)" (change)="setGender(2)"-->
+                        <input class="custom-checkbox" type="checkbox" id="dlja_detej">
+                        <label for="dlja_detej">
+                            Для детей
+                        </label>
+                    </div>
+                    <div class="cont-horiz-start">
+                        <!-- id="dlja_zhivotnyhh" [checked]="getGender(3)" (change)="setGender(3)"-->
+                        <input class="custom-checkbox" type="checkbox" >
+                        <label for="dlja_zhivotnyhh">
+                            Для животных
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>  
+        <!-- строка 2 -->
+        <div class="cont-horiz-around-start wrap">
+            <div class="txt-green-light margin-bottom30 w100" >
+                Выберите дополнительные опции:
+            </div>
+            <div class="cont-horiz-around w100 wrap" style="gap: 10px 10px;">
+                <!-- 1 -->
+                <div class="more_option">
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="razdelnye_krovati" >
+                        <label for="razdelnye_krovati">Раздельные кровати</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="dvuspalnaja_krovat" >
+                        <label for="dvuspalnaja_krovat">Двуспальная кровать</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="ws" >
+                        <label for="ws">Туалет</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="shower" >
+                        <label for="shower">Душ</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="bed_dress" >
+                        <label for="bed_dress">Постельные принадлежности</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="hair_dryer" >
+                        <label for="hair_dryer">Фен</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="food" >
+                        <label for="food">Завтрак (питание)</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="kitchen" >
+                        <label for="kitchen">Кухня</label>
+                    </div>
+                </div>
+                <!-- 2 -->
+                <div class="more_option ">
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="dishes" >
+                        <label for="dishes">Посуда</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="plate" >
+                        <label for="plate">Плита</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="mini-bar" >
+                        <label for="mini-bar">Мини-бар</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="conditioner" >
+                        <label for="conditioner">Кондиционер</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="wi-fi" >
+                        <label for="wi-fi">WI-FI</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="safe" >
+                        <label for="safe">Сейф</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="kettle" >
+                        <label for="kettle">Чайник</label>
+                        </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="fridge" >
+                        <label for="fridge">Холодильник</label>
+                    </div>
+                </div>
+                <!-- 3 -->
+                <div class="more_option">
+                    <div class="single_option">
+                    <input class="custom-checkbox" type="checkbox" id="fireplace" >
+                    <label for="fireplace">Камин</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="brazier" >
+                        <label for="brazier">Мангал</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="pavilion" >
+                        <label for="pavilion">Беседка</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="cafe1" >
+                        <label for="cafe1">Кафе</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="cafe" >
+                        <label for="cafe">Кафе</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="swimming_pool" >
+                        <label for="swimming_pool">Бассейн</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="SPA" >
+                        <label for="SPA">СПА</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="bath" >
+                        <label for="bath">Баня</label>
+                    </div>
+                </div>
+                <!-- 4 -->
+                <div class="more_option">
+                    <div class="single_option">
+                    <input class="custom-checkbox" type="checkbox" id="own_territory" >
+                    <label for="own_territory">Собственная территория</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="playground" >
+                        <label for="playground">Детская площадка</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="protected_area" >
+                        <label for="protected_area">Охраняемая территория</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="parking" >
+                        <label for="parking">Парковка</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="active_tours" >
+                        <label for="active_tours">Активные туры</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="nature_view" >
+                        <label for="nature_view">Активные туры</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="equipment_rental" >
+                        <label for="equipment_rental">Прокат техники</label>
+                    </div>
+                    <div class="single_option">
+                        <input class="custom-checkbox" type="checkbox" id="excursions" >
+                        <label for="excursions">Экскурсии</label>
+                    </div>
+                </div>
+            </div>
+        </div> 
+        <!-- Фотографии -->
+        <div class="w100 cont-vert-start-center" 
+            style="
+            background-color: #FAFAFC;
+            padding: 50px;
+            display: flex; 
+            gap: 10px 10px;  
+            margin-left: auto; 
+            margin-right: auto;">   
+            <div class="txt-green-light margin-bottom10">
+                Добавьте фотографию
+            </div>
+            <div class="cont-horiz wrap w100" style="gap: 10px 10px;">
+                <!-- Добавить фото -->
+                <div class="add-foto-to-gallery360 cont-vert" >
+                    <!--до наведения -->
+                    <div class="cont-horiz" style="position: absolute;">
+                        <div class="plus-green" >
+                        </div>
+                    </div>
+                    <!--после наведения -->
+                    <div class="add-foto-to-gallery-c-panel360 cont-vert">
+                        <div class="plus-white" >
+                        </div>
+                        <div class="margin-top20">
+                            Добавить фото
+                        </div>
+                    </div>
+                </div>
+                <!-- фото 1 -->
+                <div class="card-albom-ba-foto360 " 
+                    style=" 
+                        background-image: url(/assets/img/ba-edit/foto1.jpg);  
+                        background-size: cover;
+                        background-position: center;
+                        background-repeat: no-repeat;">
+                    <!-- До наведения -->
+                    <!--img src="/assets/img/ba-edit/foto1.jpg" class="edit-ba-gallery-foto360" style="position: absolute;z-index: 1;"-->
+                    <div class="cont-horiz-end-start card_albom_ba_foto-before360">
+                        <!-- всплыающее окно start-->
+                        <label class="tooltip">
+                            <!-- Кебаб start -->
+                            <div class="cebab-white30 cont-vert"  >
+                                <div class="cebab-point-white">  </div>
+                                <div class="cebab-point-white">  </div>
+                                <div class="cebab-point-white">  </div>
+                            </div>
+                            <!-- Кебаб End -->
+                            <input type="checkbox"> 
+                            <!-- Кебаб галерея. DAY -->
+                            <span class="cont-horiz">  
+                                <div class="modal-kebab-white">
+                                    <!-- Сделать главным фото -->
+                                    <div class="cont-horiz-start  tooltip-box margin-bottom30">
+                                        <div class="margin-right15">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                <path fill="#00DAB3" fill-rule="evenodd" clip-rule="evenodd" d="M20.5649 6.43451C20.8773 6.74693 20.8773 7.25346 20.5649 7.56588L10.5649 17.5659C10.2525 17.8783 9.74595 17.8783 9.43353 17.5659L4.43353 12.5659C4.12111 12.2535 4.12111 11.7469 4.43353 11.4345C4.74595 11.1221 5.25248 11.1221 5.5649 11.4345L9.99922 15.8688L19.4335 6.43451C19.746 6.12209 20.2525 6.12209 20.5649 6.43451Z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            Сделать главным фото 
+                                        </div>
+                                    </div> 
+                                    <!-- Удалить -->
+                                    <div class="cont-horiz-start">
+                                        <div class="margin-right15">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                <path fill="#E24414" fill-rule="evenodd" clip-rule="evenodd" d="M3 6.13672C3 5.69489 3.35817 5.33672 3.8 5.33672H19.8C20.2418 5.33672 20.6 5.69489 20.6 6.13672C20.6 6.57855 20.2418 6.93672 19.8 6.93672H3.8C3.35817 6.93672 3 6.57855 3 6.13672Z" />
+                                                <path fill="#E24414" fill-rule="evenodd" clip-rule="evenodd" d="M6.6 6.2V18.7C6.6 18.826 6.65114 18.951 6.749 19.0464C6.84756 19.1425 6.98544 19.2 7.13333 19.2H16.4667C16.6146 19.2 16.7524 19.1425 16.851 19.0464C16.9489 18.951 17 18.826 17 18.7V6.2H18.6V18.7C18.6 19.2636 18.3702 19.7999 17.968 20.192C17.5664 20.5835 17.026 20.8 16.4667 20.8H7.13333C6.57398 20.8 6.03359 20.5835 5.63204 20.192C5.22981 19.7999 5 19.2636 5 18.7V6.2H6.6Z" />
+                                                <path fill="#E24414" fill-rule="evenodd" clip-rule="evenodd" d="M9.4 5.33333V6H7.8V5.33333C7.8 4.44928 8.22143 3.60143 8.97157 2.97631C9.72172 2.35119 10.7391 2 11.8 2C12.8609 2 13.8783 2.35119 14.6284 2.97631C15.3786 3.60143 15.8 4.44928 15.8 5.33333V6H14.2V5.33333C14.2 4.97756 14.0326 4.56254 13.6041 4.20546C13.1671 3.84129 12.5213 3.6 11.8 3.6C11.0787 3.6 10.4329 3.84129 9.99587 4.20546C9.56737 4.56254 9.4 4.97756 9.4 5.33333Z" />
+                                                <path fill="#E24414" fill-rule="evenodd" clip-rule="evenodd" d="M9.8 9.2C10.2418 9.2 10.6 9.55817 10.6 10V15.3333C10.6 15.7752 10.2418 16.1333 9.8 16.1333C9.35817 16.1333 9 15.7752 9 15.3333V10C9 9.55817 9.35817 9.2 9.8 9.2Z" />
+                                                <path fill="#E24414" fill-rule="evenodd" clip-rule="evenodd" d="M13.8 9.2C14.2418 9.2 14.6 9.55817 14.6 10V15.3333C14.6 15.7752 14.2418 16.1333 13.8 16.1333C13.3582 16.1333 13 15.7752 13 15.3333V10C13 9.55817 13.3582 9.2 13.8 9.2Z" />
+                                            </svg>
+                                        </div>
+                                        <div style="color:#E24414">
+                                            Удалить
+                                        </div>
+                                    </div>
+                                </div> 
+                            </span>
+                            <!-- Кебаб галерея. DAY END-->
+                        </label>
+                        <!-- всплыающее окно start-->
+                    </div>
+                    <!-- После наведения-->
+                    <div class="albom-ba-foto-control-panel360 cont-vert-around">
+                        <div class="cont-vert">
+                            <div class="v-white" >
+                            </div>
+                            <div class="margin-top15" style="color: #fff;">
+                                Главное фото
+                            </div>
+                        </div>
+                        <div class="w100 cont-horiz-end-center" >
+                            <div class="ico-del" >
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+                <!-- фото 2 -->
+                <div class="card-albom-ba-foto360" 
+                    style="
+                        background-image: url(/assets/img/ba-edit/foto2.jpg);  
+                        background-size: cover;
+                        background-position: center;
+                        background-repeat: no-repeat;">
+                    <!-- До наведения 
+                    <img src="/assets/img/ba-edit/foto2.jpg" class="edit-ba-gallery-foto360" style="position: absolute;z-index: 1;">-->
+                    <div class="cont-horiz-end-start card_albom_ba_foto-before360">
+                        <!-- всплыающее окно start-->
+                        <label class="tooltip">
+                            <!-- Кебаб start -->
+                            <div class="cebab-white30 cont-vert"  >
+                                <div class="cebab-point-white">  </div>
+                                <div class="cebab-point-white">  </div>
+                                <div class="cebab-point-white">  </div>
+                            </div>
+                            <!-- Кебаб End -->
+                            <input type="checkbox">
+                            <!-- содержимое всплыающего окна start -->
+                            <!-- Кебаб галерея. DAY -->
+                            <span class="cont-horiz">  
+                                <div class="modal-kebab-white">
+                                    <!-- Сделать главным фото -->
+                                    <div class="cont-horiz-start  tooltip-box margin-bottom30">
+                                        <div class="margin-right15">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                <path fill="#00DAB3" fill-rule="evenodd" clip-rule="evenodd" d="M20.5649 6.43451C20.8773 6.74693 20.8773 7.25346 20.5649 7.56588L10.5649 17.5659C10.2525 17.8783 9.74595 17.8783 9.43353 17.5659L4.43353 12.5659C4.12111 12.2535 4.12111 11.7469 4.43353 11.4345C4.74595 11.1221 5.25248 11.1221 5.5649 11.4345L9.99922 15.8688L19.4335 6.43451C19.746 6.12209 20.2525 6.12209 20.5649 6.43451Z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            Сделать главным фото 
+                                        </div>
+                                    </div> 
+                                    <!-- Удалить -->
+                                    <div class="cont-horiz-start">
+                                        <div class="margin-right15">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                <path fill="#E24414" fill-rule="evenodd" clip-rule="evenodd" d="M3 6.13672C3 5.69489 3.35817 5.33672 3.8 5.33672H19.8C20.2418 5.33672 20.6 5.69489 20.6 6.13672C20.6 6.57855 20.2418 6.93672 19.8 6.93672H3.8C3.35817 6.93672 3 6.57855 3 6.13672Z" />
+                                                <path fill="#E24414" fill-rule="evenodd" clip-rule="evenodd" d="M6.6 6.2V18.7C6.6 18.826 6.65114 18.951 6.749 19.0464C6.84756 19.1425 6.98544 19.2 7.13333 19.2H16.4667C16.6146 19.2 16.7524 19.1425 16.851 19.0464C16.9489 18.951 17 18.826 17 18.7V6.2H18.6V18.7C18.6 19.2636 18.3702 19.7999 17.968 20.192C17.5664 20.5835 17.026 20.8 16.4667 20.8H7.13333C6.57398 20.8 6.03359 20.5835 5.63204 20.192C5.22981 19.7999 5 19.2636 5 18.7V6.2H6.6Z" />
+                                                <path fill="#E24414" fill-rule="evenodd" clip-rule="evenodd" d="M9.4 5.33333V6H7.8V5.33333C7.8 4.44928 8.22143 3.60143 8.97157 2.97631C9.72172 2.35119 10.7391 2 11.8 2C12.8609 2 13.8783 2.35119 14.6284 2.97631C15.3786 3.60143 15.8 4.44928 15.8 5.33333V6H14.2V5.33333C14.2 4.97756 14.0326 4.56254 13.6041 4.20546C13.1671 3.84129 12.5213 3.6 11.8 3.6C11.0787 3.6 10.4329 3.84129 9.99587 4.20546C9.56737 4.56254 9.4 4.97756 9.4 5.33333Z" />
+                                                <path fill="#E24414" fill-rule="evenodd" clip-rule="evenodd" d="M9.8 9.2C10.2418 9.2 10.6 9.55817 10.6 10V15.3333C10.6 15.7752 10.2418 16.1333 9.8 16.1333C9.35817 16.1333 9 15.7752 9 15.3333V10C9 9.55817 9.35817 9.2 9.8 9.2Z" />
+                                                <path fill="#E24414" fill-rule="evenodd" clip-rule="evenodd" d="M13.8 9.2C14.2418 9.2 14.6 9.55817 14.6 10V15.3333C14.6 15.7752 14.2418 16.1333 13.8 16.1333C13.3582 16.1333 13 15.7752 13 15.3333V10C13 9.55817 13.3582 9.2 13.8 9.2Z" />
+                                            </svg>
+                                        </div>
+                                        <div style="color:#E24414">
+                                            Удалить
+                                        </div>
+                                    </div>
+                                </div> 
+                            </span>
+                            <!-- Кебаб галерея. DAY END-->
+                            <!-- содержимое всплыающего окна end -->
+                        </label>
+                        <!-- всплыающее окно start-->
+                    </div>
+                    <!-- После наведения-->
+                    <div class="albom-ba-foto-control-panel360 cont-vert-around">
+                        <div class="cont-vert">
+                            <div class="v-white" >
+                            </div>
+                            <div class="margin-top15" style="color: #fff;">
+                                Главное фото
+                            </div>
+                        </div>
+                        <div class="w100 cont-horiz-end-center" >
+                            <div class="ico-del" >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+        
+        <!-- Цена background-color: #9f9fb5; -->
+        <div class="cont-vert-center-start w100" style=" padding: 50px;">
+            <div class="w100 cont-horiz-start txt-green-light margin-bottom30 ">
+                Укажите стоимость услуги
+            </div>
+            <!-- пишем цену -->
+            <div class="cont-horiz-start w100">
+                <div class="input-line-mini cont-horiz-start" style="margin-right: 20px;">
+                    <!-- [(ngModel)]="price"  appDisallowSymbols -->
+                    <input  type="text" size="3" placeholder="1500">
+                </div> 
+                <!-- Выбор валюты start [(ngModel)]="myCurrency" [ngModelOptions]="{standalone: true}"  (change)="chooseCurrency(myCurrency)" -->
+                <select class="accordion_tab-label_mini cont-horiz-between" style="width: 100px;"> 
+                    <option value="" selected >
+                        ₽
+                    </option>
+                    <option >
+                        <!-- *ngFor="let currency of currencies" value="{{currency}}" {{currency}} -->
+                    </option>
+                </select> 
+            </div>  
+        </div> 
+        <div class="w100 cont-horiz margin-top-bottom50" style="gap: 10px 10px ; flex-wrap: wrap;">
+            <!-- (click)="onNext()" [ngStyle]="{'background-color': checkConditions() ? 'gray' : '#409B89' }" [disabled]="checkConditions()"-->
+             
+            <button class="btn-green" style="flex: 1;" >
+                Назад 
+            </button> 
+            <button class="btn-green" style="flex: 1;">
+                Далее
+            </button> 
+        </div> 
+    </div>
+</div>   

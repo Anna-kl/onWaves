@@ -1,0 +1,159 @@
+
+<div class="cont-horiz w100" style="background: #FAFAFC;"  >
+	<div class="cont-vert list1200"> 
+		<!-- Заголовок страницы  -->
+		<div class="w100 cont-horiz-start margin-top20 margin-bottom20 left-right20"> 
+			<div class="cont-horiz btn-back" (click)="goToMain()">  
+			</div> 
+			<h1>Расширенный поиск</h1> 
+		</div> 
+		<div class="cont-vert-start w100 left-right20" >
+
+			<!-- Строка поиска -->
+			<div class="w100" Style="min-width:300px;">
+				<div class="search-line this-search-line" >
+					<div class="cont-horiz-between search-line-in">
+						<div>
+							<input type="text" size="11" [(ngModel)]="search" placeholder="Что вы ищете?" style="border:0px;" >
+						</div>
+						<a (click)=goToResult() class="round30 background-green-dark"> 
+							<img src="/assets/img/reg-ba/Lupa.png" class="search-arr-right">
+						</a>
+					</div>
+				</div>
+			</div> 
+
+			<div class="cont-horiz w100 wrap" style="display: inline-block;">
+
+				<!-- Выбор города --> 
+				<div class="margin-top-bottom20"> 
+          		<!--выподающий списко кругло-овальное--> 
+					<div class="w100 wrap"> 
+						<ng-autocomplete 
+							[data]="data"
+							[searchKeyword]="keyword"
+							placeholder="Введите город"
+							(selected)='selectEvent($event)'
+							(inputChanged)='onChangeSearch($event)'
+							(inputFocused)='onFocused($event)'
+							[itemTemplate]="itemTemplate"
+							[notFoundTemplate]="notFoundTemplate">
+						</ng-autocomplete> 
+						<ng-template #itemTemplate let-location >
+							<a [innerHTML]="location.name" ></a>
+						</ng-template> 
+						<ng-template #notFoundTemplate let-notFound>
+							<div [innerHTML]="notFound"></div>
+						</ng-template>  
+					</div> 
+        		</div>  
+				<!--div class="cont-horizmargin-top-bottom20" style="height: 55px; float:left">
+					<input class="custom-checkbox" type="checkbox" id="Rjadom" [(ngModel)]="isNear" (ngModelChange)="getNearLocation()">
+					<label for="Rjadom">
+						Рядом
+					</label>
+				</div-->
+				<!-- Линейка расстояния Start
+				<div class="cont-vert margin-top20" style="min-width:300px">
+					<div class="cont-horiz-between w100">
+						<div>Расстояние</div>
+						<div>км</div>
+					</div>
+          			<div class="w100 margin-bottom30">
+            			<input type="range" class="form-range"
+				   			[disabled]="!isNear" (ngModelChange)="setRange($event)"
+                  			[(ngModel)]="rangeData" min="0" max="50" step="10" id="customRange2" /> 
+						<div class="wrapper">
+							<div class="progress-step">
+								<div>
+									<div class="progres step"></div>1
+								</div>
+								<div>
+									<div class="progres step"></div>3
+								</div>
+								<div>
+									<div class="progres step"></div>5
+								</div>
+								<div>
+									<div class="progres step"></div>10
+								</div>
+								<div>
+									<div class="progres step"></div>30
+								</div>
+								<div>
+									<div class="progres step"></div>50
+								</div>
+							</div>
+            			</div> 
+					</div>
+				</div> -->
+				<!-- Линейка расстояния End -->
+				<!-- Выберите кому подходит услуга -->
+				<form [formGroup]="GenderGroup" class="types-of-auditory" >
+					<div   class="color-green-dark">
+						Выберите кому подходит услуга
+					</div>
+					<!--div class="cont-horiz-start">
+						<input class="custom-checkbox" type="checkbox" formControlName="isAll"  id="dlja_vseh">
+						<label for="dlja_vseh">
+							Для всех
+						</label>
+					</div-->
+					<div class="cont-horiz-start">
+						<input class="custom-checkbox" formControlName="isWoman"   type="checkbox" id="dlja_zhenshhin">
+						<label for="dlja_zhenshhin">
+							Для женщин
+						</label>
+					</div>
+					<div class="cont-horiz-start">
+						<input class="custom-checkbox" formControlName="isMan"  type="checkbox" id="dlja_muzhchin">
+						<label for="dlja_muzhchin">
+							Для мужчин
+						</label>
+					</div>
+					<div class="cont-horiz-start">
+						<input class="custom-checkbox" formControlName="isChildren" type="checkbox" id="dlja_detej">
+						<label for="dlja_detej">
+							Для детей
+						</label>
+					</div>
+					<div class="cont-horiz-start">
+						<input class="custom-checkbox" formControlName="isPet"  type="checkbox" id="dlja_zhivotnyhh">
+						<label for="dlja_zhivotnyhh">
+							Для животных
+						</label>
+					</div>
+				</form>  
+				<!-- Тип сортировки -->
+				<div class="type-sort">
+					<div class="txt-green-light">
+						Сортировать
+					</div> 
+					<div class="cont-horiz-start">
+						<input class="custom-checkbox" type="checkbox" id="Po_rejtingu" name="Po_rejtingu">
+						<label class="Po_rejtingu" for="Po_rejtingu">
+							По рейтингу
+						</label>
+					</div>   
+					<div class="cont-horiz-start " >
+						<input class="custom-checkbox" type="checkbox" id="Po_populjarnosti" name="Po_populjarnosti" value="#">
+						<label class="Po_populjarnosti" for="Po_populjarnosti">
+							По популярности
+						</label>
+					</div> 
+				</div>  
+			</div>
+			<!-- Меню Редактор профиля БА style="height: 640px;"  @@include('all_category.html',{ })  -->
+			<app-rubric-menu
+				class="w100"
+				[isOpen]="true" 
+				(setCategory)="setCategory($event)" >
+			</app-rubric-menu> 
+			<div class="cont-horiz w100" >
+				<a (click)=goToResult()  class="btn-green margin-top-bottom50">
+					Применить
+				</a> 
+			</div>
+		</div>
+	</div>
+</div>

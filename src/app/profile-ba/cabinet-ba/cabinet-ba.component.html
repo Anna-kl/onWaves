@@ -1,0 +1,152 @@
+<div style="padding: 10px; background-color: #fafafa;">
+  <!-- Заголовок start -->
+  <div class="w100 cont-horiz" >
+		<div class="w100 cont-horiz-start" style="max-width: 1200px;">
+			<div class="btn-back"></div>
+			<h3 class="margin-top-bottom30 ">
+				Кабинет
+			</h3>
+		</div>
+	</div>
+  <!-- Заголовок end -->
+  <!-- Строка 1 start -->
+  <div class="w100 cont-horiz">
+    <div class="w100   margin-bottom10 kab_str1_wrap tab10x10"
+    style=" display: flex; justify-content: center;  max-width: 1200px; ">
+      <!-- Блок 1: календарь -->
+      <div class="cont-vert-center-start w100"
+      style="background-color: #fff; padding: 30px 20px; display: flex; gap: 10px 10px; border-radius: 20px;
+      border: 2px solid var(--color-grey, #DDE2ED);">
+      <div class="cont-vert w100" style="border:none;">
+          <div class="cont-vert-start-center w100" style="max-width: 360px; min-width: 300px ;">
+            <div class="txt-green-light margin-bottom30">
+              Выберите день, для которого надо вывести статистику
+            </div>
+          
+            <!-- календарь start-->
+            <app-calendar
+              class="w100"
+              (onDate)="onDate($event)"
+              [userId]="profile?.id!">
+            </app-calendar>
+            <!-- <div class="cont-horiz-around w100" style="max-width: 360px;">
+              <div class="day_off">пн</div>
+              <div class="day_off">вт</div>
+              <div class="day_off">ср</div>
+              <div class="day_off">чт</div>
+              <div class="day_off">пт</div>
+              <div class="day_off">сб</div>
+              <div class="day_off">вс</div>
+            </div>
+            <div class="cont-horiz-around w100" *ngFor="let week of days">
+              <div  *ngFor="let d of week"
+                    [class.day_off]="!d.ifExist && !d.isChecked"
+                    [class.calendar_work_day]="d.isChecked"
+                    [class.day_is_busy]="d.isBusy"
+                    [class.calendar_click]="d.isToday" (click)="chooseDays(d)">
+                {{d.day}}
+              </div>
+            </div> -->
+            <!-- календарь end -->
+          </div>
+        </div>
+      </div>
+      <!-- Блок 2: Ваш доход составил  -->
+      <div class="kabinet_doxod"
+       style="justify-content: start!important;"
+       *ngIf="profit$|async as profit">
+        <!-- <div class="margin-bottom10">
+          За {{profit.countWorkDays}} дней
+        </div>
+        <div class="margin-bottom10">
+          Ваш доход составил:
+        </div> -->
+        
+        <div class="margin-bottom10" style=" color: #fff;">
+          Доход
+        </div> 
+        <div>
+          <div style="color: #fff; font-size: 4rem; text-align: center;">
+            {{profit.profit}}₽
+          </div>
+        </div>
+        <!-- <div class="margin-bottom10" style="color: #fff; font-size: 2rem;
+        text-align: center; margin-top: 30px;">
+          Коэффициент успешности
+          <div  style="color: #de0e0e; font-size: 4rem;">
+            {{coefficient$|async}}
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </div>
+  <!-- Строка 1 end -->
+  <!-- Строка 2 start -->
+  <div class="w100 cont-horiz">
+    <div class="w100 wrap" style="display: flex; gap: 10px 10px; justify-content: center;  max-width: 1200px;">
+      <!-- Записи -->
+      <div class="w100 kab_col50">
+        <div class="margin-bottom10">
+          <h2>Записи</h2>
+        </div>
+        <div class="margin-bottom20" style="color: $green-basic; font-size: 4rem;font-weight: 700;">
+          {{records.allRecord}}
+        </div>
+        <div class="margin-bottom20">
+          из них:
+        </div>
+        <div class="cont-horiz-start-start margin-bottom20">
+          <div class="green-mini20 margin-right10"></div>
+          <div class="margin-right10">
+            <b>{{records.complete}}</b></div>
+          <div>выполнено</div>
+        </div>
+        <div class="cont-horiz-start-start margin-bottom20">
+          <div class="blue-mini20 margin-right10"></div>
+          <div class="margin-right10">
+            <b>
+              {{records.confirm}}
+            </b>
+          </div>
+          <div>в ожидании</div>
+        </div>
+        <div class="cont-horiz-start-start margin-bottom20" style="gap: 10px 10px;">
+          <div class="yellow-mini20"></div>
+          <div><b>{{records.pending}}</b></div>
+          <div>не подтверждено</div>
+        </div>
+        <div class="cont-horiz-start-start" style="gap: 10px 10px;">
+          <div class="red-mini20"></div>
+          <div><b>{{records.canceled}}</b> </div>
+          <div>отменено</div>
+        </div>
+      </div>
+      <!-- Клиенты -->
+      <div class="w100 kab_col50">
+        <div class="margin-bottom10">
+          <h2>Клиенты</h2>
+        </div>
+        <div class="margin-bottom20" style="color: $green-basic; font-size: 4rem;font-weight: 700;">
+          {{clients.countClients}}
+        </div>
+        <div class="margin-bottom20">из них:</div>
+        <div class="cont-horiz-start-start margin-bottom20">
+          <div class="green-mini20 margin-right10"></div>
+          <div class="margin-right10"><b>{{clients.constClients}}</b></div>
+          <div>постоянные</div>
+        </div>
+        <div class="cont-horiz-start-start" style="gap: 10px 10px;">
+          <div class="blue-mini20"></div>
+          <div class="">
+            <b>
+              {{clients.newClients}}
+            </b>
+          </div>
+          <div>новые</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Строка 2 end -->
+ </div>
+

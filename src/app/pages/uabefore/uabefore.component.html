@@ -1,0 +1,56 @@
+<!-- - Экран 1 END - -->
+<!-- - Экран 2 и 3 -->
+<div class="parent-white">
+  <!--- Экран 2 -->
+  <div class="disp1 wrap">
+    <div class="flex-container cont-vert">
+      <!-- текст1  -->
+      <div class="reklm-box">
+        <!-- картинка  ../assets/gif/tel-on-main.gif-->
+        <div class="cont-horiz reklm-box-img">
+          <img src="../assets/img/page1/iPhone12.png" class="tel" alt="" />
+        </div>
+        <!-- текст 1 -->
+        <div class="txt_tel">
+          <h2>Записаться на услугу - просто</h2>
+          <p>
+            Выбирайте по отзывам и рейтингу
+            наиболее подходящего вам специалиста.
+            Выберите интересующего исполнителя и услугу,
+            далее укажите удобные время и дату - всё готово!
+          </p>
+        </div>
+      </div>
+      <!-- текст2  -->
+      <div class="reklm-box">
+        <div class="txt_tel">
+          <h2>Вся история записей в одном месте</h2>
+          <p>
+            В дальнейшем, повторить заказ будет ещё проще,
+            во вкладке "Мои записи", вы, сможете просто повторить запись.
+          </p>
+        </div>
+        <!-- картинка -->
+        <div class="cont-horiz reklm-box-img">
+          <img src="../assets/img/page1/iPhone12-2.png" class="tel" alt="" />
+        </div>
+      </div><!-- reklm-box end-->
+    </div><!-- flex-container cont-vert -->
+  </div><!-- disp1 wrap -->
+</div>
+<div class="parent-grey-light cont-horiz">
+  <div class="left-right20mob popular-near w100">
+    <h4 style="text-align: left;" class="margin-bottom30 margin-top50">
+      Популярное рядом с Вами
+    </h4>
+    <div>
+      <app-clients-card-list [card-business]="cards$"   style="background-color:#FAFAFC; gap:5px 5px">
+      </app-clients-card-list>
+    </div>
+    <div class="left-right20 margin-bottom50" *ngIf="isListCardExpand$|async">
+      <div class="txt-green-light" style="text-decoration: underline; text-align: right; cursor: pointer;" (click)="loadCards()">
+        Смотреть еще
+      </div>
+    </div>
+  </div>
+</div>  
