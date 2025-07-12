@@ -13,18 +13,17 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "baseHref": "",
-            "outputPath": "dist/main-site-ocpio",
+            "baseHref": "/",
+            "outputPath": "dist/MainSiteOcpio/browser",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "src/polyfills.ts"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/firebase-messaging-sw.js",
               "src/manifest.webmanifest"
             ],
             "styles": [
@@ -36,7 +35,7 @@
       
 
             ],
-            "scripts": ["node_modules/bootstrap/dist/js/bootstrap.js",  "src/firebase-messaging-sw.js"]
+            "scripts": ["node_modules/bootstrap/dist/js/bootstrap.js"]
           },
           "configurations": {
             "production": {
@@ -87,15 +86,12 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "polyfills": [
-              "zone.js",
-              "zone.js/testing"
+              "src/polyfills.ts"
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets",
-              "src/firebase-messaging-sw.js",
-              "src/manifest.webmanifest"
+              "src/assets"
             ],
             "styles": [
               "node_modules/primeng/resources/primeng.min.css",
@@ -105,8 +101,63 @@
               "src/styles.scss"
 
             ],
-           "scripts": ["node_modules/bootstrap/dist/js/bootstrap.js",  "src/firebase-messaging-sw.js",  "https://api-maps.yandex.ru/v3/?apikey=c92d2e01-f561-4d59-b1cc-606b3ed1e377&lang=ru_RU"]
+           "scripts": ["node_modules/bootstrap/dist/js/bootstrap.js", 
+            "https://api-maps.yandex.ru/v3/?apikey=c92d2e01-f561-4d59-b1cc-606b3ed1e377&lang=ru_RU"]
           }
+        },
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "outputPath": "dist/MainSiteOcpio/server",
+            "main": "server.ts",
+            "tsConfig": "tsconfig.server.json"
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "media"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "sourceMap": true,
+              "extractLicenses": false,
+              "vendorChunk": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve-ssr": {
+          "builder": "@nguniversal/builders:ssr-dev-server",
+          "configurations": {
+            "development": {
+              "browserTarget": "MainSiteOcpio:build:development",
+              "serverTarget": "MainSiteOcpio:server:development"
+            },
+            "production": {
+              "browserTarget": "MainSiteOcpio:build:production",
+              "serverTarget": "MainSiteOcpio:server:production"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "prerender": {
+          "builder": "@nguniversal/builders:prerender",
+          "options": {
+            "routes": [
+              "/"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "MainSiteOcpio:build:production",
+              "serverTarget": "MainSiteOcpio:server:production"
+            },
+            "development": {
+              "browserTarget": "MainSiteOcpio:build:development",
+              "serverTarget": "MainSiteOcpio:server:development"
+            }
+          },
+          "defaultConfiguration": "production"
         }
       }
     }

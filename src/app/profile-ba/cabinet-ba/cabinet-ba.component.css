@@ -1,0 +1,65 @@
+/* --- Стили для карточки промокода --- */
+
+.promo-card {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+  max-width: 350px;
+  width: 100%;
+}
+
+.promo-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 12px;
+}
+
+.promo-input-wrapper {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.promo-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #adb5bd;
+}
+
+.promo-input-field {
+  width: 100%;
+  padding: 12px 12px 12px 45px; /* Отступ слева для иконки */
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 16px;
+  box-sizing: border-box; /* Чтобы padding не влиял на ширину */
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.promo-input-field:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.promo-apply-button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #28a745; /* Зеленый цвет для акцента */
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.promo-apply-button:hover {
+  background-color: #218838;
+}

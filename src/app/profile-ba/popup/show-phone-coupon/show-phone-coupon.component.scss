@@ -1,0 +1,92 @@
+/* popup.component.scss */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal__content {
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 320px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  text-align: center;
+}
+
+.modal__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal__phone {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.modal__phone a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.modal__call-btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: #28a745;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.modal__call-btn:hover {
+  background: #218838;
+}
+
+.modal__coupon {
+  font-size: 0.875rem;
+  color: #555;
+  margin: 0;
+}
+
+.modal__coupon-amount {
+  font-weight: bold;
+  color: #e83e8c;
+}
+
+/* Адаптивно: */
+@media (max-width: 360px) {
+  .modal__content {
+    padding: 1rem;
+  }
+  .modal__call-btn {
+    width: 100%;
+    text-align: center;
+    padding: 0.75rem;
+  }
+}

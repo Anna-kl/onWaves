@@ -21,10 +21,10 @@ import {Router} from "@angular/router";
 export class ModalRegisterComponent implements OnInit {
   public phone: string = '';
   error: boolean = true;
-
+  policyAgreeError = false;
   countries: ICountry[] = [];
   chCountry!: ICountry;
-
+  showPolicyModal = false;
   validateError: string|undefined = undefined;
   flagError: boolean = false;
   public checkRule = true;
@@ -147,5 +147,15 @@ export class ModalRegisterComponent implements OnInit {
 
   openRulesInNewWindow() {
     window.open('static/pravila', '_blank');
+  }
+
+    closePolicy() {
+    this.showPolicyModal = false;
+  }
+
+    /** Открыть модальное окно */
+  openPolicy(event: MouseEvent) {
+    event.preventDefault();
+    this.showPolicyModal = true;
   }
 }

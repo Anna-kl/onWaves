@@ -12,7 +12,7 @@
         </div>
         <!-- Изображения альбома -->
         <div class="w100 wrap img-albom-ba-position"  fxLayout="row" fxLayoutAlign="center start" >
-            <img [src]="getImage(image.image)" class="img-albom-ba" style="margin-top: 5px"
+            <img [src]="image.url" class="img-albom-ba" style="margin-top: 5px"
                  *ngFor="let image of images" (click)="showImage(image)" alt="">
         </div>
     </div>

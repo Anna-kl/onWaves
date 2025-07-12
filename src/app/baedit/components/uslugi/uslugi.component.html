@@ -32,8 +32,8 @@
   </div> 
   <!-- 3. Список услуги и услуги без группы-->
   <div>
-      <ng-container *ngIf="profile">
-    <app-accordion [isUpdate]="isUpdate" [profileId]="profile.id!"
+      <ng-container >
+    <app-accordion [isUpdate]="isUpdate" [profileId]="profile!.id!"
     [reload]="isReload" [viewCreate]="false"></app-accordion>
       </ng-container>
   </div> 

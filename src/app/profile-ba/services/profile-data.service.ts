@@ -43,6 +43,7 @@ export class ProfileDataService {
     this.address.next(address);
   }
 
+
   transferProfileBA(profileBA: IViewBusinessProfile){
     this.profileBA.next(profileBA);
   }

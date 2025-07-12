@@ -52,7 +52,7 @@
                 <div class="cont-horiz-start-start w100" style="gap: 10px 10px;">
                   <!-- Неизменяемая часть адреса -->
                   <div class="cont-horiz" style="height: 50px; text-align: center;">
-                    ocpio.ru/#/id
+                    onwaves.online/
                   </div>
                   <!-- Часть адреса, заполняемая БА  [placeholder]="urlProfileLocal" -->
 
@@ -83,11 +83,11 @@
                     class="textarea-ba-profile" rows="5" cols="45"
                     type="text"
                     formControlName="about"
-                    maxlength="150"
+                    [maxlength]="TEXT_LENGTH"
                     placeholder="Добавьте описание">
                   </textarea>
                   <span class="textarea-count">
-                    {{remainingText}}/150
+                    {{remainingText/TEXT_LENGTH}}
                   </span>
                 </div>
               </div>
@@ -216,28 +216,7 @@
                         <ya-placemark [geometry]="[geo.lat, geo.lng]"></ya-placemark>
                       </ya-map>
                     </div> -->
-                    <div class="container">
-                      <y-map
-                        [props]="{
-                          location: {
-                            center: [geo.lng,geo.lat],
-                            zoom: 12,
-                          },
-                        }"
-                      >
-                      
-                      <y-map-default-scheme-layer />
-                      <y-map-default-features-layer />
-                        <y-map-marker
-                          [props]="{
-                            coordinates: [geo.lng,geo.lat],
-                            draggable: true,
-                          }"
-                      >
-                      <svg fill="#043c48" width="64px" height="64px" viewBox="0 0 24 24" id="place" data-name="Line Color" xmlns="http://www.w3.org/2000/svg" class="icon line-color" stroke="#043c48"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle id="secondary" cx="12" cy="9" r="2" style="fill: none; stroke: #7dcfbd; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></circle><path id="primary" d="M12,21S6,14,6,9A6,6,0,0,1,18,9C18,14,12,21,12,21Z" style="fill: none; stroke: #043c48; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></path></g></svg>
-                    </y-map-marker>
-                      </y-map>
-                    </div>
+             <app-my-ycomponent [geo]="geoPoint$|async"></app-my-ycomponent>
 
                   </div>
                 </div>

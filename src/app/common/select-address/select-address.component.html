@@ -37,7 +37,7 @@
   </div>
 
     <div class="select" *ngIf="!isAnotherCity">
-      <select [(ngModel)]="myCity" [disabled]="isAnotherCity"
+      <select [(ngModel)]="myCity" [disabled]="isAnotherCity" style="margin-bottom: 3px;"
        (ngModelChange)="change($event, 'city')">
         <option value="" selected >
           Населенный пункт *
@@ -47,6 +47,9 @@
           {{city}}
         </option>
       </select>
+    </div>
+    <div class="help-text" >
+      обязательное поле
     </div>
     <!-- Улица -->
 

@@ -99,7 +99,9 @@
         </div>
     </div> -->
     <!--Услуги start-->
-    <app-accordion [viewCreate]="true" [isUpdate]="false"  [canSetService]="false" [profileId]="companyId"></app-accordion>
+    <app-accordion [viewCreate]="true" [isUpdate]="false"  [canSetService]="false" [profileId]="companyId">
+
+    </app-accordion>
     <app-reviews-carusel [id]="companyId"></app-reviews-carusel>
     <!-- Отзывы-->
 
@@ -111,11 +113,7 @@
         </div>
         <!--Карта 2GIS start -->
         <div class="column-right-footer" *ngIf="geoPoint$|async as geo">
-            <div #mapContainer class="container" >
-                <!-- <ya-map [center]="[geo.lat, geo.lng]" [zoom]="14" >
-                    <ya-placemark [geometry]="[geo.lat, geo.lng]"></ya-placemark>
-                </ya-map> -->
-            </div>            
+            <app-my-ycomponent [geo]="geoPoint$|async"></app-my-ycomponent>       
         </div>
         <!--Карта 2GIS END-->
     </div>

@@ -14,11 +14,15 @@ export const environment = {
     measurementId: "G-T8F0R2G5YN"
   },
   domain: 'localhost',
+  TEXT_LENGTH: 1000,
 
-   Uri: 'https://localhost:5001/v1/api/',
- // UriFoto: 'https://localhost:5001/v1/api/',
-  //    Uri: 'https://ocpio-server.ru/v1/api/',
-   //   UriFoto: 'https://ocpio-server.ru/v1/api/',
+
+//    Uri: 'https://localhost:5001/v1/api/',
+//    hubUri: 'http://localhost:5000/',
+//  UriFoto: 'https://localhost:5001/v1/api/',
+     Uri: 'https://ocpio-server.ru/v1/api/',
+     UriFoto: 'https://ocpio-server.ru/v1/api/',
+     hubUri: 'https://ocpio-server.ru/',
  // Uri: 'https://ocpio-client.ru/test-site/v1/api/'
 
 };

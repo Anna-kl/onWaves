@@ -57,10 +57,10 @@
         <!--    блок Аватак и данные клиента -->
         <div class="w100"><hr> </div>
         <div class="w100 cont-vert-start-center">
-          <h3 class="margin-bottom30">
+          <!-- <h3 class="margin-bottom30">
             {{mainProfileCleint.name}}
             {{mainProfileCleint.family}}
-          </h3>
+          </h3> -->
           <div class="addressPersonalPageUser">
             <div class="txt-green-bold">
               <!-- г. Саратов (тут надо подтянуть данные с геолокации, это заглушка) -->
@@ -105,6 +105,29 @@
             </div>
           </div>
         </div-->
+
+         <main class="account-content">
+
+          <section class="section" style="padding-top: 0; height: auto;">
+              <h2>Добро пожаловать,  {{mainProfileCleint.name}}!</h2>
+           
+              <!-- … остальной контент … -->
+            </section>
+    <!-- Баннер купона -->
+            <div class="coupon-banner" *ngIf="hasCoupon$|async">
+              <div class="coupon-banner__text">
+                🎉 У вас есть активный купон — скидка {{ couponValue }} ₽!
+                  <p>Чтобы использовать купон, при записи к мастеру, кликните по чек-боксу "Использовать купон"</p>
+              </div>
+               
+              <!-- <button class="coupon-banner__btn">
+                Использовать купон
+              </button> -->
+            </div>
+
+            <!-- Основной контент кабинета -->
+            
+          </main>
 
         </div>
       <!-- Правая колонка END-->

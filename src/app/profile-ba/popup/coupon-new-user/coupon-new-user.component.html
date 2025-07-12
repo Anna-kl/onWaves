@@ -1,0 +1,10 @@
+<div class="overlay" *ngIf="isVisible" (click)="hide()"></div>
+
+<div class="popup" *ngIf="isVisible">
+  <button class="close-btn" (click)="hide()">×</button>
+  <!-- <img src="../../../../assets/img/jpg/coupon.jpg"> -->
+  <!-- <h3>Узнайте больше!</h3>
+  <p>Подпишитесь на нашу рассылку, чтобы получать свежие обновления.</p> -->
+  <button class="btn-white" (click)="registration()"
+   style="position: absolute; bottom: 30px; border-color: white; width: 200px; left:94px">Регистрация</button>
+</div>

@@ -27,7 +27,6 @@ export class FotoPhoneComponent implements OnInit, OnDestroy {
   constructor(private _apiImage: AlbumsService,
               private sanitizer: DomSanitizer,
               private _route: Router,
-              private location: Location,
               private _activateRoute: ActivatedRoute,
               private store$: Store) {
   }

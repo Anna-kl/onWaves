@@ -13,22 +13,29 @@ import {select, Store} from "@ngrx/store";
 import {selectProfileMainClient} from "../../../ngrx-store/mainClient/store.select";
 import {Observable} from "rxjs";
 import {IViewCoordinates} from "../../../DTO/views/profile/IViewCoordinates";
+import { YMapComponent, YMapDefaultSchemeLayerDirective } from 'angular-yandex-maps-v3';
+import { DomSanitizer } from '@angular/platform-browser';
 
-
+declare const ymaps: any;
 @Component({
   selector: 'app-contacts',
   templateUrl: './contacts.component.html',
   styleUrls: ['./contacts.component.scss'],
-  providers: [DictionaryService, MessageService]
+  providers: [DictionaryService, MessageService, YMapComponent, YMapDefaultSchemeLayerDirective]
 })
+
+
 
 export class ContactsComponent implements OnInit{
 
+
   address: IViewAddress|null = null;
+  strAddress: string = '';
+
   change($event: any,arg1: string) {
     this.isEdit = true;
   }
-  strAddress: string = '';
+
   changeAddress($event: {strAddress: string, viewAddress: IViewAddress}) {
     this.isEdit = true;
     this.strAddress = $event.strAddress;
@@ -53,6 +60,7 @@ export class ContactsComponent implements OnInit{
     private backendService: BackendService,
     private _loginService: LoginService,
     private messageService: MessageService,
+    private sanitizer: DomSanitizer
   ) {
 
   }
@@ -65,10 +73,21 @@ export class ContactsComponent implements OnInit{
               if (this.profile.address){
                 this.strAddress = getFullAddressProfile(this.profile.address);
                 this.geoPoint$ = this._dictionaries.getPoint(this.strAddress);
+                // this.geoPoint$.subscribe(result => {
+                //   console.log(result);
+                // });
               }
           }
       });
   
+  }
+
+    getAvatar(avatar: any) {
+    if (avatar) {
+      return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
+    } else {
+      return  '/assets/img/AvatarBig.png';
+    }
   }
 
   //получаем регионы по стране

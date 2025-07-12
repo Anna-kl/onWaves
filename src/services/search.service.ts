@@ -25,8 +25,8 @@ export class SearchService {
             }));
     }
 
-    search2(send: ISearchRequest){
-        const request = JSON.stringify(send);
+    search2(send: ISearchRequest|null){
+        const request = JSON.stringify(send) ?? null;
         return this.http.get<IResponse>(`${this.baseUrl}?request=${request}`);
     }
 }

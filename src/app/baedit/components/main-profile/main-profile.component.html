@@ -16,7 +16,7 @@
       <div class="cont-horiz-start-start" style="gap: 10px 10px;">
         <!-- Неизменяемая часть адреса -->
         <div class="cont-horiz" style="height: 50px; text-align: center;">
-          ocpio.ru/
+          onwaves.online/
         </div>
         <!-- Часть адреса, заполняемая БА [placeholder]="urlProfileLocal"  -->
         <!-- (ngModelChange)="change()"  -->
@@ -39,12 +39,12 @@
         занимаетесь и чем вы лучше конкурентов.
       </div>
       <div class="container-textarea">
-        <textarea class="textarea-ba-profile" rows="5" cols="45" name="text" maxlength="150"
+        <textarea class="textarea-ba-profile" rows="5" cols="45" name="text" [maxlength]="TEXT_LENGTH"
           placeholder="Добавьте описание" (ngModelChange)="setAbout()" [(ngModel)]="profile.about">
         </textarea>
         <!-- счетчик 0/150 -->
         <span *ngIf="profile?.about">
-          {{ profile.about?.length }}/150
+          {{ profile.about?.length!/TEXT_LENGTH }}
         </span>
 
       </div>

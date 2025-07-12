@@ -7,7 +7,7 @@ import { Group } from '../../DTO/views/services/IViewGroups';
 import { subGroup } from '../../DTO/views/services/IViewSubGroups';
 
 import {ScheduleService} from "../../../services/schedule.service";
-
+import {filter, forkJoin, map, switchMap, take, tap, withLatestFrom} from "rxjs";
 import {DictionaryService} from "../../../services/dictionary.service";
 
 import {ProfileDataService} from "../services/profile-data.service";
@@ -15,8 +15,12 @@ import {ProfileDataService} from "../services/profile-data.service";
 
 import {ProfileService} from "../../../services/profile.service";
 
-import { Store, select } from '@ngrx/store';
-import { selectProfileMainClient } from 'src/app/ngrx-store/mainClient/store.select';
+
+import { Meta, Title } from '@angular/platform-browser';
+import { Store } from '@ngrx/store';
+import { getProfileMainClient, selectProfileMainClient } from 'src/app/ngrx-store/mainClient/store.select';
+import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
+
 
 
 interface GroupWithSubGroups {
@@ -46,10 +50,12 @@ export class ProfileBAComponent implements OnInit {
  // businessProfile!: ICardBusinessView;
   scheduleToday: string | undefined = '';
   id: string | null = null;
+  isLoad = false;
 
   constructor(private route: ActivatedRoute,
               private _api: ProfileService,
-              private store$: Store,
+              private _meta: Meta,
+              private _store: Store,
               private _profileData: ProfileDataService,
               private _router: Router)
   {
@@ -90,15 +96,65 @@ export class ProfileBAComponent implements OnInit {
   //   );
   // }
   async ngOnInit() {
+
     let link = this.route.snapshot.paramMap.get('id');
     if (link) {
-      this._api.translateLink(link).subscribe(
-          result => {
+     this._api.translateLink(link).pipe(
+  // 1) переводим ссылку
+          switchMap(result => {
             this.id = result.data;
-            this._profileData.transferId(result.data);
-          }
-      );
+            this._profileData.transferId(this.id!);
+            return this._api.getMainTags(this.id!);
+          }),
+
+          // 2) обновляем meta-теги
+          tap(tags => {
+            this._meta.updateTag({
+              name: 'keywords',
+              content: tags.join('|')
+            });
+          }),
+
+          // 3) берём из стора его текущее значение — даже если это null
+          switchMap(tags =>
+            this._store
+              .select(selectProfileMainClient)
+              .pipe(
+                take(1),                          // первый эмит — будь он null или объект
+                map(user => ({ tags, user }))     // упакуем оба значения в один объект
+              )
+          ),
+          tap(({tags, user}) => {
+            if (user === null){
+              this.isLoad = true;
+            }
+          }),
+          // 4) слать визит с user?.id (или null) и profileId
+          switchMap(({ tags, user }) => 
+            this._api.sendWhoisVisit(this.id!, 'visit_profile', user == null ? null : user?.id!)
+          )
+        )
+        .subscribe({
+          next: resp => console.log('sendWhoisVisit OK', resp),
+          error: err => console.error('Ошибка sendWhoisVisit', err)
+        });
     }
+      // this._api.translateLink(link).subscribe(
+      //     result => {
+      //           this._api.getMainTags(result.data).pipe(
+      //             tap(res => {
+      //                 this._title.setTitle(`${this.profile?.name!} ${this.profile.address?.city} онлайн-запись onWaves`);
+      //                 this._meta.updateTag({
+      //                                 name: 'description',
+      //                                 content: `${this.profile.name} ${this.profile.about} ${this.profile.address?.city} онлайн запись`
+      //             })
+      //           )
+      //         });
+      //       // this.id = result.data;
+      //       // this._profileData.transferId(result.data);
+      //     }
+      // );
+    // }
     // this._profileData.sendAddress.subscribe(result => {
     //   if (result) {
     //     this.onAddress(result);

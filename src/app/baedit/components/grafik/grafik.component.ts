@@ -176,7 +176,10 @@ export class GrafikComponent implements OnDestroy{
 
 
   checkTimer(sch: IViewSchedule) {
-    return !(sch.work.start && sch.work.end);
+    if (sch.work.start.hour === sch.work.end.hour && sch.work.start.minutes === sch.work.end.minutes )
+      return true;
+
+    return false;
 
   }
 

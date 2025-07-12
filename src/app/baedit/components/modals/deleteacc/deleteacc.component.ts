@@ -16,6 +16,7 @@ import {selectProfileMainClient} from "../../../../ngrx-store/mainClient/store.s
 import { LoginService } from "src/app/auth/login.service";
 import { Subscription, filter, map } from "rxjs";
 import { CookieService } from "ngx-cookie-service";
+import { environment } from "src/enviroments/environment";
 
 
 @Component({
@@ -28,7 +29,7 @@ export class DeleteaccComponent implements OnInit, OnDestroy {
   profile: IViewBusinessProfile | null = null;
   avatar: any;
   private unsubscribe$: Subscription|null = null;
-  remainingText = 150;
+  remainingText = environment.TEXT_LENGTH;
   isShowCropped: boolean = true;
   formData: any;
   imageChangedEvent: any = null;

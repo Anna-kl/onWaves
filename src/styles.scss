@@ -237,7 +237,7 @@ ul{
     background-color:#ffffff ;
     width:100vw;
     height: 70px;
-    z-index: 500;
+    z-index: 1500;
 	position: fixed;
 	top: 0px;
 	padding-left: 50px;
@@ -904,7 +904,7 @@ scroll-snap-type: y mandatory;
 }
 @media screen and (max-width: 768px) {
 	.ba122-left-column{ 
-		width:100%;
+		width:90vw;
 		min-width: 290px;
 		max-width: 100%; 
 	}
@@ -914,7 +914,7 @@ scroll-snap-type: y mandatory;
 }
 @media screen and (max-width: 1024px) {
 	.ba122-left-column {
-		width:100%;
+		width:90vw;
 	}
 	.ba122-right-column {
 		width: 100%;
@@ -923,11 +923,21 @@ scroll-snap-type: y mandatory;
 } 
 @media screen and (max-width: 768px) {
 	.wrap768{
-		flex-wrap: wrap;
+		// flex-wrap: wrap;
+		   flex-direction: column;
+    align-items: center;       /* <-- вот это ключевое */
+    justify-content: center;
+	width: 100vw;
 	}
 } 
 @media (max-width: 480px) {
-	.wrap480{flex-wrap: wrap;}
+	.wrap480{
+		// flex-wrap: wrap;
+		   flex-direction: column;
+    align-items: center;       /* <-- вот это ключевое */
+    justify-content: center;
+	width: 100vw;
+	}
 }
 .menu-txt:active .menu-txt:focus{
 	color:$green-dark;

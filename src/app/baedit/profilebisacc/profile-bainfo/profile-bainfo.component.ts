@@ -99,13 +99,6 @@ export class ProfileBAInfoComponent implements OnInit {
       if (this.profile?.address) {
         const addressStr = getAddressProfile(this.profile.address);
         this.geoPoint$ = this._dictionaries.getPoint(addressStr);
-
-        this.geoPoint$.subscribe(geo => {
-          if (typeof ymaps !== 'undefined') {
-            this.initializeMap(geo.lat, geo.lng);
-          }
-
-        });
       }
     });
   }

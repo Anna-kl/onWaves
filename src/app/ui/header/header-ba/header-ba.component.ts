@@ -8,15 +8,16 @@ import {MessageNotification} from "../../../DTO/classes/notifications/MessageNot
 import {RecordService} from "../../../../services/record.service";
 import {DomSanitizer} from "@angular/platform-browser";
 import {select, Store} from "@ngrx/store";
-import {notificationCountMessages} from "../../../ngrx-store/notification/notification.selectors";
-import {Observable, Subscription} from "rxjs";
-import {LoginService} from "../../../auth/login.service";
-import {ProfileService} from "../../../../services/profile.service";
+// import {notificationCountMessages} from "../../../ngrx-store/notification/notification.selectors";
+import {filter, first, firstValueFrom, Observable, skipWhile, Subscription, take} from "rxjs";
+// import {LoginService} from "../../../auth/login.service";
+// import {ProfileService} from "../../../../services/profile.service";
 
 import { selectProfileMainClient, selectTokenMainClient} from "../../../ngrx-store/mainClient/store.select";
 
 import {ILinkState} from "../../../ngrx-store/links/interface/ILinkState";
 import { getIconAvatar } from 'src/helpers/common/avatar1';
+import { OrderSignalrService } from 'src/services/notification.signal';
 
 
 @Component({
@@ -34,12 +35,16 @@ export class HeaderBAComponent implements OnInit, OnDestroy {
   countRecord: number = 0;
   typeUserForEquels: UserType | undefined = UserType.User;
   link: ILinkState|null = null;
+  notificationCount$: Observable<number> = new Observable();
+  auth: IViewBusinessProfile | null = null;
+
   constructor(private _events: BusService,
               private _router: Router,
+              private orderSvc: OrderSignalrService,
               private sanitizer: DomSanitizer,
               private _apiRecord: RecordService,
               private store$: Store,
-              private _login: LoginService,)
+              private _apiNotification: MessageNotificationService,)
   {
 
    //  this.auth$ = this.store$.select(selectProfileMainClient);
@@ -53,8 +58,8 @@ export class HeaderBAComponent implements OnInit, OnDestroy {
     //     //     this.notifications = result;
     //     //     this.notification = this.notifications.filter(_ => _.readed === null).length;
     //     //   });
-   this.notification$ = this.store$.pipe(select(notificationCountMessages));
-   this.auth$ = this.store$.pipe(select(selectProfileMainClient));
+  //  this.notification$ = this.store$.pipe(select(notificationCountMessages));
+   
     //  .subscribe(
     //    result => {console.log(result)});
     //     this.auth = result;
@@ -70,16 +75,26 @@ export class HeaderBAComponent implements OnInit, OnDestroy {
   redirectMainPage() {
     this._router.navigate(['/']);
   }
-  ngOnInit(): void {
-    this.unsubscribe$ = this.auth$.subscribe(result => {
-        if (result) {
-          this._apiRecord.getCountRecordsForToday(result.id!, new Date().toLocaleString()).subscribe(
-            result => {
-              this.countRecord = result;
-            });
-        }
+  async ngOnInit() {   
+    this.auth$ = this.store$.pipe(select(selectProfileMainClient)); 
+    // this.auth = await firstValueFrom(this.auth$);
+    // console.log(this.auth);
+    this.auth$.pipe(skipWhile(data => data === null)).subscribe(result => {
+      
+      this.auth = result;
+      this.notificationCount$ = this._apiNotification.getCountNotifications(result?.id!);
+        this._apiRecord.getCountRecordsForToday(result?.id!, new Date().toLocaleString()).subscribe(
+          resultCount => {
+            this.countRecord = resultCount;
+          });  
+        
     });
-
+    this.orderSvc.startConnection();
+    this.orderSvc.newOrder$.subscribe(({ userId, recordId }) => {
+      if (userId)
+          this.notificationCount$ = this._apiNotification.getCountNotifications(this.auth?.id!);
+        
+    });
   }
 
   ngOnDestroy(): void {
@@ -116,6 +131,9 @@ export class HeaderBAComponent implements OnInit, OnDestroy {
  }
 
  GoToNotifications() {
+  this.unsubscribe$ = this._apiNotification.readNotifications(this.auth?.id!).subscribe(result => {
+      this.notificationCount$ = this._apiNotification.getCountNotifications(this.auth?.id!);
+  });
   this._router.navigate(['static/notifications'])
  }
 

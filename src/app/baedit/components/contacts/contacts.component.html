@@ -55,11 +55,7 @@
   </div>
   <!--Нижняя колонка правая-->
   <div class="column-right-footer" *ngIf="geoPoint$|async as geo">
-    <div class="container">
-      <!-- <ya-map [center]="[geo.lat, geo.lng]" [zoom]="12">
-        <ya-placemark [geometry]="[geo.lat, geo.lng]"></ya-placemark>
-      </ya-map> -->
-    </div>
+   <app-my-ycomponent [geo]="geoPoint$|async"></app-my-ycomponent>
   </div>
 </div>
 <div class="container-ba-contacts-btnSave"  *ngIf="profile">

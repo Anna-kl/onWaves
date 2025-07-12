@@ -10,6 +10,7 @@ import { DeleteaccComponent } from '../modals/deleteacc/deleteacc.component';
 import {LoginService} from "../../../auth/login.service";
 import {urlProfile} from "../../../../helpers/constant/commonConstant";
 import {Clipboard} from '@angular/cdk/clipboard';
+import { environment } from 'src/enviroments/environment';
 @Component({
   selector: 'app-main-profile',
   templateUrl: './main-profile.component.html',
@@ -19,11 +20,12 @@ import {Clipboard} from '@angular/cdk/clipboard';
 export class MainProfileComponent implements OnInit {
   profile: IViewBusinessProfile | null = null;
   avatar: any;
-  remainingText = 150;
+  remainingText = environment.TEXT_LENGTH;
   isShowCropped: boolean = true;
   formData: any;
   imageChangedEvent: any = null;
   isEdit = false;
+  TEXT_LENGTH: number = environment.TEXT_LENGTH;
 
   constructor(private store$:Store,
               private _loginService: LoginService,
@@ -72,10 +74,10 @@ export class MainProfileComponent implements OnInit {
   setAbout() {
     if (this.profile?.about) {
       this.isEdit = true;
-      if (this.profile?.about!.length >= 150) {
+      if (this.profile?.about!.length >= environment.TEXT_LENGTH) {
         this.profile.about = this.profile.about.substring(0,149);
       }
-      this.remainingText = 150 - this.profile.about.length;
+      this.remainingText = environment.TEXT_LENGTH - this.profile.about.length;
     }
   }
 

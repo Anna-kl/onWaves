@@ -31,7 +31,6 @@ export class UAAfterRegisterComponent implements OnInit {
     this.store$.pipe(select(selectProfileMainClient)).subscribe(
         result => {
           this.auth = result;
-          
         }
     );
   }
@@ -66,8 +65,9 @@ export class UAAfterRegisterComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     if (this.auth) {
       await this._apiCards.getListHistories(this.auth.id!);
-      await this._apiCards.getAllClientCardList(this.skip, this.isRecommend,  this.auth?.id!);
+     
     }
+    await this._apiCards.getAllClientCardList(this.skip, this.isRecommend, this.auth != null ? this.auth?.id! : undefined);
     this._apiCards.error$.subscribe(result => {
       if (result){
         navigator.geolocation.getCurrentPosition(position => {

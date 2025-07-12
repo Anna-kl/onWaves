@@ -19,8 +19,10 @@ import {StoreService} from "../../../ngrx-store/mainClient/store.service";
 import {select, Store} from "@ngrx/store";
 import {selectProfileMainClient, selectTokenMainClient} from "../../../ngrx-store/mainClient/store.select";
 import {urlProfile} from "../../../../helpers/constant/commonConstant";
-import {Observable} from "rxjs";
+import {filter, map, Observable, of, switchMap, tap} from "rxjs";
 import {IViewCoordinates} from "../../../DTO/views/profile/IViewCoordinates";
+import { LoginService } from 'src/app/auth/login.service';
+import { environment } from 'src/enviroments/environment';
 
 declare const ymaps: any;
 @Component({
@@ -31,6 +33,7 @@ declare const ymaps: any;
 })
 export class RegisterBusinessProfileComponent implements OnInit {
   strAddress: string = '';
+  TEXT_LENGTH: number = environment.TEXT_LENGTH;
 
 
 
@@ -77,6 +80,7 @@ export class RegisterBusinessProfileComponent implements OnInit {
                private _dictionaries: DictionaryService,
                private _api: ProfileService,
                private _store: Store,
+               private _login: LoginService,
                private _storeService: StoreService) {
     //store ngrx
     this._storeService.profileStoreMainProfileClient$.subscribe(
@@ -170,29 +174,64 @@ export class RegisterBusinessProfileComponent implements OnInit {
         timeZone: new Date().getTimezoneOffset(),
         email: undefined,
       } as unknown as IViewBusinessProfile;
-          this._api.createBAProfile(view, this.mainToken).subscribe(
-            result => {
-              if (result.code === 201) {
-                let user = result.data as IViewAuthProfile;
-                this.numberStreetPage ++;
-                if (this.formData) {
-                  this._serviceRegisterBusinessProfile
-                      .save_avatar(user.profileUserId!, this.formData)
-                      .subscribe(
-                          (res) => {
-                            if (res){
-                              this.activeModal.dismiss();
-                              window.location.href = `/`;
-                            }
-                          });
-                }else{
-                  this.activeModal.dismiss();
-                  window.location.href = `/`;
-                }
+      this._api.createBAProfile(view, this.mainToken).pipe(
+  // берём только успешный ответ с кодом 201
+          filter(result => result.code === 201),
 
-              }
+          // получаем user-объект
+          map(result => result.data as IViewAuthProfile),
+
+          // увеличиваем страницу
+          tap(() => this.numberStreetPage++),
+
+          // если есть formData — качаем аватар, иначе сразу «резолвим» true
+          switchMap(user => {
+            if (this.formData) {
+              return this._serviceRegisterBusinessProfile
+                .save_avatar(user.profileUserId!, this.formData)
+                .pipe(
+                  filter(res => Boolean(res)),   // ждём «truthy» результата
+                  map(() => user.profileUserId)                // прокидываем флаг OK
+                );
+            } else {
+              return of(user.profileUserId);
             }
-        );
+          })
+        )
+        // единая подписка и единый dismiss
+        .subscribe({
+          next: (res) => {
+            this.activeModal.dismiss();
+            if (res)
+              this._login.updateProfile(res);
+          },
+          error: err => {
+            console.error(err);
+            // тут можно показать сообщение об ошибке
+          }
+        });
+        //   this._api.createBAProfile(view, this.mainToken).subscribe(
+        //     result => {
+        //       if (result.code === 201) {
+        //         let user = result.data as IViewAuthProfile;
+        //         this.numberStreetPage ++;
+        //         if (this.formData) {
+        //           this._serviceRegisterBusinessProfile
+        //               .save_avatar(user.profileUserId!, this.formData)
+        //               .subscribe(
+        //                   (res) => {
+        //                     if (res){
+        //                       this.activeModal.dismiss();
+
+        //                     }
+        //                   });
+        //         }else{
+        //           this.activeModal.dismiss();
+        //         }
+
+        //       }
+        //     }
+        // );
     }
     // if (this.numberStreetPage >= 4){
     //         this.activeModal.dismiss();
@@ -286,7 +325,7 @@ export class RegisterBusinessProfileComponent implements OnInit {
 
     
     this.registrationForm.get('link')!.valueChanges.subscribe((value: string) => {
-      this.registrationForm.get('link')!.setValue(value.replace(/[^A-Za-z0-9]/, ""),
+      this.registrationForm.get('link')!.setValue(value.replace(/[^A-Za-z0-9-_.]/, ""),
        { emitEvent: false });
     });
 

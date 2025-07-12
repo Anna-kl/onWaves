@@ -69,11 +69,12 @@ export class SelectAddressComponent implements OnInit {
   checkAddress(){
     if (this.address)
       if (this.address.city)
-        if (this.address.city.length > 1)
-          if (this.address.home){
-            this.changeAddress.emit({
-              strAddress:  this.getStringAddress(),
-              viewAddress: this.address});
+        // if (this.address.city.length > 1)
+        //   if (this.address.home)
+            {
+              this.changeAddress.emit({
+                strAddress:  this.getStringAddress(),
+                viewAddress: this.address});
     }
   }
 
@@ -82,7 +83,7 @@ export class SelectAddressComponent implements OnInit {
       .subscribe(_=> {
       });
   }
-  change($event: Event, type: string) {
+  change($event: Event|null, type: string) {
    
     switch (type){
       case 'country': {
@@ -117,6 +118,7 @@ export class SelectAddressComponent implements OnInit {
         }
         case 'city': {
           this.getListStreet(this.myCity);
+          if ($event)
             this.address = {
                 city: this.myCity ?? $event.toString(),
                 street: '',
@@ -128,6 +130,7 @@ export class SelectAddressComponent implements OnInit {
             break;
         }
         case 'street': {
+          if ($event)
             this.address = {
                 city: this.myCity ?? this.address?.city,
                 street: $event.toString(),
@@ -139,6 +142,7 @@ export class SelectAddressComponent implements OnInit {
             break;
         }
         case 'home': {
+           if ($event)
             this.address = {
                 city: this.myCity ?? this.address?.city,
                 street: this.address?.street,
@@ -150,6 +154,7 @@ export class SelectAddressComponent implements OnInit {
              break;
         }
         case 'apartment': {
+           if ($event)
             this.address = {
                 city: this.myCity ?? this.address?.city,
                 street: this.address?.street,
@@ -181,6 +186,7 @@ public async getListRegions(myCountry: string|null){
     (await this._serviceRegisterBusinessProfile.getAllRegions(myCountry))
       .subscribe(_ => {
           this.myRegion = _.find(_ => _.includes(this.myRegion!))!;
+          this.change(null, 'region')
           });
   }
 }

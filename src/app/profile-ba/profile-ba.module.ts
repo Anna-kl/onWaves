@@ -4,7 +4,7 @@ import {ConfirmRecordComponent} from "./components/confirm-record/confirm-record
 
 import {ChooseTimeModalComponent} from "./components/choose-time-modal/choose-time-modal.component";
 import {ChooseDateTimeComponent} from "./components/choose-date-time/choose-date-time.component";
-import {DatePipe, NgClass, NgForOf, NgIf} from "@angular/common";
+import {CommonModule, DatePipe, NgClass, NgForOf, NgIf} from "@angular/common";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 import {ProfileBARouting} from "./profileBARouting";
@@ -41,6 +41,9 @@ import { ConfirmRecord2Component } from './components/confirm-record2/confirm-re
 import { SetIntervalStartComponent } from './components/set-interval-start/set-interval-start.component';
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import { ErrorConfirmRecordComponent } from "./components/errorConfirmRecord/error-confirm-record.component";
+import { YMapComponent } from "angular-yandex-maps-v3";
+import { CouponNewUserComponent } from './popup/coupon-new-user/coupon-new-user.component';
+import { ShowPhoneCouponComponent } from './popup/show-phone-coupon/show-phone-coupon.component';
 
 
 @NgModule({
@@ -65,9 +68,12 @@ import { ErrorConfirmRecordComponent } from "./components/errorConfirmRecord/err
     ConfirmModalComponent,
     ConfirmRecord2Component,
     SetIntervalStartComponent,
-    ErrorConfirmRecordComponent
+    ErrorConfirmRecordComponent,
+    CouponNewUserComponent,
+    ShowPhoneCouponComponent
   ],
     imports: [
+      YMapComponent,
       ProfileBANotesRouting,
       NgxMaskDirective, NgxMaskPipe,
         NgClass,
@@ -83,6 +89,7 @@ import { ErrorConfirmRecordComponent } from "./components/errorConfirmRecord/err
         NgxMaskDirective,
         UIModule,
         CommonComponentsModule,
+        CommonModule,
         ProgressSpinnerModule,
     ],
   exports: [
@@ -97,6 +104,8 @@ import { ErrorConfirmRecordComponent } from "./components/errorConfirmRecord/err
     SliderotComponent,
     CommonNotesComponent,
     ReviewsComponent,
+    PageUserBAComponent,
+    CouponNewUserComponent
   ],
   providers: [ProfileDataService, NotesService]
 })

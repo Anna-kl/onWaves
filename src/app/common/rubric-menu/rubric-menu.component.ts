@@ -37,7 +37,7 @@ export class RubricMenuComponent implements OnChanges{
          if (this.isOption !== PaymentForType.Default) {
            this.allCategories = getServiceForType(this.allCategories, this.isOption);
          }
-         this.mainCategories = this.allCategories.filter(_ => _.parentId == null);
+         this.mainCategories = this.allCategories.filter(_ => _.parentId == null && _.id !== null);
       }
     );
   }

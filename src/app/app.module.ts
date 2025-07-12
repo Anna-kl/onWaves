@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
 
 import { MainPageComponent } from './pages/main-page.component';
 import { SliderComponent } from './slider/slider.component';
@@ -92,8 +92,6 @@ import {ImageCropperModule} from "ngx-image-cropper";
 import { PersonalPageUserComponent } from './profile-user/personal-page-user/personal-page-user.component';
 import { StranicaComponent } from './static/stranica/stranica.component';
 
-import {getMessaging, provideMessaging} from "@angular/fire/messaging";
-
 import { NotificationPageComponent } from './components/mesages/notification-page/notification-page.component';
 import {StoreDevtoolsModule} from "@ngrx/store-devtools";
 import {environment} from "../enviroments/environment";
@@ -151,13 +149,12 @@ import {GalleriaModule} from "primeng/galleria";
 import { PageClient1Component } from './maks/pageClient1/pageClient1.component';
 import { BaEditModule } from './baedit/ba-edit.module';
 import { ChatMainComponent } from './pages/chat-main/chat-main.component';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { EffectsModule } from '@ngrx/effects';
-import { provideYConfig, YConfig, YMapComponent, YMapDefaultSchemeLayerDirective, YMapMarkerDirective, YMapFeatureDirective, YMapDefaultMarkerDirective,
-  YMapDefaultFeaturesLayerDirective
+import { provideYConfig, YConfig
  } from 'angular-yandex-maps-v3';
-import { YMapMarker } from '@yandex/ymaps3-types';
+
 
 const mapConfig: YConfig  = {
     apikey: '91ce60c3-9067-4742-9c3c-302de08cfc30',
@@ -245,7 +242,8 @@ registerLocaleData(localeRu, 'ru');
     PageClient1Component
   ],
     imports: [
-      NgxMaskDirective, NgxMaskPipe,
+      NgxMaskDirective,
+       NgxMaskPipe,
       BrowserModule,
       ScrollingModule,
       RouterModule,
@@ -266,9 +264,6 @@ registerLocaleData(localeRu, 'ru');
       ProfileBAModule,
       CommonComponentsModule,
       BaEditModule,
-      YMapComponent, YMapDefaultSchemeLayerDirective, YMapMarkerDirective,YMapFeatureDirective,
-      YMapDefaultMarkerDirective,
-  YMapDefaultFeaturesLayerDirective,
       PagesModule, ProgressSpinnerModule, MenuModule, ImageCropperModule,
       // AngularFireMessagingModule,
       // AngularFireModule.initializeApp({ /* See project settings in Firebase Console for this information */

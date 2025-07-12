@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 
 import {Router} from "@angular/router";
 
@@ -24,16 +24,63 @@ import { getPriceService, getPriceString } from 'src/helpers/common/price.helper
 import { getColorLine, getStatusDone } from 'src/helpers/constant/notes';
 import { Renderer2 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { MessageService } from 'primeng/api';
 
 
 
 @Component({
   selector: 'app-my-notes',
   templateUrl: './ba-notes.component.html',
-  styleUrls: ['./ba-notes.component.css'],
-  providers: [ScheduleService, RecordService]
+  styleUrls: ['./ba-notes.component.scss'],
+  providers: [ScheduleService, RecordService, MessageService]
 })
 export class BANotesComponent implements OnInit, OnDestroy {
+
+  checkStateUpdateTime(record: IViewScheduleBA): any {
+    if (record.duration === 0){
+      return false;
+    }
+    if (record.status === RecordStatus.Created){
+      return true;
+    }
+    return false;
+  }
+
+  async saveTime() {
+    this.unsubsribe$ = this._apiRecord.updateTime(this.profileId, {time: this.newTime, recordId: this.updateRecordId})
+    .subscribe(result => {
+             if (result.code === 200){
+              this.modalService.dismissAll();
+              this.getListSchedule();
+              this.showSuccess();
+             }
+        });
+    
+    // .pipe(
+    //   map(data => {
+    //    if (data.code === 200)
+    //       this.showSuccess();
+    //     })
+    // );
+  }
+
+  showSuccess() {
+    this.messageService.add({severity:'success', summary: 'Создано', detail: 'Изменения сохранены', life:5000});
+  }
+
+  closeModal() {
+    this.modalService.dismissAll();
+  }
+  @ViewChild('timeModal') timeModal!: TemplateRef<any>;
+  updateRecordId: string = '';
+
+  openTimeModal(time: number, resordId: string) {
+    this.newTime = time;
+    this.updateRecordId = resordId;
+    this.modalService.open(this.timeModal, { centered: true });
+  }
+
 getAllTimeWorking(time: number) {
     if (time >= 1440) {
       return `${getDays(time)}дн ${getHours(time)}ч.
@@ -50,22 +97,24 @@ getAllTimeWorking(time: number) {
 }
   // id: string | null = null;
   today: Date = new Date();
-
+  newTime: number = 0;
   schedules$: Observable<IViewScheduleBA[]>|null = null;
   dayId?: string;
   canceled$: Observable<IViewScheduleBA[]>|null = null;
-  private profileSubscribe: Subscription|null = null;
+  // private profileSubscribe: Subscription|null = null;
   private profile: IViewBusinessProfile | null  = null;
   private profileId: string = '';
   private unsubsribe$: Subscription|null = null;
   constructor(private _apiSchedule: ScheduleService,
               private _events: NotesService,
               private router: Router,
+              private messageService: MessageService,
               private store$: Store,
               private location: Location,
               private sanitizer: DomSanitizer,
               private renderer: Renderer2,
               private route: ActivatedRoute,
+              private modalService: NgbModal,
               private _apiRecord: RecordService) {
 
     // this._events.userId.subscribe(res => {
@@ -92,26 +141,6 @@ getAllTimeWorking(time: number) {
     const send = {dateRequest: localToUTC(this.today)} as IViewDateSchedule;
     this.schedules$ = this._apiSchedule.getProfileScheduleBA(this.profileId, send);
     
-    this.schedules$.subscribe((data:any)=> console.log('this.schedules$',data))
-    // this._apiSchedule.getProfileScheduleBA(this.id!, send).subscribe(result => {
-    //   console.log(result);
-    //   result.forEach(item => {
-    //     let a = toLocale(item.start);
-    //     console.log(a);
-    //   })
-    // })
-      // .subscribe(_=>{
-        // this.schedules = this._apiSchedule.getScheduleBA$.value;
-        // if (this.schedules.length === 0){
-        //   this._events.transferIsWorkDay(false);
-        // }
-        // this.schedules.forEach(item => {
-        //   let time = item.start.toString().split(':');
-        //   item.start = new Date(this.today.setHours(Number(time[0]), Number(time[1])));
-        //   time = item.end.toString().split(':');
-        //   item.end = new Date(this.today.setHours(Number(time[0]), Number(time[1])));
-        // });
-      // });
   }
 
   public async getListScheduleCanceled(){
@@ -151,6 +180,7 @@ getAllTimeWorking(time: number) {
 
   protected readonly getPriceService = getPriceService;
   protected readonly getPriceString = getPriceString;
+  
   async ngOnInit(): Promise<void> {
     this.unsubsribe$ = this.store$.pipe(select(selectProfileMainClient)).pipe(take(1))
         .subscribe(

@@ -36,21 +36,18 @@
 			<div class="cont-horiz" style="width: 100%;" *ngIf="loading">
 				<p-progressSpinner ></p-progressSpinner>
 			</div>
-			<div *ngIf="_apiSearch.isResultSearch|async">
+			<!-- <div *ngIf="_apiSearch.isResultSearch|async">
 				<p>Упс... к сожалению по вашему запросу ничего не нашлось, 
 					попробуйте еще раз!</p>
 				<app-clients-card-list [card-business]="cards$"
 				 *ngIf="cards$"></app-clients-card-list>
-			</div>
-			<!-- <div *ngIf="profiles$|async as profiles">
-				<p>Возможно, вас заинтересуют!</p>
-				<app-clients-card-list [card-business]="profiles"></app-clients-card-list>
 			</div> -->
+
 		
 			<!-- Результаты поиска --> 
 <!--			<app-clients-card-list class="disp1 cont-horiz-start-start wrap parent-grey-light " style="gap: 10px 4px;"> -->
 <!--			</app-clients-card-list> -->
-			<ng-container *ngIf="test$|async as cardsSearch">
+			<ng-container *ngIf="test$|async as cardsSearch;else alternative">
 				
 						<div *ngFor="let category of filtered$|async" class="w100 left-right20mob" >
 						
@@ -66,6 +63,12 @@
 						</div> 
 
 			</ng-container>
+			<ng-template  #alternative >
+				<div *ngIf="alternatives$|async as cards">
+				<p style="margin-bottom: 8px;">К сожалению, ничего не нашлось. Возможно, вас заинтересуют!</p>
+				<app-clients-card-list [card-business]="cards"></app-clients-card-list>
+			</div>
+			</ng-template>
 		</div>
 
 	</div>

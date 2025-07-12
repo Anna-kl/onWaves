@@ -1,19 +1,19 @@
 <!--Услуги start-->
 <div class="cont-horiz-start wrap " style="max-width: 1200px;">
-    <div style="display: flex; flex-direction: column;">
+    <div style="display: flex; flex-direction: column;" >
         <h2 class="head-servise">
             Список услуг
         </h2>
-
-            Услуги отсутствуют на данный момент
+<span *ngIf="!ifExist"> Услуги отсутствуют на данный момент</span>
+           
         <!-- </p>  -->
     </div>
 
 
 <ng-container >
-       <app-create-accordion *ngIf="!ifExist && viewCreate"></app-create-accordion> 
+       <app-create-accordion *ngIf="viewCreate"></app-create-accordion> 
 
-        <div class="accordion_tab" *ngFor="let group of combinedData$ | async" style="max-height: 100%;">
+        <div class="accordion_tab" *ngFor="let group of combinedData$|async as groupsCombined" style="max-height: 100%;">
             <!-- Шапка вкладки -->
             <input type="checkbox" id="chck{{group.group.id}}" [checked]="group.isOpen"
                 (change)="group.isOpen = !group.isOpen">
@@ -136,7 +136,7 @@
                         </label>
                         <!-- Шапка вкладки end -->
                         <!-- Описание услуги -->
-                        <div class="accordion_serv_in_tab-content" *ngIf="subGroup.about; else notHaveAbout ">
+                        <div class="accordion_serv_in_tab-content" *ngIf="subGroup.about; else notHaveAbout" [style.max-height.%]="isAboutOpen ? 100 : 0">
                             <span>
                                 {{subGroup.about}}
                             </span>
@@ -160,12 +160,14 @@
 
 
         <!------------------------      Услуги без группы   ----------------------->
-        <ng-container *ngIf="ifExist">
-        <ng-component *ngIf="serviceWithout$|async as services ">
+     
+
+         
             <div class="line-separateur"></div>
             <!--      Услуги без группы-->
-            <div class="accordion_serv_in_tabs w100  cont-horiz-start wrap">
-                <div class="accordion_serv_in_tab w100" *ngFor="let service of services">
+            <div class="accordion_serv_in_tabs w100  cont-horiz-start wrap" *ngIf="serviceWithout$|async as serviceWithout">
+                <div class="accordion_serv_in_tab w100" *ngFor="let service of serviceWithout">
+           
                     <input type="checkbox" id="{{service.id}}">
                     <!-- Шапка вкладки -->
                     <label for="{{service.id}}" class="w100 accordion_serv_in_tab-label str_uslugi_podcategory w100"
@@ -243,7 +245,7 @@
                         </div>
                     </label>
                     <!-- Описание -->
-                    <div class="accordion_serv_in_tab-content" *ngIf="service.about; else notHaveAbout ">
+                    <div class="accordion_serv_in_tab-content" *ngIf="service.about; else notHaveAbout" [style.max-height.%]="isAboutOpen ? 100 : 0">
                         <span>
                             {{service.about}}
                         </span>
@@ -261,7 +263,7 @@
                     </ng-template>
                 </div>
             </div>
-        </ng-component>
-    </ng-container>
+
+ </ng-container>
         <p-toast position="bottom-center">
         </p-toast>

@@ -29,6 +29,7 @@ export class MyNotesComponent implements OnInit {
 
   id!: string | null;
   records$: Observable<IViewRecordUser[]>|null = null;
+  sale: number = 0;
   constructor(private _apiRecords: RecordService,
               private route: ActivatedRoute,
               private _modal: NgbModal,
@@ -38,39 +39,7 @@ export class MyNotesComponent implements OnInit {
 
   public async getListRecords(){
     this.records$ =  this._apiRecords.getUserRecords(this.id!, new Date().toLocaleString());
-      // .subscribe(_=>{
-      //   this.records = this._apiRecords.recordsUser$.value;
-      //   this.records.forEach(item => {
-      //     item.start = item.start ? toConstantTime(new Date(item.start)) : null;
-      //     switch (item.recordStatus){
-      //       case RecordStatus.Pending:{
-      //         item.statusText = "Подтверждено";
-      //         item.isCanCancel = true;
-      //         break;
-      //       }
-      //       case RecordStatus.Confirm: {
-      //         item.statusText = "В ожидании";
-      //         item.isCanCancel = true;
-      //         break;
-      //       }
-      //       case RecordStatus.Success: {
-      //         item.statusText = "Выполнено";
-      //         item.isCanCancel = false;
-      //         break;
-      //       }
-      //       case RecordStatus.Created: {
-      //         item.statusText = "Не подтверждено";
-      //         item.isCanCancel = true;
-      //         break;
-      //       }
-      //       case RecordStatus.Canceled: {
-      //         item.statusText = "Отменено";
-      //         item.isCanCancel = true;
-      //         break;
-      //       }
-      //     }
-      //   });
-      // });
+
   }
 
   getStatus(item: IViewRecordUser){
@@ -99,6 +68,7 @@ export class MyNotesComponent implements OnInit {
     this.id = this.route.snapshot.paramMap.get('id');
     if (this.id) {
       await this.getListRecords();
+      
     }
   }
 

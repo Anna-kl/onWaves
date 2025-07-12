@@ -9,6 +9,7 @@ import {IViewRecordUser} from "../app/DTO/views/records/IViewRecordUser";
 
 import {ISendRecord} from "../app/DTO/requests/ISendRecord";
 import {IViewRecordData} from "../app/DTO/views/records/IViewRecordData";
+import { IViewUpdateTime } from "src/app/DTO/views/records/IViewUpdateTime";
 
 @Injectable()
 
@@ -19,6 +20,14 @@ export class RecordService {
   constructor(private http: HttpClient) {
   }
 
+  updateTime(userId: string, data: IViewUpdateTime){
+    return this.http.put<IResponse>(`${this.url}update-time/${userId}`, data);
+  }
+
+  getSale(id: string){
+    
+  }
+  
   saveRecord(id: string, record: Record){
     return this.http.post<IResponse>(`${this.url}add-user/${id}`, record);
   }

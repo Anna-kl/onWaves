@@ -18,7 +18,7 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {AlbumsService} from "../../../../../services/albums.service";
 import {GroupService} from "../../../../../services/groupservice";
 import {Service} from "../../../../DTO/classes/services/Service";
-import { Subject, takeUntil } from 'rxjs';
+import { map, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import {PaymentForType} from "../../../../DTO/enums/paymentForType";
 import {MessageService} from "primeng/api";
 import {DisallowSymbolsDirective} from "src/app/disallow-symbols.directive";
@@ -28,6 +28,7 @@ import {
   getTimeFromFields
 } from "../../../../../helpers/common/timeHelpers";
 import { getNameCurrency } from "src/helpers/common/price.helpers";
+import { environment } from "src/enviroments/environment";
 
 @Component({
   selector: 'app-arenda2',
@@ -37,6 +38,10 @@ import { getNameCurrency } from "src/helpers/common/price.helpers";
 
 })
 export class Arenda2Component implements OnInit, OnDestroy {
+  changeService: { [k: string]: any; } | undefined; 
+  TEXT_LENGTH: number = environment.TEXT_LENGTH;
+
+
   changeDb($event: Event) {
    console.log($event);
   }
@@ -70,8 +75,8 @@ export class Arenda2Component implements OnInit, OnDestroy {
   groupsMinutes: string[] = ['00', '15', '30', '45'];
   currencies: CurrencyType[] = [CurrencyType.RUB];
   genders: Gender[] = [];
-  maxChars: number = 150;
-  remainingText = 150;
+  maxChars: number = environment.TEXT_LENGTH;
+  remainingText = environment.TEXT_LENGTH;
   remainingChars: number = this.maxChars;
   text: string = '';
   serviceGroup!: FormGroup;
@@ -128,7 +133,11 @@ export class Arenda2Component implements OnInit, OnDestroy {
         // });
       }
     );
-
+      let temp = this.router.getCurrentNavigation()?.extras.state;
+      if (temp){
+        this.changeService  = temp['subGroup'];
+        this.groups = temp['groups'];
+      }
   }
   get duration() {
     //return this.myForm.get('numericInput') || new FormControl('');
@@ -189,41 +198,70 @@ export class Arenda2Component implements OnInit, OnDestroy {
       durationHours: this.groupsHours[0],
       durationMinutes: this.groupsMinutes[0]
     });
-    let serv = this.router.getCurrentNavigation()?.extras.state;
-    if (serv){
-      this.service = serv['subGroup'] as Service;
-      this.isRubric = false;
-      this.serviceGroup = this.builder.group({
-        name: [this.service.name, Validators.required],
-        about: this.service.about,
-        group: this.groups.find(_ => _.id === this.service?.groupServiceId),
-        isAll: this.service.gender.includes(Gender.All),
-        isWoman: this.service.gender.includes(Gender.Woman),
-        isMen: this.service.gender.includes(Gender.Men),
-        isChildren: this.service.gender.includes(Gender.Children),
-        isPet: this.service.gender.includes(Gender.Pet),
-        price: this.builder.group({
-          price: this.service.price.price,
-          isRange: this.service.price.isRange,
-          startRange: this.service.price.startRange,
-          endRange: this.service.price.endRange,
-          currencyType: CurrencyType.RUB
-        }),
-        durationHours: this.service.duration ? getHoursString(this.service.duration) : this.groupsHours[0],
-        isTimeUnlimited: this.service.isTimeUnlimited,
-        durationMinutes: this.service.duration ? getMinutesStr(this.service.duration) : this.groupsMinutes[0],
-      });
-      this._apiImage.getImagesFromService(this.service.id!).pipe(takeUntil(this.destroy$)).subscribe(
-        result_images => {
-          this.images = result_images;
-        }
-      );}
-      if (this.profile?.id){
-          this._apiService.getGroupServices(this.profile?.id).pipe(takeUntil(this.destroy$)).subscribe(
-             result => {
-                this.groups = result;
+    
+    // if (this.changeService){
+    //   this.service = this.changeService['subGroup'] as Service;
+    //   this.isRubric = false;
+    //   this.serviceGroup = this.builder.group({
+    //     id: this.changeService['subGroup'].id,
+    //     name: [this.service.name, Validators.required],
+    //     about: this.service.about,
+    //     group: this.groups.find(_ => _.id === this.service?.groupServiceId),
+    //     isAll: this.service.gender.includes(Gender.All),
+    //     isWoman: this.service.gender.includes(Gender.Woman),
+    //     isMen: this.service.gender.includes(Gender.Men),
+    //     isChildren: this.service.gender.includes(Gender.Children),
+    //     isPet: this.service.gender.includes(Gender.Pet),
+    //     price: this.builder.group({
+    //       price: this.service.price.price,
+    //       isRange: this.service.price.isRange,
+    //       startRange: this.service.price.startRange,
+    //       endRange: this.service.price.endRange,
+    //       currencyType: CurrencyType.RUB
+    //     }),
+    //     durationHours: this.service.duration ? getHoursString(this.service.duration) : this.groupsHours[0],
+    //     isTimeUnlimited: this.service.isTimeUnlimited,
+    //     durationMinutes: this.service.duration ? getMinutesStr(this.service.duration) : this.groupsMinutes[0],
+    //   });
+
+
+               
+        if (this.changeService){
+          this.service = this.changeService as Service;
+          this.isRubric = false;
+          this.serviceGroup = this.builder.group({
+            id: this.service.id,
+            name: [this.service.name, Validators.required],
+            about: this.service.about,
+            group: this.groups.find(_ => _.id === this.service?.groupServiceId),
+            isAll: this.service.gender.includes(Gender.All),
+            isWoman: this.service.gender.includes(Gender.Woman),
+            isMen: this.service.gender.includes(Gender.Men),
+            isChildren: this.service.gender.includes(Gender.Children),
+            isPet: this.service.gender.includes(Gender.Pet),
+            price: this.builder.group({
+              price: this.service.price.price,
+              isRange: this.service.price.isRange,
+              startRange: this.service.price.startRange,
+              endRange: this.service.price.endRange,
+              currencyType: CurrencyType.RUB
+            }),
+            durationHours: this.service.duration ? getHoursString(this.service.duration) : this.groupsHours[0],
+            isTimeUnlimited: this.service.isTimeUnlimited,
+            durationMinutes: this.service.duration ? getMinutesStr(this.service.duration) : this.groupsMinutes[0],
         });
-    }
+              
+  }
+          
+      
+      
+          
+          // .subscribe(
+          //    result => {
+          //       this.groups = result;
+        
+    
+  
     // this._dataService.sendGroupsService.subscribe(
     //   result => {
     //     this.groups = result;
@@ -238,10 +276,10 @@ export class Arenda2Component implements OnInit, OnDestroy {
 
     this.serviceGroup?.get('about')!.valueChanges.subscribe(
       res => {
-        if (res.length >= 150){
-          this.serviceGroup?.patchValue({'about': res.substring(0, 149)});
+        if (res.length >= environment.TEXT_LENGTH){
+          this.serviceGroup?.patchValue({'about': res.substring(0, environment.TEXT_LENGTH)});
         }
-        this.remainingText = 150 - res.length;
+        this.remainingText = environment.TEXT_LENGTH - res.length;
       }
     );
     this.serviceGroup?.get('isTimeUnlimited')!.valueChanges.subscribe(

@@ -70,3 +70,109 @@
   top: 90px;
   margin-left: 70px;
 }
+
+/////////////////
+.account-dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+// Боковое меню
+.account-menu {
+  background: #f5f5f5;
+  padding: 1rem;
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    li + li {
+      margin-top: 0.5rem;
+    }
+    a {
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// Основная область
+.account-content {
+  flex: 1;
+  padding: 1rem;
+
+  .coupon-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    background: #e0f7fa;
+    border-left: 4px solid #00796b;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+
+    &__text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #004d40;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+
+    &__btn {
+      align-self: center;
+      padding: 0.5rem 1.5rem;
+      background: #00796b;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      &:hover {
+        background: #005a43;
+      }
+    }
+
+    // На широких экранах — строчно
+    @media (min-width: 600px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      .coupon-banner__text {
+        margin-bottom: 0;
+        text-align: left;
+      }
+    }
+  }
+
+  .section {
+    // пример секции
+    h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+    p {
+      color: #555;
+    }
+  }
+}
+
+// Desktop layout: меню слева, контент справа
+@media (min-width: 768px) {
+  .account-dashboard {
+    flex-direction: row;
+  }
+  .account-menu {
+    width: 200px;
+    flex-shrink: 0;
+    height: auto;
+  }
+  .account-content {
+    padding: 2rem;
+  }
+}

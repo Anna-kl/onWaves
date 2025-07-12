@@ -10,6 +10,7 @@ import { ProfileUser, UserType } from 'src/app/DTO/classes/profiles/profile-user
 import {ICategory} from "../app/DTO/classes/ICategory";
 import {IViewBusinessProfile} from "../app/DTO/views/business/IViewBussinessProfile";
 import {IViewChangeOrder} from "../app/DTO/views/business/IViewChangeOrder";
+import { ICoupon } from 'src/app/DTO/classes/promo/IPoupon';
 
 @Injectable({
   providedIn: 'root'
@@ -31,9 +32,39 @@ export class ProfileService {
     return this.http.post<IResponse>(this.url, profileUser, {headers});
   }
 
+  hasCoupon(id: string){
+     return this.http.get<boolean>(`${this.url}has-coupon/${id}`);
+  }
+
+  getCoupon(id: string){
+     return this.http.get<ICoupon|null>(`${this.url}get-coupon/${id}`);
+  }
+
+
+  // sendIfClickContact(profileId: string,  whoIs: string|null){
+  //       if (whoIs)
+  //             return this.http.get<string[]>(`${this.url}get-reference/${profileId}?whoIs=${whoIs}`);
+  //       else
+  //           return this.http.get<string[]>(`${this.url}get-reference/${profileId}`);
+  // }
+
+
+  sendWhoisVisit(profileId: string, option: string, whoIs: string|null){
+    let urlTemp = `${this.url}get-reference/${profileId}?option=${option}`;
+    if (whoIs)
+      return this.http.get<string[]>(`${urlTemp}&whoIs=${whoIs}&`);
+    else
+     return this.http.get<string[]>(urlTemp);
+    
+  }
+
   getCoordinates(id: string){
     return this.http.get<IResponse>(
       `${this.url}get-coordinate/${id}`);
+  }
+
+  getMainTags(id: string){
+     return this.http.get<string[]>(`${this.url}get-main-tags/${id}`);
   }
 
   checkLink(word: string){
@@ -69,9 +100,15 @@ export class ProfileService {
   }
 
   public async getProfileSkillsAsync(skip: number, isRecommend: boolean, id?: string) {
+    if (id)
     return this.http.get<IResponse>(`${this.url}?id=${id}&type=1&&isRecommend=${isRecommend}&skip=${skip}`).pipe(
       tap(data => this.listClientsCard$.next(data))
     );
+    else{
+       return this.http.get<IResponse>(`${this.url}?type=1&&isRecommend=${isRecommend}&skip=${skip}`).pipe(
+            tap(data => this.listClientsCard$.next(data))
+    );
+    }
   };
 
   getFullAddress(id: string){

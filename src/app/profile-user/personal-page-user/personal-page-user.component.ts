@@ -11,7 +11,8 @@ import {LoginService} from "../../auth/login.service";
 import { IViewPost } from 'src/app/DTO/views/posts/IViewPost';
 import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
 import { PostService } from 'src/services/posts.service';
-import { Subscription } from 'rxjs';
+import { filter, forkJoin, mergeMap, of, skipWhile, Subscription, switchMap, tap } from 'rxjs';
+import { ProfileService } from 'src/services/profile.service';
 
 @Component({
   selector: 'app-personal-page-user',
@@ -25,18 +26,21 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
   posts: IViewPost[] = [];
   private unsubscribe$: Subscription|null = null;
   slice: number = 1;
+    // Флаг наличия купона
+  hasCoupon = true;
+
+  // Значение купона в рублях
+  couponValue = 500;
+  hasCoupon$: any;
   
   constructor(private _storeService: Store,
               private sanitizer: DomSanitizer,
               private _loginService: LoginService,
               private _post: PostService,
+              private _profile: ProfileService,
               private modalService: NgbModal) {
     //получаем данные профиля из store
-    this._storeService.pipe(select(selectProfileMainClient)).subscribe(
-        mainProfile => {
-          this.mainProfileCleint = mainProfile;
-        }
-    );
+    
 
     // this._events.choosedProfile.subscribe(result => {this.user = result;});
   }
@@ -82,20 +86,82 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.mainProfileCleint){
-      this.unsubscribe$ = this._post.getRecommends
-      (this.mainProfileCleint.id!, 0, 2).subscribe(result => {
-        this.posts = [];
-        this.posts = result;
-        this.posts.forEach(item => {
-          if (!item.answers){
-            this._post.getComments(item.id!).subscribe(res => {
-              item.answers = res;
-            });
-          }
-        });
-      });
-    }
+
+    this._storeService.pipe(
+  // 1) Сначала берём только непустого пользователя
+  select(selectProfileMainClient),
+  filter(user => user != null),
+
+  // 2) Как только появится объект user, переключаемся на getRecommends
+  switchMap(user => 
+    this._post.getRecommends(user!.id!, 0, 2).pipe(
+      // 3) В tap сохраняем посты и инициируем загрузку комментариев
+      tap(posts => this.posts = posts),
+      // 4) Затем с помощью mergeMap + forkJoin ждём ответы для каждого поста без comments
+      mergeMap(posts => {
+        const requests = posts
+          .filter(item => !item.answers)
+          .map(item =>
+            this._post.getComments(item.id!).pipe(
+              tap(comments => item.answers = comments)
+            )
+          );
+          this.mainProfileCleint = user;
+          if(user)
+            this.hasCoupon$ = this._profile.hasCoupon(user.id!);
+        // Если нет ни одного запроса — возвращаем пустой поток
+        return requests.length ? forkJoin(requests) : of([]);
+      })
+    )
+  )
+)
+// 5) Подписываемся, чтобы всё запустилось
+.subscribe({
+  next: () => {
+    // тут можно отрисовать обновлённый this.posts, но чаще
+    // достаточно, что в tap мы уже мутировали this.posts
+    console.log('Рекомендации и комментарии загружены', this.posts);
+  },
+  error: err => console.error(err)
+});
+
+    // this._storeService.pipe(select(selectProfileMainClient)).pipe(
+    //   tap(user => {
+    //     console.log(user);
+    //     this.mainProfileCleint = user;
+    //     this._post.getRecommends(this.mainProfileCleint?.id!, 0, 2).subscribe(result => {
+    //     this.posts = [];
+    //     this.posts = result;
+    //     this.posts.forEach(item => {
+    //       if (!item.answers){
+    //         this._post.getComments(item.id!).subscribe(res => {
+    //           item.answers = res;
+    //         });
+    //       }
+    //     });
+    //   })})
+    // )
+    // .subscribe(
+    //     mainProfile => {
+    //       this.mainProfileCleint = mainProfile;
+    //     }
+    // );
+
+
+    // if (this.mainProfileCleint){
+    //   this.unsubscribe$ = this._post.getRecommends
+    //   (this.mainProfileCleint.id!, 0, 2).subscribe(result => {
+    //     this.posts = [];
+    //     this.posts = result;
+    //     this.posts.forEach(item => {
+    //       if (!item.answers){
+    //         this._post.getComments(item.id!).subscribe(res => {
+    //           item.answers = res;
+    //         });
+    //       }
+    //     });
+    //   });
+    // }
   }
 
   getAvatar(avatar: any) {

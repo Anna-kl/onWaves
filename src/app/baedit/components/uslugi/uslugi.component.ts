@@ -51,7 +51,12 @@ export class UslugiComponent implements OnInit, OnDestroy {
     private store$: Store
   ) {
 
-    this._activateRoute.params.subscribe(params => {
+   
+  }
+
+
+  ngOnInit(): void {
+     this._activateRoute.params.subscribe(params => {
       this.isActive = params['isActive'];
     });
 
@@ -64,10 +69,6 @@ export class UslugiComponent implements OnInit, OnDestroy {
             this.groups = groups;
           });
       });
-  }
-
-
-  ngOnInit(): void {
     this.store$.pipe(select(selectProfileMainClient)).subscribe(result => {
       if (result) {
         this.profile = result;
@@ -163,9 +164,9 @@ export class UslugiComponent implements OnInit, OnDestroy {
     this.modaltUslugiRef.componentInstance.id = this.profile?.id;
     this.modaltUslugiRef.result.then((type: any) => {
       if (type === PaymentForType.ForHour) {
-        this.router.navigate([`../arenda-hour`], { relativeTo: this._activateRoute })
+        this.router.navigate([`../arenda-hour`], { relativeTo: this._activateRoute,  state: { subGroup: null,  groups: this.groups } })
       } else {
-        this.router.navigate([`../arenda-service`], { relativeTo: this._activateRoute })
+        this.router.navigate([`../arenda-service`], { relativeTo: this._activateRoute,  state: { subGroup: null,  groups: this.groups } })
       }
     });
 

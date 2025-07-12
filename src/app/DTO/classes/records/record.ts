@@ -9,4 +9,5 @@ export interface Record {
   clientId?: string;
   options?: IOptionsRecord;
   serverTime?: string;
+  couponId?: string;
 }

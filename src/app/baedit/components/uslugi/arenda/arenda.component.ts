@@ -23,6 +23,7 @@ import {GroupService} from "../../../../../services/groupservice";
 import {MessageService} from "primeng/api";
 import { getNameCurrency } from "src/helpers/common/price.helpers";
 import { Subject, takeUntil } from "rxjs";
+import { environment } from "src/enviroments/environment";
 
 @Component({
   selector: 'app-arenda',
@@ -43,8 +44,8 @@ export class ArendaComponent implements OnInit, OnDestroy {
   images: IViewImage[] = [];
   currencies: CurrencyType[] = [CurrencyType.RUB];
   genders: Gender[] = [];
-  maxChars: number = 150;
-  remainingText = 150;
+  maxChars: number = environment.TEXT_LENGTH;
+  remainingText = environment.TEXT_LENGTH;
   remainingChars: number = this.maxChars;
   text: string = '';
   serviceGroup!: FormGroup;
@@ -64,6 +65,7 @@ export class ArendaComponent implements OnInit, OnDestroy {
     errorLink: 'Заполните поле',
     errorLinkStyle: 'border-color: red; color: red'
   };
+  changeService: Service|null = null;
   limitServiceName(event: any) {
     const inputText = event.target.value;
     if (inputText.length > 70) {
@@ -98,65 +100,14 @@ export class ArendaComponent implements OnInit, OnDestroy {
               private location: Location,
               private _dataService: ProfileDataEditService) {
 
-    let serv = this.router.getCurrentNavigation()?.extras.state;
-    if (serv){
-      this.service = serv['subGroup'] as Service;
-      this.isRubric = false;
-      this.serviceGroup = this.builder.group({
-        name:  [this.service.name, Validators.required], 
-        about: this.service.about,
-        group: this.service.groupServiceId,
-        isAll: this.service.gender.find(_ => _ === Gender.All),
-        isWoman: this.service.gender.find(_ => _ === Gender.Woman),
-        isMen: this.service.gender.find(_ => _ === Gender.Men),
-        isChildren: this.service.gender.find(_ => _ === Gender.Children),
-        isPet: this.service.gender.find(_ => _ === Gender.Pet),
-        price: this.builder.group({
-          price: this.service.price.price,
-          isRange: this.service.price.isRange,
-          startRange: this.service.price.startRange,
-          endRange: this.service.price.endRange,
-          currencyType: CurrencyType.RUB
-        }),
-      });
-      this._apiImage.getImagesFromService(this.service.id!).subscribe(
-        result_images => {
-          this.images = result_images;
-        }
-      );
-    } else {
-      this.serviceGroup = this.builder.group({
-        name: ['', [Validators.required, Validators.minLength(3)]],
-        about:  ['', [ Validators.maxLength(150)]],
-        group: this.choosedGroup,
-        isAll: false,
-        isWoman: false,
-        isMen: false,
-        isChildren: false,
-        isPet: false,
-        //price: 0,
-        price: this.builder.group({
-          price: new FormControl(null, Validators.required),
-          isRange: false,
-          startRange: null,
-          endRange: null,
-          currencyType: CurrencyType.RUB
-        }),
-      });
-    }
+    //  = this.router.getCurrentNavigation()?.extras.state;
+   
 
-
-    // this._dataService.sendGroupsService.subscribe(
-    //   result => {
-    //     this.groups = result;
-    //     if (this.service){
-    //       if (this.service.groupServiceId) {
-    //         this.choosedGroup = this.groups.find(_ => _.id === this.service?.groupServiceId)!;
-    //         this.serviceGroup.patchValue({'group': this.choosedGroup});
-    //       }
-    //     }
-    //   }
-    // );
+   let temp = this.router.getCurrentNavigation()?.extras.state;
+      if (temp){
+        this.service  = temp['subGroup'];
+        this.groups = temp['groups'];
+      }
     this.store.pipe(select(selectProfileMainClient)).subscribe(result => {
         this.profile = result;
         // this.profile?.currency?.forEach(item => {
@@ -186,25 +137,70 @@ export class ArendaComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.serviceGroup?.get('about')!.valueChanges.subscribe(
       res => {
-        if (res.length >= 150){
+        if (res.length >= environment.TEXT_LENGTH){
           this.serviceGroup?.patchValue({'about': res.substring(0, 149)});
         }
-        this.remainingText = 150 - res.length;
+        this.remainingText = environment.TEXT_LENGTH - res.length;
       }
     );
 
-    if (this.profile?.id){
-      this._apiService.getGroupServices(this.profile?.id).pipe(takeUntil(this.destroy$)).subscribe(
-          result => {
-            this.groups = result;
-            if (this.service){
-              if (this.service.groupServiceId) {
-                this.choosedGroup = this.groups.find(_ => _.id === this.service?.groupServiceId)!;
-                this.serviceGroup.patchValue({'group': this.choosedGroup});
-                }
-        }
+     if (this.service){
+      this.isRubric = false;
+      this.serviceGroup = this.builder.group({
+        name:  [this.service.name, Validators.required], 
+        about: this.service.about,
+        group: this.service.groupServiceId,
+        isAll: this.service.gender.find(_ => _ === Gender.All),
+        isWoman: this.service.gender.find(_ => _ === Gender.Woman),
+        isMen: this.service.gender.find(_ => _ === Gender.Men),
+        isChildren: this.service.gender.find(_ => _ === Gender.Children),
+        isPet: this.service.gender.find(_ => _ === Gender.Pet),
+        price: this.builder.group({
+          price: this.service.price.price,
+          isRange: this.service.price.isRange,
+          startRange: this.service.price.startRange,
+          endRange: this.service.price.endRange,
+          currencyType: CurrencyType.RUB
+        }),
       });
-    } 
+      this._apiImage.getImagesFromService(this.service.id!).subscribe(
+        result_images => {
+          this.images = result_images;
+        }
+      );
+    } else {
+      this.serviceGroup = this.builder.group({
+        name: ['', [Validators.required, Validators.minLength(3)]],
+        about:  ['', [ Validators.maxLength(environment.TEXT_LENGTH)]],
+        group: this.choosedGroup,
+        isAll: false,
+        isWoman: false,
+        isMen: false,
+        isChildren: false,
+        isPet: false,
+        //price: 0,
+        price: this.builder.group({
+          price: new FormControl(null, Validators.required),
+          isRange: false,
+          startRange: null,
+          endRange: null,
+          currencyType: CurrencyType.RUB
+        }),
+      });
+    }
+
+    // if (this.profile?.id){
+    //   this._apiService.getGroupServices(this.profile?.id).pipe(takeUntil(this.destroy$)).subscribe(
+    //       result => {
+    //         this.groups = result;
+    //         if (this.service){
+    //           if (this.service.groupServiceId) {
+    //             this.choosedGroup = this.groups.find(_ => _.id === this.service?.groupServiceId)!;
+    //             this.serviceGroup.patchValue({'group': this.choosedGroup});
+    //             }
+    //     }
+    //   });
+    // } 
   }
 
   protected readonly getNameCurrency = getNameCurrency;

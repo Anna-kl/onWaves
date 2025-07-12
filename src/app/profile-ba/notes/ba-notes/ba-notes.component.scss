@@ -140,3 +140,29 @@
     margin-left: 0;
   }
 }
+
+
+.clickable-icon {
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s;
+}
+
+.clickable-icon:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.custom-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #888;
+}
+
+.custom-close:hover {
+  color: #000;
+}

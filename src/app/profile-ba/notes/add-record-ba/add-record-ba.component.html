@@ -32,17 +32,21 @@
                              (setServices)="setService($event)"></app-accordion>
             </div>
             <!--Услуги end -->
-
+            <div class="d-flex justify-content-between flex-wrap px-3 py-2">
+              <div class="text-start w-100 w-md-auto mb-2 mb-md-0"> 
+                 <b>Общее время: {{getHours(duration)}} ч. {{getMinutes(duration)}}  мин.</b></div>
+              <div class="text-end w-100 w-md-auto txt-green-bold"> Общая сумма: {{getPriceString(chooseServices)}} руб.</div>
+            </div>
             <!-- Продолжительность всех услуг , сумма -->
-            <div class="cont-horiz-between" style="padding: 20px;">
+            <!-- <div class="cont-horiz-between" style="padding: 20px;">
               <div *ngIf="!isTimeLimit">
                 <b>Общее время: {{getHours(duration)}} ч. {{getMinutes(duration)}}  мин.</b>
               </div>
-            <!-- Сумма стоимости всех услуг  -->
+             Сумма стоимости всех услуг  
               <div class="txt-green-bold">
                 Общая сумма: {{getPriceString(chooseServices)}} руб.
               </div>
-            </div>
+            </div> -->
             <!-- Свободное время -->
             <app-set-interval-start [id]="id" [day]="day$|async" [duration]="duration"
                                     (setInterval)="setInterval($event)"></app-set-interval-start>

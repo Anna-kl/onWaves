@@ -18,7 +18,7 @@ import { DataService } from 'src/app/profile-ba/components/group-service/dataser
 import { getHours, getMinutes } from "../../../helpers/common/timeHelpers";
 import { ConfirmWithoutTimeComponent } from "./modals/confirm-without-time/confirm-without-time.component";
 import { IPrice } from 'src/app/DTO/views/services/IPrice';
-import { forkJoin, map, Observable, switchMap } from 'rxjs';
+import { BehaviorSubject, forkJoin, map, Observable, startWith, Subject, switchMap, take, tap } from 'rxjs';
 
 
 @Component({
@@ -26,13 +26,16 @@ import { forkJoin, map, Observable, switchMap } from 'rxjs';
   templateUrl: './accordion.component.html',
   styleUrls: ['./accordion.component.scss'],
   providers: [ProfileService, MessageService, AlbumsService],
-  changeDetection: ChangeDetectionStrategy.Default
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AccordionComponent implements OnChanges, OnInit {
+export class AccordionComponent implements OnChanges {
   combinedData$: Observable<any[]>|null = null;
   serviceWithout$: Observable<Service[]>|null = null;
   ifExist: boolean = false;
   visibleCards: boolean = false;
+  combinedData: { isOpen: boolean; group: any; subGroups: Service[]; }[] = [];
+  a: Group[] = [];
+  mainGroups: Group[] = [];
 
 
   getPrice(price: IPrice): string | number {
@@ -49,7 +52,7 @@ export class AccordionComponent implements OnChanges, OnInit {
   
   // protected readonly getPrice = getPrice;
   isCheckboxChecked: boolean = false;
-
+  isAboutOpen = true;
   groups: GroupWithDate[] | Group[] = [];
   group: Group[] = [];
   @Input() canSetService: boolean = true;
@@ -66,6 +69,7 @@ export class AccordionComponent implements OnChanges, OnInit {
   @Input() profileId: string | null = null;
   @Input() chooseServices: subGroup[] = [];
   @Output() setServices = new EventEmitter<subGroup[]>();
+  private reload$ = new BehaviorSubject<string|null>(null);
   showDeletePanel: any;
  // services: Service[] = [];
   constructor(private messageService: MessageService,
@@ -79,9 +83,58 @@ export class AccordionComponent implements OnChanges, OnInit {
 
   showCreateAlbumBlock: boolean = false;
 
-  ngOnInit(): void {
-    this.checkIfProfilebisaccRoute();
-  }
+  // ngOnInit(): void {
+  //   this.checkIfProfilebisaccRoute();
+  //   //    if (this.profileId)
+  //   // this._groupService.getGroupServices(this.profileId).pipe(
+  //   //         take(1),
+  //   //         switchMap((users: any[]) => {
+            
+  //   //           // Используем forkJoin, чтобы выполнить второй запрос для каждого элемента массива
+  //   //           const userDetailRequests = users.map(item => 
+  //   //             this._groupService.getService(item.id!).pipe(
+  //   //               map(details => ({
+  //   //                     isOpen: true,
+  //   //                     group: item,
+  //   //                     subGroups: details })) // объединяем каждый user с его details
+  //   //             )
+  //   //           );
+  //   //           // forkJoin ждет завершения всех запросов
+  //   //           return forkJoin(userDetailRequests);
+  //   //         })).subscribe(result => {
+  //   //           this.combinedData = result;
+  //   //             if ( this.combinedData.length > 0)
+  //   //                 this.ifExist = true;
+  //   //         })
+  //   //       ;
+  //   // this.combinedData$ = this.reload$.pipe(
+  //   //         // при старте сразу выстрелить, можно убрать если не нужно
+
+  //   //         // 1) на каждый «трях» reload$ дергаем getGroupServices
+  //   //         switchMap(() => this._groupService.getGroupServices(this.profileId!)),
+
+  //   //         // 2) побочный эффект: выставляем флаг ifExist
+  //   //         tap((users: any[]) => {
+  //   //           this.ifExist = users.length > 0;
+  //   //         }),
+
+  //   //         // 3) для каждого user запускаем getService и ждём всех завершений
+  //   //         switchMap((users: any[]) => {
+  //   //           const calls = users.map(item =>
+  //   //             this._groupService.getService(item.id!).pipe(
+  //   //               map(details => ({
+  //   //                 isOpen:   true,
+  //   //                 group:    item,
+  //   //                 subGroups: details
+  //   //               }))
+  //   //             )
+  //   //           );
+  //   //           return forkJoin(calls);
+  //   //         })
+  //   //       );
+
+  //     // this.reload$.complete();
+  // }
   
   checkIfProfilebisaccRoute() {
     const currentUrl = this._route.url;
@@ -96,27 +149,51 @@ export class AccordionComponent implements OnChanges, OnInit {
   update() {
     if (this.profileId) {
       let idsChoose = this.chooseServices.map(_ => _.id);
-
-      this.serviceWithout$ =  this._groupService.getServiceWithout(this.profileId)
+    
+      this.serviceWithout$ = this._groupService.getServiceWithout(this.profileId)
         .pipe(map((items: Service[]) => {
           if (items.length > 0)
               this.ifExist = true;
             items = items.map(_ => new Service(_.id, _.name, _.gender, _.profileUserId, _.price,
               _.paymentForType, _.groupServiceId, _.about, _.duration, _.isTimeUnlimited)
             );
-           return items.map(item =>
-                item.setCheck( idsChoose.includes(item.id))
-            );
+            return items;
+          //  return items.map(item =>
+          //       item.setCheck( idsChoose.includes(item.id))
+          //   );
             
           }) );
+
+         
+            // this._groupService.getGroupServices(this.profileId).pipe(
+            //         switchMap((users: any[]) => {
+                    
+            //           // Используем forkJoin, чтобы выполнить второй запрос для каждого элемента массива
+            //           const userDetailRequests = users.map(item => 
+            //             this._groupService.getService(item.id!).pipe(
+            //               map(details => ({
+            //                     isOpen: true,
+            //                     group: item,
+            //                     subGroups: details })) // объединяем каждый user с его details
+            //             )
+            //           );
+            //           // forkJoin ждет завершения всех запросов
+            //           return forkJoin(userDetailRequests);
+            //         })).subscribe(result => {
+            //           this.combinedData = result;
+            //             if ( this.combinedData.length > 0)
+            //                 this.ifExist = true;
+            //         })
+            //       ;
 
           // this.serviceWithout$.subscribe(result => {
           //   console.log(result);
           // });
-
-
-      this.combinedData$ = this._groupService.getGroupServices(this.profileId).pipe(
+      // this.combinedData$ = this.reload$.next();
+      this.combinedData$ =
+       this._groupService.getGroupServices(this.profileId).pipe(
         switchMap((users: any[]) => {
+          this.mainGroups = users;
           if (users.length > 0)
             this.ifExist = true;
           // Используем forkJoin, чтобы выполнить второй запрос для каждого элемента массива
@@ -130,9 +207,8 @@ export class AccordionComponent implements OnChanges, OnInit {
           );
           // forkJoin ждет завершения всех запросов
           return forkJoin(userDetailRequests);
-        }));
-      
-   
+        }))
+      ;
     }
   }
 
@@ -179,12 +255,12 @@ export class AccordionComponent implements OnChanges, OnInit {
   changeService(subGroup: subGroup) {
     if (subGroup.paymentForType === PaymentForType.ForService) {
       this._route.navigate(['../arenda-service'], {
-        state: { subGroup },
+        state: { subGroup, groups: this.mainGroups },
         relativeTo: this._activateRoute
       });
     } else {
       this._route.navigate([`../arenda-hour`], {
-        state: { subGroup },
+        state: { subGroup,  groups: this.mainGroups },
         relativeTo: this._activateRoute
       });
     }

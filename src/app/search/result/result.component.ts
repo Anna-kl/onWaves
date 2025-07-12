@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit, Sanitizer} from '@angular/core';
-import {BehaviorSubject, concatMap, filter, from, map, mergeMap, Observable, Subscription, switchMap, toArray} from "rxjs";
+import {BehaviorSubject, concatMap, filter, from, map, mergeMap, Observable, startWith, Subject, Subscription, switchMap, toArray} from "rxjs";
 import {ActivatedRoute, Router} from "@angular/router";
 import {SearchService} from "../../../services/search.service";
 import {IResultSearch} from "../../DTO/views/search/IResultSearch";
@@ -33,6 +33,10 @@ export class ResultComponent implements OnInit, OnDestroy{
   categories1Level$: Observable<ICategory[]> = new Observable();
   test$: Observable<IResultSearch[]>|null = null;
   filtered$: Observable<ICategory[]> | undefined;
+  alternatives$: Observable<IResultSearch[]>|null = null;
+  private reloadTrigger = new Subject<void>();
+  state: ISearchRequest|null = null;
+
 
   constructor(private activatedRoute: ActivatedRoute,
               public _apiSearch: SearchService,
@@ -45,15 +49,12 @@ export class ResultComponent implements OnInit, OnDestroy{
   }
 
   getSearch(send: ISearchRequest) {
-      this._apiSearch.getSearchBA$.next(null);
-        this.unsubscribe = this._apiSearch.search(send)
-            .subscribe(_ => {
-
-            });
+      this.state = send;
+      this.reloadTrigger.next();
   }
 
   async ngOnInit(): Promise<void> {
-    const state = window.history.state;
+    this.state = window.history.state['send'];
     this.categories1Level$ =  this._dictionary.getMainCategories().pipe(
         map(allCategories => getCategoryLevel2(allCategories)
     ));
@@ -63,11 +64,32 @@ export class ResultComponent implements OnInit, OnDestroy{
     //       result => {
     //         this.searchRequest = result['send']['search'];
             // this.getSearch(result['send']);
-        this.test$ = this._apiSearch.search2(state['send']).pipe(map(response => {
-                if (response.code === 200){
-                    return response.data;
-                }
-        }));
+
+        this.test$ = this.reloadTrigger.pipe(
+          startWith(null), // выполнить сразу при инициализации
+          switchMap(() =>
+            this._apiSearch.search2(this.state).pipe(map(response => {
+              if (response.code === 200){
+                  return response.data;
+              } else {
+                return null;
+              }
+            })))
+        );
+        
+        // this.test$ = this._apiSearch.search2(state['send']).pipe(map(response => {
+        //         if (response.code === 200){
+        //             return response.data;
+        //         } else {
+        //           return null;
+        //         }
+        // }));
+
+        this.alternatives$ = this._apiSearch.search2(null).pipe(map(response => {
+          if (response.code === 200){
+              return response.data;
+          }
+  }));
     //       }
     //   );
 
@@ -76,7 +98,8 @@ export class ResultComponent implements OnInit, OnDestroy{
           const categoryIds = data.map(item => item.categoryIds);
           const flatIds: number[] = categoryIds.flat(); 
           return this.categories1Level$.pipe(
-            map(items => items.filter(item => flatIds.includes(item.id)))
+            map(items =>
+               items.filter(item => flatIds.includes(item.id)))
           );
         })
       );
@@ -124,7 +147,9 @@ export class ResultComponent implements OnInit, OnDestroy{
   }
 
     getCards(category: ICategory, cardsBA: IResultSearch[] ) {
-        return cardsBA.filter(_ => _.categoryIds.includes(category.id));
+        return cardsBA.filter(_ => _.categoryIds !== null
+           ? _.categoryIds.includes(category.id)
+          : _.categoryIds === category.id);
     }
 
     getAvatar(avatar: any) {

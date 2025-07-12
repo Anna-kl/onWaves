@@ -1,4 +1,4 @@
-import {Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
 import {Schedule} from "../../../DTO/classes/schedules/schedule";
 import {ScheduleService} from "../../../../services/schedule.service";
 import {DomSanitizer} from "@angular/platform-browser";
@@ -14,6 +14,8 @@ import {
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {loadLinkAction, setLinkAction} from "../../../ngrx-store/links/link.action";
 import { DeviceDetectorService } from 'ngx-device-detector';
+import { Subject, takeUntil } from 'rxjs';
+import { ShowPhoneCouponComponent } from '../../popup/show-phone-coupon/show-phone-coupon.component';
 
 
 
@@ -23,7 +25,10 @@ import { DeviceDetectorService } from 'ngx-device-detector';
   styleUrls: ['./column-baprofile.component.scss'],
   providers: [ScheduleService, ProfileService ]
 })
-export class ColumnBAProfileComponent implements  OnChanges {
+export class ColumnBAProfileComponent implements  OnChanges, OnDestroy {
+
+  isAuth: boolean = false;
+  destroy$: Subject<void> = new Subject<void>();
 
   sendMessages(receiverId: string|null|undefined) {
     if (receiverId){
@@ -51,6 +56,10 @@ export class ColumnBAProfileComponent implements  OnChanges {
               private _dataService: ProfileDataService,
               private sanitizer: DomSanitizer,
               private deviceService: DeviceDetectorService) {
+  }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
   async getSchedule(id: string) {
     (await this._apiSchedule.getProfileScheduleToday(id))
@@ -80,6 +89,9 @@ export class ColumnBAProfileComponent implements  OnChanges {
     this.store$.pipe(select(selectProfileMainClient)).subscribe(
         result => {
           this.profileUA = result;
+          if (this.profileUA){
+            this.isAuth = true;
+          }
         }
     );
     if (this.id) {
@@ -105,16 +117,24 @@ export class ColumnBAProfileComponent implements  OnChanges {
       });
     }
   }
-  onlineRecord() {
-    this._dataService.transferDate(null);
 
+  clickContact(arg0: string) {
+    this.businessProfileService.sendWhoisVisit(this.businessProfile?.id!, arg0, this.profileUA ? this.profileUA.id! : null).pipe(takeUntil(this.destroy$)).subscribe();
+  }
+
+
+  onlineRecord(option?: string) {
+    this._dataService.transferDate(null);
+    this.businessProfileService.sendWhoisVisit(this.businessProfile?.id!, option ?? 'click_call', this.profileUA ? this.profileUA.id! : null).pipe(takeUntil(this.destroy$)).subscribe();
     if (this.profileUA) {
       this._router.navigate(['choose-service'], {relativeTo: this.route});
     } else {
       this.store$.dispatch(loadLinkAction(
           {request: `profile-ba/${this.businessProfile?.link ? this.businessProfile.link : this.businessProfile?.id}/choose-service`,
                 }));
-      const modalRef = this.modalService.open(ModalRegisterComponent);
+      const modalRef = this.modalService.open(ShowPhoneCouponComponent);
+      modalRef.componentInstance.phoneNumber = this.businessProfile?.phone;
+      modalRef.componentInstance.click = option;
     }
 
   }

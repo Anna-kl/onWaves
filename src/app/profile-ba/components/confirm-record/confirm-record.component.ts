@@ -4,7 +4,6 @@ import {Record} from "../../../DTO/classes/records/record";
 import {RecordService} from "../../../../services/record.service";
 import { Router} from "@angular/router";
 import {ProfileDataService} from "../../services/profile-data.service";
-import {BusService} from "../../../../services/busService";
 import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessProfile";
 import {getAddressProfile} from "../../../../helpers/common/address";
 import {NgbActiveModal, NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
@@ -23,20 +22,29 @@ import {NotesService} from "src/app/profile-ba/notes/notes-events.service";
 import {getTokenMainClient, selectProfileMainClient} from "../../../ngrx-store/mainClient/store.select";
 import {getHours, getMinutes} from "../../../../helpers/common/timeHelpers";
 import {PaymentMethodType} from "../../../DTO/enums/paymentMethodType";
-import { Subscription, switchMap } from 'rxjs';
+import { map, Observable, Subscription, switchMap, tap } from 'rxjs';
 import { getPrice, getPriceService, getPriceString } from 'src/helpers/common/price.helpers';
 import { ErrorConfirmRecordComponent } from '../errorConfirmRecord/error-confirm-record.component';
+import { ProfileService } from 'src/services/profile.service';
+import { ICoupon } from 'src/app/DTO/classes/promo/IPoupon';
 
 
 @Component({
   selector: 'app-confirm-record',
   templateUrl: './confirm-record.component.html',
-  styleUrls: ['./confirm-record.component.css'],
+  styleUrls: ['./confirm-record.component.scss'],
   providers: [RecordService,NgbActiveModal,ScheduleService]
 
 })
 export class ConfirmRecordComponent implements OnInit, OnDestroy {
+
   token: string|null = null;
+  useCoupon: any;
+  hasCoupon$: Observable<boolean>|null = null;
+  coupon$: Observable<ICoupon|null>|null = null;
+  totalPrice: number = 0;
+  sale = 0;
+  yourCoupon: ICoupon|null = null;
   
   getStatusConfirm(): any {
     if (this.record){
@@ -45,6 +53,16 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
       }
     }
     return false;
+  }
+
+  uses(coupon: ICoupon) {
+    if (this.useCoupon){
+       this.sale = coupon.balance;
+       this.yourCoupon = coupon;
+    } else {
+      this.sale = 0;
+      this.yourCoupon = null;
+    }
   }
 
   getStrTime(): any {
@@ -83,7 +101,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
               private sanitizer: DomSanitizer,
               private location: Location,
               private store$: Store,
-
+              private _profile: ProfileService,
               private modalService: NgbModal,
               private _events: NotesService,
               private _location: Location) {
@@ -94,6 +112,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
       this._api.getDataForRecord(this.recordId!).subscribe(result => {
         this.record = result;
         this.isLoad = true;
+      
         if (this.record) {
           this.dayId = this.record.daysOfScheduleId;
           this.businessProfile = this.record.profile;
@@ -148,6 +167,12 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   }
   ngOnInit(): void {
     this._events.transferIsWorkDay(true);
+    this.unsubscribe$ = this.store$.pipe(select(selectProfileMainClient)).pipe(
+      tap(user => {
+          if (user)
+          this.coupon$ =  this._profile.getCoupon(user.id!);
+      })
+    ).subscribe();
   }
 
   protected readonly getPrice = getPriceString;
@@ -187,7 +212,8 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
       comment: this.message,
       services: this.chooseServices,
       clientId: this.profile?.id,
-      serverTime: new Date().toLocaleString()
+      serverTime: new Date().toLocaleString(),
+      couponId: this.yourCoupon ? this.yourCoupon.id : null
     } as Record;
     let option: NgbModalOptions = {
       backdrop:'static',

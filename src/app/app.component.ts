@@ -1,14 +1,16 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router, RouterState} from "@angular/router";
 import {IViewBusinessProfile} from "./DTO/views/business/IViewBussinessProfile";
 import {AuthService} from "../services/auth.service";
 import {ProfileService} from "../services/profile.service";
 
-import {BehaviorSubject, map, Observable, tap} from "rxjs";
+import {BehaviorSubject, filter, map, Observable, tap} from "rxjs";
 import {LoginService} from "./auth/login.service";
 import {IResponse} from "./DTO/classes/IResponse";
 import {DOCUMENT} from "@angular/common";
 import {Title} from "@angular/platform-browser";
+import { OrderSignalrService } from 'src/services/notification.signal';
+import { AnalyticsService } from 'src/services/analytics.service';
 
 
 
@@ -19,12 +21,15 @@ import {Title} from "@angular/platform-browser";
   providers: [AuthService, ProfileService],
 
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit  {
+
+  
   isAuth = false;
   isLoad = false;
   message: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   a: Observable<IResponse> | undefined;
   constructor(private _route: Router,
+              private analytics: AnalyticsService,
               public _login: LoginService,
               private titleService: Title,
               @Inject(DOCUMENT) private document: Document
@@ -61,7 +66,52 @@ export class AppComponent implements OnInit {
   //   this.setProfile.emit($event.user);
   //   this.isMenuOpen = $event.status;
   // }
+
+  @ViewChild('wavePath', { static: true }) wavePathRef!: ElementRef<SVGPathElement>;
+
+  ngAfterViewInit(): void {
+    const pathEl = this.wavePathRef.nativeElement;
+    let t = 0;
+
+    const animate = () => {
+      const waveLength = 20;
+      const baseAmp = 5;
+      const crestAmp = 13;
+      const crestSpeed = 0.3;
+      const points: string[] = [];
+
+      const crestCenter = (Math.sin(t * crestSpeed) + 1) * 30; // 0..100
+
+      for (let x = 0; x <= 100; x += 2) {
+        // Вычислим дополнительную амплитуду для гребня (локально)
+        const crestInfluence = Math.exp(-Math.pow((x - crestCenter) / 5, 2)); // Гауссов пик
+        const amp = baseAmp + crestAmp * crestInfluence;
+
+        let y = 5 + Math.sin((x / waveLength + t) * Math.PI) * amp;
+        // console.log(y);
+        // y = y > 0 ? (-1)*y : 0;
+        points.push(`${x},${y}`);
+      }
+
+      let d = `M${points[0]}`;
+      for (let i = 1; i < points.length; i++) {
+        d += ` L${points[i]}`;
+      }
+
+      pathEl.setAttribute('d', d);
+      t += 0.02;
+      requestAnimationFrame(animate);
+    };
+
+    animate();
+  
+  }
   ngOnInit() {
+  this._route.events.pipe(
+  filter((evt): evt is NavigationEnd => evt instanceof NavigationEnd)
+).subscribe(evt => {
+  this.analytics.trackPage(evt.urlAfterRedirects);
+});
     // this.notification.receiveMessage();
     // this.message = this.notification.currentMessage;
     this._login.checkCookie()?.subscribe(

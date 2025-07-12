@@ -8,11 +8,15 @@
   </div>
   <div class="cont-vert w100">
 
-    <input class="fio fio-text margin-bottom30 mobile360" type="text" placeholder="Имя" (input)="onInput()" formControlName="name"  />
+    <input class="fio fio-text margin-bottom30 mobile360" type="text" placeholder="Имя" (input)="onInput()"
+     formControlName="name"  />
     
-    <input class="fio fio-text margin-bottom40 mobile360" type="text" placeholder="Фамилия" (input)="onInput()" formControlName="family" />
+    <input class="fio fio-text margin-bottom40 mobile360" type="text" placeholder="Фамилия" (input)="onInput()" 
+    formControlName="family" />
     
-    <button class="btn-green button-text mobile360" [ngClass]="{'green-button': isFilled, 'gray-button': !isFilled}" [disabled]="!isFilled"  (click)="next()" >
+    <button class="button-text mobile360"
+     [ngClass]="{'btn-green': formProfile.valid, 'btn-gray': !formProfile.valid}"
+     [disabled]="!formProfile.valid"  (click)="next()" >
       Далее
     </button>  
   </div>

@@ -22,6 +22,8 @@ import { AddPostComponent } from "./profile/addPost/addPost.component";
 import { CommonLentaComponent } from "./profile/commonLenta/commonLenta.component";
 import { ProgressSpinnerModule } from "primeng/progressspinner";
 import { CreateAccordionComponent } from './accordion/create-accordion/create-accordion.component';
+import { MyYComponentComponent } from './maps/my-ycomponent/my-ycomponent.component';
+import { YMapComponent, YMapDefaultFeaturesLayerDirective, YMapDefaultMarkerDirective, YMapDefaultSchemeLayerDirective, YMapFeatureDirective, YMapMarkerDirective } from "angular-yandex-maps-v3";
 
 
 @NgModule({
@@ -39,9 +41,12 @@ import { CreateAccordionComponent } from './accordion/create-accordion/create-ac
       SelectAddressComponent,
       AddPostComponent,
       CommonLentaComponent,
-      CreateAccordionComponent
+      CreateAccordionComponent,
+      MyYComponentComponent
   ],
   imports: [
+     YMapComponent, YMapDefaultSchemeLayerDirective, YMapMarkerDirective, YMapFeatureDirective, YMapDefaultMarkerDirective,
+  YMapDefaultFeaturesLayerDirective,
     DatePipe,
     NgForOf,
     DatePipe,
@@ -65,6 +70,7 @@ import { CreateAccordionComponent } from './accordion/create-accordion/create-ac
         SelectAddressComponent,
         AddPostComponent,
         CommonLentaComponent,
+        MyYComponentComponent,
     ]
 })
 

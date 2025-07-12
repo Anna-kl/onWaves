@@ -19,11 +19,14 @@ export function getPrice(chooseServices: subGroup[]){
     return [priceServices, countService, duration];
   }
 
-  export function getPriceString(chooseServices: subGroup[]){
+  export function getPriceString(chooseServices: subGroup[], sale?: number){
     let priceServices = 0;
-    let flag = true;
+    if (!sale){
+      sale = 0;
+    }
     let endPrice = 0;
     let price = 0;
+
     chooseServices.forEach(item => {
       if (!item.price.isRange){
        price += item.price.price!;
@@ -35,11 +38,14 @@ export function getPrice(chooseServices: subGroup[]){
       }
     });
     let rangeServices = chooseServices.filter(_ => _.price.isRange);
+    if (rangeServices.length > 0){
+      sale = 0;
+    }
     let result = `${rangeServices.length > 0 ? 'от':''}
-     ${priceServices + price}`;
+     ${priceServices + price - sale}`;
     if (rangeServices.length > 0){
       if (rangeServices.find(_ => _.price.endRange !== null))
-        result += ` до ${endPrice + price}`;
+        result += ` до ${endPrice + price - sale}`;
     }
     return result;
   }

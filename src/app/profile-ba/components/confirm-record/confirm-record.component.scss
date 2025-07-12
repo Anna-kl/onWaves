@@ -1,0 +1,118 @@
+
+@import "../../../../assets/styles/main/color.scss";
+
+.chooseServices{
+  margin-bottom: 0;
+  padding: 20px 0;
+  border-bottom: 1px solid #DDE2ED;
+  background-color: #fff;
+}
+.confirm-record-servise{
+  padding-left: 20px ;
+  padding-right: 20px ;
+  padding-top: 30px;
+  background-color: #fff;
+  width: 100%;
+} 
+.container-textarea{
+  display:flex;
+  position:relative;
+  max-width: 500px;
+  margin: 30px auto;
+}
+.textarea-ba-profile{
+  border: 1px solid #9196A4;
+  border-radius: 0;
+  resize: none;
+  outline: none;
+  width:100%;
+  padding:20px;
+  margin:0 5px;
+}
+.textarea-ba-profile:focus{
+  border: 1px solid #00DAB3;
+}
+.textarea-count{
+  position:absolute;
+  bottom:20px;
+  right:20px;
+} 
+@media screen and (max-width: 640px){
+  .confirm-record-servise{
+    padding-left: 10px ;
+    padding-right: 10px ;
+    padding-top: 20px;
+  }
+}
+@media screen and (max-width: 640px){
+  .left-ba-profile{
+    display:none;
+  }
+
+}
+.type-of-pay{
+  min-width: 144px; 
+} 
+
+/* coupon-checkbox.component.scss */
+.coupon-checkbox {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  
+  &__input {
+    /* снимаем стандартный вид */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid $green-basic;
+    border-radius: 4px;
+    position: relative;
+    transition: $green-light 0.2s, border-color 0.2s;
+  }
+
+  &__input:hover {
+    border-color: #005a43;
+  }
+
+  &__input:checked {
+    background-color: #00796b;
+    border-color: #00796b;
+  }
+
+  &__input:checked::after {
+    content: '✔';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    font-size: 14px;
+    color: #fff;
+    line-height: 1;
+  }
+
+  &__label {
+    margin-left: 0.5rem;
+    font-size: 1rem;
+    color: $green-dark;
+    transition: color 0.2s;
+  }
+
+  &:hover .coupon-checkbox__label {
+    color: #00796b;
+  }
+}
+
+/* Адаптивно: чуть больше на тачскринах */
+@media (hover: none) {
+  .coupon-checkbox__input {
+    width: 24px;
+    height: 24px;
+  }
+  .coupon-checkbox__label {
+    font-size: 1.1rem;
+  }
+}

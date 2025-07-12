@@ -65,7 +65,7 @@
             </div>
             <!-- Цена услуги -->
             <div class="txt-green-light">
-              Общая сумма: {{getPrice(chooseServices)}}₽
+              Общая сумма: {{getPrice(chooseServices, sale)}}₽
             </div>
 
             <!-- Запись на услугу END -->
@@ -73,6 +73,7 @@
             <div class="margin-bottom20 margin-top20">
               <b>Возможные способы оплаты:</b>
             </div>
+
             <div class="cont-horiz-start wrap w100" style="gap: 10px 50px">
               <!-- Способ оплаты 1 -->
               <div class="cont-horiz-start type-of-pay" style="gap: 10px 10px"
@@ -84,6 +85,19 @@
                 <div>
                   Наличными
                 </div>
+             
+              </div>
+                <div class="coupon-checkbox" *ngIf="coupon$|async as coupon">
+                <input
+                  type="checkbox"
+                  id="useCoupon"
+                  class="coupon-checkbox__input"
+                  [(ngModel)]="useCoupon"  
+                  (change)="uses(coupon)"
+                />
+                <label for="useCoupon" class="coupon-checkbox__label">
+                  Использовать купон
+                </label>
               </div>
               <!-- Способ оплаты 2 -->
               <div class="cont-horiz-start type-of-pay" style="gap: 10px 10px" *ngIf="checkPaymentMethods(PaymentMethodType.CARD)">

@@ -7,13 +7,9 @@
         <span>{{getAddressProfile(profile.address!)}}</span>
     </div>
     <!--Карта 2GIS start -->
-    <!-- <div class="column-right-footer" *ngIf="geoPoint$|async as geo">
-        <div class="container" >
-            <ya-map [center]="[geo.lat, geo.lng]" [zoom]="14" >
-                <ya-placemark [geometry]="[geo.lat, geo.lng]"></ya-placemark>
-            </ya-map>
+          <div class="column-right-footer" *ngIf="geoPoint$|async as geo">
+            <app-my-ycomponent [geo]="geo"></app-my-ycomponent>       
         </div>
-    </div> -->
     <!--Карта 2GIS END-->
 </div>
 <app-reviews-carusel [id]="id"></app-reviews-carusel>

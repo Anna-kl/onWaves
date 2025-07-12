@@ -12,9 +12,11 @@ export class LandingVersion2Component implements OnInit {
   constructor(private modalService: NgbModal){
 
   }
-  register() {
-    const modalRef = this.modalService.open(ModalRegisterComponent);
-  }
+
+
+  openPopUp() {
+  const modalRef = this.modalService.open(ModalRegisterComponent);
+}
 
 
   ngOnInit() {

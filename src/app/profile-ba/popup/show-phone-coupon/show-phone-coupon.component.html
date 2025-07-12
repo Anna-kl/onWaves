@@ -1,0 +1,37 @@
+<div class="modal" >
+  <div class="modal__overlay" (click)="close()"></div>
+  <div class="modal__content">
+    <button class="modal__close" (click)="close()">×</button>
+    <div style="margin-bottom: 10px;"></div>
+    <div class="modal__body">
+      <p class="modal__phone" *ngIf="click === 'click_call';else templateMessage">
+        Позвоните нам:
+        <!-- замените на свой номер -->
+        <a [href]="'tel:' + phoneNumber" style="font-size: 21px;">{{ phoneNumber }}</a>
+
+      </p>
+
+      <a class="btn-green" [href]="'tel:' + phoneNumber" *ngIf="isMobile && click === 'click_call'">
+        Позвонить
+      </a>
+      <ng-template #templateMessage>
+        <p class="modal__phone" >
+        Напишите нам:
+        <!-- замените на свой номер -->
+        <a [href]="'tel:' + phoneNumber" style="font-size: 21px;">{{ phoneNumber }}</a>
+      </p>
+      </ng-template> 
+     <a class="btn-green" href="{{'https://wa.me/'+ phoneNumber}}" *ngIf="isMobile && click === 'click_message'">
+        Написать WhatsApp
+      </a>
+      <p class="modal__coupon">
+        Купон на <span class="modal__coupon-amount">500 ₽</span>
+        за первую онлайн запись при регистрации
+      </p>
+         <button class="btn-white" (click)="registration()">
+                Регистрация
+         </button>
+    </div>
+
+  </div>
+</div>

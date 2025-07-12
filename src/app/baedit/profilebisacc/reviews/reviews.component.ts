@@ -7,6 +7,7 @@ import {Observable, Subscription} from "rxjs";
 import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessProfile";
 import {ISendRating} from "../../../DTO/views/rating/ISendRating";
 import {ReviewType} from "../../../DTO/enums/reviewType";
+import { environment } from 'src/enviroments/environment';
 
 @Component({
   selector: 'app-reviews',
@@ -19,6 +20,7 @@ export class ReviewsComponent implements OnInit, OnDestroy{
   reviews$: Observable<IViewReview[]>|null = new Observable<IViewReview[]>();
   profile: IViewBusinessProfile|null = null;
   private unsubscribe$: Subscription|null = null;
+  TEXT_LENGTH: number = environment.TEXT_LENGTH;
 
   constructor(private _apiReviews: RatingService,
               private store$: Store) {

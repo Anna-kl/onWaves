@@ -10,7 +10,7 @@ import {Observable, Subscription} from "rxjs";
 import {getAddressProfile} from "../../../../helpers/common/address";
 import {IViewCoordinates} from "../../../DTO/views/profile/IViewCoordinates";
 import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessProfile";
-import { Meta } from '@angular/platform-browser';
+import { Meta, Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-page-user-ba',
@@ -35,8 +35,9 @@ export class PageUserBAComponent implements OnInit {
   geoPoint$: Observable<IViewCoordinates|null> = new Observable<IViewCoordinates | null>();
   profile: IViewBusinessProfile | null = null;
   constructor(private _profileData: ProfileDataService,
-              private _meta: Meta,
-              private _dictionaries: DictionaryService) {
+                       private _title: Title,
+                       private _dictionaries: DictionaryService,
+              private _meta: Meta,) {
 
     this.tutorials = [
       {
@@ -108,13 +109,16 @@ export class PageUserBAComponent implements OnInit {
       result => {
         if (result){
           this.profile = result;
-          this._meta.addTag({ name: 'title', content: this.profile?.name! });
-          this._meta.addTag({ name: 'description',
-           content: `${this.profile.address ? this.profile.address.city : ''} ${this.profile.about ?? '' }`});
-          this.geoPoint$ = this._dictionaries.getPoint(getAddressProfile(result?.address!));
-        }
-      }
-    )
+          if (this.profile.address){
+            this.geoPoint$ = this._dictionaries.getPoint(getAddressProfile(this.profile.address!));
+          }
+            this._title.setTitle(`onWaves ${this.profile?.name!} ${this.profile.address?.city}`);
+            this._meta.updateTag({
+                  name: 'description',
+                  content: `${this.profile.name} ${this.profile.about} ${this.profile.address?.city} онлайн запись`
+      });
+
+     }});
     }
 
     setServices($event: subGroup[]) {

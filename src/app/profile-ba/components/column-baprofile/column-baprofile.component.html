@@ -82,15 +82,17 @@
     </div-->
     <div class="btns-container" >
       <a class="btn-white col-4" href="javascript:void(0)" style="margin-bottom: 5px;" 
-       *ngIf="deviceInfo.deviceType === 'desktop'">+{{businessProfile.phone!|mask: '0(000) 000-00-00'}}</a>
+       *ngIf="deviceInfo.deviceType === 'desktop' && isAuth">+{{businessProfile.phone!|mask: '0(000) 000-00-00'}}</a>
       <a class="btn-white col-1" href="{{'tel:+' + businessProfile.phone }}"
-       *ngIf="deviceInfo.deviceType !== 'desktop'" >Позвонить</a>
-      <a href="javascript:void(0)"
-      (click)="sendMessages(businessProfile.id)"
-        *ngIf="deviceInfo.deviceType !== 'desktop'"
-       class="btn-white col-1" >Написать</a>
-       <a href="javascript:void(0)" *ngIf="deviceInfo.deviceType === 'desktop'"
+       *ngIf="deviceInfo.deviceType !== 'desktop'  && isAuth " (click)="clickContact('click_call')">Позвонить</a>
+        <a class="btn-white col-1" *ngIf="!isAuth " (click)="onlineRecord('click_call')">Показать телефон</a>
+      <a  href="{{'https://wa.me/'+ businessProfile.phone}}"
+        *ngIf="deviceInfo.deviceType !== 'desktop'  && isAuth"
+       class="btn-white col-1"  (click)="clickContact('click_message')">Написать</a>
+       <a href="javascript:void(0)" *ngIf="deviceInfo.deviceType === 'desktop'  && isAuth"
        href="{{'https://wa.me/'+businessProfile.phone}}" target="_blank"
+       class="btn-white col-1" style="width: 1 ,lmkn bnm,00%"  (click)="clickContact('click_message')">Написать</a>
+       <a href="javascript:void(0)" *ngIf="!isAuth" (click)="onlineRecord('click_message')"
        class="btn-white col-1" style="width: 1 ,lmkn bnm,00%">Написать</a>
     </div>
     <!--div class="btn-white margin-bottom10">Отписаться2</div-->

@@ -18,12 +18,6 @@ interface Subcategory {
   showSubSubcategories: boolean;
 }
 
-// interface Category {
-//   name: string;
-//   subcategories: Subcategory[];
-//   showSubcategories: boolean;
-// }
-
 @Component({
   selector: 'app-menu',
   templateUrl: './main-page.component.html',
@@ -77,10 +71,11 @@ export class MainPageComponent implements OnInit, OnDestroy {
   }
   title = 'MainSiteOcpio';
 
-toggleActive() {
-  const divElement = this.elementRef.nativeElement.querySelector('.nav-container');
-  divElement.classList.toggle('active');
-}
+// toggleActive() {
+//   const divElement = this.elementRef.nativeElement.querySelector('.nav-container');
+//   divElement.classList.toggle('active');
+// }
+
 tab : any = 'tab1';
 tab0 : any
 tab1 : any

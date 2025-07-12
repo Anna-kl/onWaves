@@ -95,7 +95,7 @@
                    type="text"
                    required
                    minlength="4"
-                   maxlength="150"
+                   [maxlength]="TEXT_LENGTH"
                    size="10"
                    placeholder="Напишите ответ"
                    [(ngModel)]="reviewText">
@@ -109,7 +109,7 @@
         </div>
 <!--        &lt;!&ndash; карточка комментария 1 End &ndash;&gt;-->
 <!--        &lt;!&ndash; карточка комментария 2 Start &ndash;&gt;-->
-        <div class="w100 cont-horiz-start-start" style="padding: 20px; background-color:$green-basic;"
+        <div class="w100 cont-horiz-start-start" style="padding: 20px; background-color:#006174;"
              *ngFor="let ch of review.childReviews">
             <div class="margin-right10 w100">
                 <!-- Шапка комментария -->

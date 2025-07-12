@@ -22,7 +22,7 @@ export class ModalRegisterNextComponent implements OnInit {
   // family!: string;
   formProfile: FormGroup = this._builder.group({
     name: new FormControl(undefined, Validators.required),
-    family: new FormControl(undefined, Validators.required)
+    family: new FormControl(undefined)
   });
   @Input() token: string = '';
 

@@ -9,6 +9,7 @@ import {
 import {Service} from "../../../../DTO/classes/services/Service";
 import {IViewBusinessProfile} from "../../../../DTO/views/business/IViewBussinessProfile";
 import {subGroup} from "../../../../DTO/views/services/IViewSubGroups";
+import { environment } from 'src/enviroments/environment';
 
 
 // enum Gender {
@@ -47,7 +48,7 @@ export class CreateServiceModalComponent implements OnInit {
   }
 
 
-  remainingText = 150;
+  remainingText = environment.TEXT_LENGTH;
   chooseGroup(){
       console.log(this.myGroup);
   }
@@ -102,7 +103,7 @@ export class CreateServiceModalComponent implements OnInit {
     this.activeModal.close();
   }
   text: string = '';
-  maxChars: number = 150;
+  maxChars: number = environment.TEXT_LENGTH;
   remainingChars: number = this.maxChars;
 
   updateCounter() {

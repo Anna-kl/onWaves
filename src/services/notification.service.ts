@@ -14,12 +14,20 @@ export class MessageNotificationService {
 
   }
 
+  readNotifications(id: string){
+      return this.http.get(`${this.url}update-status/${id}`);
+  }
+
   getNotifications(profileId: string){
     return this.http.get<IViewNotification[]>(`${this.url}${profileId}`);
   }
 
   changeStatus(id: string, state: IChangeNotification){
     return this.http.put<IResponse>(`${this.url}change-status/${id}`, state);
+  }
+
+  getCountNotifications(id: string){
+    return this.http.get<number>(`${this.url}get-count-notifications/${id}`);
   }
 
   // putReadNotifications(profileId: string, type:any){

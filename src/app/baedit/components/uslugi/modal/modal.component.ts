@@ -5,7 +5,7 @@ import {NgbActiveModal, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import { GroupService } from '../../../../../services/groupservice';
 import {Group} from "../../../../DTO/views/services/IViewGroups";
 import {MessageService} from "primeng/api";
-
+import { tap } from 'rxjs';
 
 
 @Component({
@@ -41,14 +41,10 @@ export class ModalComponent {
         };
         this.groupService.saveGroup(group).subscribe(
           result => {
-            this.activeModal.close(true);
-
-          },
-          error => {
-            console.error('Ошибка при сохранении группы услуг:', error);
+            this.activeModal.close(result);
           }
-        );
-      }
+
+        )  }
       // Вызов сервиса для сохранения группы услуг
     }
 
