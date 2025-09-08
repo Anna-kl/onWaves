@@ -1,0 +1,122 @@
+/* Карточка панели */
+@import "../../../../assets/styles/main/color.scss";
+
+.coupon-panel{ margin-top:.5rem; }
+.coupon-card{
+  border:1px solid #e6e6eb; border-radius:12px; background:#fff; padding:12px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.coupon-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.5rem; }
+.coupon-close{
+  border:none; background:transparent; cursor:pointer; font-size:18px; line-height:1; color:#6b7280;
+}
+.coupon-close:hover{ color:#111827; }
+
+/* OTP */
+.otp{ display:flex; gap:.5rem; justify-content:flex-start; }
+.otp-input{
+  width:48px; height:52px; text-align:center; font-size:22px; font-weight:700;
+  border:1px solid #d1d5db; border-radius:10px; outline:none; background:#f9fafb;
+}
+.otp-input:focus{ border-color:$green-basic; box-shadow:0 0 0 3px rgba(59,130,246,.15); background:#fff; }
+
+/* Кнопки */
+.coupon-actions{ display:flex; gap:.5rem; margin:.75rem 0 .25rem; }
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:.4rem;
+  padding:.5rem .8rem; border-radius:10px; border:1px solid transparent; cursor:pointer;
+  font-size:14px; line-height:1; user-select:none;
+}
+.btn.primary{ background:#3b82f6; color:#fff; }
+.btn.primary[disabled]{ opacity:.5; cursor:not-allowed; }
+.btn.ghost{ background:#f3f4f6; color:#111827; border-color:#e5e7eb; }
+.btn.ghost:hover{ background:#e5e7eb; }
+
+/* Подсказки/ошибка */
+.coupon-hint{ margin:.25rem 0 0; font-size:12px; color:#6b7280; }
+.coupon-error{ margin:.25rem 0 0; font-size:13px; color:#dc2626; }
+
+/* Темная тема */
+@media (prefers-color-scheme: dark){
+  .coupon-card{ background:#0b0c10; border-color:#1f2937; }
+  .coupon-close{ color:#9ca3af; }
+  .otp-input{ background:#111827; border-color:#374151; color:#e5e7eb; }
+  .otp-input:focus{ border-color:#60a5fa; box-shadow:0 0 0 3px rgba(96,165,250,.2); background:#0b0c10; }
+  .btn.ghost{ background:#111827; color:#e5e7eb; border-color:#374151; }
+  .btn.ghost:hover{ background:#0f172a; }
+}
+
+.theme-brand .coupon-card{
+  background: $green-basic; border:1px solid $green-basic; border-radius:12px;
+}
+.theme-brand .coupon-head strong{ color: $green-light; }
+.theme-brand .coupon-close{ color:$green-dark; }
+.theme-brand .coupon-close:hover{ color:$green-basic; }
+
+.theme-brand .otp-input{
+  background:#F9FAFB; border:1px solid #D1D5DB; color:$green-basic;
+}
+.theme-brand .otp-input:focus{
+  border-color:$green-basic;
+  box-shadow:0 0 0 3px $green-dark;
+  background:$green-basic;
+}
+
+.theme-brand .btn.primary{
+  background:$green-light; color:#fff; border:1px solid transparent;
+}
+.theme-brand .btn.primary:hover{ background:$green-basic; }
+.theme-brand .btn.ghost{
+  background:#F3F4F6; color:$green-basic; border:1px solid #E5E7EB;
+}
+
+
+/* ПАЛИТРА (можно встроить в вашу .theme-brand) */
+:root{
+  --success:#22c55e;         /* зелёный */
+  --success-ink:#065f46;     /* тёмно-зелёный текст */
+  --success-bg:#ecfdf5;      /* мягкий фон квадратиков */
+}
+
+/* Успешный статус-бейдж */
+.coupon-success{
+  display:flex; align-items:center; gap:.5rem;
+  margin:.5rem 0 0; font-size:14px; color:var(--success-ink);
+  background:var(--success-bg); border:1px solid var(--success); border-radius:10px;
+  padding:.4rem .6rem;
+}
+.coupon-success .ok-ic{ width:16px; height:16px; color:var(--success); }
+
+/* Базовые квадратики уже есть (.otp-input). Добавим success/lock состояния */
+.otp{ position:relative; }
+.otp--valid .otp-input{
+  border-color:var(--success);
+  background:var(--success-bg);
+  color:var(--success-ink);
+  font-weight:800;
+}
+.otp--locked .otp-input{
+  pointer-events:none;               /* нельзя редактировать */
+  caret-color:transparent;
+}
+.otp--valid::after{
+  content:"";
+  position:absolute; right:-6px; top:-8px;
+  width:22px; height:22px;
+  border-radius:999px;
+  background:
+    radial-gradient(circle at 60% 55%, var(--success) 55%, transparent 56%),
+    conic-gradient(var(--success) 0 25%, transparent 0 100%);
+  mask: radial-gradient(circle 7px at 60% 55%, transparent 6px, #000 7px);
+  opacity:.9;                         /* маленькая «птичка» в углу */
+}
+.otp--valid .otp-input:focus{
+  box-shadow:none;                    /* без синей подсветки после успеха */
+}
+
+/* маленькая текст-ссылка */
+.btn.link.xs{
+  margin-top:.4rem;
+  background:transparent; border:0; color:#2563eb; cursor:pointer; font-size:13px;
+}
+.btn.link.xs:hover{ text-decoration:underline; }

@@ -10,7 +10,7 @@ export function getColorLine(sch: INote){
       }
       /* Синий */
       case RecordStatus.Confirm:{
-        return '#0A6ED8';
+        return '#5a2cb1';
       }
       /* красный */
       case RecordStatus.Canceled:{
@@ -21,7 +21,7 @@ export function getColorLine(sch: INote){
         return '#4FB229';
       }
       case RecordStatus.Pending: {
-        return '#ffab00';
+        return '#1182d5';
       }
     }
     return '#4FB229';

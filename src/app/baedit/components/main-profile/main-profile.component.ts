@@ -58,6 +58,7 @@ export class MainProfileComponent implements OnInit {
       this._apiServiceProfile.saveProfile(this.profile.id!, this.profile ).subscribe(
         result => {
          this.showSuccess();
+         this.isEdit = false;
          this._loginService.updateProfile(this.profile!.id!);
         },
         (error: any) => {

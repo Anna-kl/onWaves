@@ -91,7 +91,8 @@ export class HeaderBAComponent implements OnInit, OnDestroy {
     });
     this.orderSvc.startConnection();
     this.orderSvc.newOrder$.subscribe(({ userId, recordId }) => {
-      if (userId)
+      console.log(this.auth);
+      if (userId === this.auth?.id)
           this.notificationCount$ = this._apiNotification.getCountNotifications(this.auth?.id!);
         
     });

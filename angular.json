@@ -22,10 +22,17 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
+                            {
+                "glob": "sw.js",
+                "input": "src",
+                "output": "/"
+              },
               "src/favicon.ico",
               "src/assets",
+              "src/manifest.webmanifest",
               "src/manifest.webmanifest"
             ],
+            
             "styles": [
                "node_modules/bootstrap/dist/css/bootstrap.min.css",
                "node_modules/primeng/resources/primeng.min.css",
@@ -35,7 +42,11 @@
       
 
             ],
-            "scripts": ["node_modules/bootstrap/dist/js/bootstrap.js"]
+            "scripts": [
+              "node_modules/bootstrap/dist/js/bootstrap.js"
+            ],
+            "serviceWorker": true,
+            "ngswConfigPath": "ngsw-config.json"
           },
           "configurations": {
             "production": {
@@ -91,7 +102,8 @@
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/manifest.webmanifest"
             ],
             "styles": [
               "node_modules/primeng/resources/primeng.min.css",

@@ -114,14 +114,18 @@
       </a>
     </div-->
     <!-- Последние посещения Start  -->
-    <div class="cont-horiz-start wrap padding-top80 margin-bottom30" *ngIf="auth">
+     <div *ngIf="historyCards$|async as cardsH">
+    <div class="cont-horiz-start wrap padding-top80 margin-bottom30" >
       <h3>Последние посещения</h3>
     </div>
-    <div class="cont-horiz-around wrap " *ngIf="auth"> 
-      <app-clients-card-list [card-business]="historyCards$.value"
+  
+    <div class="cont-horiz-around wrap "> 
+      <app-clients-card-list [card-business]="cardsH"
        class="disp1 cont-horiz-start-start wrap" style="gap: 10px 4px;">
       </app-clients-card-list>
     </div>
+
+     </div>
     <!-- Последние посещения END  -->
       
     <!-- Популярное -->
@@ -142,9 +146,9 @@
         Рядом
       </label>
       <div id="content-1">
-        <div class="cont-horiz-around wrap">
+        <div class="cont-horiz-around wrap" *ngIf="cards$|async as cards; else loader1">
           <!--Карточка 1 Start   <div class="parent-grey-light" > class="disp1 margin-left10 margin-right10 cont-horiz-start-start wrap"  style="gap: 10px 4px;" </div>--> 
-          <app-clients-card-list   [card-business]="_apiCards.cards$" class="w100">
+          <app-clients-card-list   [card-business]="cards" class="w100">
           </app-clients-card-list> 
           <div class="parent-grey-light cont-horiz" *ngIf="isListCardExpand$|async">
             <div class="" style="max-width: 1200px; width: 100%; ">
@@ -154,6 +158,9 @@
             </div>
           </div> 
         </div><!-- Популярное END left-right20 margin-bottom: 50px;-->
+         <ng-template #loader1>
+            <app-loader-on-waves ></app-loader-on-waves>
+     </ng-template>
       </div>
       <div id="content-2">
         <div class="cont-horiz-around wrap">
@@ -161,9 +168,9 @@
           <!-- <app-clients-card-list [card-business]="_apiCards.cards$" *ngIf="!isRecommend"
            class="w100">
           </app-clients-card-list>  -->
-          <div class="parent-grey-light cont-horiz" *ngIf="isListCardExpand$|async">
+          <div class="parent-grey-light cont-horiz" *ngIf="hasMore$|async">
             <div class="" style="max-width: 1200px; width: 100%; ">
-              <div class="txt-green-light" style="text-decoration: underline; text-align: right; cursor: pointer;" (click)="loadCards()">
+              <div class="txt-green-light" style="text-decoration: underline; text-align: right; cursor: pointer;" (click)="loadMore()">
                 Смотреть еще
               </div>
             </div>

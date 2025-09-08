@@ -7,7 +7,7 @@ import { Group } from '../../DTO/views/services/IViewGroups';
 import { subGroup } from '../../DTO/views/services/IViewSubGroups';
 
 import {ScheduleService} from "../../../services/schedule.service";
-import {filter, forkJoin, map, switchMap, take, tap, withLatestFrom} from "rxjs";
+import {filter, distinctUntilChanged, map, switchMap, take, tap, withLatestFrom, combineLatest} from "rxjs";
 import {DictionaryService} from "../../../services/dictionary.service";
 
 import {ProfileDataService} from "../services/profile-data.service";
@@ -99,6 +99,21 @@ export class ProfileBAComponent implements OnInit {
 
     let link = this.route.snapshot.paramMap.get('id');
     if (link) {
+      
+      // this._api.translateLink(link).subscribe(result => {
+      //    this.id = result.data;
+      //   const user$    = this._store.select(selectProfileMainClient);       // BehaviorSubject-подобный поток
+      //   const settings$= this._api.getMainTags(this.id!);
+      //   combineLatest([user$, settings$])
+      //     .pipe(
+      //       map(([profile, settings]) => ({ profile, settings }))
+      //     )
+      //     .subscribe(vm => {
+      //       console.log(vm);
+      //     }
+      //     );  
+      //         })
+
      this._api.translateLink(link).pipe(
   // 1) переводим ссылку
           switchMap(result => {
@@ -120,13 +135,16 @@ export class ProfileBAComponent implements OnInit {
             this._store
               .select(selectProfileMainClient)
               .pipe(
-                take(1),                          // первый эмит — будь он null или объект
+                // latest()
+                distinctUntilChanged((a, b) => (a?.id || null) === (b?.id || null)),                         // первый эмит — будь он null или объект
                 map(user => ({ tags, user }))     // упакуем оба значения в один объект
               )
           ),
           tap(({tags, user}) => {
             if (user === null){
               this.isLoad = true;
+            } else{
+              this.isLoad = false;
             }
           }),
           // 4) слать визит с user?.id (или null) и profileId

@@ -114,9 +114,9 @@
               <!-- … остальной контент … -->
             </section>
     <!-- Баннер купона -->
-            <div class="coupon-banner" *ngIf="hasCoupon$|async">
+            <div class="coupon-banner" *ngIf="hasCoupon$|async as coupon">
               <div class="coupon-banner__text">
-                🎉 У вас есть активный купон — скидка {{ couponValue }} ₽!
+                🎉 У вас есть активный купон — скидка {{ coupon.balance }} ₽!
                   <p>Чтобы использовать купон, при записи к мастеру, кликните по чек-боксу "Использовать купон"</p>
               </div>
                

@@ -25,6 +25,7 @@ export class OrderSignalrService {
 
     this.hubConnection.on('NewOrder', (data: any) => {
       this.newOrder$.next(data);
+      
     });
   }
 }

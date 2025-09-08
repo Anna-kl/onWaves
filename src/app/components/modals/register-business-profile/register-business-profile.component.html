@@ -185,7 +185,12 @@
                       </div>
                     </div>
                     <div class="txt-green-light margin-top10">
-                      Разместите ссылку на сайт вашей организации или страницу в социальных сетях.
+                    Страница в социальных сетях
+                      <div class="input-line cont-horiz-start" >
+                            <input class="form-control borderNone" type="text" size="16" id="webSite"
+                            formControlName="socialLink"   placeholder="https://vk.com/"  />
+                                   <!-- formControlName="webSite"   placeholder="https://"  /> -->
+                          </div>
                     </div>
                     <br/>
                     <!-- Контакты end -->
@@ -193,9 +198,9 @@
                   <!-- Правая колонка -->
                   <div class="border2px cont-vert-start-start contact_col_50">
                     <!-- Адрес start -->
-<app-select-address [profile]="null"
-   (changeAddress)="changeAddress($event)">
-</app-select-address>
+                        <app-select-address [profile]="null"
+                          (changeAddress)="changeAddress($event)">
+                        </app-select-address>
                   </div>
                   <!-- Адрес end -->
                 </div>

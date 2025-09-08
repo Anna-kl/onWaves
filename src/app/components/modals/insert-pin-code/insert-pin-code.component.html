@@ -1,0 +1,38 @@
+<!-- КНОПКА "Купон" уже есть у вас. Важно: у нее data-action="open-coupon" и aria-controls="coupon-panel" -->
+
+<!-- ПАНЕЛЬ ВВОДА PIN КУПОНА -->
+<div id="coupon-panel .theme-brand" class="coupon-panel" role="region" aria-label="Ввести PIN купона">
+  <div class="coupon-card .theme-brand">
+    <div class="coupon-head .theme-brand">
+      <strong>Ввести PIN купона</strong>
+      <button type="button .theme-brand" class="coupon-close" data-action="close-coupon" aria-label="Закрыть" (click)="close()">✕</button>
+    </div>
+
+    <form class="coupon-form .theme-brand" [formGroup]="pinForm" id="coupon-form" novalidate>
+      <!-- Поле OTP (4 цифры). data-length можно поменять на 6 и т.п. -->
+      <div class="otp" data-length="4" aria-label="Пин-код купона">
+        <input class="otp-input theme-brand" [style.background]="isSuccess() ? '#006174' : 'white'" formControlName="pin1" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Цифра 1">
+        <input class="otp-input theme-brand" [style.background]="isSuccess() ? '#006174' : 'white'" formControlName="pin2" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Цифра 2">
+        <input class="otp-input theme-brand" [style.background]="isSuccess() ? '#006174' : 'white'" formControlName="pin3" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Цифра 3">
+        <input class="otp-input theme-brand" [style.background]="isSuccess() ? '#006174' : 'white'" formControlName="pin4" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Цифра 4">
+      </div>
+
+      <div class="coupon-actions theme-brand">
+        <!-- <button type="button theme-brand" class="btn ghost" data-action="paste-pin" title="Вставить из буфера">Вставить</button> -->
+        <button type="submit theme-brand" class="btn primary" id="apply-coupon" [disabled]="!pinForm.valid"
+        [style.background]="pinForm.valid ? '#006174': '#DDE2ED'" (click)="setPinCode()" *ngIf="!isSuccess()">Применить</button>
+      </div>
+
+      <p class="coupon-hint theme-brand">Введите 4 цифры PIN. Его сообщает клиент во время визита.</p>
+      <p class="coupon-error theme-brand" id="coupon-error" role="alert" *ngIf="amount === -1">Неверный PIN. Попробуйте ещё раз.</p>
+      <p class="coupon-success" id="coupon-success" role="status" *ngIf="isSuccess()">
+            <svg class="ok-ic" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M8.5 12.5l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+            Купон применён — −{{amount}} ₽
+            </p>
+
+    </form>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import {LOCALE_ID, NgModule} from '@angular/core';
+import {LOCALE_ID, NgModule, isDevMode} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AppRoutingModule } from './app-routing.module';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -154,6 +154,8 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { EffectsModule } from '@ngrx/effects';
 import { provideYConfig, YConfig
  } from 'angular-yandex-maps-v3';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { InsertPinCodeComponent } from './components/modals/insert-pin-code/insert-pin-code.component';
 
 
 const mapConfig: YConfig  = {
@@ -239,7 +241,8 @@ registerLocaleData(localeRu, 'ru');
     DeleteImageAlbumComponent,
     AlbumPhoneComponent,
     FotoPhoneComponent,
-    PageClient1Component
+    PageClient1Component,
+    InsertPinCodeComponent
   ],
     imports: [
       NgxMaskDirective,
@@ -287,6 +290,12 @@ registerLocaleData(localeRu, 'ru');
       CalendarModule, AutocompleteLibModule, NgScrollbar, ScrollViewport,
       ClipboardModule,
       GalleriaModule,
+      ServiceWorkerModule.register('ngsw-worker.js', {
+        enabled: !isDevMode(),
+        // Register the ServiceWorker as soon as the application is stable
+        // or after 30 seconds (whichever comes first).
+        registrationStrategy: 'registerWhenStable:30000'
+      }),
       ],
   providers: [NgbDropdown,ProfileDataEditService, BusService,LoginService,   provideNgxMask(),
     { provide: LOCALE_ID, useValue: 'ru' }, provideYConfig(mapConfig)],

@@ -22,6 +22,7 @@ export class IViewBusinessProfile {
   avatar?: any;
   telegram?: string;
   webSite?: string;
+  socialLink?: string;
   whatsApp?: string;
   mainCategory?: string[];
   register?: Date;
@@ -65,7 +66,8 @@ export class IViewBusinessProfile {
         this.avatar = user.avatar,
         this.register = user.register,
         this.longitude = user.longitude,
-        this.latitude = user.latitude
+        this.latitude = user.latitude,
+        this.socialLink = user.socialLink
   }
   copyProfileWithAddress(user: IViewBusinessProfile, address: IViewAddress) {
         this.id = user.id;
@@ -93,6 +95,7 @@ export class IViewBusinessProfile {
         this.timeZone = user.timeZone;
         this.avatar = user.avatar;
         this.register = user.register;
+        this.socialLink = user.socialLink;
   }
     prepareBeforeSave(){
           this.link = this.link?.replace(urlProfile, '');

@@ -14,6 +14,7 @@ import {MobmenuComponent} from "./footer/mobmenu/mobmenu.component";
 import {CarouselModule} from "primeng/carousel";
 import {NotificationsComponent} from "./header/notifications/notifications.component";
 import {HeaderBAComponent} from "./header/header-ba/header-ba.component";
+import { SeenDirective } from "./header/notifications/seen.directive";
 
 @NgModule({
     declarations: [
@@ -23,10 +24,11 @@ import {HeaderBAComponent} from "./header/header-ba/header-ba.component";
         FooterComponent,
         ReviewsCaruselComponent,
         MobmenuComponent,
-        NotificationsComponent
+        NotificationsComponent,
+        SeenDirective
     ],
     imports: [
-        CommonModule, NgOptimizedImage, MenuModule, ButtonModule, ToastModule, NgbCollapse, CarouselModule, 
+        CommonModule, NgOptimizedImage, MenuModule, ButtonModule, ToastModule, NgbCollapse, CarouselModule
     ],
     exports: [
         HeaderBAComponent,
@@ -35,7 +37,8 @@ import {HeaderBAComponent} from "./header/header-ba/header-ba.component";
         FooterComponent,
         ReviewsCaruselComponent,
         MobmenuComponent,
-        NotificationsComponent
+        NotificationsComponent,
+        SeenDirective
     ]
 })
 

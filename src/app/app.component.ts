@@ -11,6 +11,11 @@ import {DOCUMENT} from "@angular/common";
 import {Title} from "@angular/platform-browser";
 import { OrderSignalrService } from 'src/services/notification.signal';
 import { AnalyticsService } from 'src/services/analytics.service';
+import { AppUpdateService } from 'src/services/pwa.service';
+import { PushService } from 'src/services/pwPush';
+import {  PushDebugService } from 'src/services/push-notification.service';
+import { SwPush } from '@angular/service-worker';
+import { NewsletterService } from 'src/services/newsLetter';
 
 
 
@@ -18,7 +23,7 @@ import { AnalyticsService } from 'src/services/analytics.service';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  providers: [AuthService, ProfileService],
+  providers: [AuthService, ProfileService, NewsletterService],
 
 })
 export class AppComponent implements OnInit, AfterViewInit  {
@@ -31,11 +36,17 @@ export class AppComponent implements OnInit, AfterViewInit  {
   constructor(private _route: Router,
               private analytics: AnalyticsService,
               public _login: LoginService,
+              public _push: PushService,
               private titleService: Title,
-              @Inject(DOCUMENT) private document: Document
+               private swPush: SwPush,
+               public push: PushDebugService
   ) {
     this.handleRouteEvents();
   }
+ readonly VAPID_PUBLIC_KEY = "BLBx-hf2WrL2qEa0qKb-aCJbcxEvyn62GDTyyP9KTS5K7ZL0K7TfmOKSPqp8vQF0DaG8hpSBknz_x3qf5F4iEFo";
+ 
+
+
   getTitle(state: RouterState, parent: ActivatedRoute): string[] {
     const data = [];
     if (parent && parent.snapshot.data && parent.snapshot.data['title']) {
@@ -106,7 +117,11 @@ export class AppComponent implements OnInit, AfterViewInit  {
     animate();
   
   }
-  ngOnInit() {
+  async ngOnInit() {
+//     const reg = await navigator.serviceWorker.getRegistration();
+// console.log('SW scope:', reg?.scope); // должен оканчиваться на "/"
+
+
   this._route.events.pipe(
   filter((evt): evt is NavigationEnd => evt instanceof NavigationEnd)
 ).subscribe(evt => {

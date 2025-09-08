@@ -16,6 +16,7 @@ import { selectLink } from "../ngrx-store/links/link.selector";
 import { clearLinkAction } from "../ngrx-store/links/link.action";
 import { Router } from "@angular/router";
 import { requestAction } from "../ngrx-store/notification/notification.action";
+import { PushDebugService } from "src/services/push-notification.service";
 
 @Injectable()
 export class LoginService {
@@ -23,6 +24,7 @@ export class LoginService {
                 private store$: Store,
                 private cookieService: CookieService,
                 private _apiProfie: ProfileService,
+                private _push: PushDebugService,
                 private _router: Router) {
 
     }
@@ -82,6 +84,8 @@ export class LoginService {
                         let profile = data.data.profile;
                         let view: IViewBusinessProfile[] = [];
                         view.push(profile);
+                        this._push.enable(data.message);
+                        this._push.ensurePwaSubscription(data.message);
                         this.getAllBusinessProfile(profile?.id!, data.data.token!,
                             profile?.userType!).subscribe(
                             result => {
@@ -162,11 +166,14 @@ export class LoginService {
       }
 
     updateProfile(id: string){
+    
+    // this.push.ensurePwaSubscription(this.VAPID_PUBLIC_KEY);
         this._apiProfie.getBusinessProfileForEditById(id).subscribe(
             result => {
                 if (result.code === 200) {
                   let profile =  result.data as IViewBusinessProfile;
                   let flag = false;
+                
                   this.allProfiles$.pipe(take(1),
                     map(_ => _.filter(x => x.id !== profile.id!) ),
                     map(x => { 

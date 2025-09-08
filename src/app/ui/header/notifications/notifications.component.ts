@@ -1,6 +1,6 @@
 
 import {HttpClient} from '@angular/common/http';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Directive, EventEmitter, Input, OnDestroy, OnInit, Output, TrackByFunction} from '@angular/core';
 import {MessageNotificationService} from '../../../../services/notification.service';
 import {TypeNotification} from '../../../DTO/enums/typeNotification';
 import {StatusNotification} from '../../../DTO/enums/statusNotification';
@@ -12,8 +12,8 @@ import {IViewNotification} from "../../../DTO/views/notifications/IViewNotificat
 import {DomSanitizer} from "@angular/platform-browser";
 import {subGroup} from "../../../DTO/views/services/IViewSubGroups";
 import {RecordStatus} from "../../../DTO/enums/recordStatus";
-import {IChangeNotification} from "../../../DTO/views/notifications/IChangeNotification";
-import { Subscription } from 'rxjs';
+import { SeenDirective } from './seen.directive'; // где лежит директива
+import { filter, Subscription, switchMap, take } from 'rxjs';
 
 interface Notification {
 message: any;
@@ -22,14 +22,17 @@ message: any;
   body: string;
   
 }
+
 @Component({
   selector: 'app-notifications',
   templateUrl: './notifications.component.html',
   styleUrls: ['./notifications.component.css'],
   providers: [MessageNotificationService]
 })
+
 export class NotificationsComponent implements OnInit, OnDestroy {
   profile: any; 
+  trackById: TrackByFunction<IViewNotification> = (_index, item) => item.id;
   private unsubscribe$: Subscription|null = null;
   enumStatus: typeof StatusNotification = StatusNotification;
   enumType: typeof TypeNotification = TypeNotification;
@@ -42,27 +45,57 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   // notificationsList: Notification[] = [];
   // openMessage: boolean = false;
   selectedNotification: Notification | undefined;
+  @Input() seenId!: string;            // id уведомления
+  @Input() seenThreshold = 0.5;        // доля площади
+  @Input() seenDelayMs = 800;          // задержка
+  @Output() seenOnce = new EventEmitter<string>();
+
   constructor(
     private sanitizer: DomSanitizer,
     private _router: Router,
-    private store$: Store
+    private store$: Store,
+    private _api: MessageNotificationService
   ) {}
   ngOnDestroy(): void {
     this.unsubscribe$?.unsubscribe();
   }
 
+  onSeen(id: string) {
+  // локально оптимистично проставили readAt
+  let message = this.messages.find(
+    n => n.id === id);
+  if (message){
+    if (message.statusNotification === StatusNotification.CREATE){
+      this._api.readNotifications(id).pipe(take(1)).subscribe();
+      message.statusNotification = StatusNotification.READ;
+    }}
+  
+  // и отправили батчем (через Subject + auditTime) на сервер
+  // this.mark$.next(id);
+}
+
   ngOnInit(): void {
-    this.unsubscribe$ = this.store$.pipe(select(notificationMessages)).subscribe((notificationState) => {
-      this.messages = notificationState;
-    });
+    // this.unsubscribe$ = this.store$.pipe(select(notificationMessages)).subscribe((notificationState) => {
+    //   this.messages = notificationState;
+    // });
 
-    this.unsubscribe$ = this.store$.pipe(select(selectProfileMainClient)).subscribe((result) => {
-      this.profile = result;
+   
+    this.store$.pipe(select(selectProfileMainClient)).
+      pipe(filter(user => !!user),
+        switchMap(_ =>  this._api.getNotifications(_?.id!)
+    )
+      ).subscribe(
+        result => {
+          this.messages = result;
+        }
+      )
+    // subscribe((result) => {
+    //   this.profile = result;
 
-      if (this.profile) {
-        this.filterNotifications();
-      }
-    });
+    //   if (this.profile) {
+    //     this.filterNotifications();
+    //   }
+    // });
     
     
   }
@@ -113,8 +146,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     return services.map(_ => _.name).join('\n');
   }
 
-  getIconStatus(recordStatus: RecordStatus) {
-    if (recordStatus === RecordStatus.Created){
+  getIconStatus(statusNotification: StatusNotification) {
+    if (statusNotification === StatusNotification.CREATE){
       return "/assets/img/ico/icons_all_size/ico_notification_v3_pc_24.svg";
     } else {
       return "/assets/img/ico/icons_all_size/ico_check_pc_24.svg";

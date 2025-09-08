@@ -33,6 +33,24 @@
          </div>
 
       </div>
+
+      <div class="input-website">
+        Ссылка на социальные сети
+      </div>
+         <div class="cont-horiz-start-start" style="gap: 10px 10px;">
+
+        <!-- Часть адреса, заполняемая БА [placeholder]="urlProfileLocal"  -->
+        <!-- (ngModelChange)="change()"  -->
+         <div class="groupe-input">
+          <div class="input-ocpio-nikname">
+            <input class="input-span-text" style="max-width: 300px;" type="text" [(ngModel)]="profile.socialLink" (ngModelChange)="change()"
+              placeholder="https://instagram.com" />
+            <!-- Иконка копировать адрес -->
+
+          </div>
+         </div>
+
+      </div>
      
       <div class="discription-column-left">
         Создайте описание профиля, чтобы клиенты знали, чем вы
@@ -44,7 +62,7 @@
         </textarea>
         <!-- счетчик 0/150 -->
         <span *ngIf="profile?.about">
-          {{ profile.about?.length!/TEXT_LENGTH }}
+          {{ profile.about?.length! }}/{{TEXT_LENGTH}}
         </span>
 
       </div>

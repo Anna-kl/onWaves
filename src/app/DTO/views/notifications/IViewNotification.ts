@@ -1,5 +1,6 @@
 import {subGroup} from "../services/IViewSubGroups";
 import {RecordStatus} from "../../enums/recordStatus";
+import { StatusNotification } from "../../enums/statusNotification";
 
 export interface IViewNotification {
     id: string;
@@ -11,4 +12,5 @@ export interface IViewNotification {
     recordDateTime: Date;
     recordStatus: RecordStatus;
     dayId: string;
+    statusNotification: StatusNotification;
 }

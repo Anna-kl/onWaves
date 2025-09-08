@@ -41,6 +41,10 @@ export class ProfileService {
   }
 
 
+  getHistoryCards(id: string, isRecommend: boolean, skip: number){
+     return this.http.get<IViewBusinessProfile[]>(`${this.url}?id=${id}&type=1&&isRecommend=${isRecommend}&skip=${skip}`)
+  }
+
   // sendIfClickContact(profileId: string,  whoIs: string|null){
   //       if (whoIs)
   //             return this.http.get<string[]>(`${this.url}get-reference/${profileId}?whoIs=${whoIs}`);
@@ -108,6 +112,14 @@ export class ProfileService {
        return this.http.get<IResponse>(`${this.url}?type=1&&isRecommend=${isRecommend}&skip=${skip}`).pipe(
             tap(data => this.listClientsCard$.next(data))
     );
+    }
+  };
+
+   getProfileAsync(skip: number, isRecommend: boolean, id?: string|null) {
+    if (id)
+    return this.http.get<IViewBusinessProfile[]>(`${this.url}?id=${id}&type=1&&isRecommend=${isRecommend}&skip=${skip}`);
+    else{
+       return this.http.get<IViewBusinessProfile[]>(`${this.url}?type=1&&isRecommend=${isRecommend}&skip=${skip}`);
     }
   };
 

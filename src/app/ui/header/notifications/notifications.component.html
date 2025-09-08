@@ -23,21 +23,22 @@
         <div class="cont-vert w100" > 
             <div style="max-width: 600px;" class="w100 tabs padding-bottom40">  
                 <input type="radio" name="tab-btn" id="tab-btn-1" value="" checked>
-                <label for="tab-btn-1" class="tab50">
+                <!-- <label for="tab-btn-1" class="tab50">
                     Заявки
-                </label> 
-                <input type="radio" name="tab-btn" id="tab-btn-2" value="">
+                </label>  -->
+                <!-- <input type="radio" name="tab-btn" id="tab-btn-2" value=""> -->
                 <!-- <label for="tab-btn-2"  class="tab50" style="margin-left: -60px;">
                     Оповещения
                 </label> -->
                 <!-- Заявки-->
                 <div id="content-1">
-                    <div class="cont-horiz-around wrap" *ngFor="let message of messages"> 
+                    <div class="cont-horiz-around wrap" *ngFor="let message of messages; trackBy: trackById" seen [seenId]="message.id"
+                            (seenOnce)="onSeen($event)"> 
                         <div class="w100 cont-vert-start-center" >
                             <div class="cont-horiz-start-start margin-bottom10">
                                 <!-- Дата записи на услугу -->
                                 <div class="margin-bottom20" style="color: #9196A4; margin-right: 10px; ">
-                                    {{message.recordDateTime|date: 'short'}}
+                                    {{message.created|date: 'short'}}
                                 </div>
                                 <!-- Дата создания 
                                 <div style="color: #9196A4; margin-right: 10px; ">
@@ -45,7 +46,7 @@
                                 </div>-->
                                 <!-- галочка -->
                                 <div> 
-                                <img [src]="getIconStatus(message.recordStatus)">
+                                <img [src]="getIconStatus(message.statusNotification)">
                                 </div>
                             </div>    
                             <div class="margin-bottom20 cont-horiz-start">

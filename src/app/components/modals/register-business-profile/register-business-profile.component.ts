@@ -169,6 +169,7 @@ export class RegisterBusinessProfileComponent implements OnInit {
         webSite: data['webSite'],
         link: data['link'].replace(urlProfile, ''),
         whatsApp: data['whatsApp'],
+        socialLink: data['socialLink'],
         // parentId: this.auth?.profile?.id!,
         parentId: this.mainProfile.id, //из store
         timeZone: new Date().getTimezoneOffset(),
@@ -294,7 +295,9 @@ export class RegisterBusinessProfileComponent implements OnInit {
       webSite: new FormControl('', [
         Validators.minLength(4)
       ]),
-
+      socialLink: new FormControl('https://', [
+        Validators.minLength(4)
+      ]),
       //шаг 2
       country: new FormControl('', [
         Validators.required
@@ -364,6 +367,7 @@ export class RegisterBusinessProfileComponent implements OnInit {
   get whatsApp() { return this.registrationForm.get('whatsApp')!;}
   get telegram() { return this.registrationForm.get('telegram')!;}
   get webSite() { return this.registrationForm.get('webSite')!;}
+  get socialLink() { return this.registrationForm.get('socialLink')!;}
 
 
   //шаг 2

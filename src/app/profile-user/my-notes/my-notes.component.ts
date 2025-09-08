@@ -61,6 +61,9 @@ export class MyNotesComponent implements OnInit {
          case RecordStatus.Pending: {
           return "В процессе";
           }
+        case RecordStatus.InWork: {
+          return "В работе";
+          }
         }
 
   }
