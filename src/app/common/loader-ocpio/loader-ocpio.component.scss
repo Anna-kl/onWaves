@@ -1,0 +1,73 @@
+/* === Настройки бренда === */
+.oc-loader{
+  --oc-size: 104px;         /* общий размер */
+  --oc-color: #0EA5A2;     /* фирменный цвет */
+  --oc-bg: transparent;    /* фон, если нужен */
+  display:inline-block;
+}
+.oc-svg{ width:var(--oc-size); height:var(--oc-size); display:block; background:var(--oc-bg); }
+
+/* Общий стиль линий */
+.oc-o,.oc-c{
+  fill:none; stroke:var(--oc-color);
+  stroke-width:4; stroke-linecap:round;
+}
+
+/* Буква О слева → в центр → назад */
+.oc-g-o{ animation: oc-move-o 2.2s ease-in-out infinite; transform-origin: 0 0; }
+/* Буква С справа → в центр → назад */
+.oc-g-c{ animation: oc-move-c 2.2s ease-in-out infinite; transform-origin: 0 0; }
+
+/* Рисуем 'С' как окружность со штрихом (разрыв справа) */
+.oc-c{
+  stroke-dasharray: 38.832 24;  /* C - G , G */
+  stroke-dashoffset: -12;       /* -G/2 */
+}
+
+/* Вспышка при соединении */
+.oc-pulse{
+  fill: var(--oc-color);
+  opacity: 0;
+  transform: scale(0.2);
+  transform-origin: center;
+  animation: oc-pulse 2.2s ease-out infinite;
+}
+
+/* Анимации движения и «склейки» */
+@keyframes oc-move-o{
+  0%   { transform: translateX(-28px) scale(1); }
+  38%  { transform: translateX(0)     scale(1); }   /* встретились */
+  50%  { transform: translateX(0)     scale(1.08); }/* легкий bounce */
+  62%  { transform: translateX(0)     scale(1); }
+  100% { transform: translateX(-28px) scale(1); }
+}
+@keyframes oc-move-c{
+  0%   { transform: translateX(28px) rotate(0deg) scale(1); }
+  38%  { transform: translateX(0)    rotate(0deg) scale(1); }
+  50%  { transform: translateX(0)    rotate(0deg) scale(1.08); }
+  62%  { transform: translateX(0)    rotate(0deg) scale(1); }
+  100% { transform: translateX(28px) rotate(0deg) scale(1); }
+}
+@keyframes oc-pulse{
+  0%,30%   { opacity:0; transform:scale(0.2); }
+  39%      { opacity:.0; transform:scale(0.2); } /* перед встречей */
+  50%      { opacity:.18; transform:scale(1.35); }
+  65%      { opacity:0; transform:scale(1.6); }
+  100%     { opacity:0; transform:scale(1.6); }
+}
+
+/* Тёмная тема — просто сработает благодаря переменной цвета.
+   Если нужно, можно переопределить --oc-color для dark. */
+
+/* Уважение к reduce-motion */
+@media (prefers-reduced-motion: reduce){
+  .oc-g-o,.oc-g-c,.oc-pulse{ animation: none; }
+  .oc-svg{ opacity:.85; }
+}
+
+.oc-center{
+  display:flex;
+  justify-content:center; /* по центру по ширине */
+  /* при желании ещё и по вертикали:
+  align-items:center; min-height:120px; */
+}

@@ -80,16 +80,26 @@ export class ExtsearchComponent implements OnInit {
     if (genderList['isChildren']){
       gender.push(Gender.Children);
     }
-    const send = {
-      search: this.search,
-      distance: this.isNear ? this.rangeData : null ,
-      categoryId: this.category ? this.category.id : null,
-      address: this.address,
-      gender: gender,
-      geo: this.isNear ? this.geo : null,
-    } as ISearchRequest;
+    // const send = {
+    //   search: this.search,
+    //   distance: this.isNear ? this.rangeData : null ,
+    //   categoryId: this.category ? this.category.id : null,
+    //   address: this.address,
+    //   gender: gender,
+    //   geo: this.isNear ? this.geo : null,
+    // } as ISearchRequest;
 
-      this.router.navigate(['search/result'],  { state: { send } });
+       this.router.navigate(['search/result'], {
+      queryParams: {
+        search: this.search,
+        distance:this.isNear ? this.rangeData : null ,
+        categoryId: this.category ? this.category.id : null,
+        // сложные объекты можно сериализовать:
+        gender: gender,
+         geo: this.isNear ? this.geo : null,
+         address: this.address,
+      }
+    });
     }
     
   getUserLocation() {

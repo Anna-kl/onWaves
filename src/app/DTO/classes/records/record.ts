@@ -2,6 +2,7 @@ import {subGroup} from "../../views/services/IViewSubGroups";
 import {IOptionsRecord} from "./optionsRecord";
 
 export interface Record {
+  id?: string;
   daysOfScheduleId: string;
   services: subGroup[];
   comment?: string;

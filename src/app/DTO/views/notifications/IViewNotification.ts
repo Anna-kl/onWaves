@@ -13,4 +13,8 @@ export interface IViewNotification {
     recordStatus: RecordStatus;
     dayId: string;
     statusNotification: StatusNotification;
+    duration: number;
+    start: string;
+    isTimeUnlimited: boolean;
+    title: string;
 }

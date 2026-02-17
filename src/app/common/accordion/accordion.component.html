@@ -38,7 +38,7 @@
                             <!-- подкатегория 1 -->
                             <div class="modal_chng_group cont-vert-around-left" style="gap: 20px 20px;">
                                 <h2>{{ group.group.name }}</h2>
-                                <a (click)="changeGroupService(group.group)">
+                                <a (click)="changeGroupService(group)">
                                     Изменить название
                                 </a>
                                 <a (click)="deleteGroup(group.group)">
@@ -55,21 +55,117 @@
             <!-- Содержимое вкладки -->
             <div class="accordion_tab-content" [class.open]="group.isOpen">
                 <div class="accordion_serv_in_tabs" *ngFor="let subGroup of group.subGroups">
+                   
+                    <div class="service-item" [class.is-checked]="subGroup.isChecked" >
+                    <label class="service-check">
+                        <input
+                        type="checkbox"
+                        [(ngModel)]="subGroup.isChecked"
+                        *ngIf="canSetService"
+                       (ngModelChange)="setService(subGroup)"
+                        aria-label="Выбрать услугу: Разработка web приложения"
+                        />
+                        <span class="chk"   [style.background]="canSetService ? '#67C4B2' : 'white' " aria-hidden="true"></span>
+                    </label>
+
+                    <div class="service-content">
+                        <div class="service-header">
+                        <h3 class="service-title">{{subGroup.name}}</h3>
+                           <div class="txt-uslugi-price cont-horiz">
+                               
+                                    <label class="tooltip " *ngIf="isUpdate">
+                                    
+                                        <div class="cebab1 horiz-vert">
+                                            <div class="round-cebab-gray"></div>
+                                            <div class="round-cebab-gray"></div>
+                                            <div class="round-cebab-gray"></div>
+                                        </div>
+                                    
+                                        <input type="checkbox">
+                                  
+                                        <span class="cont-vert">
+                                        
+                                            <div class="modal_chng_service cont-vert-around-left"
+                                                style="gap: 20px 20px;">
+                                                <h2>{{subGroup.name}}</h2>
+                                                 <a (click)="changeService(subGroup)">
+                                                        Изменить услугу
+                                                    </a>
+                                                    <a (click)="changeGroup(subGroup)">
+                                                        Сменить группу
+                                                    </a>
+                                                    <a (click)="deleteService(subGroup)">
+                                                        Удалить
+                                                    </a>
+                                            </div>
+                                        </span>
+                                    
+                                    </label>
+                           
+                                </div>
+                              
+                        </div>
+
+
+
+                        <div class="service-meta">
+                        <span class="meta-time" *ngIf="isWriteTime(subGroup)">
+                                            {{getHours(subGroup.duration!)}}ч. {{getMinutes(subGroup.duration!)}} мин.
+                        </span>
+                        <span class="meta-time" *ngIf="subGroup.isTimeUnlimited">
+                            Без ограничений по времени
+                        </span>
+                        <span class="meta-price">    {{getPrice(subGroup.price)}} руб. </span>
+                        <span class="meta-note">{{getDescribeTypePayment(subGroup)}}</span>
+                        </div>
+                        <ng-container *ngIf="subGroup.about; else notHaveAbout">
+                           <div class="service-actions" *ngIf="subGroup.about.length>100">
+                                        <button
+                                        type="button"
+                                        class="expand-btn"
+                                        [class.open]="isExpanded(subGroup.id!)"
+                                        [attr.aria-expanded]="isExpanded(subGroup.id!)"
+                                        [attr.aria-controls]="'service-desc-' + subGroup.id"
+                                        (click)="toggle(subGroup.id!)">
+                                        <svg class="chev" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                                            <polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="4"
+                                                    stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span>{{ isExpanded(subGroup.id!) ? 'Скрыть описание' : 'Показать описание' }}</span>
+                                        </button>
+                                    </div>
+                
+                         <div 
+                            class="accordion_serv_in_tab-content"
+                            [id]="'service-desc-' + subGroup.id"
+                            [style.maxHeight]="isExpanded(subGroup.id!)|| subGroup.about.length <= 100 ? '300px' : '0'"
+                            [class.expanded]="isExpanded(subGroup.id!)|| subGroup.about.length <= 100"
+                          >
+                            <span *ngIf="isExpanded(subGroup.id!) || subGroup.about.length <= 100">{{ subGroup.about }}</span>
+                        </div>
+                         
+                        </ng-container>
+                        
+                 <ng-template #notHaveAbout>— описания нет —</ng-template>
+         
+                    </div>
+                    </div>
+              
                     <!-- вкладка 2 -->
-                    <div class="accordion_serv_in_tab">
+                    <!-- <div class="accordion_serv_in_tab">
                         <input type="checkbox" id="{{subGroup.id}}">
-                        <!-- Шапка вкладки -->
+                     
                         <label class="accordion_serv_in_tab-label" for="{{subGroup.id}}">
                             <div class="cont-vert-start-start w100" style="gap: 5px 5px;">
                                 <div class="cont-horiz-between-end w100">
-                                    <!-- Название услуги и Длительность услуги -->
+                                  
                                     <div class="cont-horiz-between w100">
                                         <div class="cont-vert-start" style="gap: 5px 5px;">
-                                            <!-- Название услуги -->
+                                         
                                             <div>
                                                 {{subGroup.name}}
                                             </div>
-                                            <!-- Длительность услуги -->
+                                       
                                             <div class="txt-uslugi-time" *ngIf="isWriteTime(subGroup)">
                                                 {{getHours(subGroup.duration!)}} ч.
                                                 {{getMinutes(subGroup.duration!)}}
@@ -79,40 +175,39 @@
                                                 Без ограничений по времени
                                             </div>
                                             <div class="cont-horiz-around">
-                                                <!-- Цена услуги -->
+                                              
                                                 <div class="cont-horiz-start margin-right10">
                                                     {{getPrice(subGroup.price)}}руб.
-                                                    <!--  (заглушка валюта должна меняться) -->
+                                                 
                                                 </div>
                                             </div>
-                                            <!-- Тип услуги -->
+                                           
                                             <div class="txt-uslugi-time">
                                                 {{getDescribeTypePayment(subGroup)}}
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Модальное окно + checkbox -->
+                                  
                                     <div class="txt-uslugi-price cont-horiz" *ngIf="canSetService">
-                                        <!-- checkbox -->
-                                        <!-- (ngModelChange)="updateCheckboxState($event)" -->
+                                 
                                         <div>
                                             <input type="checkbox" [(ngModel)]="subGroup.isChecked"
                                                 class="custom-checkbox" (ngModelChange)="setService(subGroup)"
                                                 *ngIf="!isUpdate">
                                         </div>
-                                        <!-- Модальное окно -->
+                                    
                                         <label class="tooltip " *ngIf="isUpdate">
-                                            <!-- Объект на которы вызываем всплывающее окно -->
+                                           
                                             <div class="cebab1 horiz-vert">
                                                 <div class="round-cebab-gray"></div>
                                                 <div class="round-cebab-gray"></div>
                                                 <div class="round-cebab-gray"></div>
                                             </div>
-                                            <!-- Объект на которы вызыаем всплывающее окно end -->
+                                        
                                             <input type="checkbox">
-                                            <!-- Cодержимое Модального окно -->
+                                          
                                             <span class="cont-vert">
-                                                <!-- подкатегория 1 -->
+                                               
                                                 <div class="modal_chng_service cont-vert-around-left"
                                                     style="gap: 20px 20px;">
                                                     <h2> {{subGroup.name}} </h2>
@@ -127,32 +222,26 @@
                                                     </a>
                                                 </div>
                                             </span>
-                                            <!-- Cодержимое Модального окно end -->
+                                           
                                         </label>
-                                        <!-- Модальное окно end -->
-                                    </div><!-- txt-uslugi-price -->
+                                     
+                                    </div>
                                 </div>
                             </div>
                         </label>
-                        <!-- Шапка вкладки end -->
-                        <!-- Описание услуги -->
+                      
                         <div class="accordion_serv_in_tab-content" *ngIf="subGroup.about; else notHaveAbout" [style.max-height.%]="isAboutOpen ? 100 : 0">
                             <span>
                                 {{subGroup.about}}
                             </span>
-                            <!-- фото услуги -->
-                            <!--                        <div class="cont-horiz-start-start wrap w100 margin-top20">-->
-                            <!--                            <div class="card-albom-ba-foto"  *ngFor="let image of subGroup.images">-->
-                            <!--                                <img [src]="getImage(image.image)" class="edit-ba-gallery-foto"  alt="">-->
-                            <!--                            </div>-->
-                            <!--                        </div>-->
+
                         </div>
                         <ng-template #notHaveAbout>
                             <div class="accordion_serv_in_tab-content">
                                 <span><i>описания услуги еще не добавлено</i></span>
                             </div>
                         </ng-template>
-                    </div>
+                    </div> -->
                 </div>
                 <!-- ----------------- -->
             </div><!-- Содержимое вкладки end -->
@@ -165,59 +254,153 @@
          
             <div class="line-separateur"></div>
             <!--      Услуги без группы-->
-            <div class="accordion_serv_in_tabs w100  cont-horiz-start wrap" *ngIf="serviceWithout$|async as serviceWithout">
+                <ng-container *ngIf="serviceWithout$|async as serviceWithout">
+                    <div class="service-item" [class.is-checked]="service.isChecked" 
+                      *ngFor="let service of serviceWithout">
+                    <label class="service-check">
+                        <input
+                        type="checkbox"
+                        *ngIf="canSetService"
+                        [(ngModel)]="service.isChecked"
+                       (ngModelChange)="setService(service)"
+                        aria-label="Выбрать услугу: Разработка web приложения"
+                        />
+                        <span class="chk" [style.background]="canSetService ? '#67C4B2' : 'white' "  style="background: #67C4B2; " aria-hidden="true"></span>
+                    </label>
+
+                    <div class="service-content">
+                        <div class="service-header">
+                        <h3 class="service-title">{{service.name}}</h3>
+                           <div class="txt-uslugi-price cont-horiz">
+                               
+                                    <label class="tooltip " *ngIf="isUpdate">
+                                    
+                                        <div class="cebab1 horiz-vert">
+                                            <div class="round-cebab-gray"></div>
+                                            <div class="round-cebab-gray"></div>
+                                            <div class="round-cebab-gray"></div>
+                                        </div>
+                                    
+                                        <input type="checkbox">
+                                  
+                                        <span class="cont-vert">
+                                        
+                                            <div class="modal_chng_service cont-vert-around-left"
+                                                style="gap: 20px 20px;">
+                                                <h2>{{service.name}}</h2>
+                                                 <a (click)="changeService(service)">
+                                                        Изменить услугу
+                                                    </a>
+                                                    <a (click)="changeGroup(service)">
+                                                        Сменить группу
+                                                    </a>
+                                                    <a (click)="deleteService(service)">
+                                                        Удалить
+                                                    </a>
+                                            </div>
+                                        </span>
+                                    
+                                    </label>
+                           
+                                </div>
+                              
+                        </div>
+
+
+
+                        <div class="service-meta">
+                        <span class="meta-time" *ngIf="isWriteTime(service)">
+                                            {{getHours(service.duration!)}}ч. {{getMinutes(service.duration!)}} мин.
+                        </span>
+                        <span class="meta-time" *ngIf="service.isTimeUnlimited">
+                            Без ограничений по времени
+                        </span>
+                        <span class="meta-price">    {{getPrice(service.price)}} руб. </span>
+                        <span class="meta-note">{{getDescribeTypePayment(service)}}</span>
+                        </div>
+                        <ng-container *ngIf="service.about; else notHaveAbout">
+                           <div class="service-actions" *ngIf="service.about.length>100">
+                                        <button
+                                        type="button"
+                                        class="expand-btn"
+                                        [class.open]="isExpanded(service.id!)"
+                                        [attr.aria-expanded]="isExpanded(service.id!)"
+                                        [attr.aria-controls]="'service-desc-' + service.id"
+                                        (click)="toggle(service.id!)">
+                                        <svg class="chev" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                                            <polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="4"
+                                                    stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span>{{ isExpanded(service.id!) ? 'Скрыть описание' : 'Показать описание' }}</span>
+                                        </button>
+                                    </div>
+                
+                         <div 
+                            class="accordion_serv_in_tab-content"
+                            [id]="'service-desc-' + service.id"
+                            [style.maxHeight]="isExpanded(service.id!)|| service.about.length <= 100 ? '300px' : '0'"
+                            [class.expanded]="isExpanded(service.id!)|| service.about.length <= 100"
+                          >
+                            <span *ngIf="isExpanded(service.id!) || service.about.length <= 100">{{ service.about }}</span>
+                        </div>
+                         
+                        </ng-container>
+                        
+                 <ng-template #notHaveAbout>— описания нет —</ng-template>
+         
+                    </div>
+                    </div>
+                </ng-container>
+            <!-- <div class="accordion_serv_in_tabs w100  cont-horiz-start wrap" *ngIf="serviceWithout$|async as serviceWithout">
                 <div class="accordion_serv_in_tab w100" *ngFor="let service of serviceWithout">
            
                     <input type="checkbox" id="{{service.id}}">
-                    <!-- Шапка вкладки -->
+                   
                     <label for="{{service.id}}" class="w100 accordion_serv_in_tab-label str_uslugi_podcategory w100"
                         style="padding: 20px;">
                         <div class="cont-vert-start-start w100" style="gap: 5px 5px;">
                             <div class="cont-horiz-between-end w100">
-                                <!-- Название услуги и Длительность услуги -->
+                            
                                 <div class="cont-horiz-between w100">
-                                    <!-- Название услуги и Длительность услуги -->
+                               
                                     <div class="cont-vert-start" style="gap: 5px 5px;">
-                                        <!-- Название услуги -->
+                                        <div>
+
+                                        <input type="checkbox" class="custom-checkbox" [(ngModel)]="service.isChecked"
+                                            (ngModelChange)="setService(service)" *ngIf="!isUpdate && canSetService">
+                                    </div>
+                                  
                                         <div>
                                             {{service.name}}
                                         </div>
-                                        <!-- Длительность услуги -->
+                                     
                                         <div class="txt-uslugi-time" *ngIf="isWriteTime(service)">
                                             {{getHours(service.duration!)}}ч. {{getMinutes(service.duration!)}} мин.
                                         </div>
                                         <div class="txt-uslugi-time" *ngIf="service.isTimeUnlimited">
                                             Без ограничений по времени
                                         </div>
-                                        <!-- Оплата за услугу -->
+                                     
                                         <div class="txt-uslugi-time">
                                             {{getDescribeTypePayment(service)}}
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Цена услуги + Модальное окно + checkbox -->
+                             
                                 <div class="txt-uslugi-price cont-horiz">
-                                    <!-- checkbox -->
-                                    <div>
-                                        <!-- <input type="checkbox" class="custom-checkbox" [(ngModel)]="service.isChecked "
-                                (ngModelChange)="setService(service)" *ngIf="!isUpdate&&canSetService"> -->
-                                        <input type="checkbox" class="custom-checkbox" [(ngModel)]="service.isChecked"
-                                            (ngModelChange)="setService(service)" *ngIf="!isUpdate && canSetService">
-                                    </div>
-
-                                    <!-- Модальное окно -->
+                               
                                     <label class="tooltip " *ngIf="isUpdate">
-                                        <!-- Объект на которы вызываем всплывающее окно -->
+                                    
                                         <div class="cebab1 horiz-vert">
                                             <div class="round-cebab-gray"></div>
                                             <div class="round-cebab-gray"></div>
                                             <div class="round-cebab-gray"></div>
                                         </div>
-                                        <!-- Объект на которы вызыаем всплывающее окно end -->
+                                    
                                         <input type="checkbox">
-                                        <!-- Cодержимое Модального окно -->
+                                  
                                         <span class="cont-vert">
-                                            <!-- подкатегория 1 -->
+                                        
                                             <div class="modal_chng_service cont-vert-around-left"
                                                 style="gap: 20px 20px;">
                                                 <h2>{{service.name}}</h2>
@@ -232,24 +415,24 @@
                                                 </a>
                                             </div>
                                         </span>
-                                        <!-- Cодержимое Модального окно end -->
+                                    
                                     </label>
-                                    <!-- Модальное окно end -->
-                                </div><!-- txt-uslugi-price -->
+                           
+                                </div>
                             </div>
-                            <div class="cont-horiz-start" style="background-color: #fff;"> <!-- Цена услуги -->
+                            <div class="cont-horiz-start" style="background-color: #fff;">
                                 <div class="price-group-uslygi margin-right20">
-                                    {{getPrice(service.price)}} руб. <!-- (заглушка валюта должна меняться)-->
+                                    {{getPrice(service.price)}} руб. 
                                 </div>
                             </div>
                         </div>
                     </label>
-                    <!-- Описание -->
+                 
                     <div class="accordion_serv_in_tab-content" *ngIf="service.about; else notHaveAbout" [style.max-height.%]="isAboutOpen ? 100 : 0">
                         <span>
                             {{service.about}}
                         </span>
-                        <!-- фото 1 -->
+                   
                         <div class="cont-vert-start-start">
                             <div class="card-albom-ba-foto" *ngFor="let image of service.images">
                                 <img [src]="getImage(image.image)" class="edit-ba-gallery-foto" alt="">
@@ -262,7 +445,7 @@
                         </div>
                     </ng-template>
                 </div>
-            </div>
+            </div> -->
 
  </ng-container>
         <p-toast position="bottom-center">

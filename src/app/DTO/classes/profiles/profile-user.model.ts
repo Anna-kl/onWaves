@@ -5,8 +5,9 @@ export interface ViewNameProfile {
 }
 
 export interface ProfileUser {
-  Name: string;
+  Name: ViewNameProfile;
   UserType: UserType;
+  Email?: string;
 }
 
 export enum UserType {

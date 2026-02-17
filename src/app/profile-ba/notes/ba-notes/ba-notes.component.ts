@@ -9,7 +9,7 @@ import {IViewScheduleBA} from "../../../DTO/views/schedule/IViewScheduleBA";
 import {RecordStatus} from "../../../DTO/enums/recordStatus";
 import {IViewDateSchedule} from "../../../DTO/requests/IViewDateSchedule";
 import {ISendRecord} from "../../../DTO/requests/ISendRecord";
-import { UTCToLocale, localToUTC, toLocale, toLocaleTime} from "../../../../helpers/dateUtils/dateUtils";
+import { UTCToLocale, formatDateToString, localToUTC, toLocale, toLocaleTime} from "../../../../helpers/dateUtils/dateUtils";
 import {NotesService} from "../notes-events.service";
 import {catchError, firstValueFrom, map, Observable, of, Subscription, take} from "rxjs";
 import {Location} from '@angular/common';
@@ -37,6 +37,7 @@ import { InsertPinCodeComponent } from 'src/app/components/modals/insert-pin-cod
   providers: [ScheduleService, RecordService, MessageService]
 })
 export class BANotesComponent implements OnInit, OnDestroy {
+  recordId: string|null = null;
   checkCouponUse(_t9: IViewScheduleBA): any {
   if (_t9.status == RecordStatus.Success){
         if (!!_t9.couponId && _t9.couponId !== 'notUse' ){
@@ -127,6 +128,23 @@ export class BANotesComponent implements OnInit, OnDestroy {
     this.modalService.open(this.timeModal, { centered: true });
   }
 
+  opened: Record<string | number, boolean> = {};
+
+  open(id: string | number) {
+    this.opened[id] = true;
+  }
+  close(id: string | number) {
+    this.opened[id] = false;
+  }
+  toggle(id: string | number) {
+    this.opened[id] = !this.opened[id];
+  }
+
+  openOnly(id: string | number) {
+  for (const k in this.opened) this.opened[k] = false;
+  this.opened[id] = true;
+  }
+
 getAllTimeWorking(time: number) {
     if (time >= 1440) {
       return `${getDays(time)}дн ${getHours(time)}ч.
@@ -171,11 +189,13 @@ getAllTimeWorking(time: number) {
         this.profile = result;
         this.profileId = result?.id!
       }else{
+       
         this.route.paramMap.subscribe((params: any) => { 
           const id = params.get('id');
           if (id) {
             this.profileId = id; 
           }
+         
         });
       }
        
@@ -186,13 +206,13 @@ getAllTimeWorking(time: number) {
   public async getListSchedule(){
     const send = {dateRequest: localToUTC(this.today)} as IViewDateSchedule;
     this.schedules$ = this._apiSchedule.getProfileScheduleBA(this.profileId, send);
-    
+  
   }
 
   public async getListScheduleCanceled(){
     const send = {dateRequest: localToUTC(this.today)} as IViewDateSchedule;
     this.canceled$ = this._apiSchedule.getProfileScheduleCanceledBA(this.profileId, send);
-  }
+   }
 
   async confirmRecord(sch: IViewScheduleBA, status: RecordStatus) {
     // if (sch.status === RecordStatus.Created || sch.status === RecordStatus.Canceled) {
@@ -221,7 +241,7 @@ getAllTimeWorking(time: number) {
 
   addRecord(){
     this.router.navigate([`notes/${this.profile?.id!}/add-record-ba`],
-        { queryParams: {dayId: this.dayId, date: this.today}});
+        { queryParams: {dayId: this.dayId, date: formatDateToString(this.today)}});
   }
 
   protected readonly getPriceService = getPriceService;
@@ -229,10 +249,17 @@ getAllTimeWorking(time: number) {
   protected RecordStatus = RecordStatus;
 
   async ngOnInit(): Promise<void> {
+
     this.unsubsribe$ = this.store$.pipe(select(selectProfileMainClient)).pipe(take(1))
         .subscribe(
         result => this.profile = result
     );
+    this._events.recordId.subscribe(result => {
+      if (result)
+              setTimeout(() => {
+          this.openOnly(result)
+        }, 300);
+    });
     let element = document.getElementById('top');
     element?.scrollIntoView(true);
 
@@ -258,7 +285,6 @@ getAllTimeWorking(time: number) {
         this.canceled$ = null;
       }
     });
-
 
   }
 

@@ -26,6 +26,8 @@ import { MyYComponentComponent } from './maps/my-ycomponent/my-ycomponent.compon
 import { YMapComponent, YMapDefaultFeaturesLayerDirective, YMapDefaultMarkerDirective, YMapDefaultSchemeLayerDirective, YMapFeatureDirective, YMapMarkerDirective } from "angular-yandex-maps-v3";
 import { LoaderOnWavesComponent } from './loader-on-waves/loader-on-waves.component';
 import { InstallBannerComponent } from './banner/install-banner/install-banner.component';
+import { LoaderOcpioComponent } from './loader-ocpio/loader-ocpio.component';
+
 
 
 @NgModule({
@@ -46,11 +48,13 @@ import { InstallBannerComponent } from './banner/install-banner/install-banner.c
       CreateAccordionComponent,
       MyYComponentComponent,
       LoaderOnWavesComponent,
-      InstallBannerComponent
+      InstallBannerComponent,
+      LoaderOcpioComponent,
+      
   ],
   imports: [
-     YMapComponent, YMapDefaultSchemeLayerDirective, YMapMarkerDirective, YMapFeatureDirective, YMapDefaultMarkerDirective,
-  YMapDefaultFeaturesLayerDirective,
+    YMapComponent, YMapDefaultSchemeLayerDirective, YMapMarkerDirective, YMapFeatureDirective, YMapDefaultMarkerDirective,
+    YMapDefaultFeaturesLayerDirective,
     DatePipe,
     NgForOf,
     DatePipe,
@@ -63,8 +67,8 @@ import { InstallBannerComponent } from './banner/install-banner/install-banner.c
     ButtonModule,
     ImageCropperModule,
     ProgressSpinnerModule,
-    CommonModule
-  ],
+    CommonModule,
+],
     exports: [
         CalendarComponent,
         RubricMenuComponent,
@@ -76,7 +80,9 @@ import { InstallBannerComponent } from './banner/install-banner/install-banner.c
         CommonLentaComponent,
         MyYComponentComponent,
         LoaderOnWavesComponent,
-        InstallBannerComponent
+        InstallBannerComponent,
+        LoaderOcpioComponent,
+        
     ]
 })
 

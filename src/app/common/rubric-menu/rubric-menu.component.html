@@ -7,8 +7,8 @@
   <div class="menu col" *ngIf="isOpen" [@dropDownMenu]>
     <div class="menu-item  row" *ngFor="let item of mainCategories; let i = index"
          [class]="item.isChoose ? 'chooseItem': 'none-item'"
-         (click)="chooseMain(item)"
-         (mouseover)="set2Level(item)" >
+         (click)="set2Level(item)"
+         >
      <span [class]="item.icon" class="cont-horiz-start-start margin-right20" style="width: 24px; height: 24px"></span>
      {{item.name}}
     </div>
@@ -16,9 +16,9 @@
   <!-- Уровень 2: Категории -->
   <div class="menu col"  *ngIf="isShow2Level" [@dropDownMenu2]>
 
-    <div class="menu-item-2" (mouseover)="set3Level(item)"
+    <div class="menu-item-2"
          [class]="item.isChoose ? 'chooseItem': 'none-item'"
-         (click)="chooseLevel2(item)"
+         (click)="set3Level(item)"
          *ngFor="let item of menu2Level; let i = index">
       {{item.name}}
     </div>

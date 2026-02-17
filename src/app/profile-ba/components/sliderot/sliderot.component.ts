@@ -20,21 +20,21 @@ export class SliderotComponent {
 				text:
         'Осталась очень довольна посещением студии, мастер добрая и отзывчивая, явно была заинтересована в том, чтобы работа получилась качественной, помогала выбрать цвет и дизайн.',
 				image: '/assets/img/1.22_b_a/ava_comments.png',
-				ico: "/assets/img/page1/popular/Star-24.png"
+				ico: "./assets/img/ico/ico_rating_pc24.svg"
 			},
 			{
 				name: "Зинаида Смирнова",
 				text:
         'Осталась очень довольна посещением студии, мастер добрая и отзывчивая, явно была заинтересована в том, чтобы работа получилась качественной, помогала выбрать цвет и дизайн.',
 				image: '/assets/img/1.22_b_a/ava_comments.png',
-				ico: "/assets/img/page1/popular/Star-24.png"
+				ico: "./assets/img/ico/ico_rating_pc24.svg"
 			},
 			{
 				name: "Зинаида Смирнова",
 				text:
         'Осталась очень довольна посещением студии, мастер добрая и отзывчивая,  явно была заинтересована в том, чтобы работа получилась качественной, помогала выбрать цвет и дизайн.',
 				image: '/assets/img/1.22_b_a/ava_comments.png',
-				ico: "/assets/img/page1/popular/Star-24.png"
+				ico: "./assets/img/ico/ico_rating_pc24.svg"
 			}
 
 		];

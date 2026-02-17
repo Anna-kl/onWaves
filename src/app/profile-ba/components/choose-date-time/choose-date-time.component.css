@@ -32,3 +32,46 @@
   min-height: 100dvh; /* корректная высота на мобилках */
   padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 16px);
 }
+
+
+@media (min-width: 768px) {
+  .booking-page {
+    min-height: auto;
+    display: block;  
+  }
+  .booking-scroll {
+    overflow: visible;
+    padding-bottom: 0;
+  }
+  .booking-footer {
+    box-shadow: none;
+    padding: 0;
+    margin-top: 24px;
+  }
+  .cta-fixed{
+      margin-top: 20px
+  }
+}
+
+
+@media (min-width: 360px) {
+  .booking-page {
+    min-height: auto;
+    display: block;  
+  }
+  .booking-scroll {
+    overflow: visible;
+    padding-bottom: 0;
+  }
+  .booking-footer {
+    box-shadow: none;
+    padding: 0;
+    margin-top: 24px;
+  }
+  .cta-fixed{
+    margin-top: 20px;
+    margin-bottom: 60px;
+    height: 90px;
+
+  }
+}

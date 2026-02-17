@@ -6,13 +6,15 @@
             </div> 
             <h1>Уведомления</h1> 
         </div>  
-        <div>
+        <!-- <div *ngIf="notificationsList; else loading">
+            <span *ngIf="notificationsList.length == 0" class=" text-body-emphasis">У вас еще нет уведомлений </span>
             <ul>
                 <li *ngFor="let notification of notificationsList">
                 <button (click)="openNotification(notification.id)">{{ notification.title }}</button>
                 </li>
             </ul>
-        </div> 
+        </div>  -->
+    
         <div *ngIf="openMessage && selectedNotification">
             <h2>{{ selectedNotification.title }}</h2>
             <p>{{ selectedNotification.body }}</p>
@@ -31,7 +33,11 @@
                     Оповещения
                 </label> -->
                 <!-- Заявки-->
-                <div id="content-1">
+                     <ng-template #loading>
+                <app-loader-ocpio></app-loader-ocpio>
+                    </ng-template>
+                <div id="content-1" *ngIf="messages; else loading">
+                      <span *ngIf="messages.length == 0" class=" text-body-emphasis">У вас еще нет уведомлений </span>
                     <div class="cont-horiz-around wrap" *ngFor="let message of messages; trackBy: trackById" seen [seenId]="message.id"
                             (seenOnce)="onSeen($event)"> 
                         <div class="w100 cont-vert-start-center" >
@@ -58,18 +64,39 @@
                                 <div>
                                     <b>{{message.clientName}}</b>
                                 </div>
+                                
                             </div>
-                            <div class="margin-bottom10">
-                                Новая запись
+                            <div class="row" style="width: 100%;">
+                            <div class="margin-bottom10 col-6">
+                                {{message.title}}
                             </div> 
+                              <div class="subline col-6">
+                                    <ng-container  *ngIf="message.isTimeUnlimited; else noTime">
+                                        <div>
+                                    <span class="chip chip--time">
+                                     <svg width="14px" height="14px" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg" fill="#ffab00" stroke="#ffab00"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill="#000000" fill-rule="evenodd" d="M161.960546,159.843246 L164.399107,161.251151 C164.637153,161.388586 164.71416,161.70086 164.580127,161.933013 C164.442056,162.172159 164.144067,162.258604 163.899107,162.117176 L161.419233,160.68542 C161.165323,160.8826 160.846372,161 160.5,161 C159.671573,161 159,160.328427 159,159.5 C159,158.846891 159.417404,158.291271 160,158.085353 L160,153.503423 C160,153.22539 160.231934,153 160.5,153 C160.776142,153 161,153.232903 161,153.503423 L161,158.085353 C161.582596,158.291271 162,158.846891 162,159.5 C162,159.6181 161.986351,159.733013 161.960546,159.843246 Z M160.5,169 C165.746705,169 170,164.746705 170,159.5 C170,154.253295 165.746705,150 160.5,150 C155.253295,150 151,154.253295 151,159.5 C151,164.746705 155.253295,169 160.5,169 Z M160.5,168 C165.19442,168 169,164.19442 169,159.5 C169,154.80558 165.19442,151 160.5,151 C155.80558,151 152,154.80558 152,159.5 C152,164.19442 155.80558,168 160.5,168 Z" transform="translate(-151 -150)"></path> </g></svg>
+                                       {{ message.recordDateTime|date: " HH:mm dd MMM yyyy" }}
+                                        <span> {{message.duration}} мин</span>
+                                    </span>
+                          
+                          </div>
+                                    </ng-container>
+                                    <ng-template #noTime>
+                                    <span class="chip chip--free">
+                                        <svg viewBox="0 0 24 24" class="ico"><path d="M4 12h16M12 4v16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+                                        Без фиксированного времени
+                                    </span>
+                                    </ng-template>
+                                </div>
+</div>
                             <!-- Услуги -->
-                            <div class="margin-bottom10">
-                                <a href="javascript:void(0)" (click)="goToRecords(message)">{{getNameServices(message.services)}}</a>
+                            <div class="margin-bottom10 ">
+                                <a href="javascript:void(0)"  (click)="goToRecords(message)">{{getNameServices(message.services)}}</a>
+                          
                             </div> 
-<!--                            <a class="txt-green-light" *ngIf="getStatus(message)" style="text-decoration: underline;" (click)="goToRecords(message)">-->
-<!--                                Посмотреть и подтвердить запись-->
-<!--                            </a>-->
+                        
                         </div>
+                       
                         <div class="hr30" ></div> 
                     </div><!-- Популярное END  -->
                 </div>  

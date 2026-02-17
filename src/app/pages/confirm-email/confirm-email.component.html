@@ -1,0 +1,54 @@
+<main class="wrap">
+  <div class="container">
+
+    <section class="card" aria-label="Подтверждение e-mail">
+      <div class="card-inner">
+        <div class="left">
+          <div class="status">
+            <span class="status-icon" aria-hidden="true">✓</span>
+            <span>E-mail подтверждён</span>
+          </div>
+
+          <h1>Аккаунт активирован</h1>
+
+          <p class="text">
+            Спасибо! Мы подтвердили ваш адрес электронной почты
+            <ng-container *ngIf="email; else noEmail">
+              <span class="chip">{{ email }}</span>.
+            </ng-container>
+            <ng-template #noEmail>.</ng-template>
+            Теперь вы можете войти в систему и продолжить работу.
+          </p>
+
+          <div class="actions">
+            <button class="btn btn-primary" type="button">
+             На главную
+              <span class="arrow" aria-hidden="true">→</span>
+            </button>
+
+          </div>
+
+          <div class="meta">
+            <div class="small">
+              Если вы не подтверждали почту — свяжитесь с поддержкой.
+            </div>
+
+            <!-- <div class="small hint" aria-live="polite">
+              Переход на страницу входа через {{ seconds }} сек…
+            </div> -->
+          </div>
+        </div>
+
+        <aside class="right" aria-hidden="true">
+          <div class="illustration">
+            <div class="ring"></div>
+            <div class="ring r2"></div>
+            <div class="check">
+              <span class="check-mark">✓</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+

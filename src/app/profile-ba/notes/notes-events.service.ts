@@ -8,17 +8,23 @@ export class NotesService {
   private dayId = new BehaviorSubject<string | null>(null);
   private today = new BehaviorSubject<IChooseDayOfCalendar>({date: null, dayId: undefined, ifExist: false});
   private isWorkDay = new BehaviorSubject<boolean>(true);
+  private _recordId = new BehaviorSubject<string|undefined>(undefined);
+
 
   userId = this.id.asObservable();
   dayOff = this.today.asObservable();
   workDay = this.isWorkDay.asObservable();
   ofDayId = this.dayId.asObservable();
+  recordId = this._recordId.asObservable();
+
   constructor() {
   }
 
   transferId(user: string): void {
     this.id.next(user);
   }
+
+
 
   transferDayId(dayId: string){
     this.dayId.next(dayId);
@@ -30,5 +36,9 @@ export class NotesService {
 
   transferIsWorkDay(flag: boolean): void {
     this.isWorkDay.next(flag);
+  }
+
+  transferRecordId(recordId?: string): void {
+    this._recordId.next(recordId);
   }
 }

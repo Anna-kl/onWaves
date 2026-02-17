@@ -13,7 +13,11 @@ import {DomSanitizer} from "@angular/platform-browser";
 import {subGroup} from "../../../DTO/views/services/IViewSubGroups";
 import {RecordStatus} from "../../../DTO/enums/recordStatus";
 import { SeenDirective } from './seen.directive'; // где лежит директива
-import { filter, Subscription, switchMap, take } from 'rxjs';
+import { filter, Subscription, switchMap, take, tap } from 'rxjs';
+import { loadSuccessNotification } from 'src/app/ngrx-store/notification/notification.action';
+import { deleteSeconds, toHHMM } from 'src/helpers/dateUtils/dateUtils';
+import { getProfileMainClient, selectProfileMainAndBaClient } from 'src/app/ngrx-store/profileBAClient/ba-store.select';
+import { UserType } from 'src/app/DTO/classes/profiles/profile-user.model';
 
 interface Notification {
 message: any;
@@ -40,8 +44,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   idMessage: string | undefined;
   openMessage: boolean = false;
   id: any = '43865dc1-58d0-4f9a-aa67-774b7fab1c09';
-  notificationsList: Notification[] = [];
-  messages: IViewNotification[] = [];
+  notificationsList: Notification[]|null = null;
+  messages: IViewNotification[]|null = null;
   // notificationsList: Notification[] = [];
   // openMessage: boolean = false;
   selectedNotification: Notification | undefined;
@@ -49,6 +53,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   @Input() seenThreshold = 0.5;        // доля площади
   @Input() seenDelayMs = 800;          // задержка
   @Output() seenOnce = new EventEmitter<string>();
+  protected toHHMM = toHHMM;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -56,39 +61,55 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     private store$: Store,
     private _api: MessageNotificationService
   ) {}
+
   ngOnDestroy(): void {
     this.unsubscribe$?.unsubscribe();
   }
 
   onSeen(id: string) {
   // локально оптимистично проставили readAt
-  let message = this.messages.find(
-    n => n.id === id);
-  if (message){
-    if (message.statusNotification === StatusNotification.CREATE){
-      this._api.readNotifications(id).pipe(take(1)).subscribe();
-      message.statusNotification = StatusNotification.READ;
-    }}
-  
+    if (this.messages) {
+    let message = this.messages.find(
+      n => n.id === id);
+    if (message){
+      if (message.statusNotification === StatusNotification.CREATE){
+        this._api.readNotifications(id).pipe(take(1)).subscribe();
+        message.statusNotification = StatusNotification.READ;
+      }}
+    }
   // и отправили батчем (через Subject + auditTime) на сервер
   // this.mark$.next(id);
-}
+ }
 
   ngOnInit(): void {
     // this.unsubscribe$ = this.store$.pipe(select(notificationMessages)).subscribe((notificationState) => {
     //   this.messages = notificationState;
     // });
+    this.unsubscribe$ = this.store$.pipe(select(notificationMessages)).subscribe(
+      result => {
+        this.messages = result;
+      }
+    );
 
+    this.unsubscribe$ = this.store$.pipe(select(selectProfileMainClient)).subscribe(
+      result => {
+        this.profile = result;
+      }
+    );
+
+    
    
-    this.store$.pipe(select(selectProfileMainClient)).
-      pipe(filter(user => !!user),
-        switchMap(_ =>  this._api.getNotifications(_?.id!)
-    )
-      ).subscribe(
-        result => {
-          this.messages = result;
-        }
-      )
+    // this.store$.pipe(select(selectProfileMainClient)).
+    //   pipe(
+    //     filter(user => !!user),
+    //     tap(user=>console.log(user)),
+    //     switchMap(_ =>  this._api.getNotifications(_?.id!)
+    // )
+    //   ).subscribe(
+    //     result => {
+    //       this.messages = result;
+    //     }
+    //   )
     // subscribe((result) => {
     //   this.profile = result;
 
@@ -100,7 +121,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     
   }
   filterNotifications() {
-    if (this.profile) {
+    if (this.profile && this.notificationsList) {
       this.notificationsList = this.notificationsList.filter((notification) =>
 
         notification.id === this.profile.id
@@ -123,9 +144,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     goToMain() {
       this._router.navigate(['/']);
     }
+
     openNotification(id: string) {
-    this.openMessage = true;
-    this.selectedNotification = this.notificationsList.find(notification => notification.id === id);
+      this.openMessage = true;
+      if (this.notificationsList)
+        this.selectedNotification = this.notificationsList.find(notification => notification.id === id);
   }
 
   closeNotification() {
@@ -167,9 +190,15 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   // }
   goToRecords(message: IViewNotification) {
-    this._router.navigate([`id/${this.id}/confirm-record`],
-        {state: {recordId: message.recordId, date: message.recordDateTime}});
-  }
+     if (this.profile) {
+          // Главное Меню юзера
+          if (this.profile.userType === UserType.User){
+            this._router.navigate(['/profile-user', this.profile?.id]);
+        } else { // Главное Меню бизнеса
+          this._router.navigate(['/notes/',this.profile.id], {  queryParams:{date: message.recordDateTime, dayId: message.dayId, recordId: message.recordId},  });
+
+        }
+      }}
 
 
   getStatus(message: IViewNotification) {

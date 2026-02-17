@@ -2,11 +2,11 @@
 
 
 /*1*/
-$green-dark:#043c48;
+$green-dark:#409B89;
 .color-green-dark     {color: $green-dark;}
 .background-green-dark{	background-color:$green-dark;}
-.ico-background-green { background-color:#006174;}
-.ico-background-green:hover { background-color:#043c48;}
+.ico-background-green { background-color:#67C4B2;}
+.ico-background-green:hover { background-color:#409B89;}
 .green-txt-hover:hover{
     cursor: pointer;
     display: inline-block;
@@ -14,15 +14,18 @@ $green-dark:#043c48;
  }
 
 /*2*/
-$green-basic:#006174;
+$green-basic:#67C4B2;
 .color-green-basic{	color:$green-basic;}
 .background-green-basic{background-color:$green-basic;}
 /*3*/
-$green-light:#0d94a0;
+$green-light:#00DAB3;
+.color-green-light{color:$green-light;}
+.background-green-light{background-color:$green-light;}
+
+$green-light2:#42e7c9;
 .color-green-light{color:$green-light;}
 .background-green-light{background-color:$green-light;}
 /*4*/
-$green-light2:#5ecdd7;
 $black:#23262F;
 .color-black{color:$black;}
 .background-black{background-color:$black;}
@@ -51,11 +54,11 @@ $color-info:#0A6ED8;
 .color-info{ color:$color-info;}
 .background-info{ background-color:$color-info;}
 /*11*/
-$color-warning:#dbdf9b;
+$color-warning:#ffab00;
 .color-warning{color:$color-warning;}
 .background-warning{background-color:$color-warning;}
 /*12*/
-$color-error:#d46c54;
+$color-error:#E24414;
 .color-error{color:$color-error;}
 .background-error{background-color:$color-error;}
 /* ---- ЦВЕТА END ----*/

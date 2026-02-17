@@ -22,3 +22,35 @@
       font-size: 16px;
     }
   } */
+
+.item.cont-horiz.ng-star-inserted {
+  height: 250px;
+}
+  /* card растягивается по контенту */
+.p-carousel .card {
+  display: flex;
+  flex-direction: column;
+  height: auto;              /* важное */
+  min-height: 0;
+}
+
+/* текст переносится нормально */
+.title {
+  margin-top: .5rem;
+  line-height: 1.2;
+  word-break: break-word;    /* ломаем длинные слова */
+  overflow-wrap: anywhere;   /* современная альтернатива */
+  hyphens: auto;             /* расстановка переносов */
+}
+
+/* чтобы браузер знал язык для переносов */
+:host { language: ru; }      /* или <html lang="ru"> */
+
+
+/* показываем максимум 2 строки */
+.title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* 2–3 строки — выбери нужное */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

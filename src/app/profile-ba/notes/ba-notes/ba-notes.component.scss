@@ -263,3 +263,41 @@
   .cb-sub{ flex-wrap:wrap; }
   .cb-action{ margin-left:0; }
 }
+
+
+.badge-new{
+  display:inline-flex; align-items:center; justify-content:center;
+  height:20px; padding:0 8px; margin-left:6px;
+  border-radius:999px;
+  background:#dee671;          /* чёрный фон */
+  color:#fff;
+  font-size:11px; font-weight:800; letter-spacing:.04em;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  line-height:1; user-select:none;
+}
+
+/* вариант с контуром (если нужен более лёгкий вид) */
+.badge-new--outline{
+  background:transparent; color:#111; border:2px solid #111;
+}
+
+/* маленькая точка рядом с NEW (новые события) */
+.badge-new::before{
+  content:""; width:6px; height:6px; border-radius:50%;
+  background:#ff3b30; margin-right:6px;
+}
+
+/* опционально — пульс точки */
+.badge-new--pulse::before{
+  position:relative;
+}
+.badge-new--pulse::after{
+  content:""; position:absolute; left:-1px; top:-1px;
+  width:8px; height:8px; border-radius:50%;
+  border:2px solid rgba(255,59,48,.5);
+  animation:pulse 1.8s ease-out infinite;
+}
+@keyframes pulse{
+  0% { transform:scale(.6); opacity:.9 }
+  100% { transform:scale(2.2); opacity:0 }
+}

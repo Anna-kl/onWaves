@@ -1,0 +1,42 @@
+
+.help-phone{
+    margin-right: 30px;
+} 
+
+.help-cont{
+    width: 100%;
+    max-width: 1200px;
+    gap: 30px 10px;  
+    flex-wrap: wrap;
+    margin-bottom: 30px ;
+  }
+  @media screen and (max-width: 480px) {
+    .help-cont{
+      max-width: 320px;
+    }
+  }
+  .help-video{
+    width: 280px;
+    overflow: hidden; 
+    /*background-color: #11142D;*/
+  }
+  .help-video-head{
+    width: 280px;
+    height: 50px;
+    margin-bottom: 10px; 
+  }
+  .help-video-question{
+    border-radius: 20px; 
+    border: 3px solid #67C4B2; 
+    padding: 30px 25px 30px 25px;
+  }
+  @media screen and (max-width: 480px) {
+    .help-phone{
+        margin-right: 10px;
+        width: 100px;
+    }  
+    .help-video{
+      width: 100%;
+    }
+    
+}

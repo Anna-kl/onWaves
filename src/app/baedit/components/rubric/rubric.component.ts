@@ -57,6 +57,16 @@ export class RubricComponent {
     );
   }
 
+  trackById(index: number, item: { id: number | string }): number | string {
+    return item.id ?? index;         // подстрахуемся индексом
+  }
+  private startY = 0;
+  onDown(e: PointerEvent) { this.startY = e.clientY; }
+  onUp(e: PointerEvent, main: ICategory) {
+    if (Math.abs(e.clientY - this.startY) > 8) return; // это был скролл
+    this.chooseMainCategory(main);
+  }
+
   setOnlyProfilesCategories(){
     let tempCategories: IViewCategoryTree[] = [];
     this.treeCategory.forEach(_ => {

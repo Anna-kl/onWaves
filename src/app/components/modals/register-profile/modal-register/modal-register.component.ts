@@ -9,6 +9,7 @@ import { ICountry } from '../../../../DTO/classes/ICountry';
 
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {Router} from "@angular/router";
+import { RegisterEmailCodeComponent } from '../register-email-code/register-email-code.component';
 
 @Component({
   selector: 'app-modal-register',
@@ -19,6 +20,7 @@ import {Router} from "@angular/router";
 
 })
 export class ModalRegisterComponent implements OnInit {
+
   public phone: string = '';
   error: boolean = true;
   policyAgreeError = false;
@@ -46,6 +48,10 @@ export class ModalRegisterComponent implements OnInit {
   ]
 
 
+  returnToEmail() {
+    this.activeModal.close();
+    let modal = this.modalService.open(RegisterEmailCodeComponent);
+  }
   constructor(private modalService: NgbModal,
               public activeModal: NgbActiveModal,
 

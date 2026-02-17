@@ -72,8 +72,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BackendService } from '../../../../services/backend.service';
 import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessProfile";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {CreateAlbumComponent} from "src/app/baedit/components/modals/create-album/create-album.component";
-import {BusService} from "../../../../services/busService";
+
 import {AlbumsService} from "../../../../services/albums.service";
 import {IAlbumWithFoto} from "../../../DTO/views/images/IAlbumWithFoto";
 
@@ -82,13 +81,13 @@ import {IViewImage} from "../../../DTO/views/images/IViewImage";
 import {DomSanitizer} from "@angular/platform-browser";
 import {MessageService} from "primeng/api";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {ModalComponent} from "../../components/uslugi/modal/modal.component";
+
 import {ShowFotoComponent} from "../../../common/modals/galereya/show-foto/show-foto.component";
 
 @Component({
      selector: 'app-modalalbum',
      templateUrl: './modalalbum.component.html',
-     styleUrls: ['./modalalbum.component.css'],
+     styleUrls: ['./modalalbum.component.scss'],
      encapsulation: ViewEncapsulation.None,
      providers: [AlbumsService, MessageService]
    })

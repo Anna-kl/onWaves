@@ -47,18 +47,37 @@ export class MainMenuComponent implements OnInit{
       gender: [],
       geo:  null,
     } as ISearchRequest;
-    this._router.navigate(['search/result'],  { state: { send } });
+    this._router.navigate(['search/result'],  {queryParams: {
+        search: null,
+        distance:  null ,
+        categoryId:  $event.id,
+        // сложные объекты можно сериализовать:
+        gender: null,
+         geo: null,
+         address: null,
+      } });
   }
 
   goToSearch() {
-    const send = {
-      search: this.search,
-      distance:  null ,
-      categoryId:  null,
-      address: '',
-      gender: [],
-      geo:  null,
-    } as ISearchRequest;
-    this._router.navigate(['search/result'],  { state: { send } });
+    this._router.navigate(['search/result'], {
+      queryParams: {
+        search: this.search,
+        distance:null,
+        categoryId: null,
+        // сложные объекты можно сериализовать:
+        gender: null
+      }
+    });
+
+
+    // const send = {
+    //   search: this.search,
+    //   distance:  null ,
+    //   categoryId:  null,
+    //   address: '',
+    //   gender: [],
+    //   geo:  null,
+    // } as ISearchRequest;
+    // this._router.navigate(['search/result'],  { state: { send } });
   }
 }

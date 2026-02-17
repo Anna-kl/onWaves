@@ -6,7 +6,7 @@ import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessPr
 import {MessageNotificationService} from "../../../../services/notification.service";
 import {MessageNotification} from "../../../DTO/classes/notifications/MessageNotification";
 import {RecordService} from "../../../../services/record.service";
-import {DomSanitizer} from "@angular/platform-browser";
+import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import {select, Store} from "@ngrx/store";
 // import {notificationCountMessages} from "../../../ngrx-store/notification/notification.selectors";
 import {filter, first, firstValueFrom, Observable, skipWhile, Subscription, take} from "rxjs";
@@ -18,6 +18,7 @@ import { selectProfileMainClient, selectTokenMainClient} from "../../../ngrx-sto
 import {ILinkState} from "../../../ngrx-store/links/interface/ILinkState";
 import { getIconAvatar } from 'src/helpers/common/avatar1';
 import { OrderSignalrService } from 'src/services/notification.signal';
+import { requestAction } from 'src/app/ngrx-store/notification/notification.action';
 
 
 @Component({
@@ -91,10 +92,9 @@ export class HeaderBAComponent implements OnInit, OnDestroy {
     });
     this.orderSvc.startConnection();
     this.orderSvc.newOrder$.subscribe(({ userId, recordId }) => {
-      console.log(this.auth);
       if (userId === this.auth?.id)
           this.notificationCount$ = this._apiNotification.getCountNotifications(this.auth?.id!);
-        
+          this.store$.dispatch(requestAction({request: this.auth?.id!}));
     });
   }
 
@@ -138,13 +138,12 @@ export class HeaderBAComponent implements OnInit, OnDestroy {
   this._router.navigate(['static/notifications'])
  }
 
-  getAvatar(avatar: any) {
-    if (avatar) {
-      avatar = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
-    } else {
-      avatar = '/assets/img/ui/ava.svg';
+  getAvatar(avatar: string|null): string|SafeResourceUrl {
+    if (avatar !== null) {
+      let result = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
+      return result;
     }
-    return avatar;
+      return  '/assets/img/ui/ava.svg';
   }
 
   protected readonly getIconAvatar = getIconAvatar;

@@ -11,10 +11,8 @@ import { Router } from '@angular/router';
 
 import { GroupService } from '../../../../services/groupservice';
 import { IViewBusinessProfile } from "../../../DTO/views/business/IViewBussinessProfile";
-import { IGroupWithSubGroups } from "../../../DTO/views/services/IGroupWithSubGroup";
 import { ProfileDataEditService } from "../../services/ba-edit-service";
 import { DictionaryService } from "../../../../services/dictionary.service";
-import { IViewAddress } from "../../../DTO/views/IViewAddress";
 import { getAddressProfile } from "../../../../helpers/common/address";
 import { ProfileService } from "../../../../services/profile.service";
 import { AlbumsService } from "../../../../services/albums.service";
@@ -25,7 +23,6 @@ import { DomSanitizer, Meta } from "@angular/platform-browser";
 import { BackendService } from '../../../../services/backend.service';
 import { createMap } from "../../../../helpers/common/maps";
 import { Store } from "@ngrx/store";
-import { MainProfileComponent } from "../../components/main-profile/main-profile.component";
 import { getProfileMainClient } from "../../../ngrx-store/mainClient/store.select";
 import { Observable, Subscription } from "rxjs";
 import { IViewCoordinates } from "../../../DTO/views/profile/IViewCoordinates";

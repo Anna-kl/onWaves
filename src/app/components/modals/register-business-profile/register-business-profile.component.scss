@@ -77,8 +77,15 @@ agm-map {
   }
 
   .modal-list {
-    padding: 20px;
+    padding: 5px;
   }
+}
+
+.form-control textarea,
+textarea.form-control,
+textarea.my-textarea {
+  resize: vertical !important;
+  overflow: auto !important;
 }
 
 .line-gray-ba {
@@ -451,3 +458,5 @@ agm-map {
 
 /* показ формы */
 .add-form--open { display: flex; }
+
+

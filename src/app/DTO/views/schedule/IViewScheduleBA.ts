@@ -14,4 +14,5 @@ export interface IViewScheduleBA extends INote{
   phone?: string;
   lastChanged?: Date;
   couponId?: string;
+  isNew?: boolean;
 }

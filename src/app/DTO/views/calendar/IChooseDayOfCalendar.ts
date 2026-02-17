@@ -3,4 +3,6 @@ export interface IChooseDayOfCalendar {
   dayId?: string;
   ifExist: boolean;
   isLast?: boolean;
+  canAdd?: boolean;
+  countNew?: number;
 }

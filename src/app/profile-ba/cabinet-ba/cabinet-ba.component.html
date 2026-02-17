@@ -27,6 +27,8 @@
             <app-calendar
               class="w100"
               (onDate)="onDate($event)"
+              [period] = "period"
+              [isCabinet]="true"
               [userId]="profile?.id!">
             </app-calendar>
             <!-- <div class="cont-horiz-around w100" style="max-width: 360px;">
@@ -55,7 +57,7 @@
       <div class="kabinet_doxod"
        style="justify-content: start!important;"
        *ngIf="profit$|async as profit">
-    <div class="promo-card">
+    <!-- <div class="promo-card">
         <label for="promo-input" class="promo-label">У вас есть промокод?</label>
         <div class="promo-input-wrapper">
           <svg class="promo-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -70,16 +72,40 @@
           <input type="text" id="promo-input" class="promo-input-field" placeholder="PROMO2025">
         </div>
         <button class="promo-apply-button">Применить промокод</button>
-      </div>
-        
-        <div style=" color: #fff; margin-top: 20px; font-weight: 800;">
+      </div> -->
+        <div class="card-metric income" >
+           <h2 class="title card-header" style="justify-content: center; display: flex;">Доход</h2>
+          <div class="card-metric__header" style="margin-top: 20px;">
+           
+
+            <div class="segmented" role="tablist" aria-label="Период">
+              <button type="button"
+                      class="segmented__btn"
+                      [class.is-active]="period==='today'"
+                      (click)="setPeriod('today')">Сегодня</button>
+              <button type="button"
+                      class="segmented__btn"
+                      [class.is-active]="period==='week'"
+                      (click)="setPeriod('week')">Неделя</button>
+              <button type="button"
+                      class="segmented__btn"
+                      [class.is-active]="period==='month'"
+                      (click)="setPeriod('month')">Месяц</button>
+            </div>
+          </div>
+
+          <div class="card-metric__value" style="justify-content: center;    display: flex">
+            {{ profit.profit}}₽
+          </div>
+        </div>
+        <!-- <div style=" color: #fff; margin-top: 20px; font-weight: 800;">
           Доход
-        </div> 
-        <div>
+        </div>  -->
+        <!-- <div>
           <div style="color: #fff; font-size: 4rem; text-align: center;">
             {{profit.profit}}₽
           </div>
-        </div>
+        </div> -->
   
         <!-- <div class="margin-bottom10" style="color: #fff; font-size: 2rem;
         text-align: center; margin-top: 30px;">
@@ -100,7 +126,7 @@
         <div class="margin-bottom10">
           <h2>Записи</h2>
         </div>
-        <div class="margin-bottom20" style="color: $green-basic; font-size: 4rem;font-weight: 700;">
+        <div class="margin-bottom20" style="color:#67C4B2; font-size: 4rem;font-weight: 700;">
           {{records.allRecord}}
         </div>
         <div class="margin-bottom20">
@@ -137,7 +163,7 @@
         <div class="margin-bottom10">
           <h2>Клиенты</h2>
         </div>
-        <div class="margin-bottom20" style="color: $green-basic; font-size: 4rem;font-weight: 700;">
+        <div class="margin-bottom20" style="color: #67C4B2; font-size: 4rem;font-weight: 700;">
           {{clients.countClients}}
         </div>
         <div class="margin-bottom20">из них:</div>

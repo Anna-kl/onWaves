@@ -19,9 +19,9 @@ export class SelectAddressComponent implements OnInit {
   constructor( private _dictionaries: DictionaryService,
     private _serviceRegisterBusinessProfile: ServiceRegisterBusinessProfile)
     {
-      this.myCountry = '';
-      this.myRegion = '';
-      this.myCity = '';
+      // this.myCountry = '';
+      // this.myRegion = '';
+      // this.myCity =null;
     }
 
   @Output() changeAddress = new EventEmitter();  
@@ -32,7 +32,10 @@ export class SelectAddressComponent implements OnInit {
       if (this.address) {
           this.myCountry = this.address.country;
           this.myRegion = this.address.region;
-          this.myCity = this.address.city;
+          if (this.address.city)
+            this.myCity = this.address.city.trim();
+        
+          
           this.getListRegions(this.myCountry);
           if (this.myRegion) {
               this.getListCity(this.myRegion);
@@ -84,7 +87,7 @@ export class SelectAddressComponent implements OnInit {
       });
   }
   change($event: Event|null, type: string) {
-   
+   if ($event)
     switch (type){
       case 'country': {
         this.getListRegions(this.myCountry!);
@@ -104,7 +107,7 @@ export class SelectAddressComponent implements OnInit {
         case 'region': {
           this.getListCity(this.myRegion!);
             if ( this.address) {
-              this.myCity = '';
+              this.myCity = null;
                 this.address = {
                   city: '',
                     street: '',
@@ -173,7 +176,8 @@ export class SelectAddressComponent implements OnInit {
   }
   public countryList$ = this._serviceRegisterBusinessProfile.countryList$;
   public readonly allRegions$ = this._serviceRegisterBusinessProfile.allRegions$;
-  public readonly allCity$ = this._serviceRegisterBusinessProfile.allCity$;
+  // public readonly allCity$ = this._serviceRegisterBusinessProfile.allCity$;
+  allCity: string[] = [];
   myRegion: string|null = null;
   myCountry: string|null = null;
   myCity: string|null = null;
@@ -185,7 +189,7 @@ public async getListRegions(myCountry: string|null){
   if (myCountry) {
     (await this._serviceRegisterBusinessProfile.getAllRegions(myCountry))
       .subscribe(_ => {
-          this.myRegion = _.find(_ => _.includes(this.myRegion!))!;
+          this.myRegion = _.find(_ => _.includes(this.myRegion!))! ?? null;
           this.change(null, 'region')
           });
   }
@@ -195,6 +199,7 @@ public async getListCity(myRegion: string){
   if (myRegion) {
     (await this._serviceRegisterBusinessProfile.getAllCity(myRegion))
       .subscribe(_ => {
+        this.allCity = _;
           if (_.length === 1){
               this.myCity = _[0];
           }

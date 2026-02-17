@@ -48,6 +48,7 @@ export class ColumnBAProfileComponent implements  OnChanges, OnDestroy {
   isHasSchedule: boolean = false;
   schedulesListFree: string[]|undefined = [];
   isHasRecord = true;
+  isHandset = true;
   profileUA: IViewBusinessProfile | null = null;
   constructor(private businessProfileService: ProfileService,
               private _apiSchedule: ScheduleService,
@@ -105,8 +106,17 @@ export class ColumnBAProfileComponent implements  OnChanges, OnDestroy {
         }
       });
   }
+
+  get telHref(): string | null {
+  const raw = this.businessProfile?.phone ?? '';
+  const digits = raw.replace(/\D/g, '');          // только цифры
+  if (!digits) return null;
+  return `tel:+${digits}`;                        // ровно один +
+}
+
+
   async ngOnChanges(): Promise<void> {
-    this.deviceInfo = this.deviceService.getDeviceInfo();
+    this.isHandset = this.deviceService.isMobile() || this.deviceService.isTablet();
     this.store$.pipe(select(selectProfileMainClient)).subscribe(
         result => {
           this.profileUA = result;
@@ -153,9 +163,9 @@ export class ColumnBAProfileComponent implements  OnChanges, OnDestroy {
       this.store$.dispatch(loadLinkAction(
           {request: `profile-ba/${this.businessProfile?.link ? this.businessProfile.link : this.businessProfile?.id}/choose-service`,
                 }));
-      const modalRef = this.modalService.open(ShowPhoneCouponComponent);
-      modalRef.componentInstance.phoneNumber = this.businessProfile?.phone;
-      modalRef.componentInstance.click = option;
+      // const modalRef = this.modalService.open(ShowPhoneCouponComponent);
+      // modalRef.componentInstance.phoneNumber = this.businessProfile?.phone;
+      // modalRef.componentInstance.click = option;
     }
 
   }

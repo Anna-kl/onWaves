@@ -84,8 +84,7 @@ export class LoginService {
                         let profile = data.data.profile;
                         let view: IViewBusinessProfile[] = [];
                         view.push(profile);
-                        this._push.enable(data.message);
-                        this._push.ensurePwaSubscription(data.message);
+                        this._push.subscribe(data.message);
                         this.getAllBusinessProfile(profile?.id!, data.data.token!,
                             profile?.userType!).subscribe(
                             result => {
@@ -194,8 +193,6 @@ export class LoginService {
     checkRequestAccount(result: IResponse, view: IViewBusinessProfile[],
        data: IResponse){
         if (result.code !== 404) {
-                  
-            let profileId: string|null = null;
             if (result.data.length > 0){
               view.push(result.data.pop());                
             }
@@ -238,7 +235,6 @@ export class LoginService {
 
             if (result.code !== 404) {
                   
-              let profileId: string|null = null;
               if (result.data.length > 0){
                 view.push(result.data.pop());                
               }

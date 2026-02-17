@@ -23,4 +23,9 @@ export class AuthServices {
     let headers: HttpHeaders = new HttpHeaders();
     return this.http.post<IResponse>(`${this.url}`, send, {headers});
   }
+
+  registerEmail(email:string){
+    let headers: HttpHeaders = new HttpHeaders();
+    return this.http.post<IResponse>(`${this.url}register-email/`, {email}, {headers});
+  }
 }

@@ -34,6 +34,11 @@ export class ScheduleService {
         request);
   }
 
+  readCalendar(id: string, today: Date){
+    return this.http.get(`${this.baseUrl}schedules/read-calendar/${id}?date=${new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(),
+      0,0,0)).toISOString()}`);
+  }
+
   public getProfileScheduleCanceledBA(id: string, request: IViewDateSchedule){
     return this.http.post<IViewScheduleBA[]>(`${this.baseUrl}schedules/get-ba-canceled-schedule/${id}`, request).pipe(
       tap(data => this.getScheduleBA$.next(data)));
@@ -75,7 +80,7 @@ export class ScheduleService {
   public saveSchedule(id: string, schedule: IViewSchedule):Observable<IResponse>{
       return this.http.post<IResponse>(`${this.baseUrl}schedules/add-schedule/${id}`, schedule);
   }
-  public async getFreeSlotForDay(id: string, duration: number, day?: string, dayId?: string){
+  public  getFreeSlotForDay(id: string, duration: number, day?: string, dayId?: string){
   let send = { duration, day, dayId };
     return this.http.post<IFreeSlotSchedule[]>(`${this.baseUrl}services/get-free-slot/${id}`, send);
         //.pipe(

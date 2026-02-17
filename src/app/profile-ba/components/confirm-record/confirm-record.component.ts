@@ -27,6 +27,8 @@ import { getPrice, getPriceService, getPriceString } from 'src/helpers/common/pr
 import { ErrorConfirmRecordComponent } from '../errorConfirmRecord/error-confirm-record.component';
 import { ProfileService } from 'src/services/profile.service';
 import { ICoupon } from 'src/app/DTO/classes/promo/IPoupon';
+import { v4 as uuidv4 } from 'uuid';
+
 
 
 @Component({
@@ -209,7 +211,9 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   }
 
   onConfirm(){
+
     let record = {
+      id: uuidv4(),
       daysOfScheduleId: this.dayId,
       isRemandDay: this.IsRemandDay,
       isRemandHours: this.IsRemandHours,

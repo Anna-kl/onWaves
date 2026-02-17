@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, ParamMap, Router} from "@angular/router";
-import {BehaviorSubject, map, Observable} from "rxjs";
+import {BehaviorSubject, distinctUntilChanged, filter, map, merge, Observable, shareReplay, Subscription} from "rxjs";
 import {IFreeSlotSchedule} from "../../../DTO/views/schedule/IFreeSlotSchedule";
 import {ScheduleService} from "../../../../services/schedule.service";
 import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
@@ -17,14 +17,24 @@ import {IOptionsRecord} from "../../../DTO/classes/records/optionsRecord";
 import {getHours, getMinutes} from "../../../../helpers/common/timeHelpers";
 import {IChooseDayOfCalendar} from "../../../DTO/views/calendar/IChooseDayOfCalendar";
 import { getPrice, getPriceService, getPriceString } from 'src/helpers/common/price.helpers';
+import { isString } from 'src/helpers/dateUtils/dateUtils';
+
+
+
+function sameDay(a?: Date, b?: Date) {
+  if (!a || !b) return a === b;
+  return a.getFullYear() === b.getFullYear() &&
+         a.getMonth() === b.getMonth() &&
+         a.getDate() === b.getDate();
+}
 
 @Component({
   selector: 'app-add-record-ba',
   templateUrl: './add-record-ba.component.html',
-  styleUrls: ['./add-record-ba.component.css'],
+  styleUrls: ['./add-record-ba.component.scss'],
   providers: [ScheduleService, GroupService, RecordService]
 })
-export class AddRecordBAComponent implements OnInit {
+export class AddRecordBAComponent implements OnInit, OnDestroy {
 
   getStatePrice() {
     return this.chooseServices.find(_ => !_.price.isRange) ? 'от': '';
@@ -44,8 +54,13 @@ export class AddRecordBAComponent implements OnInit {
   services$ = new BehaviorSubject<subGroup|null>(null);
   isChoosed: boolean = false;
   start: Date | null = null;
+  startAI?: string;
   day$ = new  Observable<IChooseDayOfCalendar|null>();
   isTimeLimit: boolean = false;
+  serviceId?: string;
+  slotError =  false;
+  private unsubscribe$: Subscription|null = null;
+
   constructor(private _routeActivate: ActivatedRoute,
               private _builder: FormBuilder,
               private _router: Router,
@@ -121,19 +136,60 @@ export class AddRecordBAComponent implements OnInit {
       this.isChoosed = false;
     }
   }
+
+  isControlInvalid(controlName: string): boolean {
+    const control = this.formClient.get(controlName);
+    const test = !!control;
+    return !!control && control.invalid;
+  }
+
+
   async ngOnInit(): Promise<void> {
-    this.day$ = this._routeActivate.queryParamMap.pipe(
+    const dayFromEvent$ = this._events.dayOff.pipe(filter(result => !!result));
+    const dayFromQuery$ = this._routeActivate.queryParamMap.pipe(
         map((params: ParamMap) => {
-          // console.log(params.get('date'));
-          return {date: new Date(params.get('date')!), dayId: params.get('dayId')} as IChooseDayOfCalendar }
+          let dttm = new Date();
+          if (params.get('serviceId')){
+            this.serviceId = params.get('serviceId')!;
+          }
+          if (params.get('slot')){
+            this.startAI = params.get('slot')!;
+          } else {
+            this.slotError = true;
+          }
+          if (params.get('name') || params.get('phone')){
+            this.formClient = this._builder.group({
+                phone: new FormControl(params.get('phone'), [Validators.required,  Validators.minLength(4)]),
+                name: new FormControl(params.get('name')),
+                remandHours: new FormControl(false),
+                start: new FormControl(params.get('slot') ?? '00:00'),
+                about: new FormControl('')
+          });
+          if (params.get('date')){
+            if (isString(params.get('date'))){
+                const [day, month, year] = params.get('date')!.split('.').map(Number);
+                dttm = new Date(year, month - 1, day);
+            } 
+          }
+          }
+          return {date: dttm, dayId: params.get('dayId')} as IChooseDayOfCalendar }
         ));
+
+            // 3) объединяем источники
+    this.day$ = merge(dayFromEvent$, dayFromQuery$).pipe(
+      // убираем повтор той же даты/того же dayId
+      distinctUntilChanged((a, b) => sameDay(a.date!, b.date!) && a.dayId === b.dayId),
+      // кэшируем последнее значение для async-пайпа/многократных подписок
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+    
     this.services$.subscribe(async (result: any) => {
       if (result) {
         [this.priceServices, this.countService, this.duration] = getPrice(this.chooseServices);
 
       }
 
-    this._events.userId.subscribe(res => {
+    this.unsubscribe$ = this._events.userId.subscribe(res => {
       this.id = res;
       // this.getGroupsWithServices();
       this.getPaymentsMethod();
@@ -144,6 +200,11 @@ export class AddRecordBAComponent implements OnInit {
   });
 
   }
+
+    ngOnDestroy(): void {
+    this.unsubscribe$?.unsubscribe();
+  }
+
 
   setService($event: subGroup[]) {
     $event.forEach(_ => {
@@ -156,6 +217,7 @@ export class AddRecordBAComponent implements OnInit {
         if (!$event.includes(_)) {
           this.chooseServices = this.chooseServices.filter(item => item !== _);
           [this.priceServices, this.countService, this.duration] = getPrice(this.chooseServices);
+          console.log(this.duration);
         }
       }
     });
@@ -178,6 +240,7 @@ export class AddRecordBAComponent implements OnInit {
     this._apiRecord.saveRecord(this.id!, record).subscribe(
       res => {
         if (res.code === 201){
+          this._events.transferRecordId(res.data);
           this._router.navigate(['/notes/', this.id]);
         }
       });
@@ -216,6 +279,7 @@ export class AddRecordBAComponent implements OnInit {
     }
 
   }
+
   getMethodPayment(service: subGroup) {
     return service.paymentForType === PaymentForType.ForService;
   }

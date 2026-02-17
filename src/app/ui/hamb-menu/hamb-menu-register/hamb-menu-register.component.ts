@@ -4,7 +4,6 @@ import {
   ElementRef,
   EventEmitter,
   Input,
-  OnChanges,
   OnDestroy,
   OnInit,
   Output,
@@ -36,8 +35,8 @@ import {getProfileMainClient, selectProfileMainClient} from "../../../ngrx-store
 
 import {ILinkState} from "../../../ngrx-store/links/interface/ILinkState";
 
-import {clearLinkAction} from "../../../ngrx-store/links/link.action";
 import { getIconAvatar } from 'src/helpers/common/avatar1';
+import {MessageService} from "primeng/api";
 
 
 
@@ -45,7 +44,7 @@ import { getIconAvatar } from 'src/helpers/common/avatar1';
   selector: 'app-hamb-menu-register',
   templateUrl: './hamb-menu-register.component.html',
   styleUrls: ['./hamb-menu-register.component.css'],
-  providers: [ProfileService]
+  providers: [ProfileService, MessageService]
 })
 export class HambMenuRegisterComponent implements OnInit, OnDestroy{
 
@@ -81,7 +80,7 @@ export class HambMenuRegisterComponent implements OnInit, OnDestroy{
               private store$: Store,
               private renderer: Renderer2,
               private _cookie: CookieService,
-              private _apiProfiles: ProfileService) {
+              private messageService: MessageService,) {
     this.store$.pipe(select(selectTokenMainClient)).subscribe(result =>
       this.token = result
     );
@@ -217,7 +216,9 @@ this.unsubscribe$ = this._login.mainCategoriesProfile$.subscribe(
     this._login.mainCategoriesProfile$.next(null);
     this._login.isAutentificate$.next(false);
     this.store$.dispatch(logoutAction());
-    this._router.navigate(['/']);
+    window.location.replace('/');
+    // this._router.navigate(['/']);
+    // window.location.reload();
   }
   goToHelpPage() {
     this._router.navigate(['static/help']);
@@ -250,6 +251,32 @@ this.unsubscribe$ = this._login.mainCategoriesProfile$.subscribe(
       } else { // Главное Меню бизнеса
         this._router.navigate(['/profile-user', mainProfile.id]);
       }
+    }
+
+    copy(text: string) {
+      if (navigator.clipboard && window.isSecureContext) {
+        this.onCopied();
+        navigator.clipboard.writeText(`https://ocpio.ru/${text}`);
+      } else {
+        this.fallbackCopy(text);
+      }
+    }
+
+    private fallbackCopy(text: string) {
+      const ta = document.createElement('textarea');
+      ta.value = `https://ocpio.ru/${text}`;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+
+    private onCopied() {
+  // уведомление по желанию
+      this.messageService.add({key: 'global', severity:'success', summary: 'Скопировано', detail: 'Ссылка скопирована', life:1000});
     }
 
   }

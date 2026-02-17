@@ -132,6 +132,8 @@
     <!-- <div class="cont-horiz-start wrap margin-top50">
       <h3>Рекомендуем</h3>
     </div> -->
+
+    
     <!--Переключатель-->
     <!-- partial:index.partial.html  display: flex;    justify-content: center;     align-items: center; -->
     <div class="tabs padding-top40 padding-bottom40">      
@@ -145,6 +147,7 @@
       (click)="changeCards(false)">
         Рядом
       </label>
+    
       <div id="content-1">
         <div class="cont-horiz-around wrap" *ngIf="cards$|async as cards; else loader1">
           <!--Карточка 1 Start   <div class="parent-grey-light" > class="disp1 margin-left10 margin-right10 cont-horiz-start-start wrap"  style="gap: 10px 4px;" </div>--> 
@@ -159,7 +162,7 @@
           </div> 
         </div><!-- Популярное END left-right20 margin-bottom: 50px;-->
          <ng-template #loader1>
-            <app-loader-on-waves ></app-loader-on-waves>
+            <app-loader-ocpio></app-loader-ocpio>
      </ng-template>
       </div>
       <div id="content-2">

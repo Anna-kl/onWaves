@@ -1,0 +1,24 @@
+.big-caret {
+  /* убираем системную стрелку */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* своя стрелка справа */
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>\
+  <path d='M7 10l5 5 5-5' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>\
+</svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center; /* отступ от правого края */
+  background-size: 1.25rem 1.25rem;          /* ← УВЕЛИЧИВАЕТ стрелку */
+
+  padding-right: 2.25rem; /* чтобы текст не наезжал на стрелку */
+  line-height: 1.4;       /* чуть выше кликабельность */
+}
+
+/* (не обязательно) при фокусе/disabled можно подправить цвет стрелки другой SVG */
+.big-caret:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}

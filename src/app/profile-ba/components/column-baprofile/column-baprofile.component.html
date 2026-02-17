@@ -19,7 +19,7 @@
           <!-- комментарии -->
           <div class="margin-right10">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M15.9115 3.89207C14.6913 3.30416 13.3542 2.99923 11.9998 3C10.3719 3.00054 8.77442 3.44261 7.37788 4.27913C5.98128 5.11568 4.83774 6.31537 4.06905 7.75044C3.30037 9.18551 2.93533 10.8022 3.01281 12.4283C3.08495 13.9425 3.53824 15.412 4.32822 16.7015L3.04139 20.1251C2.95944 20.3432 3.00097 20.5884 3.15015 20.7673C3.29932 20.9462 3.53311 21.0311 3.76231 20.9897L8.24833 20.1785C9.41231 20.7131 10.6778 20.9935 11.9604 20.9999C13.3148 21.0066 14.6533 20.7075 15.8761 20.1249C17.0989 19.5423 18.1744 18.6912 19.0225 17.6351C19.8705 16.5789 20.4693 15.345 20.7741 14.0253C21.0789 12.7055 21.0819 11.334 20.7828 10.013C20.4838 8.69192 19.8904 7.4554 19.047 6.39558C18.2035 5.33577 17.1317 4.48 15.9115 3.89207Z" fill="#006174"/>
+              <path d="M15.9115 3.89207C14.6913 3.30416 13.3542 2.99923 11.9998 3C10.3719 3.00054 8.77442 3.44261 7.37788 4.27913C5.98128 5.11568 4.83774 6.31537 4.06905 7.75044C3.30037 9.18551 2.93533 10.8022 3.01281 12.4283C3.08495 13.9425 3.53824 15.412 4.32822 16.7015L3.04139 20.1251C2.95944 20.3432 3.00097 20.5884 3.15015 20.7673C3.29932 20.9462 3.53311 21.0311 3.76231 20.9897L8.24833 20.1785C9.41231 20.7131 10.6778 20.9935 11.9604 20.9999C13.3148 21.0066 14.6533 20.7075 15.8761 20.1249C17.0989 19.5423 18.1744 18.6912 19.0225 17.6351C19.8705 16.5789 20.4693 15.345 20.7741 14.0253C21.0789 12.7055 21.0819 11.334 20.7828 10.013C20.4838 8.69192 19.8904 7.4554 19.047 6.39558C18.2035 5.33577 17.1317 4.48 15.9115 3.89207Z" fill="#67C4B2"/>
             </svg>
           </div>
           <!--div>
@@ -48,7 +48,7 @@
       </div>
     </div>
     <!-- Описание профиля БА -->
-    <div class="w100" *ngIf="businessProfile?.about">
+    <div class="w100" *ngIf="businessProfile?.about" style=" white-space: pre-line;">
       {{businessProfile.about}}
     </div>
     <!-- Ссылка на сайт -->
@@ -57,7 +57,7 @@
         {{businessProfile.webSite}}
       </a>
     </div>
-        <div class="margin-top20 w100 cont-horiz-start row" *ngIf="businessProfile?.socialLink">
+        <!-- <div class="margin-top20 w100 cont-horiz-start row" *ngIf="businessProfile?.socialLink">
           <span class="text-title w100 row">Ссылки на социальные сети</span>
           <div class="w100 row">
       <a [href]="businessProfile.socialLink" target="_blank" class="col">
@@ -68,8 +68,8 @@
             <stop stop-color="#B13589"></stop> <stop offset="0.79309" stop-color="#C62F94"></stop> 
             <stop offset="1" stop-color="#8A3AC8"></stop> </radialGradient> <radialGradient id="paint1_radial_87_7153" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(11 31) rotate(-65.1363) scale(22.5942)"> <stop stop-color="#E0E8B7"></stop> <stop offset="0.444662" stop-color="#FB8A2E"></stop> <stop offset="0.71474" stop-color="#E2425C"></stop> <stop offset="1" stop-color="#E2425C" stop-opacity="0"></stop> </radialGradient> <radialGradient id="paint2_radial_87_7153" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0.500002 3) rotate(-8.1301) scale(38.8909 8.31836)"> <stop offset="0.156701" stop-color="#406ADC"></stop> <stop offset="0.467799" stop-color="#6A45BE"></stop> <stop offset="1" stop-color="#6A45BE" stop-opacity="0"></stop> </radialGradient> </defs> </g></svg>
       </a>
-      </div>
-    </div>
+      </div> -->
+    <!-- </div> -->
     <div class="cont-horiz-start-start w100 free-time margin-top20 margin-bottom20" *ngIf="isHasSchedule && businessProfile.isGetOrder">
       <b>Рабочее время сегодня:</b>
     </div>
@@ -95,18 +95,18 @@
     </div-->
     <div class="btns-container" >
       <a class="btn-white col-4" href="javascript:void(0)" style="margin-bottom: 5px;" 
-       *ngIf="deviceInfo.deviceType === 'desktop' && isAuth">+{{businessProfile.phone!|mask: '0(000) 000-00-00'}}</a>
-      <a class="btn-white col-1" href="{{'tel:+' + businessProfile.phone }}"
-       *ngIf="deviceInfo.deviceType !== 'desktop'  && isAuth " (click)="clickContact('click_call')">Позвонить</a>
-        <a class="btn-white col-1" *ngIf="!isAuth " (click)="onlineRecord('click_call')">Показать телефон</a>
+       *ngIf="!isHandset">+{{businessProfile.phone!|mask: '0(000) 000-00-00'}}</a>
+      <a class="btn-white col-1"  [attr.href]="telHref"
+       *ngIf="isHandset" (click)="clickContact('click_call')">Позвонить</a>
+        <!-- <a class="btn-white col-1" *ngIf="!isAuth " (click)="onlineRecord('click_call')">Показать телефон</a> -->
       <a  href="{{'https://wa.me/'+ businessProfile.phone}}"
-        *ngIf="deviceInfo.deviceType !== 'desktop'  && isAuth"
+        *ngIf="isHandset"
        class="btn-white col-1"  (click)="clickContact('click_message')">Написать</a>
-       <a href="javascript:void(0)" *ngIf="deviceInfo.deviceType === 'desktop'  && isAuth"
+       <a href="javascript:void(0)" *ngIf="!isHandset"
        href="{{'https://wa.me/'+businessProfile.phone}}" target="_blank"
        class="btn-white col-1" style="width: 1 ,lmkn bnm,00%"  (click)="clickContact('click_message')">Написать</a>
-       <a href="javascript:void(0)" *ngIf="!isAuth" (click)="onlineRecord('click_message')"
-       class="btn-white col-1" style="width: 1 ,lmkn bnm,00%">Написать</a>
+       <!-- <a href="javascript:void(0)" *ngIf="!isAuth" (click)="onlineRecord('click_message')"
+       class="btn-white col-1" style="width: 1 ,lmkn bnm,00%">Написать</a> -->
     </div>
     <!--div class="btn-white margin-bottom10">Отписаться2</div-->
     <div class="btn-green margin-top20" style=" width: 100%; max-width: none;"

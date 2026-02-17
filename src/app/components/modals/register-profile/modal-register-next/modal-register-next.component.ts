@@ -24,7 +24,7 @@ export class ModalRegisterNextComponent implements OnInit {
     name: new FormControl(undefined, Validators.required),
     family: new FormControl(undefined)
   });
-  @Input() token: string = '';
+  @Input() token!: IViewAuthProfile;
 
   constructor(
     private _builder: FormBuilder,
@@ -43,8 +43,8 @@ export class ModalRegisterNextComponent implements OnInit {
   }
   next() {
     // const modalRef = this.modalService.open(ModalRegisterEndComponent);
-    const data = this.formProfile.getRawValue() as IProfile;
-    this._profile.createProfile(data, this.token).subscribe(
+    const name = this.formProfile.getRawValue() as IProfile;
+    this._profile.createProfile(name, this.token.token).subscribe(
       result => {
         if (result.code === 201){
           // this.notification.requestPermission(result.message);

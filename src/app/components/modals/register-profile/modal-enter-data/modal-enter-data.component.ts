@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, Input, OnInit } from '@angular/core';
 import {NgbActiveModal, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ModalRegisterComponent} from "../modal-register/modal-register.component";
 
@@ -11,9 +11,13 @@ import { ISendCode } from '../../../../DTO/ISendCode';
 
 import { CookieService } from 'ngx-cookie-service';
 import {IViewAuthProfile} from "../../../../DTO/views/profile/IViewAuthProfile";
-import {Router} from "@angular/router";
+
 import {LoginService} from "../../../../auth/login.service";
-import { environment } from 'src/enviroments/environment';
+
+import { interval, map, startWith, takeWhile, tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RegisterEmailCodeComponent } from '../register-email-code/register-email-code.component';
+
 
 @Component({
   selector: 'app-modal-enter-data',
@@ -24,14 +28,24 @@ import { environment } from 'src/enviroments/environment';
 
 })
 export class ModalEnterDataComponent implements OnInit {
+
+  enterEmail() {
+      let modalRef = this.modalService.open(RegisterEmailCodeComponent);
+      modalRef.componentInstance.phone = this.phone;
+      this.activeModal.close();
+  }
+
+
   public codeForm: FormGroup;
   public checkCode = false;
   @Input() public session = '';
   @Input() public phone = '';
+  @Input() public email = '';
   @Input() public code = '';
   flagError: boolean = false;
   textError: string = '';
   link: string|null = null;
+  private destroyRef = inject(DestroyRef);
   constructor(
     private modalService: NgbModal,
     public activeModal: NgbActiveModal,
@@ -51,8 +65,24 @@ export class ModalEnterDataComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
+    if(this.phone.length > 0)
+      this.startCountdown(60);
   }
+
+   secondsLeft = 60;        // текущее значение (биндим в шаблон)
+
+  startCountdown(from = 60) {
+    this.secondsLeft = from;
+
+    interval(1000).pipe(
+      startWith(0),                      // сразу показать стартовое значение
+      tap(t => this.secondsLeft = from - t),
+      takeWhile(() => this.secondsLeft > 1), // идём до 1
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+  }
+
+  
   closeModal() {
     this.activeModal.close();
   }

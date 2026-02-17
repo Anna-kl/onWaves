@@ -87,9 +87,6 @@ isSetAvatar: boolean = false;
     this.isSetAvatar = true;
     this.isShowCropped = true;
  
-  }
-
-  save(){
     if (this.id) {
       this._apiServiceProfile.save_avatar(this.id!, this.formData)
         .subscribe(result => {
@@ -106,5 +103,23 @@ isSetAvatar: boolean = false;
     }
     this.isSetAvatar = false;
   }
+
+  // save(){
+  //   if (this.id) {
+  //     this._apiServiceProfile.save_avatar(this.id!, this.formData)
+  //       .subscribe(result => {
+  //           console.error('Ошибка при загрузке фотографии:', '');
+  //           this.onSave.emit(true);
+  //         },
+  //         (error) => {
+  //           console.error('Ошибка при загрузке фотографии:', error);
+  //         }
+  //       );
+  //   } else {
+  //     console.log(this.formData);
+  //     this.onSave.emit(this.formData);
+  //   }
+  //   this.isSetAvatar = false;
+  // }
 
 }

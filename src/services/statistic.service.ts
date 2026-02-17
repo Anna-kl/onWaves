@@ -24,21 +24,21 @@ export class StatisticService {
   public records$ = new BehaviorSubject<IViewRecordsStatistic|null>(null);
   public clients$ = new BehaviorSubject<IViewClientsStatistic|null>(null);
 
-  public getProfileProfit(id: string, date: Date){
-    return this.http.get<IViewProfit>(`${this.baseUrl}profit/${id}?strDate=${date.toLocaleString()}`, );
+  public getProfileProfit(id: string, startDate: Date, endDate: Date){
+    return this.http.get<IViewProfit>(`${this.baseUrl}profit/${id}?startDate=${startDate.toLocaleString()}&endDate=${endDate.toLocaleString()}`, );
   }
 
   public getCoefficient(id: string){
     return this.http.get<number>(`${this.baseUrl}get-coefficient/${id}`);
     }
 
-  public async getClientsStatistic(id: string, date: Date){
-    return this.http.get<IViewClientsStatistic>(`${this.baseUrl}clients/${id}?strDate=${date.toLocaleString()}`, ).pipe(
+  public async getClientsStatistic(id: string,startDate: Date, endDate: Date){
+    return this.http.get<IViewClientsStatistic>(`${this.baseUrl}clients/${id}?startDate=${startDate.toLocaleString()}&endDate=${endDate.toLocaleString()}`, ).pipe(
       tap(data => this.clients$.next(data)));
   }
 
-  public async getProfileRecords(id: string, date: Date){
-    return this.http.get<IViewRecordsStatistic>(`${this.baseUrl}records/${id}?strDate=${date.toLocaleString()}`).pipe(
+  public async getProfileRecords(id: string, startDate: Date, endDate: Date){
+    return this.http.get<IViewRecordsStatistic>(`${this.baseUrl}records/${id}?startDate=${startDate.toLocaleString()}&endDate=${endDate.toLocaleString()}`).pipe(
       tap(data => this.records$.next(data)));
   }
 

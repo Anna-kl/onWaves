@@ -4,6 +4,95 @@
     </svg>
 </div>
   <app-install-banner></app-install-banner>
+
+
+<!-- <div *ngIf="isShowMessageAI" class="voice-overlay">
+  <div class="voice-overlay__backdrop"></div>
+
+  <div class="voice-overlay__content">
+    <div class="voice-overlay__icon">🎤</div>
+
+    <div class="voice-overlay__title">
+      {{ infoTitle || 'Голосовой комментарий сохранён' }}
+    </div>
+
+
+
+    <button class="voice-overlay__button" (click)="closeAI()">
+      Понятно
+    </button>
+  </div>
+</div>  -->
+
+<!-- <div *ngIf="isShowMessageAI"
+     class="voice-overlay"
+  [@toast]
+     (@toast.done)="onToastDone()">>
+  <div class="voice-overlay__backdrop"></div>
+
+  <div class="voice-overlay__content">
+    <div class="voice-overlay__icon">🎤</div>
+    <div class="voice-overlay__title">
+      {{ infoTitle || 'Голосовой комментарий сохранён' }}
+    </div>
+  
+  </div>
+</div> -->
+
+<!-- ПОЛНОЭКРАННОЕ ИНФО-ОКНО -->
+<!-- <div
+  class="ai-voice-intro-backdrop"
+  *ngIf="showIntroOverlay"
+>
+  <div class="ai-voice-intro-modal">
+    <div class="ai-voice-intro-header">
+      <div class="ai-voice-intro-icon">
+        🎙
+      </div>
+      <div class="ai-voice-intro-title">
+        Новый голосовой помощник
+      </div>
+    </div>
+
+    <div class="ai-voice-intro-body">
+      <p>
+        Теперь вы можете управлять расписанием голосом:
+      </p>
+      <ul>
+        <li>создавать записи для клиентов;</li>
+        <li>переносить и отменять записи;</li>
+        <li>спрашивать про свободные окошки.</li>
+      </ul>
+      <p style="margin-top: 8px;">
+        Просто нажмите на кнопку микрофона в правом нижнем углу и скажите:
+        <br />
+        <strong>«Запиши клиента завтра в 15:00 на маникюр».</strong>
+      </p>
+    </div>
+
+    <div class="ai-voice-intro-footer">
+      <button
+        type="button"
+        class="ai-voice-intro-primary"
+        (click)="closeIntroOverlay()"
+      >
+        Понятно, попробовать
+      </button>
+      <button
+        type="button"
+        class="ai-voice-intro-secondary"
+        (click)="closeIntroOverlay()"
+      >
+        Закрыть
+      </button>
+    </div>
+  </div>
+</div> -->
+
+
+
+
+
 <!--   
 {{message|async}} -->
 <!-- Шапка для не зарегистрированного пользователя -->
@@ -18,5 +107,75 @@
     
     
 </div> 
+<!-- <div class="ai-voice-widget" *ngIf="user && user.userType === UserType.Business">
+>
+  <div
+    class="ai-voice-hint"
+    [class.ai-voice-hint--visible]="showHint"
+    [class.ai-voice-hint--hidden]="!showHint"
+  >
+    <span class="ai-voice-hint-dot"></span>
+
+    <span class="ai-voice-hint-text">
+      Я голосовой помощник. Нажми, чтобы управлять расписанием голосом.
+    </span>
+
+    <button
+      class="ai-voice-hint-close"
+      type="button"
+      aria-label="Закрыть подсказку"
+      (click)="closeHint()"
+    >
+      ×
+    </button>
+  </div>
+
+
+ <button
+  type="button"
+ class="voice-btn"
+  [class.is-recording]="isRecording()"
+  aria-label="Удерживайте для записи"
+  (pointerdown)="onPress($event)"
+  (pointerup)="onRelease($event)"
+  (pointerleave)="onRelease($event)"
+  (pointercancel)="onRelease($event)"
+  (keydown.space)="onKeyDown($event)"
+  (keyup.space)="onKeyUp($event)"
+  (keydown.enter)="onKeyDown($event)"
+  (keyup.enter)="onKeyUp($event)"
+>
+   
+
+  🎙
+  </button> -->
+  <!-- <button
+  type="button"
+ class="voice-btn"
+  [class.is-recording]="isRecording()"
+  aria-label="Удерживайте для записи"
+  (pointerdown)="onPress($event)"
+  (pointerup)="onRelease($event)"
+  (pointerleave)="onRelease($event)"
+  (pointercancel)="onRelease($event)"
+  (keydown.space)="onKeyDown($event)"
+  (keyup.space)="onKeyUp($event)"
+  (keydown.enter)="onKeyDown($event)"
+  (keyup.enter)="onKeyUp($event)"
+>
+   
+</button>
+
+
+<div *ngIf="isShowMessageAI" class="voice-overlay">
+  <div class="voice-overlay__backdrop"></div>
+  <div class="voice-overlay__content">
+    <div class="voice-overlay__icon">🎤</div>
+    <div class="voice-overlay__title">{{ infoTitle || 'Голосовой комментарий сохранён' }}</div>
+    <div class="voice-overlay__text">{{ infoMessage }}</div>
+    <button class="voice-overlay__button" (click)="closeAI()">Понятно</button>
+  </div>
+</div> -->
+<!-- </div> -->
 
 <app-footer *ngIf="(_login.isLoad$|async)"></app-footer>

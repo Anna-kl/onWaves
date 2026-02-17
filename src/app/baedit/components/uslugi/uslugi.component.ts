@@ -25,6 +25,7 @@ import { Subscription, take } from 'rxjs';
   providers: [MessageService]
 })
 export class UslugiComponent implements OnInit, OnDestroy {
+
   // @Output() closeWindow = new EventEmitter();
   showDeletePanel = false;
   groups: Group[] = [];
@@ -55,6 +56,9 @@ export class UslugiComponent implements OnInit, OnDestroy {
   }
 
 
+  setGroup($event: Group[]) {
+    this.groups = [...$event];
+  }
   ngOnInit(): void {
      this._activateRoute.params.subscribe(params => {
       this.isActive = params['isActive'];
@@ -121,6 +125,7 @@ export class UslugiComponent implements OnInit, OnDestroy {
     this.modaltPopUpMRef.result.then((result: any) => {
       if (result) {
         this.isReload = !this.isReload;
+        this.isUpdate = true;
       }
     });
   }

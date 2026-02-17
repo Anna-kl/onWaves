@@ -298,7 +298,7 @@
         </div>
 
          <div class="cont-horiz-between w100" >
-          Укажите перерыв между началом записей
+          Укажите интервалы для записей. Кратность отрезков
         </div>
         <div class="input-line-mini cont-horiz-start" style="width: 100%;">
           <select style="border: none" [(ngModel)]="sch.period" (ngModelChange)="setStartPeriod(sch)">
@@ -319,7 +319,7 @@
         </div>
         <ng-template #bntCalandrier>
           <button class="btn-green blockBntCalandier"
-                 *ngIf="sch.id" [ngStyle]="{'background-color': checkTimer(sch) ? 'gray' : '#0d94a0' }"
+                 *ngIf="sch.id" [ngStyle]="{'background-color': checkTimer(sch) ? 'gray' : '#409B89' }"
                   [disabled]="checkTimer(sch)"  (click)="chooseDays(sch)" >
 
             <div> Применить к дням </div>
@@ -329,7 +329,7 @@
 
           </button>
           <button class="btn-green blockBntCalandier"
-                  *ngIf="!sch.id" [ngStyle]="{'background-color': checkTimer(sch) ? 'gray' : '#0d94a0' }"
+                  *ngIf="!sch.id" [ngStyle]="{'background-color': checkTimer(sch) ? 'gray' : '#409B89' }"
                   [disabled]="checkTimer(sch)"  (click)="addScheduler(sch)" >
 
             <div> Создать </div>

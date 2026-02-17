@@ -48,7 +48,6 @@ export class GalereyaComponent implements OnDestroy {
     private route: ActivatedRoute,
     private store$: Store,
     private _apiImage: AlbumsService,
-    private sanitizer: DomSanitizer,
     private backendService: BackendService,
     private messageService: MessageService,
     private modalService: NgbModal

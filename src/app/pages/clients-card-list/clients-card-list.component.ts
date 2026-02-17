@@ -53,7 +53,6 @@ export class ClientsCardListComponent implements OnChanges {
   constructor(private _history: HistoryService,
               private sanitizer: DomSanitizer,
               private store$: Store,
-              private elRef:ElementRef,
               private confirmationService: ConfirmationService,
               private router: Router) {
     this.store$.pipe(select(selectProfileMainClient)).subscribe(

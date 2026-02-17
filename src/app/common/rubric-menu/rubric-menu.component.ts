@@ -64,6 +64,7 @@ export class RubricMenuComponent implements OnChanges{
         setTimeout(() => {                           // <<<---using ()=> syntax
           this.isShow2Level = true;
         }, 300);
+        // this.setCategory.emit(item);
       } else {
         this.isShow2Level = true;
       }
@@ -107,10 +108,22 @@ export class RubricMenuComponent implements OnChanges{
           this.isShow3Level = true;
         }
       }
+      if (this.menu3Level.length == 0){
+        this.setCategory.emit(item);
+      }
     }
   }
 
   backMainMenu() {
+    this.mainCategories.forEach(item => {
+      item.isChoose = false
+    });
+    this.menu2Level.forEach(item => {
+      item.isChoose=false;
+    });
+    this.menu3Level.forEach(item => {
+      item.isChoose=false;
+    });
     this.isShow2Level = false;
     this.isShow3Level = false;
     setTimeout(()=>{                           // <<<---using ()=> syntax
@@ -119,6 +132,12 @@ export class RubricMenuComponent implements OnChanges{
   }
 
   back2LevelMenu() {
+    this.menu2Level.forEach(item => {
+      item.isChoose=false;
+    });
+    this.menu3Level.forEach(item => {
+      item.isChoose=false;
+    });
     this.isShow3Level = false;
     setTimeout(()=>{                           // <<<---using ()=> syntax
       this.isShow2Level = true;
@@ -146,8 +165,11 @@ export class RubricMenuComponent implements OnChanges{
     });
     this.menu3Level = this.allCategories.filter(_ => _.parentId === item.id);
     // this.menu2Level.forEach(_ => {_.isChoose = false});
+    if (this.menu3Level.length == 0){
     this.setCategory.emit(item);
+    }
     this.isBlocked3Level = false;
+    
   }
 
   chooseLevel3(item: ICategory) {
@@ -173,10 +195,11 @@ export class RubricMenuComponent implements OnChanges{
     this.menu2Level.forEach(_ => {_.isChoose = false});
     this.isBlockedMain = true;
     this.isBlocked2Level = false;
-    this.setCategory.emit(item);
+    // this.setCategory.emit(item);
   }
 
   chooseMenu($event: any) {
+
       switch ($event.item.id){
         case '0': {
           this.items = [];

@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component,  ElementRef,  NgZone,  OnInit, ViewChild} from '@angular/core';
 
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {ServiceRegisterBusinessProfile} from "../../../../services/service-register-business";
@@ -19,22 +19,24 @@ import {StoreService} from "../../../ngrx-store/mainClient/store.service";
 import {select, Store} from "@ngrx/store";
 import {selectProfileMainClient, selectTokenMainClient} from "../../../ngrx-store/mainClient/store.select";
 import {urlProfile} from "../../../../helpers/constant/commonConstant";
-import {filter, map, Observable, of, switchMap, tap} from "rxjs";
+import {catchError, EMPTY, filter, map, Observable, of, switchMap, tap, throwError} from "rxjs";
 import {IViewCoordinates} from "../../../DTO/views/profile/IViewCoordinates";
 import { LoginService } from 'src/app/auth/login.service';
 import { environment } from 'src/enviroments/environment';
+import { ViewportScroller } from '@angular/common';
+import { Router } from 'express';
+import { MessageService } from 'primeng/api';
 
 declare const ymaps: any;
 @Component({
   selector: 'app-register-business-profile',
   templateUrl: './register-business-profile.component.html',
   styleUrls: ['./register-business-profile.component.scss'],
-  providers: [DictionaryService, ProfileService]
+  providers: [DictionaryService, ProfileService, MessageService]
 })
-export class RegisterBusinessProfileComponent implements OnInit {
+export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit {
   strAddress: string = '';
   TEXT_LENGTH: number = environment.TEXT_LENGTH;
-
 
 
   changeAddress($event: {strAddress: string,
@@ -69,6 +71,8 @@ export class RegisterBusinessProfileComponent implements OnInit {
   user: IViewBusinessProfile | null = null;
   private allCategories: ICategory[] = [];
 
+
+
   mapType = 'satellite';
   mainProfile: any;
   remainingText:any = 0;
@@ -79,8 +83,10 @@ export class RegisterBusinessProfileComponent implements OnInit {
                public activeModal: NgbActiveModal,
                private _dictionaries: DictionaryService,
                private _api: ProfileService,
+               private zone: NgZone,
+                private messageService: MessageService,
                private _store: Store,
-               private _login: LoginService,
+               private _login: LoginService,private cdr: ChangeDetectorRef,
                private _storeService: StoreService) {
     //store ngrx
     this._storeService.profileStoreMainProfileClient$.subscribe(
@@ -100,27 +106,44 @@ export class RegisterBusinessProfileComponent implements OnInit {
       }
     );
 
-    // this.renderer2.listen('window', 'click',(e:Event)=>{
-    //   /**
-    //    * Only run when toggleButton is not clicked
-    //    * If we don't check this, all clicks (even on the toggle button) gets into this
-    //    * section which in the result we might never see the menu open!
-    //    * And the menu itself is checked here, and it's where we check just outside of
-    //    * the menu and button the condition abbove must close the menu
-    //    */
-    //   let element = e.target as HTMLElement;
-    //   if(element.className.toString().includes('change')){
-    //     const tab = this.elementRef.nativeElement.getElementsByClassName('upfile2')
-    //     if (tab.length > 0){
-    //       tab[0].click();
-    //     }
-    //   }
-    // });
+  }
+
+@ViewChild('modalBody',  { read: ElementRef }) modalBody!: ElementRef<HTMLElement>;
+  @ViewChild('topAnchor',  { read: ElementRef }) topAnchor!: ElementRef<HTMLElement>;
+
+  ngAfterViewInit() {
+    // первый показ модалки — к началу
+    requestAnimationFrame(() => this.scrollToTop());
+     setTimeout(() =>this.zone.runOutsideAngular(() => {
+        // ждём layout/paint
+        requestAnimationFrame(() => {
+            let element = document.getElementById('groupModal');
+        element?.scrollIntoView(true);
+        });
+      }), 500);
+  }
+
+  private scrollToTop() {
+    // Вариант А: просто в самый верх контейнера
+    this.modalBody.nativeElement.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Вариант Б: к якорю (если нужен именно anchor)
+    // this.topAnchor.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   closeModal() {
     this.activeModal.close();
   }
+
+  private scrollContainerTopAfterRender() {
+      this.zone.runOutsideAngular(() => {
+        // ждём layout/paint
+        requestAnimationFrame(() => {
+            let element = document.getElementById('groupModal');
+        element?.scrollIntoView(true);
+        });
+      });
+}
 
   increment () {
     let element = document.getElementById('groupModal');
@@ -197,7 +220,15 @@ export class RegisterBusinessProfileComponent implements OnInit {
             } else {
               return of(user.profileUserId);
             }
-          })
+          }),
+            catchError(err => {
+              if (err?.status === 500) {
+                    this.messageService.add({severity:'error', summary: 'Ошибка', detail: 'Превышено число аккаунтов', life:5000});
+                return EMPTY;                // «тихое» завершение без ошибки вверх
+                // или: return throwError(() => err); // пробросить дальше, если нужно
+              }
+              return throwError(() => err);
+            }),
         )
         // единая подписка и единый dismiss
         .subscribe({
@@ -211,33 +242,8 @@ export class RegisterBusinessProfileComponent implements OnInit {
             // тут можно показать сообщение об ошибке
           }
         });
-        //   this._api.createBAProfile(view, this.mainToken).subscribe(
-        //     result => {
-        //       if (result.code === 201) {
-        //         let user = result.data as IViewAuthProfile;
-        //         this.numberStreetPage ++;
-        //         if (this.formData) {
-        //           this._serviceRegisterBusinessProfile
-        //               .save_avatar(user.profileUserId!, this.formData)
-        //               .subscribe(
-        //                   (res) => {
-        //                     if (res){
-        //                       this.activeModal.dismiss();
 
-        //                     }
-        //                   });
-        //         }else{
-        //           this.activeModal.dismiss();
-        //         }
-
-        //       }
-        //     }
-        // );
     }
-    // if (this.numberStreetPage >= 4){
-    //         this.activeModal.dismiss();
-    //         window.location.href = `/`;
-    // }
 
 
   }
@@ -246,9 +252,7 @@ export class RegisterBusinessProfileComponent implements OnInit {
   decrement () {this.numberStreetPage--; }
 
   async ngOnInit(): Promise<void> {
- 
-    let element = document.getElementById('groupModal');
-    element?.scrollIntoView(true);
+
     //методы для заполнения полей адреса шаг 2
     this._dictionaries.getExceptWords().subscribe(
         result => {
@@ -322,7 +326,7 @@ export class RegisterBusinessProfileComponent implements OnInit {
       //шаг 3
       avatar: new FormControl('', []),
       about: new FormControl('', [
-        Validators.minLength(1), Validators.maxLength(150)
+        Validators.minLength(1), Validators.maxLength(this.TEXT_LENGTH)
       ]),
     });
 
@@ -335,7 +339,7 @@ export class RegisterBusinessProfileComponent implements OnInit {
     this.registrationForm?.get('about')!.valueChanges.subscribe(
       res => {
         if (res.length >= 150){
-          this.registrationForm?.patchValue({'about': res.substring(0, 150)});
+          this.registrationForm?.patchValue({'about': res.substring(0, this.TEXT_LENGTH)});
         }
         this.remainingText = res.length;
       }

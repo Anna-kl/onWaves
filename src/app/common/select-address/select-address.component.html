@@ -4,22 +4,18 @@
     </div>
     <!-- Страна -->
     <div class="select">
-      <select [(ngModel)]="myCountry" (change)="getListRegions(myCountry)">
-        <option value="" selected >
-          Страна *
-        </option>
-        <option *ngFor="let country of countryList$ | async" value="{{country}}">
+      <select [(ngModel)]="myCountry" (ngModelChange)="getListRegions( myCountry)">
+       <option [ngValue]="null" disabled>Страна *</option>
+        <option *ngFor="let country of countryList$ | async"  [ngValue]="country">
           {{country}}
         </option>
       </select>
     </div>
     <!-- Регион -->
     <div class="select">
-      <select [(ngModel)]="myRegion" (change)="change($event, 'region')">
-        <option value="" disabled selected>
-          Регион *
-        </option>
-        <option *ngFor="let region of allRegions$ | async" value="{{region}}">
+      <select [(ngModel)]="myRegion" (ngModelChange)="change($event, 'region')">
+          <option [ngValue]="null" disabled>Регион *</option>
+        <option *ngFor="let region of allRegions$ | async"  [ngValue]="region">
           {{region}}
         </option>
       </select>
@@ -36,19 +32,18 @@
 
   </div>
 
-    <div class="select" *ngIf="!isAnotherCity">
-      <select [(ngModel)]="myCity" [disabled]="isAnotherCity" style="margin-bottom: 3px;"
-       (ngModelChange)="change($event, 'city')">
-        <option value="" selected >
-          Населенный пункт *
-        </option>
-        <option *ngFor="let city of allCity$ | async"
-         value="{{city}}">
-          {{city}}
+      <div class="select" *ngIf="!isAnotherCity">
+      <select
+        [ngModel]="myCity"
+        (ngModelChange)="change($event, 'city')">
+        <option [ngValue]="null" disabled>Населенный пункт *</option>
+        <option *ngFor="let city of allCity "
+                [ngValue]="city">
+          {{ city }}
         </option>
       </select>
     </div>
-    <div class="help-text" >
+    <div class="help-text" style="margin-top: -30px;">
       обязательное поле
     </div>
     <!-- Улица -->

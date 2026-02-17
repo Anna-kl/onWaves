@@ -15,19 +15,30 @@ import { Observable, Subscription } from 'rxjs';
 @Component({
   selector: 'app-cabinet-ba',
   templateUrl: './cabinet-ba.component.html',
-  styleUrls: ['./cabinet-ba.component.css'],
+  styleUrls: ['./cabinet-ba.component.scss'],
   providers: [StatisticService, ScheduleService]
 })
 export class CabinetBAComponent implements OnInit, OnDestroy {
+  period: string = 'today';
+  amount: number = 0;
+
   profit$: Observable<IViewProfit>|null = null;
+  currentDay = new Date();
   coefficient$: Observable<number> = new Observable();
   async onDate($event: IChooseDayOfCalendar) {
     if ($event.date){
+      this.currentDay = $event.date;
       await this.getListClients($event.date);
       await this.getListRecords($event.date);
-      await this.getProfit($event.date);
+      await this.getProfit();
     }
   }
+
+  setPeriod(arg0: string) {
+    this.period = arg0;
+   this.getProfit();
+  }
+
   profile!: IViewBusinessProfile | null;
   today: Date = new Date();
   // profit: IViewProfit;
@@ -38,6 +49,7 @@ export class CabinetBAComponent implements OnInit, OnDestroy {
   allWorksDays: IDaysOfSchedule[] = [];
   schedules: IViewSchedule[] = [];
   private unsubscribe$: Subscription|null = null;
+  endDate: Date = new Date();
 
   
   constructor(private _apiStatistic: StatisticService,
@@ -97,19 +109,43 @@ export class CabinetBAComponent implements OnInit, OnDestroy {
     await this.chooseDays({day: date.getDate()});
   }
 
-  public async getProfit(date: Date){
-    this.profit$ =  this._apiStatistic.getProfileProfit(this.profile?.id!, date);
+  public getStartEnd(){
+    let startDate = new Date(this.currentDay.getTime());
+     let endDate = new Date(this.currentDay.getTime());
+     
+     switch (this.period){
+      case 'today': { startDate.setDate(endDate.getDate() - 1); break; }
+      case 'week': { startDate.setDate(endDate.getDate() - 7); break; }
+      case 'month': { startDate.setMonth(endDate.getMonth()-1); break; }
+
+    }
+    return {startDate,  endDate};
+  }
+
+  public async getProfit(){
+     let {startDate, endDate} = this.getStartEnd();
+    //  let endDate = new Date(this.currentDay.getTime());
+     
+    //  switch (this.period){
+    //   case 'today': { startDate.setDate(endDate.getDate() - 1); break; }
+    //   case 'week': { startDate.setDate(endDate.getDate() - 7); break; }
+    //   case 'month': { startDate.setMonth(endDate.getMonth()-1); break; }
+
+    // }
+    this.profit$ =  this._apiStatistic.getProfileProfit(this.profile?.id!, startDate, endDate);
   }
 
   public async getListRecords(date: Date){
-    (await this._apiStatistic.getProfileRecords(this.profile?.id!, date))
+     let {startDate, endDate} = this.getStartEnd();
+    (await this._apiStatistic.getProfileRecords(this.profile?.id!, startDate, endDate))
       .subscribe(_=>{
         this.records = this._apiStatistic.records$.value!;
       });
   }
 
   public async getListClients(date: Date){
-    (await this._apiStatistic.getClientsStatistic(this.profile?.id!, date))
+    let {startDate, endDate} = this.getStartEnd();
+    (await this._apiStatistic.getClientsStatistic(this.profile?.id!, startDate, endDate))
       .subscribe(_=>{
         this.clients = this._apiStatistic.clients$.value!;
       });
@@ -180,6 +216,7 @@ export class CabinetBAComponent implements OnInit, OnDestroy {
 
   async chooseDays(day: any) {
     day.isToday = true;
+    this.currentDay = day;
     this.days.forEach(item => {
       item.forEach((_: { day: any; isToday: boolean; }) => {
         if (_.day !== day.day){
@@ -190,6 +227,6 @@ export class CabinetBAComponent implements OnInit, OnDestroy {
     let date = new Date(this.today.getFullYear(), this.today.getMonth(), day.day,0,0,0)
     await this.getListClients(date);
     await this.getListRecords(date);
-    await this.getProfit(date);
+    await this.getProfit();
   }
 }

@@ -10,7 +10,7 @@ import {INotificationState} from "./interfaces/INotificationState";
 const initialNotificationState: INotificationState = {
     isLoad: false,
     isReadMessage: false,
-    notification: [],
+    notification: null,
     isNewMessage: false,
 }
 

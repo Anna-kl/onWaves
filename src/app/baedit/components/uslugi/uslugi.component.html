@@ -34,7 +34,7 @@
   <div>
       <ng-container >
     <app-accordion [isUpdate]="isUpdate" [profileId]="profile!.id!"
-    [reload]="isReload" [viewCreate]="false"></app-accordion>
+    [reload]="isReload" [viewCreate]="false"  (setGroup)="setGroup($event)"></app-accordion>
       </ng-container>
   </div> 
 </div>  

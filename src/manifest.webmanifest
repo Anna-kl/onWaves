@@ -1,8 +1,8 @@
 {
-  "name": "OnWaves - сеть онлайн бронирования",
-  "short_name": "OnWaves.Online",
-  "background_color": "#111827",
-  "theme_color": "#111827",
+  "name": "OCPIO - сеть онлайн бронирования",
+  "short_name": "OCPIO",
+  "background_color": "#ffffff",
+  "theme_color": "#67C4B2",
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
@@ -32,13 +32,13 @@
       "purpose": "any"
     },
     {
-      "src": "assets/icons/icon-192-maskable.png",
+      "src": "assets/icons/maskable-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "assets/icons/icon-512-maskable.png",
+      "src": "assets/icons/maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

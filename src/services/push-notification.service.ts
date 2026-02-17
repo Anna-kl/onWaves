@@ -23,12 +23,18 @@ export class PushDebugService {
   constructor(private http: HttpClient) {}
 
   url = environment.Uri;
+  async subscribe(idUser: string){
+      const isPwa = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
+      if (isPwa){
+        this.ensurePwaSubscription(idUser);
+      } else {
+          this.enable(idUser);
+      }
+  }
 
     async ensurePwaSubscription(idUser: string) {
     // проверить, что мы в PWA
-    const isPwa = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
-    console.log('isPWA:', isPwa);
-
+   
     const reg = await navigator.serviceWorker.ready;        // важен SW со scope="/"
     let sub = await reg.pushManager.getSubscription();
     if (!sub) {
@@ -46,8 +52,9 @@ export class PushDebugService {
           console.log(`pwa подписался - ${result.data}`);
           // alert('Подписка сохранена на сервере. Теперь можно отправить тест.');
       }
-    })
+    });
   }
+  
 
   async enable(id: string) {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -86,7 +93,7 @@ export class PushDebugService {
           // alert('Подписка сохранена на сервере. Теперь можно отправить тест.');
       }
     });
-   
+  
   }
 
   sendTest() {

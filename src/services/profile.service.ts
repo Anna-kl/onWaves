@@ -22,13 +22,17 @@ export class ProfileService {
   constructor(private http: HttpClient, private busService: BusService) {
   }
   public listClientsCard$ = new BehaviorSubject<IResponse|null>(null);
-  createProfile(profile: IProfile, token: any): Observable<IResponse>{
+  createProfile(profile: IProfile, token: string): Observable<IResponse>{
     let  headers: HttpHeaders = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token.token);
-    const profileUser: ProfileUser = {
-      Name: JSON.stringify({Name: profile.name, Family: profile.family}),
+    headers = headers.append('Authorization', 'Bearer ' + token);
+    let profileUser: ProfileUser = {
+      Name: {Name: profile.name, Family: profile.family},
+ 
       UserType: UserType.User
     };
+    if (Object.keys(profile).includes('email')){
+      profile.email = profile['email']
+    }
     return this.http.post<IResponse>(this.url, profileUser, {headers});
   }
 

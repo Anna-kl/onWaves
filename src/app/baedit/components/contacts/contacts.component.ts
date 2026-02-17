@@ -25,7 +25,6 @@ declare const ymaps: any;
 })
 
 
-
 export class ContactsComponent implements OnInit{
 
 
@@ -33,6 +32,11 @@ export class ContactsComponent implements OnInit{
   strAddress: string = '';
 
   change($event: any,arg1: string) {
+    if (arg1 === 'site')
+    if ($event.length == 1 && $event[0] !== 'h'){
+      if (this.profile)
+        this.profile.webSite = 'https://'+ $event
+    }
     this.isEdit = true;
   }
 

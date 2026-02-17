@@ -157,27 +157,7 @@ export class ProfileBAComponent implements OnInit {
           error: err => console.error('Ошибка sendWhoisVisit', err)
         });
     }
-      // this._api.translateLink(link).subscribe(
-      //     result => {
-      //           this._api.getMainTags(result.data).pipe(
-      //             tap(res => {
-      //                 this._title.setTitle(`${this.profile?.name!} ${this.profile.address?.city} онлайн-запись onWaves`);
-      //                 this._meta.updateTag({
-      //                                 name: 'description',
-      //                                 content: `${this.profile.name} ${this.profile.about} ${this.profile.address?.city} онлайн запись`
-      //             })
-      //           )
-      //         });
-      //       // this.id = result.data;
-      //       // this._profileData.transferId(result.data);
-      //     }
-      // );
-    // }
-    // this._profileData.sendAddress.subscribe(result => {
-    //   if (result) {
-    //     this.onAddress(result);
-    //   }
-    // });
+
 
     }
     onActivate($event: any) {
