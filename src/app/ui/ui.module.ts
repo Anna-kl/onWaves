@@ -6,7 +6,7 @@ import {CommonModule, NgOptimizedImage} from "@angular/common";
 import {MenuModule} from "primeng/menu";
 import {ButtonModule} from "primeng/button";
 import {ToastModule} from "primeng/toast";
-import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
+import { NgbCollapse, NgbPanelTitle } from "@ng-bootstrap/ng-bootstrap";
 import {FooterComponent} from "./footer/footer.component";
 import {ProfileBAModule} from "../profile-ba/profile-ba.module";
 import {ReviewsCaruselComponent} from "../static/razrab/razrab.component";
@@ -14,6 +14,8 @@ import {MobmenuComponent} from "./footer/mobmenu/mobmenu.component";
 import {CarouselModule} from "primeng/carousel";
 import {NotificationsComponent} from "./header/notifications/notifications.component";
 import {HeaderBAComponent} from "./header/header-ba/header-ba.component";
+import { SeenDirective } from "./header/notifications/seen.directive";
+import { CommonComponentsModule } from "src/app/common/common.module";
 
 @NgModule({
     declarations: [
@@ -23,11 +25,14 @@ import {HeaderBAComponent} from "./header/header-ba/header-ba.component";
         FooterComponent,
         ReviewsCaruselComponent,
         MobmenuComponent,
-        NotificationsComponent
+        NotificationsComponent,
+        SeenDirective
     ],
     imports: [
-        CommonModule, NgOptimizedImage, MenuModule, ButtonModule, ToastModule, NgbCollapse, CarouselModule, 
-    ],
+    CommonModule, NgOptimizedImage, MenuModule, ButtonModule, ToastModule, NgbCollapse, CarouselModule,
+    NgbPanelTitle,
+    CommonComponentsModule
+],
     exports: [
         HeaderBAComponent,
         HambMenuNoRegisterComponent,
@@ -35,7 +40,8 @@ import {HeaderBAComponent} from "./header/header-ba/header-ba.component";
         FooterComponent,
         ReviewsCaruselComponent,
         MobmenuComponent,
-        NotificationsComponent
+        NotificationsComponent,
+        SeenDirective
     ]
 })
 

@@ -8,25 +8,22 @@ import {IViewNotification} from "../../../DTO/views/notifications/IViewNotificat
 
 @Injectable()
 export class NotificationEffect {
-    constructor(private action$: Actions,
-                private _apiNotification: MessageNotificationService) {
-    }
-    load$ = createEffect(() => this.action$.pipe(
-        ofType(requestAction),
-        switchMap(({request}) => {
-            return this._apiNotification.getNotifications(request).pipe(
-                map((messages:IViewNotification[]) => {
-                    return loadSuccessNotification({
-                        messages: messages
-                    });
-                })
-            )
-        }
-    ),
-        catchError(()=> {
-            return of(loadNotificationFailed())
-        })
-    ))
+  constructor(
+    private actions$: Actions,
+    private api: MessageNotificationService
+  ) {}
 
-
+  load$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(requestAction),
+      switchMap(({ request }) =>
+        this.api.getNotifications(request).pipe(
+          map((messages: IViewNotification[]) =>
+            loadSuccessNotification({ messages })
+          ),
+          catchError(() => of(loadNotificationFailed()))
+        )
+      )
+    )
+  );
 }

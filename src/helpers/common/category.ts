@@ -125,10 +125,11 @@ export function setCategoryState(treeCategory: IViewCategoryTree[]){
 
 
 export function getCategoryLevel2(categories: ICategory[]){
-  let mainCategories = categories.filter(_ => _.parentId === null);
+  let mainCategories = categories.filter(_ => _.parentId === null).map(_ => _.id).filter(_ => _ !== null);
   let result: ICategory[] = [];
+  let temp = categories.filter(_ => mainCategories.includes(_.parentId!));
   mainCategories.forEach(item => {
-    result.push(...categories.filter(_ => _.parentId === item.id));
+    result.push(...temp);
   });
-  return result;
+  return temp;
 }

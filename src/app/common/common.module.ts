@@ -24,6 +24,10 @@ import { ProgressSpinnerModule } from "primeng/progressspinner";
 import { CreateAccordionComponent } from './accordion/create-accordion/create-accordion.component';
 import { MyYComponentComponent } from './maps/my-ycomponent/my-ycomponent.component';
 import { YMapComponent, YMapDefaultFeaturesLayerDirective, YMapDefaultMarkerDirective, YMapDefaultSchemeLayerDirective, YMapFeatureDirective, YMapMarkerDirective } from "angular-yandex-maps-v3";
+import { LoaderOnWavesComponent } from './loader-on-waves/loader-on-waves.component';
+import { InstallBannerComponent } from './banner/install-banner/install-banner.component';
+import { LoaderOcpioComponent } from './loader-ocpio/loader-ocpio.component';
+
 
 
 @NgModule({
@@ -42,11 +46,15 @@ import { YMapComponent, YMapDefaultFeaturesLayerDirective, YMapDefaultMarkerDire
       AddPostComponent,
       CommonLentaComponent,
       CreateAccordionComponent,
-      MyYComponentComponent
+      MyYComponentComponent,
+      LoaderOnWavesComponent,
+      InstallBannerComponent,
+      LoaderOcpioComponent,
+      
   ],
   imports: [
-     YMapComponent, YMapDefaultSchemeLayerDirective, YMapMarkerDirective, YMapFeatureDirective, YMapDefaultMarkerDirective,
-  YMapDefaultFeaturesLayerDirective,
+    YMapComponent, YMapDefaultSchemeLayerDirective, YMapMarkerDirective, YMapFeatureDirective, YMapDefaultMarkerDirective,
+    YMapDefaultFeaturesLayerDirective,
     DatePipe,
     NgForOf,
     DatePipe,
@@ -59,8 +67,8 @@ import { YMapComponent, YMapDefaultFeaturesLayerDirective, YMapDefaultMarkerDire
     ButtonModule,
     ImageCropperModule,
     ProgressSpinnerModule,
-    CommonModule
-  ],
+    CommonModule,
+],
     exports: [
         CalendarComponent,
         RubricMenuComponent,
@@ -71,6 +79,10 @@ import { YMapComponent, YMapDefaultFeaturesLayerDirective, YMapDefaultMarkerDire
         AddPostComponent,
         CommonLentaComponent,
         MyYComponentComponent,
+        LoaderOnWavesComponent,
+        InstallBannerComponent,
+        LoaderOcpioComponent,
+        
     ]
 })
 

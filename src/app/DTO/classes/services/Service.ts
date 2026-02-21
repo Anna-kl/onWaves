@@ -25,7 +25,7 @@ export class Service implements subGroup{
   isTimeUnlimited?: boolean;
   constructor(id: string|null, name: string, gender: Gender[],profileUserId: string, price: IPrice,
               paymentForType: PaymentForType,groupServiceId: string|null,
-              about?: string,  duration?: number, isTimeUnlimited?: boolean, categoryId?: number  ) {
+              about?: string,  duration?: number, isTimeUnlimited?: boolean, categoryId?: number, isChecked?: boolean  ) {
     this.serviceStatus = ServiceStatus.Active;
     this.prepayment = false;
     this.dateModified = new Date();
@@ -41,6 +41,7 @@ export class Service implements subGroup{
     this.isTimeUnlimited = isTimeUnlimited;
     this.id = id;
     this.categoryId = categoryId;
+    this.isChecked = isChecked;
   }
 
   setCheck(flag: boolean){

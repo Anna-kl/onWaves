@@ -22,7 +22,7 @@ export class UserService {
       Family: family
     };
     const profileUser: ProfileUser = {
-      Name: JSON.stringify(viewNameProfile),
+      Name: viewNameProfile,
       UserType: UserType.User
     };
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });

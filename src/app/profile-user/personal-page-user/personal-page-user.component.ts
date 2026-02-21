@@ -11,8 +11,9 @@ import {LoginService} from "../../auth/login.service";
 import { IViewPost } from 'src/app/DTO/views/posts/IViewPost';
 import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
 import { PostService } from 'src/services/posts.service';
-import { filter, forkJoin, mergeMap, of, skipWhile, Subscription, switchMap, tap } from 'rxjs';
+import { filter, forkJoin, mergeMap, Observable, of, skipWhile, Subscription, switchMap, tap } from 'rxjs';
 import { ProfileService } from 'src/services/profile.service';
+import { ICoupon } from 'src/app/DTO/classes/promo/IPoupon';
 
 @Component({
   selector: 'app-personal-page-user',
@@ -30,8 +31,8 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
   hasCoupon = true;
 
   // Значение купона в рублях
-  couponValue = 500;
-  hasCoupon$: any;
+  couponValue = 0;
+  hasCoupon$: Observable<ICoupon|null>|null = null;
   
   constructor(private _storeService: Store,
               private sanitizer: DomSanitizer,
@@ -108,7 +109,7 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
           );
           this.mainProfileCleint = user;
           if(user)
-            this.hasCoupon$ = this._profile.hasCoupon(user.id!);
+            this.hasCoupon$ = this._profile.getCoupon(user.id!);
         // Если нет ни одного запроса — возвращаем пустой поток
         return requests.length ? forkJoin(requests) : of([]);
       })

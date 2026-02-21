@@ -3,4 +3,6 @@ export interface Schedule {
   daysOfWork: Date;
   addDate: string;
   scheduleId: string;
+  canAdd?: boolean;
+  countNew?: number;
 }

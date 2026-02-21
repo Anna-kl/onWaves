@@ -3,13 +3,15 @@ import {environment} from "../enviroments/environment";
 import {HttpClient} from "@angular/common/http";
 import {Record} from "../app/DTO/classes/records/record";
 import {IResponse} from "../app/DTO/classes/IResponse";
-import {BehaviorSubject, tap} from "rxjs";
+import {BehaviorSubject, Observable, tap} from "rxjs";
 
 import {IViewRecordUser} from "../app/DTO/views/records/IViewRecordUser";
 
 import {ISendRecord} from "../app/DTO/requests/ISendRecord";
 import {IViewRecordData} from "../app/DTO/views/records/IViewRecordData";
 import { IViewUpdateTime } from "src/app/DTO/views/records/IViewUpdateTime";
+import { ICoupon } from "src/app/DTO/classes/promo/IPoupon";
+import { ISendPromo } from "src/app/DTO/views/promo/ISendPromo";
 
 @Injectable()
 
@@ -27,9 +29,17 @@ export class RecordService {
   getSale(id: string){
     
   }
+
+  ckeckPin(recordId: string, pin: string): Observable<ISendPromo>{
+    return this.http.post<ISendPromo>(`${this.url}check-coupon`, {recordId, pin});
+  }
   
   saveRecord(id: string, record: Record){
     return this.http.post<IResponse>(`${this.url}add-user/${id}`, record);
+  }
+
+  getCoupon(id: string){
+    return this.http.get<number>(`${this.url}get-coupon/${id}`);
   }
 
   getRecord(id: string){

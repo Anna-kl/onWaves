@@ -70,7 +70,7 @@ import { ShowPhoneCouponComponent } from './popup/show-phone-coupon/show-phone-c
     SetIntervalStartComponent,
     ErrorConfirmRecordComponent,
     CouponNewUserComponent,
-    ShowPhoneCouponComponent
+    // ShowPhoneCouponComponent
   ],
     imports: [
       YMapComponent,

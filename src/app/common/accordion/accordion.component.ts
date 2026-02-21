@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnInit, Output, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GroupService } from '../../../services/groupservice';
 import { Group, GroupShow, GroupShowWithDate, GroupWithDate } from "../../DTO/views/services/IViewGroups";
@@ -29,6 +29,7 @@ import { BehaviorSubject, forkJoin, map, Observable, startWith, Subject, switchM
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AccordionComponent implements OnChanges {
+
   combinedData$: Observable<any[]>|null = null;
   serviceWithout$: Observable<Service[]>|null = null;
   ifExist: boolean = false;
@@ -36,6 +37,20 @@ export class AccordionComponent implements OnChanges {
   combinedData: { isOpen: boolean; group: any; subGroups: Service[]; }[] = [];
   a: Group[] = [];
   mainGroups: Group[] = [];
+  @Output() setGroup = new EventEmitter<Group[]>();
+  @Input() serviceId?: string|null = null;
+
+  expandedIds = signal<Set<string>>(new Set());
+
+  isExpanded = (id: string) => this.expandedIds().has(id);
+
+  toggle(id: string) {
+    const next = new Set(this.expandedIds());
+    next.has(id) ? next.delete(id) : next.add(id);
+    this.expandedIds.set(next);
+  }
+
+  trackById = (_: number, s: Service) => s.id;
 
 
   getPrice(price: IPrice): string | number {
@@ -49,6 +64,8 @@ export class AccordionComponent implements OnChanges {
       return price.price!;
     }
   }
+
+  
   
   // protected readonly getPrice = getPrice;
   isCheckboxChecked: boolean = false;
@@ -154,57 +171,59 @@ export class AccordionComponent implements OnChanges {
         .pipe(map((items: Service[]) => {
           if (items.length > 0)
               this.ifExist = true;
-            items = items.map(_ => new Service(_.id, _.name, _.gender, _.profileUserId, _.price,
-              _.paymentForType, _.groupServiceId, _.about, _.duration, _.isTimeUnlimited)
+            items = items.map(_ => 
+              new Service(_.id, _.name, _.gender, _.profileUserId, _.price,
+              _.paymentForType, _.groupServiceId, _.about, _.duration, _.isTimeUnlimited, undefined, !!this.serviceId && this.serviceId === _.id)
             );
             return items;
           //  return items.map(item =>
           //       item.setCheck( idsChoose.includes(item.id))
           //   );
             
-          }) );
+          }),
+                  tap(result => {
+                                  result
+                                    .filter(sg => sg.isChecked)
+                                    .forEach(sg => {
+                                      // здесь вызываешь тот же обработчик, что раньше по клику
+                                      this.setService(sg);
+                    // или dispatch в store:
+                    // this.store.dispatch(selectService({ group: result.group, service: sg }));
+                  });
+              }) );
 
          
-            // this._groupService.getGroupServices(this.profileId).pipe(
-            //         switchMap((users: any[]) => {
-                    
-            //           // Используем forkJoin, чтобы выполнить второй запрос для каждого элемента массива
-            //           const userDetailRequests = users.map(item => 
-            //             this._groupService.getService(item.id!).pipe(
-            //               map(details => ({
-            //                     isOpen: true,
-            //                     group: item,
-            //                     subGroups: details })) // объединяем каждый user с его details
-            //             )
-            //           );
-            //           // forkJoin ждет завершения всех запросов
-            //           return forkJoin(userDetailRequests);
-            //         })).subscribe(result => {
-            //           this.combinedData = result;
-            //             if ( this.combinedData.length > 0)
-            //                 this.ifExist = true;
-            //         })
-            //       ;
-
-          // this.serviceWithout$.subscribe(result => {
-          //   console.log(result);
-          // });
-      // this.combinedData$ = this.reload$.next();
+          
       this.combinedData$ =
        this._groupService.getGroupServices(this.profileId).pipe(
         switchMap((users: any[]) => {
           this.mainGroups = users;
+          this.setGroup.emit(this.mainGroups);
           if (users.length > 0)
             this.ifExist = true;
           // Используем forkJoin, чтобы выполнить второй запрос для каждого элемента массива
-          const userDetailRequests = users.map(item => 
-            this._groupService.getService(item.id!).pipe(
-              map(details => ({
+          const userDetailRequests = users.map(item =>
+                this._groupService.getService(item.id!).pipe(
+                  map(details => ({
                     isOpen: true,
                     group: item,
-                    subGroups: details })) // объединяем каждый user с его details
-            )
-          );
+                    subGroups: details.map(x => ({
+                      ...x,                                      // распаковываем сервис
+                      isChecked: !!this.serviceId && this.serviceId === x.id,
+                    })),
+                  })),
+                   tap(result => {
+                        result.subGroups
+                          .filter(sg => sg.isChecked)
+                          .forEach(sg => {
+                            // здесь вызываешь тот же обработчик, что раньше по клику
+                            this.setService(sg);
+          // или dispatch в store:
+          // this.store.dispatch(selectService({ group: result.group, service: sg }));
+        });
+    })
+                )
+);
           // forkJoin ждет завершения всех запросов
           return forkJoin(userDetailRequests);
         }))
@@ -281,14 +300,15 @@ export class AccordionComponent implements OnChanges {
 
   changeGroup(subGroup: subGroup) {
     const modalRef = this.modalService.open(ChangeModalGroupComponent);
-    modalRef.componentInstance.groups = this.groups;
+    modalRef.componentInstance.groups = this.mainGroups;
     modalRef.componentInstance.myGroupId = subGroup.groupServiceId;
     modalRef.result.then(
       (res: Group) => {
         if (res) {
           this._groupService.changeGroup(subGroup.id!, res.id!).subscribe(
             result => {
-              console.log('Успешно');
+              this.showSuccess();
+              this.update();
             }
           );
         }

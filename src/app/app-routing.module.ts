@@ -46,6 +46,7 @@ import { PageClient1Component } from './maks/pageClient1/pageClient1.component';
 import { PageClient2Component } from './maks/pageClient2/pageClient2.component';
 import { LentaComponent } from './common/profile/lenta/lenta.component';
 import { ChatMainComponent } from './pages/chat-main/chat-main.component';
+import { ConfirmEmailComponent } from './pages/confirm-email/confirm-email.component';
 
 
 const routes: Routes = [
@@ -60,6 +61,7 @@ const routes: Routes = [
   { path: 'grafik/:id', component: GrafikComponent },
   { path: 'profile-user/:id', component: MyNotesComponent },
   { path: 'oplata/:id', component: OplataComponent },
+   { path: 'confirm-url/:id', component: ConfirmEmailComponent },
   // { path: 'uslugi/:id', component: UslugiComponent },
   { path: 'galereya/:id', component: GalereyaComponent },
   { path: 'static/help', component: HelpComponent },

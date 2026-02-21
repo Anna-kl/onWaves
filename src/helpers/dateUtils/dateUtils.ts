@@ -21,6 +21,15 @@ export function deleteSeconds(time: string){
   }
   return `${timeArray[0]}:${timeArray[1]}:${timeArray[2]}`;
 }
+
+export function toHHMM(time: string): string {
+  // берём первые два компонента
+  const [h = '00', m = '00'] = time.split(':');
+  return `${h.padStart(2,'0')}:${m.padStart(2,'0')}`;
+}
+
+
+
 export function toConstantTime(date: Date) {
   return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),date.getUTCHours(),
       date.getUTCMinutes(),0);
@@ -232,3 +241,23 @@ export function toHoursMinutesString(text: string){
 
 
 
+export function parseDotDate(s: string): Date | null {
+  const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s);
+  if (!m) return null;
+  const [, dd, mm, yyyy] = m;
+  const d = new Date(+yyyy, +mm - 1, +dd);
+  return d.getFullYear() === +yyyy && d.getMonth() === +mm - 1 && d.getDate() === +dd ? d : null;
+}
+
+
+export function isString(value: any): value is string {
+  return typeof value === 'string';
+}
+
+export function formatDateToString(date: Date): string {
+  const day = String(date.getDate()).padStart(2, '0');        // 01–31
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // 01–12
+  const year = date.getFullYear();                            // 2025
+
+  return `${day}.${month}.${year}`;
+}

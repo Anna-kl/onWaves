@@ -77,8 +77,15 @@ agm-map {
   }
 
   .modal-list {
-    padding: 20px;
+    padding: 5px;
   }
+}
+
+.form-control textarea,
+textarea.form-control,
+textarea.my-textarea {
+  resize: vertical !important;
+  overflow: auto !important;
 }
 
 .line-gray-ba {
@@ -373,3 +380,83 @@ agm-map {
     height: 300px;
   }
 }
+
+
+
+
+.social-editor {
+  max-width: 480px;
+  margin: 1rem auto;
+  font-family: system-ui, sans-serif;
+}
+
+.social-list {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  gap: .5rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .4rem .6rem;
+    border-radius: 6px;
+    background: #f4f4f4;
+    font-size: .875rem;
+
+    a { color: inherit; text-decoration: none; }
+    .icon { font-size: 1rem; }
+  }
+
+  /* базовый (если домен не распознан) */
+  .social--generic { background:#e0e0e0; }
+
+  /* примеры конкретных сетей */
+  .social--vk      { background:#0077ff; color:#fff; }
+  .social--tg      { background:#29a9ea; color:#fff; }
+  .social--twitter { background:#1da1f2; color:#fff; }
+  .social--linkedin{ background:#0072b1; color:#fff; }
+}
+
+.add-btn,
+.add-form button {
+  appearance: none;
+  border: none;
+  border-radius: 6px;
+  padding: .5rem 1rem;
+  font-size: .9rem;
+  cursor: pointer;
+  background: #007bff;
+  color: #fff;
+  transition: background .2s;
+
+  &:hover { background:#0063d1; }
+}
+
+.add-form {
+  display: none;            /* скрыто по умолчанию */
+  gap: .5rem;
+  flex-wrap: wrap;
+
+  input {
+    flex: 1 1 180px;
+    padding: .45rem .6rem;
+    font-size: .9rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  .cancel {
+    background:#aaa;
+
+    &:hover { background:#888; }
+  }
+}
+
+/* показ формы */
+.add-form--open { display: flex; }
+
+

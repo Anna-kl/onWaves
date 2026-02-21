@@ -14,13 +14,18 @@ import {IViewBusinessProfile} from "../../DTO/views/business/IViewBussinessProfi
   providers: [ScheduleService]
 })
 export class CalendarComponent implements OnChanges {
+
   days: IViewCalendar[][] = [];
-  today: Date|null = new Date();
+  @Input() today: Date|null = new Date();
   choosedDay?: IChooseDayOfCalendar;
   user!: IViewBusinessProfile | null;
   @Output() onDate = new EventEmitter<IChooseDayOfCalendar>();
   @Output() clearInterval = new EventEmitter<boolean>();
   @Input('userId') userId: string|null = null;
+  @Input() period?: string;
+  @Input() isCabinet:boolean = false;
+  @Input() type:string = 'BA';
+  @Input() isUpdate?: string;
   workDays: Schedule[] = [];
   year = new Date().getFullYear();
   month = new Date().getMonth();
@@ -28,9 +33,36 @@ export class CalendarComponent implements OnChanges {
 
   }
   async ngOnChanges(): Promise<void> {
+    // if(this.type !== 'User' && this.userId && this.today){
+    //   this._api.readCalendar(this.userId, this.today).subscribe(result => {
+    //       console.log(result);
+    //   });
+    // }
     if (this.userId) {
       await this.getSchedule(this.userId!, this.year, this.month);
     }
+    if (this.isUpdate){
+      await this.getSchedule(this.userId!, this.year, this.month);
+    }
+
+  }
+
+  checkedInterval(_t25: IViewCalendar) {
+    if (this.today && this.period){
+      let startDate = new Date(this.today);
+      switch (this.period){
+        case 'today': { startDate.setDate(this.today.getDate() - 1); break; }
+        case 'week': { startDate.setDate(this.today.getDate() - 7); break; }
+        case 'month': { startDate.setMonth(this.today.getMonth()-1); break; }
+
+    }
+      let tempDttm = new Date(this.year, this.month, _t25.day, 0,0,0,0);
+      if (tempDttm < this.today && tempDttm > startDate){
+        return true;
+      }
+     
+    }
+     return false;
   }
 
   async getSchedule(id: string, year: number, month: number) {
@@ -38,6 +70,11 @@ export class CalendarComponent implements OnChanges {
       .subscribe(async _ => {
         this.workDays = this._api.getWorkDayInMonth$.value;
         await this.changeToday(year, month, this.today ? this.today.getDate() : undefined);
+        if(this.type !== 'User' && this.userId && this.choosedDay?.date){
+            this._api.readCalendar(this.userId, this.choosedDay?.date).subscribe(result => {
+                console.log(result);
+            });
+        }
         this.onDate.emit(this.choosedDay);
       });
   }
@@ -50,7 +87,7 @@ export class CalendarComponent implements OnChanges {
     } else {
       this.month = month;
     }
-    this.checkIsToday();
+    // this.checkIsToday();
     await this.getSchedule(this.userId!, this.year, this.month);
   }
 
@@ -70,7 +107,7 @@ export class CalendarComponent implements OnChanges {
     }else{
       this.month = month;
     }
-    this.checkIsToday();
+    // this.checkIsToday();
     await this.getSchedule(this.userId!, this.year, this.month);
   }
 
@@ -83,17 +120,21 @@ export class CalendarComponent implements OnChanges {
     };
     this.days.forEach(item => {
       item.forEach((sub: any) => {
+        sub.isChecked = this.period === undefined ? false : this.checkedInterval(sub);
         let day = this.workDays
           .find(_=> new Date(_.daysOfWork).getDate() === sub.day);
           if (day){
           sub.ifExist = true;
           sub.dayId = day.id;
-          sub.isChecked = false;
+          sub.canAdd = day.canAdd;
+          sub.countNew = day.countNew;
+          // sub.isChecked = !this.period ? false : this.checkedInterval(sub);
+          sub.isToday = new Date(day.daysOfWork).getDate() === this.today?.getDate() ? true : false;
         }
           if (this.today) {
-            if (sub.day === this.today.getDate()) {
+            if (sub.day === this.today.getDate() && this.month === this.today.getMonth()) {
               sub.isChecked = true;
-              sub.ifExist = true;
+              // sub.ifExist = true;
               if (this.choosedDay) {
                 this.choosedDay.dayId = this.workDays
                     .find(_ => new Date(_.daysOfWork).getDate() === sub.day)?.id;
@@ -101,19 +142,29 @@ export class CalendarComponent implements OnChanges {
               }
             }
           }
+         
       });
     });
-
   }
   chooseDay(d: IViewCalendar) {
+        this.days = this.days.map(week => 
+        week.map(x => x.dayId === d.dayId ? { ...x, countNew: 0 } : x)
+      );
       this.today = new Date(this.year, this.month, d.day, 0,0,0);
       this.changeToday(this.year, this.month);
       this.choosedDay = {
         date: this.today,
         ifExist: d.ifExist,
         dayId: d.dayId,
-        isLast: d.isLast
+        isLast: d.isLast,
+        canAdd: d.canAdd,
+        countNew: d.countNew,
       };
+       if(this.type !== 'User' && this.userId && this.choosedDay?.date){
+            this._api.readCalendar(this.userId, this.choosedDay?.date).subscribe(result => {
+                console.log(result);
+            });
+        }
       this.onDate.emit(this.choosedDay);
     }
 

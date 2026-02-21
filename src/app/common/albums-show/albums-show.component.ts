@@ -86,8 +86,14 @@ export class AlbumsShowComponent implements OnChanges {
 
     showAlbum2(album: any) {
         this.getScreenSize();
-        if (this.screenWidth > 500) {
-            const modalRef = this.modalService.open(ModalAlbumComponent);
+        // if (this.screenWidth > 500) {
+            const modalRef = this.modalService.open(ModalAlbumComponent, {
+ centered: true,          // вертикально по центру
+  size: 'xl',              // шире окно
+  scrollable: true,        // прокрутка внутри body
+  backdrop: 'static',
+  windowClass: 'gallery-modal'
+});
             // Передает выбранный albumId в модальное окно
             modalRef.componentInstance.albumId = album.id;
             modalRef.componentInstance.albumName = album.name;
@@ -95,15 +101,15 @@ export class AlbumsShowComponent implements OnChanges {
             modalRef.result.then(result => {
                 this.loadAlbum();
             });
-        } else {
-            this._route.navigate(['/common/albums-phone/'],
-                {
-                    queryParams: {
-                        albumId: album.id, albumName: album.name,
-                        isEdit: this.isEdit, page: this._route.url
-                    }
-                });
-        }
+        // } else {
+        //     this._route.navigate(['/common/albums-phone/'],
+        //         {
+        //             queryParams: {
+        //                 albumId: album.id, albumName: album.name,
+        //                 isEdit: this.isEdit, page: this._route.url
+        //             }
+        //         });
+        // }
 
         this.setAlbum(album);
     }

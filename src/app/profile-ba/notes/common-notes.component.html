@@ -16,7 +16,8 @@
         <div class="cont-horiz-start margin-bottom50 w100" *ngIf="!isMyNote()">
           <a class="cont-horiz btn-back" (click)="returnToNote()">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M7.43353 12.5665C7.12111 12.254 7.12111 11.7475 7.43353 11.4351L15.4335 3.4351C15.746 3.12268 16.2525 3.12268 16.5649 3.4351C16.8773 3.74752 16.8773 4.25405 16.5649 4.56647L9.13059 12.0008L16.5649 19.4351C16.8773 19.7475 16.8773 20.254 16.5649 20.5665C16.2525 20.8789 15.746 20.8789 15.4335 20.5665L7.43353 12.5665Z" fill="#006174"/>
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M7.43353 12.5665C7.12111 12.254 7.12111 11.7475 7.43353 11.4351L15.4335 3.4351C15.746 3.12268 16.2525 3.12268 16.5649 3.4351C16.8773 3.74752 16.8773 4.25405 16.5649 4.56647L9.13059 12.0008L16.5649 19.4351C16.8773 19.7475 16.8773 20.254 16.5649 20.5665C16.2525 20.8789 15.746 20.8789 15.4335 20.5665L7.43353 12.5665Z"
+               fill="#67C4B2"/>
             </svg>
           </a>
           <div>
@@ -24,7 +25,7 @@
           </div>
         </div> 
         <div class="w100 margin-bottom30" >
-          <app-calendar (onDate)="onDate($event)" [userId]="id" >
+          <app-calendar (onDate)="onDate($event)" [userId]="id" [today]="today" [isUpdate]="recordId">
           </app-calendar>
         </div>
         <h2 *ngIf="!isWorkDay">

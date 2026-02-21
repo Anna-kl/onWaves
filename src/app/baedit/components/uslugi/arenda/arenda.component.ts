@@ -68,8 +68,8 @@ export class ArendaComponent implements OnInit, OnDestroy {
   changeService: Service|null = null;
   limitServiceName(event: any) {
     const inputText = event.target.value;
-    if (inputText.length > 70) {
-      event.target.value = inputText.substring(0, 70); // Truncate to 70 characters
+    if (inputText.length > 50) {
+      event.target.value = inputText.substring(0, 50); // Truncate to 70 characters
     }
     this.characterCount = event.target.value.length;
   }
@@ -277,7 +277,7 @@ export class ArendaComponent implements OnInit, OnDestroy {
     }
     if (flagValidation) {
       let service: Service = new Service (this.service ? this.service.id : null,
-        data['name'], gender,this.profile?.id!, data['price'], PaymentForType.ForHour,
+        data['name'].replace('\n',''), gender,this.profile?.id!, data['price'], PaymentForType.ForHour,
         data['group'].id !== '' ? data['group']['id'] : null, 
         data['about'], data['duration'], false, this.category?.id);
        

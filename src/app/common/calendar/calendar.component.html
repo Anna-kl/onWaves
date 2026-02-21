@@ -18,7 +18,7 @@
     </div> 
     <!-- календарь start-->
     <!-- Дни недели -->
-    <div class="cont-horiz-around w100 calendar_width_m" style="">
+    <div class="cont-horiz-around w100 calendar_width_m" >
       <div class="day_off">пн</div>
       <div class="day_off">вт</div>
       <div class="day_off">ср</div>
@@ -29,13 +29,16 @@
     </div>
     <!-- Дни месяца -->
     <div class="cont-horiz-around w100 calendar_width_m"  *ngFor="let week of days">
-      <div  *ngFor="let d of week" class="cont-horiz-between"
-        [class.day_off]="!d.ifExist && !d.isChecked"
-        [class.calendar_work_day]="d.ifExist"
+      <div  *ngFor="let d of week" class="day"
+        [class.out]="!d.ifExist && !d.isChecked"
+        [class.working]="d.ifExist"
         [class.last_day]="d.isLast"
-        [class.calendar_click]="d.isChecked" 
+        [class.today]="d.isToday"
+         [class.calendar_click]="d.isChecked "
         (click)="chooseDay(d)">
         {{d.day}}
+           <span class="dot" [attr.data-count]="d.countNew " *ngIf="d.countNew && d.countNew > 0 && type !== 'User'"></span>
+            <span class="plus" aria-hidden="true" *ngIf="d.canAdd">+</span>
       </div>
     </div>
     <!-- календарь end --> 

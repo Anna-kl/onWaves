@@ -1,4 +1,4 @@
- <div class="parent-grey-light">
+ <div class="parent-grey-light main-page">
   <div class="disp1 top170" >
     <div class="cont-horiz wrap768">
       <!--- Левая колонка --->
@@ -14,6 +14,7 @@
         </div> 
           <app-calendar            
             (onDate)="onDate($event)"
+            [type]="'User'"
             [userId]="id">
           </app-calendar> 
         <app-set-interval-start 
@@ -33,7 +34,7 @@
         <!--       </div> -->
         <!--     </div>  -->
         <!--  </div>-->
-        <div class="w100 cont-horiz " style="margin-top: 20px">
+        <div class="w100 cont-horiz cta-fixed" >
           <a class="next-btn-calendar" (click)="nextConfirm()"
             [ngClass]="{'btn-green': isChoosed, 'btn-gray': !isChoosed}">
             Далее

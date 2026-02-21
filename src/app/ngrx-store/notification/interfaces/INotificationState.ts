@@ -5,5 +5,5 @@ export interface INotificationState {
     isLoad: boolean;
     isNewMessage: boolean;
     isReadMessage: boolean;
-    notification: IViewNotification[];
+    notification: IViewNotification[]|null;
 }

@@ -1,5 +1,7 @@
-<a name="top"></a>
+
 <div class=" cont-horiz-center-start modal-reg-ba1 "><!-- Зеленый -->
+  <div class="modal-list" #modalBody>        <!-- скролл-контейнер -->
+    <div id="eTop" #topAnchor></div>  
   <div class="modal-list" ><!-- голубой -->
     <div *ngIf="numberStreetPage===1" class="head-1-12" style="text-align: center;">
       Основная информация
@@ -52,7 +54,7 @@
                 <div class="cont-horiz-start-start w100" style="gap: 10px 10px;">
                   <!-- Неизменяемая часть адреса -->
                   <div class="cont-horiz" style="height: 50px; text-align: center;">
-                    onwaves.online/
+                    ocpio.ru/
                   </div>
                   <!-- Часть адреса, заполняемая БА  [placeholder]="urlProfileLocal" -->
 
@@ -80,14 +82,14 @@
                 </div>
                 <div class="container-textarea">
                   <textarea
-                    class="textarea-ba-profile" rows="5" cols="45"
+                    class="textarea-ba-profile form-control" cols="45"
                     type="text"
                     formControlName="about"
                     [maxlength]="TEXT_LENGTH"
                     placeholder="Добавьте описание">
                   </textarea>
                   <span class="textarea-count">
-                    {{remainingText/TEXT_LENGTH}}
+                    {{remainingText}}
                   </span>
                 </div>
               </div>
@@ -181,21 +183,25 @@
                             </div>
                           </div>
                         </div>
-
                       </div>
                     </div>
-                    <div class="txt-green-light margin-top10">
-                      Разместите ссылку на сайт вашей организации или страницу в социальных сетях.
-                    </div>
+                    <!-- <div class="txt-green-light margin-top10">
+                    Страница в социальных сетях
+                      <div class="input-line cont-horiz-start" >
+                            <input class="form-control borderNone" type="text" size="16" id="webSite"
+                            formControlName="socialLink"   placeholder="https://vk.com/"  />
+                                
+                          </div>
+                    </div> -->
                     <br/>
                     <!-- Контакты end -->
                   </div>
                   <!-- Правая колонка -->
                   <div class="border2px cont-vert-start-start contact_col_50">
                     <!-- Адрес start -->
-<app-select-address [profile]="null"
-   (changeAddress)="changeAddress($event)">
-</app-select-address>
+                        <app-select-address [profile]="null"
+                          (changeAddress)="changeAddress($event)">
+                        </app-select-address>
                   </div>
                   <!-- Адрес end -->
                 </div>
@@ -248,7 +254,7 @@
                       [ngStyle]="{ 'display': 'block' }"  >
                 Назад
               </button>
-              <button type="button" class="btn-green"   [ngStyle]="{'background-color': isFormValid() ? 'gray' : '#006174' }"
+              <button type="button" class="btn-green"   [ngStyle]="{'background-color': isFormValid() ? 'gray' : '#67C4B2' }"
                       (click)="increment()" [disabled]="isFormValid()">
                 {{textBtn}}
               </button>
@@ -257,4 +263,6 @@
       </form>
     </div>
   </div>
+</div>
+<p-toast position="bottom-center" ></p-toast>
 </div>

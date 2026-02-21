@@ -166,3 +166,138 @@
 .custom-close:hover {
   color: #000;
 }
+
+
+.pin-btn{
+  --pin-bg:#ffffff; --pin-fg:#111827; --pin-br:#d1d5db; --pin-hover:#f3f4f6; --pin-focus:rgba(59,130,246,.2);
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:.55rem .9rem; border-radius:999px; border:1px solid var(--pin-br);
+  background:var(--pin-bg); color:var(--pin-fg); font:600 14px/1.1 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  box-shadow:0 1px 2px rgba(0,0,0,.04); cursor:pointer; transition:.15s ease;
+}
+.pin-btn:hover{ background:var(--pin-hover); transform:translateY(-1px); }
+.pin-btn:active{ transform:translateY(0); }
+.pin-btn:focus-visible{ outline:none; box-shadow:0 0 0 4px var(--pin-focus); }
+.pin-ic{ width:16px; height:16px; }
+@media (prefers-color-scheme: dark){
+  .pin-btn{ --pin-bg:#0b0c10; --pin-fg:#e5e7eb; --pin-br:#1f2937; --pin-hover:#111827; --pin-focus:rgba(96,165,250,.25); }
+}
+
+
+
+/* Бренд-переменные (подставьте свои хексы; будут использованы и в тёмной теме) */
+.theme-brand{
+  --brand-surface:#ffffff;
+  --brand-text:#0f172a;
+  --brand-border:#e6e6eb;
+
+  --brand-primary:#0ea5a2;        /* ваш акцентный */
+  --brand-primary-600:#0d9488;
+
+  --success:#22c55e;              /* зелёный успех */
+  --success-600:#16a34a;
+  --success-ink:#065f46;
+  --success-bg:#ecfdf5;
+}
+
+@media (prefers-color-scheme: dark){
+  .theme-brand{
+    --brand-surface:#0b0c10;
+    --brand-text:#e5e7eb;
+    --brand-border:#1f2937;
+
+    --success-bg:#052e23;         /* мягкий тёмно-зелёный фон */
+    --success-ink:#d1fae5;
+  }
+}
+
+/* Плашка успеха */
+.coupon-banner{
+  display:flex; align-items:center; gap:.75rem;
+  padding:.65rem .8rem;
+  background:var(--success-bg);
+  border:1px solid var(--success);
+  border-radius:12px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  position:relative;
+  overflow:hidden;
+}
+
+/* Аккуратная цветная «лента» слева */
+.coupon-banner::before{
+  content:"";
+  position:absolute; inset:0 0 0 auto; left:0;
+  width:4px; background:linear-gradient(180deg,var(--success) 0%, var(--success-600) 100%);
+}
+
+/* Иконка-галочка */
+.cb-ic{ width:18px; height:18px; flex:0 0 auto; color:var(--success-600); }
+
+/* Текстовая часть */
+.cb-main{ display:flex;  gap:.15rem; min-width:0; }
+.cb-title{ font:700 14px/1.2 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color:var(--success-ink); }
+.cb-sub{ display:flex; align-items:center; gap:.4rem; color:var(--brand-text); font:500 13px/1.2 system-ui,-apple-system; opacity:.9; }
+.cb-dot{ opacity:.5; }
+
+/* Чип со скидкой */
+.cb-chip{
+  display:inline-flex; align-items:center; gap:.35rem;
+  padding:.18rem .5rem; border-radius:999px;
+  background:rgba(34,197,94,.12); /* прозрачный зелёный для светлой темы */
+  border:1px solid var(--success);
+  color:var(--success-600); font-weight:700;
+}
+
+/* Кнопка «Отменить» как текст-ссылка */
+.cb-action{
+  margin-left:auto; flex:0 0 auto;
+  background:transparent; border:0; cursor:pointer;
+  color:var(--brand-primary); font:600 13px/1 system-ui,-apple-system;
+  padding:.25rem .35rem; border-radius:8px;
+}
+.cb-action:hover{ color:var(--brand-primary-600); text-decoration:underline; }
+.cb-action:focus-visible{ outline:none; box-shadow:0 0 0 4px rgba(14,165,162,.25); }
+
+/* Адаптация для узких контейнеров */
+@media (max-width:420px){
+  .cb-sub{ flex-wrap:wrap; }
+  .cb-action{ margin-left:0; }
+}
+
+
+.badge-new{
+  display:inline-flex; align-items:center; justify-content:center;
+  height:20px; padding:0 8px; margin-left:6px;
+  border-radius:999px;
+  background:#dee671;          /* чёрный фон */
+  color:#fff;
+  font-size:11px; font-weight:800; letter-spacing:.04em;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  line-height:1; user-select:none;
+}
+
+/* вариант с контуром (если нужен более лёгкий вид) */
+.badge-new--outline{
+  background:transparent; color:#111; border:2px solid #111;
+}
+
+/* маленькая точка рядом с NEW (новые события) */
+.badge-new::before{
+  content:""; width:6px; height:6px; border-radius:50%;
+  background:#ff3b30; margin-right:6px;
+}
+
+/* опционально — пульс точки */
+.badge-new--pulse::before{
+  position:relative;
+}
+.badge-new--pulse::after{
+  content:""; position:absolute; left:-1px; top:-1px;
+  width:8px; height:8px; border-radius:50%;
+  border:2px solid rgba(255,59,48,.5);
+  animation:pulse 1.8s ease-out infinite;
+}
+@keyframes pulse{
+  0% { transform:scale(.6); opacity:.9 }
+  100% { transform:scale(2.2); opacity:0 }
+}

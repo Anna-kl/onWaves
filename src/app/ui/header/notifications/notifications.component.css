@@ -44,3 +44,27 @@
 .tab50{  
   width:calc( (100% + 60px)/2 ) 
 } 
+
+
+
+.card-row .meta{ display:flex; align-items:center; gap:8px; color:#64748b; font-size:13px; }
+.card-row .ok{ font-size:16px; color:#20d0b5; }
+
+.user{ display:flex; align-items:center; gap:8px; margin:8px 0 6px; }
+.avatar{ width:28px; height:28px; border-radius:50%; background:#e6f7f3; }
+.name{ font-weight:700; color:#0f172a; }
+
+.title{ color:#0f172a; font-weight:600; margin-bottom:6px; }
+.subline{ display:flex; gap:8px; margin-bottom:6px; justify-content: right; }
+
+.chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px;
+  border:1px solid transparent; user-select:none;
+}
+.chip .ico{ width:16px; height:16px; }
+
+.chip--time{ background:#ecfeff; color:#0e7490; border-color:#a5f3fc; }       /* бирюзовый */
+.chip--free{ background:#f1f5f9; color:#334155; border-color:#cbd5e1; }       /* нейтральный */
+
+.desc{ color:#20d0b5; margin-top:4px; }

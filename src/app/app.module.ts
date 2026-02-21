@@ -1,4 +1,4 @@
-import {LOCALE_ID, NgModule} from '@angular/core';
+import {LOCALE_ID, NgModule, isDevMode} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AppRoutingModule } from './app-routing.module';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -62,10 +62,8 @@ import {RubricComponent} from "./baedit/components/rubric/rubric.component";
 import {MenueditbaprofileComponent} from "./baedit/menu-ba-edit/menueditbaprofile.component";
 import {BAEditComponent} from "./baedit/baedit.component";
 import {ProfileDataEditService} from "./baedit/services/ba-edit-service";
-import {ProfileBAEditRouting} from "./baedit/ba-edit-routing";
 import {MainProfileComponent} from "./baedit/components/main-profile/main-profile.component";
 import {UslugiComponent} from "./baedit/components/uslugi/uslugi.component";
-import {AccordionComponent} from "./common/accordion/accordion.component";
 import {ContactsComponent} from "./baedit/components/contacts/contacts.component";
 import { registerLocaleData } from '@angular/common';
 import localeRu from '@angular/common/locales/ru';
@@ -154,6 +152,15 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { EffectsModule } from '@ngrx/effects';
 import { provideYConfig, YConfig
  } from 'angular-yandex-maps-v3';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { InsertPinCodeComponent } from './components/modals/insert-pin-code/insert-pin-code.component';
+import { loadAIReducer, reducersAI } from './ngrx-store/aiStore/ai.reducers';
+import { AIEffect } from './ngrx-store/aiStore/effect/ai.effect';
+import { RegisterEmailComponent } from './components/modals/register-profile/register-email/register-email.component';
+import { ConfirmEmailComponent } from './pages/confirm-email/confirm-email.component';
+import { RegisterEmailCodeComponent } from './components/modals/register-profile/register-email-code/register-email-code.component';
+import { EmailSanitizeDirective } from './components/modals/services/email.directive';
+
 
 
 const mapConfig: YConfig  = {
@@ -168,6 +175,7 @@ registerLocaleData(localeRu, 'ru');
 // registerLocaleData(localeRu, 'ru');
 @NgModule({
   declarations: [
+    EmailSanitizeDirective,
     ChatMainComponent,
     AppComponent,
     MainPageComponent,
@@ -239,7 +247,11 @@ registerLocaleData(localeRu, 'ru');
     DeleteImageAlbumComponent,
     AlbumPhoneComponent,
     FotoPhoneComponent,
-    PageClient1Component
+    PageClient1Component,
+    InsertPinCodeComponent,
+    RegisterEmailComponent,
+    ConfirmEmailComponent,
+    RegisterEmailCodeComponent
   ],
     imports: [
       NgxMaskDirective,
@@ -275,18 +287,27 @@ registerLocaleData(localeRu, 'ru');
       //     appId: "1:625145012665:web:b19feea8ea4bd2679fd668",
       //     measurementId: "G-T8F0R2G5YN"
       // }),
-      EffectsModule.forFeature([NotificationEffect, LinkEffect]),
+      EffectsModule.forFeature([NotificationEffect, LinkEffect, AIEffect]),
       EffectsModule.forRoot([]),
       StoreModule.forFeature('notification', reducers),
       StoreModule.forFeature('link', reducersLink),
+       StoreModule.forFeature('aiStore', reducersAI),
       StoreModule.forRoot({
           modeleReducerPoint: stateReducerMainClient, baClientReducer: stateReducerBAClient,
-          checedIdClient: stateReducerChecedIDClient, updateGallery: loadUpdateReducer
+          checedIdClient: stateReducerChecedIDClient, updateGallery: loadUpdateReducer,
+          aiReducer: loadAIReducer
+          
       }),
       StoreDevtoolsModule.instrument({maxAge: 25, logOnly: environment.production}),
       CalendarModule, AutocompleteLibModule, NgScrollbar, ScrollViewport,
       ClipboardModule,
       GalleriaModule,
+      ServiceWorkerModule.register('ngsw-worker.js', {
+        enabled: !isDevMode(),
+        // Register the ServiceWorker as soon as the application is stable
+        // or after 30 seconds (whichever comes first).
+        registrationStrategy: 'registerWhenStable:30000'
+      }),
       ],
   providers: [NgbDropdown,ProfileDataEditService, BusService,LoginService,   provideNgxMask(),
     { provide: LOCALE_ID, useValue: 'ru' }, provideYConfig(mapConfig)],

@@ -3,13 +3,13 @@ import {IFreeSlotSchedule} from "../../../DTO/views/schedule/IFreeSlotSchedule";
 import {compareTimeHour, setTime, toHoursMinutesString} from "../../../../helpers/dateUtils/dateUtils";
 import {IChooseDayOfCalendar} from "../../../DTO/views/calendar/IChooseDayOfCalendar";
 import {ScheduleService} from "../../../../services/schedule.service";
-import {BehaviorSubject, map, Observable} from "rxjs";
+import {BehaviorSubject, EMPTY, map, Observable, shareReplay, take, tap} from "rxjs";
 
 
 @Component({
   selector: 'app-set-interval-start',
   templateUrl: './set-interval-start.component.html',
-  styleUrls: ['./set-interval-start.component.css'],
+  styleUrls: ['./set-interval-start.component.scss'],
   changeDetection: ChangeDetectionStrategy.Default
 })
 
@@ -24,29 +24,44 @@ export class SetIntervalStartComponent implements OnChanges {
   @Input() duration: number = 0;
   @Input() day: IChooseDayOfCalendar|null = null;
   @Output() setInterval = new EventEmitter<IChooseDayOfCalendar|null>();
+  @Input() start?: string;
+  @Input() errorEmpty: boolean = false;
   constructor(private  _api: ScheduleService,) {
 
   }
 
+
+private lastKey?: string; // чтобы не дёргать одинаковое
   async getFreeSlotForDay(day: IChooseDayOfCalendar) {
     if(day.dayId) {
       this.dayId = day.dayId;
       this.dateRecord =  new Date(Date.UTC(day.date!.getFullYear(), day.date!.getMonth(),
         day.date!.getDate()));
-      this.freeSlots$ = await this._api.getFreeSlotForDay(this.id!, this.duration, this.dateRecord.toDateString(), day.dayId);
-      this.freeSlots$ = this.freeSlots$.pipe(map(item => this.prepareFreeSlots(item, day)));
-      // (await this._api.getFreeSlotForDay(this.id!, this.duration, this.dateRecord.toDateString(), day.dayId))
-      //   .subscribe(async _ => {
-      //     this.freeSlots = this._api.freeSlotForDay$.value;
-      //     if (day.date?.toDateString() === new Date().toDateString()){
-      //       this.freeSlots = this.freeSlots.filter(_ => compareTimeHour(_.start.toString(), new Date()));
-      //     }
-      //     this.freeSlots.forEach(item => {
-      //       item.start = toHoursMinutesString(item.start as string);
-      //       // item.start = `${items[0]}:${items[1]}`;
-      //       item.isChoose = false;
-      //     });
-      //   });
+        console.log(this.lastKey);
+          // if (this.lastKey !== this.dateRecord.toDateString()) {
+          const src$ = this._api
+            .getFreeSlotForDay(this.id!, this.duration,   this.dateRecord.toDateString(), day.dayId)
+            .pipe(
+              map(items => this.prepareFreeSlots(items, day)),
+            
+            );
+
+          this.freeSlots$ = src$;             // для шаблона (| async)
+          this.lastKey = this.dateRecord.toDateString();
+
+          if (this.start) {
+            src$                                   // подписываемся на ТУ ЖЕ «разделённую» струю
+              .pipe(
+                take(1),
+                tap(items => {
+                  const found = items.find(x => x.start === this.start);
+                  if (found) this.chooseInterval(found);
+                })
+              )
+              .subscribe();
+          }
+        
+
     }
   }
 
@@ -70,9 +85,11 @@ export class SetIntervalStartComponent implements OnChanges {
 
   chooseInterval(slot: IFreeSlotSchedule){
     slot.isChoose = !slot.isChoose;
+
     if (slot.isChoose){
       this.dateRecord = setTime(this.dateRecord, slot.start.toString());
       this.freeSlots$ = this.freeSlots$?.pipe(map(items => this.setUnlock(items, slot)));
+      this.errorEmpty = false;
       this.setInterval.emit({ date: this.dateRecord, dayId: this.dayId, ifExist: true } as IChooseDayOfCalendar);
     } else{
       this.setInterval.emit(null);
@@ -80,11 +97,11 @@ export class SetIntervalStartComponent implements OnChanges {
   }
 
   async ngOnChanges(): Promise<void> {
-    console.log(this.day);
+
     if (this.day && this.duration > 0) {
       await this.getFreeSlotForDay(this.day);
     } else {
-      this.freeSlots$ = new Observable();
+      this.freeSlots$ = EMPTY;
     }
   }
 

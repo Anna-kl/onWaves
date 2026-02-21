@@ -33,10 +33,10 @@
      (click)="cropImage()" *ngIf="this.imageChangedEvent && !isShowCropped">
         Готово
     </div>
-    <div class="margin-bottom30 bntForAvatar"
+    <!-- <div class="margin-bottom30 bntForAvatar"
      *ngIf="isSetAvatar" (click)="save()">
        Сохранить
-   </div>
+   </div> -->
     <a href="javascript:void(0)" style="border-bottom:  1px solid $green-basic;" class="choose-another-foto" 
      (click)="fileUpload.click()">
         <input type="file" class="file-input"  (change)="fileChangeEvent($event)"  #fileUpload/>

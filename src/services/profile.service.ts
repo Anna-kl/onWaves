@@ -22,13 +22,17 @@ export class ProfileService {
   constructor(private http: HttpClient, private busService: BusService) {
   }
   public listClientsCard$ = new BehaviorSubject<IResponse|null>(null);
-  createProfile(profile: IProfile, token: any): Observable<IResponse>{
+  createProfile(profile: IProfile, token: string): Observable<IResponse>{
     let  headers: HttpHeaders = new HttpHeaders();
-    headers = headers.append('Authorization', 'Bearer ' + token.token);
-    const profileUser: ProfileUser = {
-      Name: JSON.stringify({Name: profile.name, Family: profile.family}),
+    headers = headers.append('Authorization', 'Bearer ' + token);
+    let profileUser: ProfileUser = {
+      Name: {Name: profile.name, Family: profile.family},
+ 
       UserType: UserType.User
     };
+    if (Object.keys(profile).includes('email')){
+      profile.email = profile['email']
+    }
     return this.http.post<IResponse>(this.url, profileUser, {headers});
   }
 
@@ -40,6 +44,10 @@ export class ProfileService {
      return this.http.get<ICoupon|null>(`${this.url}get-coupon/${id}`);
   }
 
+
+  getHistoryCards(id: string, isRecommend: boolean, skip: number){
+     return this.http.get<IViewBusinessProfile[]>(`${this.url}?id=${id}&type=1&&isRecommend=${isRecommend}&skip=${skip}`)
+  }
 
   // sendIfClickContact(profileId: string,  whoIs: string|null){
   //       if (whoIs)
@@ -108,6 +116,14 @@ export class ProfileService {
        return this.http.get<IResponse>(`${this.url}?type=1&&isRecommend=${isRecommend}&skip=${skip}`).pipe(
             tap(data => this.listClientsCard$.next(data))
     );
+    }
+  };
+
+   getProfileAsync(skip: number, isRecommend: boolean, id?: string|null) {
+    if (id)
+    return this.http.get<IViewBusinessProfile[]>(`${this.url}?id=${id}&type=1&&isRecommend=${isRecommend}&skip=${skip}`);
+    else{
+       return this.http.get<IViewBusinessProfile[]>(`${this.url}?type=1&&isRecommend=${isRecommend}&skip=${skip}`);
     }
   };
 

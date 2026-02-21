@@ -10,7 +10,7 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 })
 export class ChangeModalGroupComponent implements OnInit {
   @Input() groups: Group[] = [];
-
+  flagChange = false;
 
   @Input() myGroupId: string|null = null;
 
@@ -29,7 +29,7 @@ export class ChangeModalGroupComponent implements OnInit {
   }
 
   chooseGroup(){
-    console.log(this.myGroup);
+    this.flagChange = true;
   }
 
   changeGroup() {

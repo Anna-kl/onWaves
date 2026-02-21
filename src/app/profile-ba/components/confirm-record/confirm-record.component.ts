@@ -27,6 +27,8 @@ import { getPrice, getPriceService, getPriceString } from 'src/helpers/common/pr
 import { ErrorConfirmRecordComponent } from '../errorConfirmRecord/error-confirm-record.component';
 import { ProfileService } from 'src/services/profile.service';
 import { ICoupon } from 'src/app/DTO/classes/promo/IPoupon';
+import { v4 as uuidv4 } from 'uuid';
+
 
 
 @Component({
@@ -170,7 +172,12 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     this.unsubscribe$ = this.store$.pipe(select(selectProfileMainClient)).pipe(
       tap(user => {
           if (user)
-          this.coupon$ =  this._profile.getCoupon(user.id!);
+           this.coupon$ =  this._profile.getCoupon(user.id!);
+        // this._profile.getCoupon(user.id!).subscribe(result => 
+        // {
+        //   console.log(result);
+        // }
+        // )
       })
     ).subscribe();
   }
@@ -204,7 +211,9 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   }
 
   onConfirm(){
+
     let record = {
+      id: uuidv4(),
       daysOfScheduleId: this.dayId,
       isRemandDay: this.IsRemandDay,
       isRemandHours: this.IsRemandHours,

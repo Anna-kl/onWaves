@@ -34,7 +34,7 @@
 				</div>
 			</div>
 			<div class="cont-horiz" style="width: 100%;" *ngIf="loading">
-				<p-progressSpinner ></p-progressSpinner>
+				<app-loader-ocpio ></app-loader-ocpio>
 			</div>
 			<!-- <div *ngIf="_apiSearch.isResultSearch|async">
 				<p>Упс... к сожалению по вашему запросу ничего не нашлось, 
@@ -47,30 +47,58 @@
 			<!-- Результаты поиска --> 
 <!--			<app-clients-card-list class="disp1 cont-horiz-start-start wrap parent-grey-light " style="gap: 10px 4px;"> -->
 <!--			</app-clients-card-list> -->
-			<ng-container *ngIf="test$|async as cardsSearch;else alternative">
-				
-						<div *ngFor="let category of filtered$|async" class="w100 left-right20mob" >
-						
-							<div class="cont-horiz-start-start margin-top50 margin-bottom30 w100 left-right20">
-								<div>
-									<h2>{{category.name}}</h2>
-								</div>
+
+				<ng-container *ngIf="firstCards.length > 0">
+					<div *ngFor="let category of getCategories(categories, firstCards)" class="w100 left-right20mob" >
+					
+						<div class="cont-horiz-start-start margin-top50 margin-bottom30 w100 left-right20">
+							<div>
+								<h2>{{category.name}}</h2>
 							</div>
+						</div>
 
-							<app-clients-card-list [card-business]="getCards(category, cardsSearch)" class="disp1 cont-horiz-start-start wrap parent-grey-light " style="gap: 10px 4px;">
-							</app-clients-card-list>
+						<app-clients-card-list [card-business]="getCards(category,firstCards)" class="disp1 cont-horiz-start-start wrap parent-grey-light"
+						 style="gap: 10px 4px;">
+						</app-clients-card-list>
 
-						</div> 
+					</div> 
+				</ng-container>
+				<ng-container *ngIf="seconsCards.length > 0">
+					<p style="margin-bottom: 8px;">Возможно, это также Вас заинтересует!</p>
+									<div  *ngFor="let category of getCategories(categories, seconsCards)" class="w100 left-right20mob" >
+				
+					<div class="cont-horiz-start-start margin-top50 margin-bottom30 w100 left-right20" >
+						<div>
+							<h2>{{category.name}}</h2>
+						</div>
+					</div>
 
-			</ng-container>
-			<ng-template  #alternative >
+					<app-clients-card-list [card-business]="getCards(category, seconsCards)" class="disp1 cont-horiz-start-start wrap parent-grey-light " style="gap: 10px 4px;">
+					</app-clients-card-list>
+
+				</div> 
+				</ng-container>
+								<ng-container *ngIf="thirdCards.length > 0">
+					<p style="margin-bottom: 8px;">Упс... К сожалению ничего не нашлось, но может это вас заинтересует </p>
+								
+				
+
+					<app-clients-card-list [card-business]="thirdCards" class="disp1 cont-horiz-start-start wrap parent-grey-light " style="gap: 10px 4px;">
+					</app-clients-card-list>
+
+			
+				</ng-container>
+					<ng-container *ngIf="thirdCards.length === 0 && seconsCards.length === 0 && firstCards.length === 0">
+							<p style="margin-bottom: 8px;">Упс... К сожалению, по вашему запросу ничего не нашлось </p>
+					</ng-container>
+			<!-- <ng-template  #alternative >
 				<div *ngIf="alternatives$|async as cards">
 				<p style="margin-bottom: 8px;">К сожалению, ничего не нашлось. Возможно, вас заинтересуют!</p>
 				<app-clients-card-list [card-business]="cards"></app-clients-card-list>
 			</div>
-			</ng-template>
+			</ng-template> -->
 		</div>
 
 	</div>
 </div>
-<!-- List END -->  
+<!-- List END -->

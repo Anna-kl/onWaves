@@ -112,7 +112,7 @@ export class PageUserBAComponent implements OnInit {
           if (this.profile.address){
             this.geoPoint$ = this._dictionaries.getPoint(getAddressProfile(this.profile.address!));
           }
-            this._title.setTitle(`onWaves ${this.profile?.name!} ${this.profile.address?.city}`);
+            this._title.setTitle(`OCPIO ${this.profile?.name!} ${this.profile.address?.city}`);
             this._meta.updateTag({
                   name: 'description',
                   content: `${this.profile.name} ${this.profile.about} ${this.profile.address?.city} онлайн запись`

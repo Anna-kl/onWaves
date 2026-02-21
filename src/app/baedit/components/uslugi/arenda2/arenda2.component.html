@@ -231,15 +231,15 @@
                 [ngClass]="getIsRange(true) ? 'test-disable':''"
                  style="margin-right: 20px;">
                   <input  type="number" size="3" placeholder="1500"
-                   formControlName="price" class="own-input"
+                   formControlName="price" class="own-input" [style.color]="getIsRange(true) ? 'gray': 'black'"
                   [readOnly]="getIsRange(true)"
                           [style]="isErrorPrice ? errors.errorLinkStyle :''">
 
                 </div>
 
                 <select class="accordion_tab-label_mini cont-horiz-between"
-                formControlName="currencyType" (change)="changeDb($event)"
-                    style="width: 100px;">
+                formControlName="currencyType" (change)="changeDb($event)"  [disabled]="getIsRange(true)"
+                    style="width: 100px;"  [style.color]="getIsRange(true) ? 'gray': 'black'">
                   <option  *ngFor="let currency of currencies"  [ngValue]="currency">
                   {{getNameCurrency(currency)}}
                   </option>
@@ -271,7 +271,7 @@
                       style="margin-right: 20px;width: 120px; overflow: hidden;
                       margin-left: 5px;padding-left:10px;">
                       <input   type="number" size="2" placeholder="500"
-                       class="own-input"  
+                       class="own-input"  [style.color]="getIsRange(false) ? 'gray' : 'black'"
                        formControlName="startRange"  [readOnly]="getIsRange(false)"
                               [style]="isErrorPrice ? errors.errorLinkStyle :''" >
                               
@@ -281,7 +281,7 @@
                     [ngClass]="getIsRange(false) ? 'test-disable':''"
                     style="margin-right: 20px;width: 120px;margin-left: 5px;
                     overflow: hidden;padding-left:10px;">
-                    <input  type="number" size="2" placeholder="1500"
+                    <input  type="number" size="2" placeholder="1500" [style.color]="getIsRange(false) ? 'gray' : 'black'"
                      [readOnly]="getIsRange(false)"
                      formControlName="endRange" class="own-input"
                             [style]="isErrorPrice ? errors.errorLinkStyle :''">

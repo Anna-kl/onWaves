@@ -7,18 +7,19 @@
     <div class="margin-bottom30 txt-green-light"> 
       Выберите соответствующую группу услуг
     </div> 
-    <select class="input-line cont-horiz-between margin-bottom100" style="max-width:320px"
+    <select class="input-line cont-horiz-between margin-bottom100 big-caret" style="max-width:320px"
       [(ngModel)]="myGroup"
       (change)="chooseGroup()">
-      <option [ngValue]="myGroup">
+      <!-- <option [ngValue]="myGroup">
         {{myGroup.name}}
-      </option>
+      </option> -->
       <option *ngFor="let group of groups" [ngValue]="group">
         {{group.name}}
       </option>
     </select>
-    <a class="btn-green button-text cont-vert" style="width: 100%; max-width: 320px;" (click)="changeGroup()">
-      Добавить
+    <a class="button-text cont-vert" style="width: 100%; max-width: 320px;"
+     [class]="flagChange ? 'btn-green' : 'btn-gray'"  (click)="changeGroup()">
+      Сохранить
     </a>
   </div> 
 </div>

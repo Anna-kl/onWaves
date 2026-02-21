@@ -8,6 +8,8 @@ import {
   ModalRegisterComponent
 } from "../../../components/modals/register-profile/modal-register/modal-register.component";
 import {Router} from "@angular/router";
+import { RegisterEmailComponent } from 'src/app/components/modals/register-profile/register-email/register-email.component';
+import { RegisterEmailCodeComponent } from 'src/app/components/modals/register-profile/register-email-code/register-email-code.component';
 
 @Component({
   selector: 'app-hamb-menu-no-register',
@@ -63,7 +65,7 @@ export class HambMenuNoRegisterComponent implements OnInit{
   isCollapsed=false;
   openPopUp() {
     this.status = !this.status;
-    const modalRef = this.modalService.open(ModalRegisterComponent);
+    const modalRef = this.modalService.open(RegisterEmailCodeComponent);
   }
 
   ngOnInit(): void {

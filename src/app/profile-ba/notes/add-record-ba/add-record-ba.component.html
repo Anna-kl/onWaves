@@ -15,12 +15,20 @@
                   placeholder="Введите номер телефона"
                   mask="+X(XXX)XXX-XX-XX"
                   class="input-line cont-horiz-start margin-bottom30 w100"
-                  style="margin-top: 0px; max-width: 600px;">
+                  style="margin-top: 0px; max-width: 600px;"
+                    [ngClass]="{ 'input-error': isControlInvalid('phone') }">
+                      <div class="error-text" *ngIf="isControlInvalid('phone')">
+                      Заполните, это важно
+                    </div>
               <!-- фамилию и имя -->
-              <div class="input-line cont-horiz-start margin-bottom50 w100"
+              <div class="input-line cont-horiz-start margin-bottom50 w100" [ngClass]="{ 'input-error': isControlInvalid('name') }"
                 style="margin-top: 0px; max-width: 600px;">
-                <input  type="text" formControlName="name" size="18" placeholder="Введите ФИО">
+                <input  type="text" formControlName="name" size="18" placeholder="Введите ФИО"   >
+           
               </div>
+                    <div class="error-text" *ngIf="isControlInvalid('name')">
+                      Заполните, это важно
+                    </div>
             </div>
             <!-- календарь 1 Неделя END -->
             <!--Услуги start-->
@@ -28,7 +36,7 @@
               <div class="margin-bottom30">
                 Добавьте услугу из списка
               </div>
-              <app-accordion [isUpdate]="false" [profileId]="id"
+              <app-accordion [isUpdate]="false" [profileId]="id" [serviceId]="serviceId"
                              (setServices)="setService($event)"></app-accordion>
             </div>
             <!--Услуги end -->
@@ -48,8 +56,11 @@
               </div>
             </div> -->
             <!-- Свободное время -->
-            <app-set-interval-start [id]="id" [day]="day$|async" [duration]="duration"
+          
+            <app-set-interval-start [id]="id" [day]="day$|async" [duration]="duration"  [start]="startAI" [errorEmpty]="slotError"
                                     (setInterval)="setInterval($event)"></app-set-interval-start>
+                              
+
 <!--            <div class="cont-horiz margin-bottom30 margin-top50" style="font-weight: 500;">-->
 <!--              <b>Время начала услуги</b>-->
 <!--            </div>-->

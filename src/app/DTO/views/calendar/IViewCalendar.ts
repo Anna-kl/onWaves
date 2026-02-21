@@ -6,4 +6,6 @@ export interface IViewCalendar {
   ifExist: boolean;
   dayId?: string;
   isLast: boolean;
+  countNew?: number;
+  canAdd?: boolean;
 }

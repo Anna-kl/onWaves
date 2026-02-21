@@ -1,0 +1,10 @@
+  <section class="install-banner" *ngIf="show()">
+    <div class="txt">
+      <b>Установить приложение OCPIO?</b>
+      <!-- <small>Открывается как отдельное окно.</small> -->
+    </div>
+    <div class="actions">
+      <button (click)="install()">Установить</button>
+      <button class="ghost" (click)="dismiss()">Позже</button>
+    </div>
+  </section>
