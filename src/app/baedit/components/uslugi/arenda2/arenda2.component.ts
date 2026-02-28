@@ -199,81 +199,39 @@ export class Arenda2Component implements OnInit, OnDestroy {
       durationMinutes: this.groupsMinutes[0]
     });
     
-    // if (this.changeService){
-    //   this.service = this.changeService['subGroup'] as Service;
-    //   this.isRubric = false;
-    //   this.serviceGroup = this.builder.group({
-    //     id: this.changeService['subGroup'].id,
-    //     name: [this.service.name, Validators.required],
-    //     about: this.service.about,
-    //     group: this.groups.find(_ => _.id === this.service?.groupServiceId),
-    //     isAll: this.service.gender.includes(Gender.All),
-    //     isWoman: this.service.gender.includes(Gender.Woman),
-    //     isMen: this.service.gender.includes(Gender.Men),
-    //     isChildren: this.service.gender.includes(Gender.Children),
-    //     isPet: this.service.gender.includes(Gender.Pet),
-    //     price: this.builder.group({
-    //       price: this.service.price.price,
-    //       isRange: this.service.price.isRange,
-    //       startRange: this.service.price.startRange,
-    //       endRange: this.service.price.endRange,
-    //       currencyType: CurrencyType.RUB
-    //     }),
-    //     durationHours: this.service.duration ? getHoursString(this.service.duration) : this.groupsHours[0],
-    //     isTimeUnlimited: this.service.isTimeUnlimited,
-    //     durationMinutes: this.service.duration ? getMinutesStr(this.service.duration) : this.groupsMinutes[0],
-    //   });
-
-
                
-        if (this.changeService){
-          this.service = this.changeService as Service;
-          this.isRubric = false;
-          this.serviceGroup = this.builder.group({
-            id: this.service.id,
-            name: [this.service.name, Validators.required],
-            about: this.service.about,
-            group: this.groups.find(_ => _.id === this.service?.groupServiceId),
-            isAll: this.service.gender.includes(Gender.All),
-            isWoman: this.service.gender.includes(Gender.Woman),
-            isMen: this.service.gender.includes(Gender.Men),
-            isChildren: this.service.gender.includes(Gender.Children),
-            isPet: this.service.gender.includes(Gender.Pet),
-            price: this.builder.group({
-              price: this.service.price.price,
-              isRange: this.service.price.isRange,
-              startRange: this.service.price.startRange,
-              endRange: this.service.price.endRange,
-              currencyType: CurrencyType.RUB
-            }),
-            durationHours: this.service.duration ? getHoursString(this.service.duration) : this.groupsHours[0],
-            isTimeUnlimited: this.service.isTimeUnlimited,
-            durationMinutes: this.service.duration ? getMinutesStr(this.service.duration) : this.groupsMinutes[0],
-        });
+         if (this.changeService ){
+          const selectedGroup =
+              this.service?.groupServiceId != null
+                ? (this.groups?.find(g => g.id === this.service!.groupServiceId) ?? null)
+                : (this.choosedGroup ?? null);
+            this.service = this.changeService as Service;
+            this.isRubric = false;
+            this.serviceGroup = this.builder.group({
+              id: [this.service.id],
+              name: [this.service.name, Validators.required],
+              about: [this.service.about],
+              group: [selectedGroup],   // <-- контроль с value
+              isAll: [this.service.gender.includes(Gender.All)],
+              isWoman: [this.service.gender.includes(Gender.Woman)],
+              isMen: [this.service.gender.includes(Gender.Men)],
+              isChildren: [this.service.gender.includes(Gender.Children)],
+              isPet: [this.service.gender.includes(Gender.Pet)],
+              price: this.builder.group({
+                price: [this.service.price.price],
+                isRange: [this.service.price.isRange],
+                startRange: [this.service.price.startRange],
+                endRange: [this.service.price.endRange],
+                currencyType: [CurrencyType.RUB],
+              }),
+              durationHours: [this.service.duration ? getHoursString(this.service.duration) : this.groupsHours[0]],
+              isTimeUnlimited: [this.service.isTimeUnlimited],
+              durationMinutes: [this.service.duration ? getMinutesStr(this.service.duration) : this.groupsMinutes[0]],
+            });
+
               
   }
           
-      
-      
-          
-          // .subscribe(
-          //    result => {
-          //       this.groups = result;
-        
-    
-  
-    // this._dataService.sendGroupsService.subscribe(
-    //   result => {
-    //     this.groups = result;
-    //     if (this.service){
-    //       if (this.service.groupServiceId) {
-    //         this.choosedGroup = this.groups.find(_ => _.id === this.service?.groupServiceId)!;
-    //         this.serviceGroup?.patchValue({'group': this.choosedGroup});
-    //       }
-    //     }
-    //   }
-    // );
-
     this.serviceGroup?.get('about')!.valueChanges.subscribe(
       res => {
         if (res.length >= environment.TEXT_LENGTH){

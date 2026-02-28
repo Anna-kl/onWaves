@@ -145,24 +145,48 @@ export class ArendaComponent implements OnInit, OnDestroy {
     );
 
      if (this.service){
+      const selectedGroup =
+              this.service?.groupServiceId != null
+                ? (this.groups?.find(g => g.id === this.service!.groupServiceId) ?? null)
+                : (this.choosedGroup ?? null);
       this.isRubric = false;
+
       this.serviceGroup = this.builder.group({
-        name:  [this.service.name, Validators.required], 
-        about: this.service.about,
-        group: this.service.groupServiceId,
-        isAll: this.service.gender.find(_ => _ === Gender.All),
-        isWoman: this.service.gender.find(_ => _ === Gender.Woman),
-        isMen: this.service.gender.find(_ => _ === Gender.Men),
-        isChildren: this.service.gender.find(_ => _ === Gender.Children),
-        isPet: this.service.gender.find(_ => _ === Gender.Pet),
-        price: this.builder.group({
-          price: this.service.price.price,
-          isRange: this.service.price.isRange,
-          startRange: this.service.price.startRange,
-          endRange: this.service.price.endRange,
-          currencyType: CurrencyType.RUB
-        }),
-      });
+              id: [this.service.id],
+              name: [this.service.name, Validators.required],
+              about: [this.service.about],
+              group: [selectedGroup],   // <-- контроль с value
+              isAll: [this.service.gender.includes(Gender.All)],
+              isWoman: [this.service.gender.includes(Gender.Woman)],
+              isMen: [this.service.gender.includes(Gender.Men)],
+              isChildren: [this.service.gender.includes(Gender.Children)],
+              isPet: [this.service.gender.includes(Gender.Pet)],
+              price: this.builder.group({
+                price: [this.service.price.price],
+                isRange: [this.service.price.isRange],
+                startRange: [this.service.price.startRange],
+                endRange: [this.service.price.endRange],
+                currencyType: [CurrencyType.RUB],
+              })
+            });
+
+      // this.serviceGroup = this.builder.group({
+      //   name:  [this.service.name, Validators.required], 
+      //   about: this.service.about,
+      //   group: this.service.groupServiceId,
+      //   isAll: this.service.gender.find(_ => _ === Gender.All),
+      //   isWoman: this.service.gender.find(_ => _ === Gender.Woman),
+      //   isMen: this.service.gender.find(_ => _ === Gender.Men),
+      //   isChildren: this.service.gender.find(_ => _ === Gender.Children),
+      //   isPet: this.service.gender.find(_ => _ === Gender.Pet),
+      //   price: this.builder.group({
+      //     price: this.service.price.price,
+      //     isRange: this.service.price.isRange,
+      //     startRange: this.service.price.startRange,
+      //     endRange: this.service.price.endRange,
+      //     currencyType: CurrencyType.RUB
+      //   }),
+
       this._apiImage.getImagesFromService(this.service.id!).subscribe(
         result_images => {
           this.images = result_images;
@@ -189,18 +213,6 @@ export class ArendaComponent implements OnInit, OnDestroy {
       });
     }
 
-    // if (this.profile?.id){
-    //   this._apiService.getGroupServices(this.profile?.id).pipe(takeUntil(this.destroy$)).subscribe(
-    //       result => {
-    //         this.groups = result;
-    //         if (this.service){
-    //           if (this.service.groupServiceId) {
-    //             this.choosedGroup = this.groups.find(_ => _.id === this.service?.groupServiceId)!;
-    //             this.serviceGroup.patchValue({'group': this.choosedGroup});
-    //             }
-    //     }
-    //   });
-    // } 
   }
 
   protected readonly getNameCurrency = getNameCurrency;
