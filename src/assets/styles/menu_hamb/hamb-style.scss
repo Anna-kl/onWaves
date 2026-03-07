@@ -1,3 +1,4 @@
+@import '../main/color.scss';
 /* Меню гамбургер  */
 li{
   list-style:none;
@@ -66,13 +67,13 @@ li{
     transform: translateY(-10px);
 } 
 .toggle2 span:nth-child(2) {
-    background-color: #125B62;
+    background-color: $green-dark;
     transform: translateY(-3px);
     width: 20px;
     left: 5px;
 } 
 .toggle2 span:nth-child(3) {
-    background-color:#81C6BF;
+    background-color:$green-light2;
     transform: translateY(3px);
     width: 20px;
     left: 0;
@@ -133,7 +134,7 @@ li{
  }
 .ua-name{ 
     font-weight:bold;
-    color:#409B89;
+    color:$green-basic;
  } 
 .nav-item>a:visited{  
     color:#11142D; 
@@ -143,7 +144,7 @@ li{
     color:#11142D; 
 }
 .nav-item a:hover {
-    color: #409B89;
+    color: $green-basic;
 } 
 .foo-menu-text{
     color: #fff; 

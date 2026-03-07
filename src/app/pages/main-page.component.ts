@@ -69,7 +69,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
       }
     );
   }
-  title = 'MainSiteOcpio';
+  // title = 'MainSiteOcpio';
 
 // toggleActive() {
 //   const divElement = this.elementRef.nativeElement.querySelector('.nav-container');

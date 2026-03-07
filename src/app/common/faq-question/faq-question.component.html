@@ -1,0 +1,41 @@
+<div class="faq-item" [class.open]="isOpen">
+
+  <div class="faq-header" (click)="toggle()">
+    <span class="question">{{ question }}</span>
+
+    <svg class="icon" [class.rotate]="isOpen" width="18" height="18" viewBox="0 0 24 24">
+      <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="faq-content" [class.expanded]="isOpen">
+
+    <!-- TEXT -->
+    <div class="faq-text" *ngIf="content?.paragraphs">
+      <p *ngFor="let p of content.paragraphs">
+        {{ p }}
+      </p>
+    </div>
+
+    <!-- LIST -->
+    <ul class="faq-list" *ngIf="content?.list">
+      <li *ngFor="let item of content.list">
+        {{ item }}
+      </li>
+    </ul>
+
+    <!-- IMAGES -->
+    <div class="faq-gallery" *ngIf="content?.images?.length">
+
+      <div class="image-card" *ngFor="let img of content.images">
+        <img [src]="img.url" alt="Help image">
+        <div class="caption" *ngIf="img.caption">
+          {{ img.caption }}
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

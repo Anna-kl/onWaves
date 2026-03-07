@@ -160,6 +160,7 @@ import { RegisterEmailComponent } from './components/modals/register-profile/reg
 import { ConfirmEmailComponent } from './pages/confirm-email/confirm-email.component';
 import { RegisterEmailCodeComponent } from './components/modals/register-profile/register-email-code/register-email-code.component';
 import { EmailSanitizeDirective } from './components/modals/services/email.directive';
+import { FaqQuestionComponent } from './common/faq-question/faq-question.component';
 
 
 
@@ -251,7 +252,8 @@ registerLocaleData(localeRu, 'ru');
     InsertPinCodeComponent,
     RegisterEmailComponent,
     ConfirmEmailComponent,
-    RegisterEmailCodeComponent
+    RegisterEmailCodeComponent,
+    FaqQuestionComponent
   ],
     imports: [
       NgxMaskDirective,
@@ -315,6 +317,8 @@ registerLocaleData(localeRu, 'ru');
   bootstrap: [AppComponent],
 
     exports: [
+
+
         // CategoryTreeComponent,
         // AccordionComponent
     ]

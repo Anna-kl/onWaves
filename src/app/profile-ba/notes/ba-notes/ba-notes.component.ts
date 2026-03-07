@@ -332,7 +332,7 @@ getAllTimeWorking(time: number) {
     if (avatar) {
       return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
     } else {
-      return  '/assets/img/AvatarBig.png';
+      return  '/assets/img/onwaves/user.png';
     }
   }
 

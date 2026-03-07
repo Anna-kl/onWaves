@@ -68,7 +68,7 @@ export class FormatsComponent implements OnChanges {
         if (item.avatar) {
           item.avatar = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${item.avatar}`);
         } else {
-          item.avatar = '/assets/img/AvatarBig.png';
+          item.avatar = '/assets/img/onwaves/user.png';
         }
       });
       const user = this.baProfiles.find(_ => _.userType === UserType.User);

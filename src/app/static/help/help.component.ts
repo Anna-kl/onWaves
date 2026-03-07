@@ -4,9 +4,20 @@ import {Router} from "@angular/router";
 @Component({
   selector: 'app-help',
   templateUrl: './help.component.html',
-  styleUrls: ['./help.component.css']
+  styleUrls: ['./help.component.scss']
 })
 export class HelpComponent {
+
+  setMaster() {
+    this.btnProfile = false;
+  }
+  setClient() {
+    this.btnProfile = true;
+  }
+
+  btnProfile: boolean = true;
+  flag = false;
+
   constructor(
     private _router: Router,
     ) {

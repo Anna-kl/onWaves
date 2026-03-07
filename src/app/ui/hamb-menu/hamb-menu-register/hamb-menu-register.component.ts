@@ -256,7 +256,7 @@ this.unsubscribe$ = this._login.mainCategoriesProfile$.subscribe(
     copy(text: string) {
       if (navigator.clipboard && window.isSecureContext) {
         this.onCopied();
-        navigator.clipboard.writeText(`https://ocpio.ru/${text}`);
+        navigator.clipboard.writeText(`https://onwaves.online/${text}`);
       } else {
         this.fallbackCopy(text);
       }
@@ -264,7 +264,7 @@ this.unsubscribe$ = this._login.mainCategoriesProfile$.subscribe(
 
     private fallbackCopy(text: string) {
       const ta = document.createElement('textarea');
-      ta.value = `https://ocpio.ru/${text}`;
+      ta.value = `https://onwaves.online/${text}`;
       ta.style.position = 'fixed';
       ta.style.opacity = '0';
       document.body.appendChild(ta);

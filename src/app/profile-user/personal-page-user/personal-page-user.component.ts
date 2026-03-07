@@ -169,7 +169,7 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
     if (avatar) {
       avatar = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
     } else {
-      avatar = '/assets/img/AvatarBig.png';
+      avatar = '/assets/img/onwaves/user.png';
     }
     return avatar;
   }

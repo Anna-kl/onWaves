@@ -72,7 +72,7 @@ export class ChatMainComponent implements OnInit, OnDestroy {
       return  this.sanitizer
       .bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${message.avatar}`);
     } else {
-      return  '/assets/img/AvatarBig.png';
+      return  '/assets/img/onwaves/user.png';
     }
   }
 
@@ -176,7 +176,7 @@ export class ChatMainComponent implements OnInit, OnDestroy {
 
   getAvatar(chat: IChat|null, flag: boolean) {
     if (chat === null){
-      return  '/assets/img/AvatarBig.png';
+      return  '/assets/img/onwaves/user.png';
     }
     if (chat.receiverId === this.receiverId && flag){
       this.isNewChat = false;
@@ -185,7 +185,7 @@ export class ChatMainComponent implements OnInit, OnDestroy {
     if (chat.avatar) {
       return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${chat.avatar}`);
     } else {
-      return  '/assets/img/AvatarBig.png';
+      return  '/assets/img/onwaves/user.png';
     }
   }
 

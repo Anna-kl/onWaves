@@ -176,7 +176,7 @@ export class ColumnBAProfileComponent implements  OnChanges, OnDestroy {
         return this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${businessProfile.avatar}`);
       }
     }
-    return '/assets/img/AvatarBig.png';
+    return '/assets/img/onwaves/user.png';
   }
 
 }

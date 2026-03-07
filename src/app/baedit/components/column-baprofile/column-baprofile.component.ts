@@ -73,7 +73,7 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
     if (avatar) {
       return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
     } else {
-      return  '/assets/img/AvatarBig.png';
+      return  '/assets/img/onwaves/user.png';
     }
   }
 
@@ -84,35 +84,7 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
     this._dataService.transferBusinessProfile(this.businessProfile!);
     this._router.navigate(['ba-edit', this.id]);
   }
-  // async ngOnInit(): Promise<void> {
-  //   this.store.pipe(select(selectProfileMainClient)).subscribe(
-  //   mainProfile => {
-  //     if (mainProfile) {
-  //       this.businessProfileService.getBusinessProfileForEditById(mainProfile.id!).subscribe(async (businessProfile) => {
-  //         if (businessProfile.code === 200) {
-  //           this.businessProfile = businessProfile.data as IViewBusinessProfile;
-  //           if (this.businessProfile.isGetOrder) {
-  //             await this.getSchedule(this.id!);
-  //           } else {
-  //             this.scheduleToday = 'Заказы не принимаются';
-  //             this.isHasSchedule = false;
-  //           }
-  //           this.address = getAddressProfile(this.businessProfile?.address!);
-  //           this.onAddress.emit(this.businessProfile.address);
-  //           if (this.businessProfile.avatar) {
-  //             this.avatar = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${this.businessProfile.avatar}`);
-  //           } else {
-  //             this.avatar = '/assets/img/AvatarBig.png';
-  //           }
 
-  //         }
-  //       });
-  //     }
-  //   });
-  //   this.backendService.checkServiceAvailability(this.id!).subscribe((result) => {
-  //     this.hasServices = result;
-  //   });
-  // }
   async ngOnInit(): Promise<void> {
     this.auth.subscribe(
       result => {
@@ -135,26 +107,7 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
           this.businessProfile = mainProfile;
         }
         this._dataService.transferBusinessProfile(this.businessProfile!);
-        // this.businessProfileService.getBusinessProfileForEditById(mainProfile.id!).subscribe(async (businessProfile) => {
-        //   if (businessProfile.code === 200) {
-        //     this.businessProfile = businessProfile.data as IViewBusinessProfile;
-        //     this.address = getAddressProfile(this.businessProfile?.address!);
-        //     this.onAddress.emit(this.businessProfile.address);
-        //     if (this.businessProfile.avatar) {
-        //       this.avatar = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${this.businessProfile.avatar}`);
-        //     } else {
-        //       this.avatar = '/assets/img/AvatarBig.png';
-        //     }
-        //
-        //     if (this.businessProfile.isGetOrder) {
-        //       await this.getSchedule(this.id!);
-        //     } else {
-        //       this.scheduleToday = 'Заказы не принимаются';
-        //       this.isHasSchedule = false;
-        //     }
-        //
-        //   }
-        // });
+
       }
     });
   }

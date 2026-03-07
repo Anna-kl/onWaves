@@ -5,7 +5,6 @@ import { Observable, Subscription, filter, take, takeLast } from 'rxjs';
 import { IResponse } from 'src/app/DTO/classes/IResponse';
 import { IPost } from 'src/app/DTO/classes/posts/IPost';
 import { PostStatus } from 'src/app/DTO/enums/postStatus';
-import { CropImageModalComponent } from 'src/app/baedit/components/modals/crop-image-modal/crop-image-modal.component';
 import { PostService } from 'src/services/posts.service';
 
 

@@ -78,7 +78,7 @@ export class ConfirmRecord2Component implements OnInit {
           if (item.avatar) {
             item.avatar = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${item.avatar}`);
           } else {
-            item.avatar = '/assets/img/AvatarBig.png';
+            item.avatar = '/assets/img/onwaves/user.png';
           }
           let time = item.start!.toString().split(':');
           item.start = new Date(this.today.setHours(Number(time[0]), Number(time[1])));
@@ -97,7 +97,7 @@ export class ConfirmRecord2Component implements OnInit {
           if (item.avatar) {
             item.avatar = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${item.avatar}`);
           } else {
-            item.avatar = '/assets/img/AvatarBig.png';
+            item.avatar = '/assets/img/onwaves/user.png';
           }
           let time = item.start!.toString().split(':');
           item.start = new Date(this.today.setHours(Number(time[0]), Number(time[1])));
