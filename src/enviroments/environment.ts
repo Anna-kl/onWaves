@@ -23,15 +23,12 @@ export const environment = {
 //  UriAI: 'http://127.0.0.1:8000/api/',
    publicKey:"BLBx-hf2WrL2qEa0qKb-aCJbcxEvyn62GDTyyP9KTS5K7ZL0K7TfmOKSPqp8vQF0DaG8hpSBknz_x3qf5F4iEFo",
   privateKey:"PkVHOUKgY29NM7myQXXoGbp_bH_9j-cxW5cO-fGcSsA",
-     Uri: 'https://ocpio-server.ru/v1/api/',
-     UriFoto: 'https://ocpio-server.ru/v1/api/',
-     hubUri: 'https://ocpio-server.ru/',
-     UriAI: 'https://ocpio-server.ru/flask-api/api/'
 
-    //      Uri: 'https://81.177.175.185/ocpio-api/v1/api/',
-    //  UriFoto: 'https://ocpio-server.ru/v1/api/',
-    //  hubUri: 'https://81.177.175.185/ocpio-api/',
-    //  UriAI: 'https://ocpio-server.ru/flask-api/api/'
+
+         Uri: 'https://81.177.175.185/ocpio-api/v1/api/',
+     UriFoto: 'https://ocpio-server.ru/v1/api/',
+     hubUri: 'https://81.177.175.185/ocpio-api/',
+     UriAI: 'https://ocpio-server.ru/flask-api/api/'
 
 
 };
