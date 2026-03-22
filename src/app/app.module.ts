@@ -17,7 +17,7 @@ import { MainPageComponent } from './pages/main-page.component';
 import { SliderComponent } from './slider/slider.component';
 import { ModalEnterDataComponent } from './components/modals/register-profile/modal-enter-data/modal-enter-data.component';
 import { ModalRegisterComponent } from './components/modals/register-profile/modal-register/modal-register.component';
-import { NgbDropdown, NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdown, NgbDropdownModule, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { HttpClientModule } from '@angular/common/http';
 
 import { BusService } from '../services/busService';
@@ -256,61 +256,61 @@ registerLocaleData(localeRu, 'ru');
     FaqQuestionComponent
   ],
     imports: [
-      NgxMaskDirective,
-       NgxMaskPipe,
-      BrowserModule,
-      ScrollingModule,
-      RouterModule,
-      BrowserModule,
-      BrowserAnimationsModule,
-      HttpClientModule,
-      CarouselModule,
-      ButtonModule,
-      AppRoutingModule,
-      NgbDropdownModule,
-      ReactiveFormsModule,
-      FormsModule,
-      ToastModule,
-      ImageModule,
-      UIModule,
-      NgOptimizedImage,
-      MainAppModule,
-      ProfileBAModule,
-      CommonComponentsModule,
-      BaEditModule,
-      PagesModule, ProgressSpinnerModule, MenuModule, ImageCropperModule,
-      // AngularFireMessagingModule,
-      // AngularFireModule.initializeApp({ /* See project settings in Firebase Console for this information */
-      //     apiKey: "AIzaSyBiOQ4X8q8Kf5UHwTq_TaRSTb9j0xClRJs",
-      //     authDomain: "ocpio-311510.firebaseapp.com",
-      //     projectId: "ocpio-311510",
-      //     storageBucket: "ocpio-311510.appspot.com",
-      //     messagingSenderId: "625145012665",
-      //     appId: "1:625145012665:web:b19feea8ea4bd2679fd668",
-      //     measurementId: "G-T8F0R2G5YN"
-      // }),
-      EffectsModule.forFeature([NotificationEffect, LinkEffect, AIEffect]),
-      EffectsModule.forRoot([]),
-      StoreModule.forFeature('notification', reducers),
-      StoreModule.forFeature('link', reducersLink),
-       StoreModule.forFeature('aiStore', reducersAI),
-      StoreModule.forRoot({
-          modeleReducerPoint: stateReducerMainClient, baClientReducer: stateReducerBAClient,
-          checedIdClient: stateReducerChecedIDClient, updateGallery: loadUpdateReducer,
-          aiReducer: loadAIReducer
-          
-      }),
-      StoreDevtoolsModule.instrument({maxAge: 25, logOnly: environment.production}),
-      CalendarModule, AutocompleteLibModule, NgScrollbar, ScrollViewport,
-      ClipboardModule,
-      GalleriaModule,
-      ServiceWorkerModule.register('ngsw-worker.js', {
+    NgxMaskDirective,
+    NgxMaskPipe,
+    BrowserModule,
+    ScrollingModule,
+    RouterModule,
+    BrowserModule,
+    BrowserAnimationsModule,
+    HttpClientModule,
+    CarouselModule,
+    ButtonModule,
+    AppRoutingModule,
+    NgbDropdownModule,
+    ReactiveFormsModule,
+    FormsModule,
+    ToastModule,
+    ImageModule,
+    UIModule,
+    NgOptimizedImage,
+    MainAppModule,
+    ProfileBAModule,
+    CommonComponentsModule,
+    BaEditModule,
+    PagesModule, ProgressSpinnerModule, MenuModule, ImageCropperModule,
+    // AngularFireMessagingModule,
+    // AngularFireModule.initializeApp({ /* See project settings in Firebase Console for this information */
+    //     apiKey: "AIzaSyBiOQ4X8q8Kf5UHwTq_TaRSTb9j0xClRJs",
+    //     authDomain: "ocpio-311510.firebaseapp.com",
+    //     projectId: "ocpio-311510",
+    //     storageBucket: "ocpio-311510.appspot.com",
+    //     messagingSenderId: "625145012665",
+    //     appId: "1:625145012665:web:b19feea8ea4bd2679fd668",
+    //     measurementId: "G-T8F0R2G5YN"
+    // }),
+    EffectsModule.forFeature([NotificationEffect, LinkEffect, AIEffect]),
+    EffectsModule.forRoot([]),
+    StoreModule.forFeature('notification', reducers),
+    StoreModule.forFeature('link', reducersLink),
+    StoreModule.forFeature('aiStore', reducersAI),
+    StoreModule.forRoot({
+        modeleReducerPoint: stateReducerMainClient, baClientReducer: stateReducerBAClient,
+        checedIdClient: stateReducerChecedIDClient, updateGallery: loadUpdateReducer,
+        aiReducer: loadAIReducer
+    }),
+    StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: environment.production }),
+    CalendarModule, AutocompleteLibModule, NgScrollbar, ScrollViewport,
+    ClipboardModule,
+    GalleriaModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {
         enabled: !isDevMode(),
         // Register the ServiceWorker as soon as the application is stable
         // or after 30 seconds (whichever comes first).
         registrationStrategy: 'registerWhenStable:30000'
-      }),
-      ],
+    }),
+    NgbCollapse
+],
   providers: [NgbDropdown,ProfileDataEditService, BusService,LoginService,   provideNgxMask(),
     { provide: LOCALE_ID, useValue: 'ru' }, provideYConfig(mapConfig)],
 

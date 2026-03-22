@@ -26,7 +26,7 @@ import { MyYComponentComponent } from './maps/my-ycomponent/my-ycomponent.compon
 import { YMapComponent, YMapDefaultFeaturesLayerDirective, YMapDefaultMarkerDirective, YMapDefaultSchemeLayerDirective, YMapFeatureDirective, YMapMarkerDirective } from "angular-yandex-maps-v3";
 import { LoaderOnWavesComponent } from './loader-on-waves/loader-on-waves.component';
 import { InstallBannerComponent } from './banner/install-banner/install-banner.component';
-import { LoaderOcpioComponent } from './loader-ocpio/loader-ocpio.component';
+
 
 
 
@@ -49,7 +49,7 @@ import { LoaderOcpioComponent } from './loader-ocpio/loader-ocpio.component';
       MyYComponentComponent,
       LoaderOnWavesComponent,
       InstallBannerComponent,
-      LoaderOcpioComponent,
+
       
   ],
   imports: [
@@ -81,7 +81,6 @@ import { LoaderOcpioComponent } from './loader-ocpio/loader-ocpio.component';
         MyYComponentComponent,
         LoaderOnWavesComponent,
         InstallBannerComponent,
-        LoaderOcpioComponent,
         
     ]
 })

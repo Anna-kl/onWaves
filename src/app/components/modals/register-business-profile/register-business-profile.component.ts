@@ -100,11 +100,11 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit {
         this.mainToken = result;
       }
     )
-    this._store.pipe(select(selectProfileMainClient)).subscribe(
-      result => {
-        let test = result;
-      }
-    );
+    // this._store.pipe(select(selectProfileMainClient)).subscribe(
+    //   result => {
+    //     let test = result;
+    //   }
+    // );
 
   }
 
@@ -180,10 +180,12 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit {
 
     if (this.numberStreetPage === 3){
       const data = this.registrationForm.getRawValue();
+      console.log(this.phone);
       let view = {
         id: null,
         status: AuthStatus.Active,
         about: data['about'],
+        email: data['email'],
         userType: UserType.Business,
         address: this.address,
         name: data['name'],
@@ -195,8 +197,7 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit {
         socialLink: data['socialLink'],
         // parentId: this.auth?.profile?.id!,
         parentId: this.mainProfile.id, //из store
-        timeZone: new Date().getTimezoneOffset(),
-        email: undefined,
+        timeZone: new Date().getTimezoneOffset()
       } as unknown as IViewBusinessProfile;
       this._api.createBAProfile(view, this.mainToken).pipe(
   // берём только успешный ответ с кодом 201
@@ -277,16 +278,17 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit {
         Validators.required,
         Validators.minLength(4)
       ]),
+      email: new FormControl(this.mainProfile?.email, Validators.email),
       link: new FormControl('', [
         Validators.minLength(4)
       ]),
-      phone: new FormControl(this.mainProfile ? this.mainProfile.phone : '', [
+      phone: new FormControl(this.mainProfile ? this.mainProfile.phone : null, [
         Validators.required,
         Validators.minLength(10),
         // Validators.pattern('[0-9]{3}-[0-9]{2}-[0-9]{3}')
       ]),
       search: new FormControl(''),
-      whatsApp: new FormControl(this.user ? this.user.phone : '', [
+      whatsApp: new FormControl(this.mainProfile ? this.mainProfile.phone : null, [
         Validators.minLength(4),
         // Validators.pattern('[0-9]{3}-[0-9]{2}-[0-9]{3}')
       ]),
@@ -354,38 +356,38 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit {
     // );
 
 
-    this.registrationForm?.get('phone')?.valueChanges.subscribe(
-      res => {
-        if (res.length <= 16) {
-          this.registrationForm?.patchValue({ 'phone': '+7(000) 000-0000' });
-        }
-      }
-    );
+    // this.registrationForm?.get('phone')?.valueChanges.subscribe(
+    //   res => {
+    //     if (res.length <= 16) {
+    //       this.registrationForm?.patchValue({ 'phone': '+7(000) 000-0000' });
+    //     }
+    //   }
+    // );
 
 
   }
   //шаг 1
-  get name() { return this.registrationForm.get('name')!;}//ВАЖНО эту палочку ! в конце
-  get webResource() { return this.registrationForm.get('webResource')!;}
-  get phone() { return this.registrationForm.get('phone')!;}
-  get whatsApp() { return this.registrationForm.get('whatsApp')!;}
-  get telegram() { return this.registrationForm.get('telegram')!;}
-  get webSite() { return this.registrationForm.get('webSite')!;}
-  get socialLink() { return this.registrationForm.get('socialLink')!;}
-
+  get name() { return this.registrationForm.get('name')!  as FormControl;}//ВАЖНО эту палочку ! в конце
+  get webResource() { return this.registrationForm.get('webResource')! as FormControl;}
+  get phone() { return this.registrationForm.get('phone')! as FormControl;}
+  get whatsApp() { return this.registrationForm.get('whatsApp')! as FormControl;}
+  get telegram() { return this.registrationForm.get('telegram')! as FormControl;}
+  get webSite() { return this.registrationForm.get('webSite')! as FormControl;}
+  get socialLink() { return this.registrationForm.get('socialLink')! as FormControl;}
+  get email() {return this.registrationForm.get('email') as FormControl;}
 
   //шаг 2
-  get country() { return this.registrationForm.get('country')!;}
-  get search() { return this.registrationForm.get('search')!;}
-  get region() { return this.registrationForm.get('region')!;}
-  get city() { return this.registrationForm.get('city')!;}
-  get street() { return this.registrationForm.get('street')!;}
-  get home() { return this.registrationForm.get('home')!;}
-  get apartment() { return this.registrationForm.get('apartment')!;}
+  get country() { return this.registrationForm.get('country')! as FormControl;}
+  get search() { return this.registrationForm.get('search')! as FormControl;}
+  get region() { return this.registrationForm.get('region')! as FormControl;}
+  get city() { return this.registrationForm.get('city')! as FormControl;}
+  get street() { return this.registrationForm.get('street')! as FormControl;}
+  get home() { return this.registrationForm.get('home')! as FormControl;}
+  get apartment() { return this.registrationForm.get('apartment')! as FormControl;}
 
   //шаг 3
-  get avatar() { return this.registrationForm.get('avatar')!;}
-  get about() { return this.registrationForm.get('about')!;}
+  get avatar() { return this.registrationForm.get('avatar')! as FormControl;}
+  get about() { return this.registrationForm.get('about')! as FormControl;}
   //получаем регионы по стране
 
 

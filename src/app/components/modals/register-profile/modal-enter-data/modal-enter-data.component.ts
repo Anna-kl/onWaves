@@ -138,6 +138,7 @@ export class ModalEnterDataComponent implements OnInit {
           this.activeModal.close();
           let modalRef = this.modalService.open(ModalRegisterNextComponent);
           modalRef.componentInstance.token = result.data;
+          modalRef.componentInstance.email = this.email;
         }
       } else if (result.code === 500) {
         this.flagError = true;

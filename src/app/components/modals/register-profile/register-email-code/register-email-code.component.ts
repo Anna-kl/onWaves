@@ -5,6 +5,10 @@ import { AuthServices } from '../../services/auth.service';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalEnterDataComponent } from '../modal-enter-data/modal-enter-data.component';
 import { ModalRegisterComponent } from '../modal-register/modal-register.component';
+import { IViewAuthProfile } from 'src/app/DTO/views/profile/IViewAuthProfile';
+import { LoginService } from 'src/app/auth/login.service';
+import { BusService } from 'src/services/busService';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-register-email-code',
@@ -15,7 +19,10 @@ import { ModalRegisterComponent } from '../modal-register/modal-register.compone
 export class RegisterEmailCodeComponent {
     constructor(private authService: AuthServices,
       private activeModal: NgbActiveModal,
-      private modalService: NgbModal
+      private modalService: NgbModal,
+      private loginService: LoginService,
+       private _busService: BusService,
+         private _cookie: CookieService
     ){}
 
     returnToPhone() {
@@ -41,12 +48,32 @@ export class RegisterEmailCodeComponent {
               let validateError = result.data.toString().split('.')[0];
               this.messageError = `Повторно запросить код можно будет через ${validateError}`;
             }
-            // if (result.code === 204){
-            //
-            //   this.flagError = true;
+            // else{
+            //           let user = result.data as IViewAuthProfile;
+            //           this._busService.transferToken(user);
+            //           this.activeModal.close();
+            //           this.modalService.dismissAll();
+              
+            //           const profileUserId = result.data?.profileUserId;
+            //           if (profileUserId != null) {
+            //             // this.notification.requestPermission(result.message);
+            //             let expiry = new Date();
+            //             expiry.setDate(expiry.getDate()+365);
+              
+            //             this._cookie.set('auth-token-ocpio', user.token,
+            //               expiry );
+              
+            //             if(user.profileUserId) {
+            //               this._cookie.set('profileId-ocpio', user.profileUserId,
+            //                expiry );
+              
+            //             }
+            //             this.activeModal.close();
+            //             this.loginService.isAutentificate$.next(true);
+            //             this.loginService.updateProfileUA();
             // }
-         }
-       )
+        //  }
+        });
     }
     closeModal() {
      this.activeModal.close();

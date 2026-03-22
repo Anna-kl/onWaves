@@ -169,18 +169,6 @@ export class ExtsearchComponent implements OnInit {
             }
         );
       }
-      // } else {
-      //   this._location.getAddress(val).subscribe(
-      //       (answer: any) => {
-      //         const candidatesAddress = answer['response']['GeoObjectCollection']['featureMember'];
-      //         this.data = [];
-      //         let index = 0;
-      //         for (const candidate of candidatesAddress) {
-      //           this.data.push({id: index, name: candidate['GeoObject']['metaDataProperty']
-      //                 ['GeocoderMetaData']['text'],
-      //             type: 'yandex-search'});
-      //         }
-      //       });
 
     }
   }

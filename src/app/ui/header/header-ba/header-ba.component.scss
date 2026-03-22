@@ -1,5 +1,15 @@
 @import '../../../../assets/styles/main/color.scss';
 
+
+.brand-logo{
+  height: 70px;                 // фикс высоты для шапки
+  width: auto;                  // ширина по пропорциям
+  max-width: clamp(110px, 50vw, 300px); // адаптивная ширина
+  object-fit: contain;
+  margin-left: 12px;
+  display: block;
+}
+
 .bell_main_menu{
     cursor: pointer;
     fill:#FFAB00;

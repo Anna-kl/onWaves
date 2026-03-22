@@ -15,6 +15,7 @@ import { DataService } from 'src/app/profile-ba/components/group-service/dataser
 import { LoginService } from 'src/app/auth/login.service';
 import { BusService } from 'src/services/busService';
 import { IViewProfileMenu } from 'src/app/DTO/views/profile/IViewProfileMenu';
+import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
 
 @Component({
   selector: 'app-register-email',
@@ -78,7 +79,7 @@ export class RegisterEmailComponent implements OnInit {
           name: data['name'],
           family: data['family'],
           email: data['email']
-        } as IProfile,
+        } as IViewBusinessProfile,
         res.data // payload/uuid/токен, что вернул registerEmail
       ).pipe(
         map(profileRes => ({ registerRes: res, profileRes }))

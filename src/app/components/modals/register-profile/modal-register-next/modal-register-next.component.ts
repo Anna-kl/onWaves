@@ -10,6 +10,8 @@ import { UserService } from 'src/app/DTO/classes/profiles/ProfileUser';
 import { BusService } from '../../../../../services/busService';
 import {IViewAuthProfile} from "../../../../DTO/views/profile/IViewAuthProfile";
 import {CookieService} from "ngx-cookie-service";
+import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
+import { UserType } from 'src/app/DTO/classes/profiles/profile-user.model';
 
 @Component({
   selector: 'app-modal-register-next',
@@ -25,6 +27,7 @@ export class ModalRegisterNextComponent implements OnInit {
     family: new FormControl(undefined)
   });
   @Input() token!: IViewAuthProfile;
+   @Input() email: string|null = null;
 
   constructor(
     private _builder: FormBuilder,
@@ -43,7 +46,11 @@ export class ModalRegisterNextComponent implements OnInit {
   }
   next() {
     // const modalRef = this.modalService.open(ModalRegisterEndComponent);
-    const name = this.formProfile.getRawValue() as IProfile;
+    const name = this.formProfile.getRawValue() as IViewBusinessProfile;
+    name.userType = UserType.User;
+    if (this.email){
+      name.email = this.email;
+    }
     this._profile.createProfile(name, this.token.token).subscribe(
       result => {
         if (result.code === 201){

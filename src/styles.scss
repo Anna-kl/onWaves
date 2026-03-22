@@ -830,6 +830,16 @@ scroll-snap-type: y mandatory;
 		padding-right:40px;
 	}
 }
+
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
 /* Переключатель галерея-лента ba-before(1.22).html START*/
 .btn-recommend1, .btn-recommend2{
 	width:50%; 
@@ -1879,7 +1889,7 @@ ul.uslugi-full-txt {
 	flex-grow: 1;
 }
 .boks3{
-	background-color: #4FB229;
+	background-color: $green-light;
 	flex-grow: 1;
 }
 .boks4{
@@ -2245,7 +2255,7 @@ span.dropdown-toggle > img{
 }
 .toast_night{
 	background: #21334E;
-	border: 1px solid #00DAB3;
+	border: 1px solid $green-light2;
 }
 .toast_night_no{
 	background: #21334E;

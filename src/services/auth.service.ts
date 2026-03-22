@@ -41,4 +41,12 @@ export class AuthService {
     let  headers: HttpHeaders = new HttpHeaders();
     return this.http.post<IResponse>(`${this.url}register-email`, {"email": email, "password":password,  name, family, uuid}, {headers})
   }
+
+  confirmContacts(id: string, contact: string, uuid: string, type: number){
+     return this.http.get<IResponse>(`${this.url}confirm/${id}?contact=${contact}&uuid=${uuid}&type=${type}`,)
+  }
+
+  confirmCode(uuid: string, session: string, code: string){
+     return this.http.post<IResponse>(`${this.url}confirm-code`, {uuid, session, code} )
+  }
 }

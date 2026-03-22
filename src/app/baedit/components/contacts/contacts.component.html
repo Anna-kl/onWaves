@@ -8,7 +8,7 @@
       <!-- Номер телефона -->
       <span>Номер телефона</span>
       <div>
-        <input type="text" placeholder="+7 123 456 78 90" 
+        <input type="text" placeholder="+7(000)000-00-00" 
         [(ngModel)]="profile.phone" (ngModelChange)="change($event,'')" 
         required>
       </div>
@@ -31,6 +31,17 @@
         <input type="text" placeholder="https://" [(ngModel)]="profile.webSite"
          (ngModelChange)="change($event,'site')" required>
       </div>
+
+        <span> Email        </span>
+          <div class="block-input margin-bottom30">
+            <div class="input-line cont-horiz-start" >
+              <input  type="email" size="16" id="email"
+               [(ngModel)]="profile.email"  placeholder=""  />
+                      <!-- formControlName="webSite"   placeholder="https://"  /> -->
+            </div>
+            <!-- Событие при ошибки -->
+        
+          </div>
     </div>
   </div>
   <!-- правая колонка-->

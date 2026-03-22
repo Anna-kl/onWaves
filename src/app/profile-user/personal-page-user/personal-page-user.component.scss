@@ -51,10 +51,10 @@
   margin:5px 0 15px 0;
 }
 .btnPersonalPageUser div{
-  border:1px solid #409B89;
+  border:1px solid $green-basic;
   padding: 10px 20px;
   border-radius:24px;
-  color:#409B89;
+  color: $green-basic;
   font-weight:700;
 }
 .avatarMain{
@@ -63,7 +63,7 @@
 .ico_type_user{
   width: 30px;
   height: 30px;
-  background-color: #00DAB3;
+  background-color: $green-light;
   border-radius: 30px;
   border: 1px solid #fff;
   position: absolute;
@@ -110,7 +110,7 @@
     flex-direction: column;
     align-items: stretch;
     background: #e0f7fa;
-    border-left: 4px solid #00796b;
+    border-left: 4px solid $green-light;
     padding: 1rem;
     margin-bottom: 1.5rem;
     border-radius: 4px;
@@ -126,7 +126,7 @@
     &__btn {
       align-self: center;
       padding: 0.5rem 1.5rem;
-      background: #00796b;
+      background: $green-light;
       color: #fff;
       border: none;
       border-radius: 4px;
@@ -134,7 +134,7 @@
       cursor: pointer;
       transition: background 0.2s;
       &:hover {
-        background: #005a43;
+        background: $green-dark;
       }
     }
 
@@ -175,4 +175,149 @@
   .account-content {
     padding: 2rem;
   }
+}
+
+
+.profile-card {
+
+  background: white;
+  border-radius: 14px;
+  padding: 28px;
+  // width: 420px;
+
+  box-shadow:
+  0 4px 18px rgba(0,0,0,0.05);
+}
+
+.profile-title {
+
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.profile-field {
+
+  margin-bottom: 22px;
+}
+
+.profile-field label {
+
+  display: block;
+  font-size: 13px;
+  color: #6b6b80;
+  margin-bottom: 6px;
+}
+
+.field-row{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;      // 🔥 разрешаем перенос
+}
+
+.field-row input{
+  flex: 1 1 260px;      // растёт, сжимается, базовая ширина
+  min-width: 0;         // чтобы реально сжимался
+}
+
+.confirm-btn{
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* На мобиле кнопка вниз и на всю ширину */
+@media (max-width: 420px){
+  .confirm-btn{
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
+
+input, select {
+
+  flex: 1;
+  padding: 10px 12px;
+
+  border-radius: 8px;
+  border: 1px solid #e5e7f0;
+
+  font-size: 14px;
+}
+
+.btn-outline {
+
+  padding: 8px 14px;
+
+  border-radius: 8px;
+  border: 1px solid $green-basic;
+
+  background: transparent;
+  color: $green-basic;
+
+  cursor: pointer;
+}
+
+.btn-primary {
+
+  padding: 8px 16px;
+
+  border-radius: 8px;
+  margin-left: 15px;
+  background: $green-basic;
+  color: white;
+  border: none;
+
+  cursor: pointer;
+}
+
+.code-input-error {
+    width: 43px;
+  height: 43px;
+  padding-right: 10px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  border-color: $color-error;
+  border-radius: 12px;
+  border: 1px solid #e4e6ef;
+
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.code-block {
+
+  margin-top: 10px;
+}
+
+.code-container {
+
+  // display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.code-input {
+
+  width: 43px;
+  height: 43px;
+  padding-right: 10px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+
+  border-radius: 12px;
+  border: 1px solid #e4e6ef;
+
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.code-input:focus {
+
+  border-color: $green-light;
+
+  box-shadow:
+  0 0 0 3px rgba(108, 99, 255, 0.15);
 }

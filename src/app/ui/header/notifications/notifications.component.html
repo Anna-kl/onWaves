@@ -34,7 +34,8 @@
                 </label> -->
                 <!-- Заявки-->
                      <ng-template #loading>
-                <app-loader-ocpio></app-loader-ocpio>
+                        <app-loader-on-waves></app-loader-on-waves>
+                <!-- <app-loader-ocpio></app-loader-ocpio> -->
                     </ng-template>
                 <div id="content-1" *ngIf="messages; else loading">
                       <span *ngIf="messages.length == 0" class=" text-body-emphasis">У вас еще нет уведомлений </span>

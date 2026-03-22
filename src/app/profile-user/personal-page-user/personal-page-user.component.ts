@@ -1,11 +1,9 @@
-import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
+import {Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {DomSanitizer} from "@angular/platform-browser";
-import {StoreService} from "../../ngrx-store/mainClient/store.service";
 import {IViewAddress} from "../../DTO/views/IViewAddress";
 import {select, Store} from "@ngrx/store";
 import {selectProfileMainClient} from "../../ngrx-store/mainClient/store.select";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {ModalComponent} from "../../baedit/components/uslugi/modal/modal.component";
 import {ChangeAvatarUAComponent} from "../../common/modals/change-avatar-ua/change-avatar-ua.component";
 import {LoginService} from "../../auth/login.service";
 import { IViewPost } from 'src/app/DTO/views/posts/IViewPost';
@@ -14,14 +12,152 @@ import { PostService } from 'src/services/posts.service';
 import { filter, forkJoin, mergeMap, Observable, of, skipWhile, Subscription, switchMap, tap } from 'rxjs';
 import { ProfileService } from 'src/services/profile.service';
 import { ICoupon } from 'src/app/DTO/classes/promo/IPoupon';
+import { Md5 } from 'ts-md5';
+import { AuthService } from 'src/services/auth.service';
+import { DictionaryService } from 'src/services/dictionary.service';
+import { ServiceRegisterBusinessProfile } from 'src/services/service-register-business';
+import { LocationService } from 'src/services/location.service';
 
 @Component({
   selector: 'app-personal-page-user',
   templateUrl: './personal-page-user.component.html',
   styleUrls: ['./personal-page-user.component.scss'],
-  providers: [PostService]
+  providers: [PostService,AuthService, LocationService]
 })
 export class PersonalPageUserComponent implements OnInit, OnDestroy {
+  showAuto = true;
+
+  addCities() {
+    if (this.mainProfileCleint && this.address)
+      this._profile.changeCity(this.mainProfileCleint.id!, this.address).subscribe(result => {
+        if (result.code === 200){
+          this.addCity = false;
+        }
+    });
+  }
+  addCity = false;
+  allCities:any[] = [];
+
+  setKeywordForce(v: string) {
+  this.keyword = v;
+
+  // принудительно пересоздаём компонент, чтобы он заново принял searchKeyword
+  this.showAuto = false;
+  setTimeout(() => this.showAuto = true);
+  }
+
+  onChangeSearch(val: string) {
+    if (val.length > 0) {
+      if (this.data.find(_ => _.name.includes(val))) {
+        this._location.getAddress(val).subscribe(
+            result => {
+              let address = result;
+              this.addCity = true;
+            }
+        );
+      }
+
+    }
+  }
+
+
+  toStringFromInputs(): string {
+  return this.inputs
+    .toArray()
+    .map(ref => ref.nativeElement.value ?? '')
+    .join('');
+  }
+
+  sendCode() {
+  throw new Error('Method not implemented.');
+  }
+
+  isEmailValid(): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((this.emailInput ?? '').trim());
+  }
+
+    @ViewChildren('codeInput')
+    inputs!: QueryList<ElementRef>;
+
+  changeEmail() {
+    if (this.mainProfileCleint)
+      if (this.mainProfileCleint.email !== this.emailInput && this.isEmailValid())
+       
+          this.emailVerified = true;
+        
+
+  }
+  changePhone(event:Event) {
+    if (this.phoneInput)
+        if (this.phoneInput.length > 10)
+          if (this.phoneInput !== this.mainProfileCleint?.phone)
+            this.phoneVerified = true;
+        
+  }
+   moveNext(event: any, index: number) {
+
+    const value = event.target.value;
+
+    if (value && index < 3) {
+
+      const next = this.inputs.toArray()[index + 1];
+      next.nativeElement.focus();
+
+    }
+
+  }
+
+  movePrev(event: any, index: number) {
+
+    if (event.key === 'Backspace' && !event.target.value && index > 0) {
+
+      const prev = this.inputs.toArray()[index - 1];
+      prev.nativeElement.focus();
+
+    }
+  }
+
+  errorCode = false;
+  errorMessage: string|null = null;
+  confirmEmail() {
+
+  }
+  showEmailCode: any;
+  emailCode: any;
+  uuid: any=null;
+  sendEmailCode() {
+
+  }
+  md5 = new Md5();
+  emailVerified = false;
+  phoneVerified = false;
+  confirmPhone() {
+    if (this.inputs.length === 4 && this.uuid){
+        this._auth.confirmCode(this.uuid.uuid, this.uuid.id, this.toStringFromInputs()).subscribe(result => {
+            if (result.code === 500){
+              this.errorMessage = result.message;
+            } else{
+              this.showPhoneCode = false;
+              this.phoneVerified = false;
+            }
+        });
+
+    }
+
+  }
+  showPhoneCode = false;
+  phoneCode = false;
+    sendPhoneCode() {
+      let id = this.md5.appendStr(`${new Date().toLocaleDateString()}${this.phoneInput}`).end()!.toString().substring(20);
+      this.showPhoneCode = true;
+      if (this.mainProfileCleint?.id && this.phoneInput)
+      this._auth.confirmContacts(this.mainProfileCleint?.id, this.phoneInput, id, 0).subscribe(
+          result => {
+            if (result.code === 200)
+            this.uuid = {id: result.data, uuid: id}
+          }
+      );
+    }
   // user: IViewBusinessProfile | null = null;
   mainProfileCleint: IViewBusinessProfile|null = null;
   posts: IViewPost[] = [];
@@ -33,11 +169,16 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
   // Значение купона в рублях
   couponValue = 0;
   hasCoupon$: Observable<ICoupon|null>|null = null;
+  phoneInput: string|undefined = undefined;
+  emailInput: string|undefined = undefined;
   
   constructor(private _storeService: Store,
               private sanitizer: DomSanitizer,
               private _loginService: LoginService,
               private _post: PostService,
+              private _auth: AuthService,
+              private _location: LocationService,
+              private _serviceRegisterBusinessProfile: ServiceRegisterBusinessProfile,
               private _profile: ProfileService,
               private modalService: NgbModal) {
     //получаем данные профиля из store
@@ -85,9 +226,28 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
       //   this.posts.push(...result.slice(this.slice, this.slice + 1));
       // }).unsubscribe();
   }
+  address: string|null = null;
+  async selectEvent(item: any) {
+    this.address = item.name;
 
-  ngOnInit(): void {
+  }
 
+  data: any[] = [];
+  keyword:string = 'name';
+
+  public async getListCities(){
+    (await this._serviceRegisterBusinessProfile.getCities())
+      .subscribe(_=> {
+        let index = this.data.length + 1;
+        _.forEach(item => {
+          this.data.push({id: index, name: item, type: 'city'});
+        });
+      });
+  }
+
+  async ngOnInit() {
+
+    await this.getListCities();
     this._storeService.pipe(
   // 1) Сначала берём только непустого пользователя
   select(selectProfileMainClient),
@@ -108,6 +268,14 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
             )
           );
           this.mainProfileCleint = user;
+          if (this.mainProfileCleint){
+            this.phoneInput = this.mainProfileCleint.phone;
+            this.emailInput = this.mainProfileCleint.email;
+            if (this.mainProfileCleint.address){
+              this.address = this.mainProfileCleint.address.city!;
+              // this.setKeywordForce(this.keyword);
+            }
+          }
           if(user)
             this.hasCoupon$ = this._profile.getCoupon(user.id!);
         // Если нет ни одного запроса — возвращаем пустой поток

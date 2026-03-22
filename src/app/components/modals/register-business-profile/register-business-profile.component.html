@@ -123,9 +123,9 @@
                         <div class="input-line cont-horiz-start margin-bottom30"  >
                           <input type="text" size="16" id="phone" formControlName="phone"
                                  placeholder="+7(000) 000-0000"
-                                 mask="+0(000) 000-0000" [showMaskTyped]="true"
+                                 mask="+0(000) 000-0000" [showMaskTyped]="false"
                                 />
-                          <!-- {{phone}} -->
+
                         </div>
                         <div *ngIf="phone.invalid &&(phone.dirty || phone.touched)" class="alert-validation">
                           <div *ngIf="phone.errors?.['minlength']">
@@ -183,6 +183,22 @@
                             </div>
                           </div>
                         </div>
+
+                         <h3 class="label margin-bottom10" for="email">
+                          Email
+                        </h3>
+                        <div class="block-input margin-bottom30">
+                          <div class="input-line cont-horiz-start" >
+                            <input class="form-control borderNone" type="text" size="16" id="email"
+                            formControlName="email"   placeholder=""  />
+                                   <!-- formControlName="webSite"   placeholder="https://"  /> -->
+                          </div>
+                          <!-- Событие при ошибки -->
+                          <div *ngIf="!email?.valid && email != null" class="alert-validation">
+                              Введите валидный email
+                          </div>
+                        </div>
+
                       </div>
                     </div>
                     <!-- <div class="txt-green-light margin-top10">
@@ -254,7 +270,7 @@
                       [ngStyle]="{ 'display': 'block' }"  >
                 Назад
               </button>
-              <button type="button" class="btn-green"   [ngStyle]="{'background-color': isFormValid() ? 'gray' : '#67C4B2' }"
+              <button type="button" class="btn-green"   [ngStyle]="{'background-color': isFormValid() ? 'gray' : '#006174' }"
                       (click)="increment()" [disabled]="isFormValid()">
                 {{textBtn}}
               </button>

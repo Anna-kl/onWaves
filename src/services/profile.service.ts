@@ -22,18 +22,22 @@ export class ProfileService {
   constructor(private http: HttpClient, private busService: BusService) {
   }
   public listClientsCard$ = new BehaviorSubject<IResponse|null>(null);
-  createProfile(profile: IProfile, token: string): Observable<IResponse>{
+  createProfile(profile: IViewBusinessProfile, token: string): Observable<IResponse>{
     let  headers: HttpHeaders = new HttpHeaders();
     headers = headers.append('Authorization', 'Bearer ' + token);
-    let profileUser: ProfileUser = {
-      Name: {Name: profile.name, Family: profile.family},
+    // let profileUser: IViewBusinessProfile = {
+    //   name: profile.name, Family: profile.family},
  
-      UserType: UserType.User
-    };
-    if (Object.keys(profile).includes('email')){
-      profile.email = profile['email']
-    }
-    return this.http.post<IResponse>(this.url, profileUser, {headers});
+    //   UserType: UserType.User
+    // };
+    // if (Object.keys(profile).includes('email')){
+    //   profile.email = profile['email']
+    // }
+    return this.http.post<IResponse>(this.url, profile, {headers});
+  }
+
+  changeCity(id: string, city: string){
+     return this.http.post<IResponse>(`${this.url}change-city/${id}`, {city});
   }
 
   hasCoupon(id: string){

@@ -56,7 +56,7 @@
         </div>
         <!--    блок Аватак и данные клиента -->
         <div class="w100"><hr> </div>
-        <div class="w100 cont-vert-start-center">
+        <div class="w100 cont-vert-start-center" *ngIf="mainProfileCleint.address">
           <!-- <h3 class="margin-bottom30">
             {{mainProfileCleint.name}}
             {{mainProfileCleint.family}}
@@ -66,11 +66,11 @@
               <!-- г. Саратов (тут надо подтянуть данные с геолокации, это заглушка) -->
               <!-- {{getCity(mainProfileCleint)}} -->
             </div>
-            <div>
-              {{getCity(mainProfileCleint.address!)}}
+            <div *ngIf="mainProfileCleint.address.city">
+              {{getCity(mainProfileCleint.address)}}
             </div>
-            <div>
-              {{getStreet(mainProfileCleint.address!)}}
+            <div *ngIf="mainProfileCleint.address.street">
+              {{getStreet(mainProfileCleint.address)}}
             </div>
           </div>
         </div>
@@ -111,7 +111,163 @@
           <section class="section" style="padding-top: 0; height: auto;">
               <h2>Добро пожаловать,  {{mainProfileCleint.name}}!</h2>
            
-              <!-- … остальной контент … -->
+             <div class="profile-card" style="margin-top: 20px;">
+
+                  <h2 class="profile-title">Контактные данные</h2>
+
+                  <!-- PHONE -->
+                  <div class="profile-field">
+
+                    <label>Телефон</label>
+
+                    <div class="field-row">
+
+                      <input
+                     
+                        type="text"
+                        placeholder="+7(000)000-00-00"
+                        [(ngModel)]="phoneInput"
+                        mask="+0(000) 000-0000"
+                        (input)="changePhone($event)"
+                      />
+
+                      <!-- <span *ngIf="mainProfileCleint.phone">{{mainProfileCleint.phone}}</span> -->
+
+                      <button
+                        *ngIf="phoneVerified"
+                        class="btn-outline"
+                        (click)="sendPhoneCode()"
+                      >
+                        Подтвердить
+                      </button>
+
+                    </div>
+                    <div class="code-container"  *ngIf="showPhoneCode">
+
+                        <input
+                        #codeInput
+                        [ngClass]="errorCode ? 'code-input-error' : 'code-input'"
+                        maxlength="1"
+                        type="text"
+                        inputmode="numeric"
+                        (input)="moveNext($event, 0)"
+                        (keydown)="movePrev($event, 0)"
+                        />
+
+                        <input
+                        #codeInput
+                          [ngClass]="errorCode ? 'code-input-error' : 'code-input'"
+                        maxlength="1"
+                        type="text"
+                        inputmode="numeric"
+                        (input)="moveNext($event, 1)"
+                        (keydown)="movePrev($event, 1)"
+                        />
+
+                        <input
+                        #codeInput
+                         [ngClass]="errorCode ? 'code-input-error' : 'code-input'"
+                        maxlength="1"
+                        type="text"
+                        inputmode="numeric"
+                        (input)="moveNext($event, 2)"
+                        (keydown)="movePrev($event, 2)"
+                        />
+
+                        <input
+                        #codeInput
+                       [ngClass]="errorCode ? 'code-input-error' : 'code-input'"
+                        maxlength="1"
+                        type="text"
+                        inputmode="numeric"
+                        (input)="moveNext($event, 3)"
+                        (keydown)="movePrev($event, 3)"
+                        />
+
+     
+                      <button class="btn-primary"
+                              (click)="confirmPhone()">
+                        OK
+                      </button>
+
+           
+
+                  </div>
+                  <span class="eror-txt" *ngIf="errorMessage">{{errorMessage}}</span>
+                        </div>
+
+
+
+                  <!-- EMAIL -->
+                  <div class="profile-field">
+
+                    <label>Email</label>
+
+                    <div class="field-row">
+
+                      <input
+                   
+                        type="email"
+                        placeholder="example@mail.com"
+                        (input)="changeEmail()"
+                        [(ngModel)]="emailInput"
+                      />
+                      <div *ngIf="emailInput && !isEmailValid()" class="error" style="color: red;">Неверный формат email</div>
+                      <!-- <span *ngIf="mainProfileCleint.email">{{mainProfileCleint.email}}</span> -->
+
+                      <button
+                        *ngIf="emailVerified"
+                        class="btn-outline"
+                        (click)="sendEmailCode()"
+                      >
+                        Подтвердить
+                      </button>
+
+                    </div>
+
+                    <div *ngIf="showEmailCode" class="code-block">
+
+                      <input maxlength="4"
+                            placeholder="Код"
+                            [(ngModel)]="emailCode">
+
+                      <button class="btn-primary"
+                              (click)="confirmEmail()">
+                        OK
+                      </button>
+
+                    </div>
+
+                  </div>
+
+
+                  <!-- CITY -->
+                   <div class="margin-top-bottom20"> 
+          		<!--выподающий списко кругло-овальное--> 
+                      <div class="w100 wrap"> 
+                        <ng-autocomplete 
+                          [data]="data"
+                          [(ngModel)]="address"
+                           [searchKeyword]="keyword"
+                          placeholder="Введите город"
+                          (selected)='selectEvent($event)'
+                          (inputChanged)='onChangeSearch($event)'
+                          [itemTemplate]="itemTemplate"
+                          [notFoundTemplate]="notFoundTemplate">
+                        </ng-autocomplete> 
+                        <ng-template #itemTemplate let-location >
+                          <a [innerHTML]="location.name" ></a>
+                        </ng-template> 
+                        <ng-template #notFoundTemplate let-notFound>
+                          <div [innerHTML]="notFound"></div>
+                        </ng-template>  
+                      </div> 
+                        </div>  
+                        <button class="btn-green button-text cont-vert" *ngIf="addCity" (click)="addCities()">
+                      Подтвердить
+                    </button> 
+                </div>
+                    
             </section>
     <!-- Баннер купона -->
             <!-- <div class="coupon-banner" *ngIf="hasCoupon$|async as coupon">

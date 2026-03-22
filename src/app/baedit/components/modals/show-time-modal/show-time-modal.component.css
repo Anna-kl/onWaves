@@ -56,12 +56,12 @@
   outline:1px solid #9196A4;
 }
 .spisokListContainerR div::-webkit-scrollbar-thumb {
-  background-color: #50BDA7FF;
+  background-color: #5ecdd7;
   border-radius: 8px;
   border: 4px solid #fff;
 }
 .openListR li:hover{
-  background-color:#00DAB3
+  background-color:#5ecdd7;
 }
 .show-time-modal{
   background-color: #fff;
