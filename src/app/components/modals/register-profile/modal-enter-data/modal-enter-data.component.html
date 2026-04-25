@@ -52,9 +52,13 @@
             Позвонить повторно
           </a>
         </div> 
-        <button class="btn-green button-text cont-vert margin-bottom40" (click)="next()" [disabled]="!checkCode">
+        <button
+          class="button-text cont-vert margin-bottom40"
+          [ngClass]="checkCode ? 'btn-green' : 'btn-gray'"
+          (click)="next()"
+          [disabled]="!checkCode">
           Подтвердить
-        </button> 
+        </button>
       </div>
     </form>
   </div>

@@ -35,6 +35,7 @@ import { Uslugis2Component } from './uslugis2/uslugis2.component';
 import { DayrentComponent } from './dayrent/dayrent.component';
 import {ReviewsComponent} from "../baedit/profilebisacc/reviews/reviews.component";
 import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal.component';
+import { RecordSuccessTelegramModalComponent } from './components/record-success-telegram-modal/record-success-telegram-modal.component';
 
 import {UIModule} from "../ui/ui.module";
 import { ConfirmRecord2Component } from './components/confirm-record2/confirm-record2.component';
@@ -66,6 +67,7 @@ import { ShowPhoneCouponComponent } from './popup/show-phone-coupon/show-phone-c
     DayrentComponent,
     ReviewsComponent,
     ConfirmModalComponent,
+    RecordSuccessTelegramModalComponent,
     ConfirmRecord2Component,
     SetIntervalStartComponent,
     ErrorConfirmRecordComponent,

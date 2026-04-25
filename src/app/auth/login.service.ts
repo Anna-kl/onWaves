@@ -10,7 +10,7 @@ import {IViewBusinessProfile} from "../DTO/views/business/IViewBussinessProfile"
 
 import {ProfileService} from "../../services/profile.service";
 import { Store, select } from "@ngrx/store";
-import { getActionStateMainProfileClient } from "../ngrx-store/mainClient/store.action";
+import { getActionStateMainProfileClient, logoutAction } from "../ngrx-store/mainClient/store.action";
 import { UserType } from "../DTO/classes/profiles/profile-user.model";
 import { selectLink } from "../ngrx-store/links/link.selector";
 import { clearLinkAction } from "../ngrx-store/links/link.action";
@@ -81,52 +81,8 @@ export class LoginService {
                 tap(data => {
                     if (data.code === 200) {
                         this.isLoad$.next(true);
-                        let profile = data.data.profile;
-                        let view: IViewBusinessProfile[] = [];
-                        view.push(profile);
                         this._push.subscribe(data.message);
-                        this.getAllBusinessProfile(profile?.id!, data.data.token!,
-                            profile?.userType!).subscribe(
-                            result => {
-                                this.checkRequestAccount(result, view, data);
-                                // if (result.code !== 404) {
-                  
-                                //     let profileId: string|null = null;
-                                //     if (result.data.length > 0){
-                                //       view.push(result.data.pop());                
-                                //     }
-                                // }
-                                // let profileId: string|null = null;
-                                // if (result.data.length > 0){
-                                //   profileId = this.isProfileId();
-                                //   view.push(result.data.pop());
-                                //   this.allProfiles$.next(view as IViewBusinessProfile[]);
-                                // }
-                                // if (!profileId){
-                                //   profileId = profile.id;
-                                // }
-                                // if (profileId){
-                                //     let tempProfile =  view.find((_:IViewBusinessProfile) => _.id === profileId);
-                                //     if (tempProfile){
-                                //         this.store$.dispatch(getActionStateMainProfileClient(
-                                //             { tokenMainClient: data.data.profile,
-                                //                           profileMainClient:  tempProfile} ))
-                                //         this.store$.dispatch(requestAction({request: tempProfile.id!}));
-                                //         this.store$.pipe(select(selectLink)).subscribe(
-                                //             linkResult => {
-                                //                 if (linkResult.isHasLink){
-                                //                     this.store$.dispatch(clearLinkAction());
-                                //                     this._router.navigate([linkResult.link]);
-                                //                 }
-                                //             }
-                                //         );
-                                //     } else {
-                                //         this.cookieService.deleteAll();
-                                //         window.location.href = '/';
-                                //     }
-                                // }
-                            }
-                        );
+                        this.checkRequestAccount(data);
                         // this.store$.dispatch(getActionStateMainProfileClient(
                         //     { tokenMainClient: data.data.token,
                         //          profileMainClient: data.data.profile }));
@@ -190,40 +146,7 @@ export class LoginService {
         );
     }
 
-    checkRequestAccount(result: IResponse, view: IViewBusinessProfile[],
-       data: IResponse){
-        if (result.code !== 404) {
-            if (result.data.length > 0){
-              view.push(result.data.pop());                
-            }
-          }
-          let profileId: string|null = null;
-          profileId = this.isProfileId();
-          if (profileId){
-              this.allProfiles$.next(view);
-              let tempProfile =  view.find((_:IViewBusinessProfile) => _.id === profileId);
-              if (tempProfile){
-                  this.store$.dispatch(getActionStateMainProfileClient(
-                      { tokenMainClient: data.data.token,
-                                  profileMainClient:  tempProfile} ))
-                  this.store$.dispatch(requestAction({request: tempProfile.id!}));
-                  this.store$.pipe(select(selectLink)).subscribe(
-                      linkResult => {
-                          if (linkResult.isHasLink){
-                              this.store$.dispatch(clearLinkAction());
-                              this._router.navigate([linkResult.link]);
-                          }
-                      }
-                  );
-              } else {
-                  this.cookieService.deleteAll();
-                  window.location.href = '/';
-              }
-          }
-        }
-    
-
-    prepareProfiles(data: any){
+    checkRequestAccount(data: IResponse){
       this.isLoad$.next(true);
       let profile = data.data.profile;
       let view: IViewBusinessProfile[] = [];
@@ -248,12 +171,14 @@ export class LoginService {
                         { tokenMainClient: data.data.token,
                                     profileMainClient:  tempProfile} ))
                     this.store$.dispatch(requestAction({request: tempProfile.id!}));
-                    this.store$.pipe(select(selectLink)).subscribe(
+                    this.store$.pipe(
+                        select(selectLink),
+                        filter(linkResult => linkResult.isHasLink),
+                        take(1)
+                    ).subscribe(
                         linkResult => {
-                            if (linkResult.isHasLink){
-                                this.store$.dispatch(clearLinkAction());
-                                this._router.navigate([linkResult.link]);
-                            }
+                            this.store$.dispatch(clearLinkAction());
+                            this._router.navigate([linkResult.link]);
                         }
                     );
                 } else {
@@ -263,12 +188,6 @@ export class LoginService {
             }
           }
       );
-      // this.store$.dispatch(getActionStateMainProfileClient(
-      //     { tokenMainClient: data.data.token,
-      //          profileMainClient: data.data.profile }));
-
-    //   this._notification.requestPermission(data.message);
-    //   this._notification.receiveMessage();
     }
 
     updateProfileUA(){
@@ -278,8 +197,46 @@ export class LoginService {
       this.http.post<IResponse>(`${this.url}uuid`, send, {headers}).subscribe
         (data => {
             if (data.code === 200) {
-              this.prepareProfiles(data);
+              this.checkRequestAccount(data);
     }});
+  }
+
+  private clearAuthCookies(): void {
+      const cookieNames = ['auth-token-ocpio', 'profileId-ocpio', 'uuid-ocpio'];
+      for (const name of cookieNames) {
+          // Try both root-path and default-path variants to avoid stale auth cookies.
+          this.cookieService.delete(name, '/');
+          this.cookieService.delete(name);
+      }
+  }
+
+  async logoutAndClearCaches(): Promise<void> {
+      this.clearAuthCookies();
+
+      this.mainCategoriesProfile$.next(null);
+      this.allProfiles$.next([]);
+      this.isAutentificate$.next(false);
+      this.isLoad$.next(true);
+      this.store$.dispatch(logoutAction());
+
+      try {
+          sessionStorage.clear();
+          localStorage.clear();
+      } catch {}
+
+      try {
+          if ('caches' in window) {
+              const keys = await caches.keys();
+              await Promise.all(keys.map(key => caches.delete(key)));
+          }
+      } catch {}
+
+      try {
+          if ('serviceWorker' in navigator) {
+              const regs = await navigator.serviceWorker.getRegistrations();
+              await Promise.all(regs.map(reg => reg.unregister()));
+          }
+      } catch {}
   }
 
 }

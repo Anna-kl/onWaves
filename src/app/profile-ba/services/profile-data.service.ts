@@ -51,4 +51,15 @@ export class ProfileDataService {
   transferChooseService(services: subGroup[]){
     this.chooseService.next(services);
   }
+
+  /** Сброс данных черновика записи (внутренняя «шина» между экранами выбора). */
+  clearBookingState(): void {
+    this.id.next(null);
+    this.service.next([]);
+    this.dayId.next(null);
+    this.date.next(null);
+    this.profileBA.next(null);
+    this.chooseService.next([]);
+    this.address.next(null);
+  }
 }

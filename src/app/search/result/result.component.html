@@ -49,34 +49,41 @@
 <!--			</app-clients-card-list> -->
 
 				<ng-container *ngIf="firstCards.length > 0">
-					<div *ngFor="let category of getCategories(categories, firstCards)" class="w100 left-right20mob" >
-					
-						<div class="cont-horiz-start-start margin-top50 margin-bottom30 w100 left-right20">
-							<div>
-								<h2>{{category.name}}</h2>
+					<ng-container *ngIf="firstCardCategories.length > 0; else firstCardsFlat">
+						<div *ngFor="let category of firstCardCategories" class="w100 left-right20mob" >
+							<div class="cont-horiz-start-start margin-top50 margin-bottom30 w100 left-right20">
+								<div>
+									<h2>{{category.name}}</h2>
+								</div>
 							</div>
+							<app-clients-card-list [card-business]="getCards(category,firstCards)" class="disp1 cont-horiz-start-start wrap parent-grey-light"
+							 style="gap: 10px 4px;">
+							</app-clients-card-list>
 						</div>
-
-						<app-clients-card-list [card-business]="getCards(category,firstCards)" class="disp1 cont-horiz-start-start wrap parent-grey-light"
-						 style="gap: 10px 4px;">
+					</ng-container>
+					<ng-template #firstCardsFlat>
+						<app-clients-card-list [card-business]="firstCards" class="disp1 cont-horiz-start-start wrap parent-grey-light" style="gap: 10px 4px;">
 						</app-clients-card-list>
-
-					</div> 
+					</ng-template>
 				</ng-container>
 				<ng-container *ngIf="seconsCards.length > 0">
 					<p style="margin-bottom: 8px;">Возможно, это также Вас заинтересует!</p>
-									<div  *ngFor="let category of getCategories(categories, seconsCards)" class="w100 left-right20mob" >
-				
-					<div class="cont-horiz-start-start margin-top50 margin-bottom30 w100 left-right20" >
-						<div>
-							<h2>{{category.name}}</h2>
+					<!-- Если categoryIds с API не совпали с рубриками 2-го уровня из словаря, getCategories() пустой — показываем список без заголовков рубрик -->
+					<ng-container *ngIf="secondCardCategories.length > 0; else secondCardsFlat">
+						<div *ngFor="let category of secondCardCategories" class="w100 left-right20mob" >
+							<div class="cont-horiz-start-start margin-top50 margin-bottom30 w100 left-right20" >
+								<div>
+									<h2>{{category.name}}</h2>
+								</div>
+							</div>
+							<app-clients-card-list [card-business]="getCards(category, seconsCards)" class="disp1 cont-horiz-start-start wrap parent-grey-light " style="gap: 10px 4px;">
+							</app-clients-card-list>
 						</div>
-					</div>
-
-					<app-clients-card-list [card-business]="getCards(category, seconsCards)" class="disp1 cont-horiz-start-start wrap parent-grey-light " style="gap: 10px 4px;">
-					</app-clients-card-list>
-
-				</div> 
+					</ng-container>
+					<ng-template #secondCardsFlat>
+						<app-clients-card-list [card-business]="seconsCards" class="disp1 cont-horiz-start-start wrap parent-grey-light " style="gap: 10px 4px;">
+						</app-clients-card-list>
+					</ng-template>
 				</ng-container>
 								<ng-container *ngIf="thirdCards.length > 0">
 					<p style="margin-bottom: 8px;">Упс... К сожалению ничего не нашлось, но может это вас заинтересует </p>
@@ -88,7 +95,7 @@
 
 			
 				</ng-container>
-					<ng-container *ngIf="thirdCards.length === 0 && seconsCards.length === 0 && firstCards.length === 0">
+					<ng-container *ngIf="!loading && thirdCards.length === 0 && seconsCards.length === 0 && firstCards.length === 0">
 							<p style="margin-bottom: 8px;">Упс... К сожалению, по вашему запросу ничего не нашлось </p>
 					</ng-container>
 			<!-- <ng-template  #alternative >

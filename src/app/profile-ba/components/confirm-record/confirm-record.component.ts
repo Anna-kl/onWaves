@@ -8,6 +8,7 @@ import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessPr
 import {getAddressProfile} from "../../../../helpers/common/address";
 import {NgbActiveModal, NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
 import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
+import { RecordSuccessTelegramModalComponent } from '../record-success-telegram-modal/record-success-telegram-modal.component';
 import {Location} from "@angular/common";
 import {IViewRecordData} from "../../../DTO/views/records/IViewRecordData";
 import {DomSanitizer} from "@angular/platform-browser";
@@ -22,7 +23,7 @@ import {NotesService} from "src/app/profile-ba/notes/notes-events.service";
 import {getTokenMainClient, selectProfileMainClient} from "../../../ngrx-store/mainClient/store.select";
 import {getHours, getMinutes} from "../../../../helpers/common/timeHelpers";
 import {PaymentMethodType} from "../../../DTO/enums/paymentMethodType";
-import { map, Observable, Subscription, switchMap, tap } from 'rxjs';
+import { finalize, map, Observable, Subscription, switchMap, tap } from 'rxjs';
 import { getPrice, getPriceService, getPriceString } from 'src/helpers/common/price.helpers';
 import { ErrorConfirmRecordComponent } from '../errorConfirmRecord/error-confirm-record.component';
 import { ProfileService } from 'src/services/profile.service';
@@ -97,6 +98,10 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   record: IViewRecordData|null = null;
   recordId: string|null = null;
   remainingText = 150;
+  /** Блокировка «Далее» (saveRecord) до ответа сервера */
+  saveInProgress = false;
+  /** Блокировка «Подтвердить» / «Отменить» (confirmRecord) до ответа сервера */
+  confirmInProgress = false;
   constructor(private _api: RecordService,
               private _profileData: ProfileDataService,
               private _route: Router,
@@ -189,30 +194,77 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   // //   await this.getListSchedule();
 
   // }
-  async confirmRecord(status: RecordStatus) {
-    // if (sch.status === RecordStatus.Created || sch.status === RecordStatus.Canceled) {
-      const send = {id: this.recordId!, status} as ISendRecord;
-      this.unsubscribe$ = this._api.confirmRecord(this.businessProfile?.id!, send).subscribe(
-          res => {
-            if (res.code === 200) {
-              this.store$.dispatch(requestAction({request: this.businessProfile?.id!}));
-              this._route.navigate(['/']);
-            }
-          });
-    }
-
-  goPage(){
-      if (this.businessProfile?.link){
-        this._route.navigate(['/', this.businessProfile!.link])
-      } else {
-          this._route.navigate(['id/', this.businessProfile!.id]);
-      }
-    
+  /** Id мастера (страница БА): из профиля или с инпута маршрута */
+  private getMasterId(): string | null {
+    return this.businessProfile?.id ?? this.idBaPage ?? null;
   }
 
-  onConfirm(){
+  confirmRecord(status: RecordStatus) {
+    if (this.confirmInProgress) {
+      return;
+    }
+    const masterId = this.getMasterId();
+    if (!masterId || !this.recordId) {
+      return;
+    }
+    const send = { id: this.recordId, status } as ISendRecord;
+    this.confirmInProgress = true;
+    this.unsubscribe$ = this._api
+      .confirmRecord(masterId, send)
+      .pipe(finalize(() => (this.confirmInProgress = false)))
+      .subscribe((res) => {
+        if (res.code === 200) {
+          this.store$.dispatch(requestAction({ request: masterId }));
+          this._route.navigate(['/']);
+        }
+      });
+  }
 
-    let record = {
+  /**
+   * Возврат на публичную страницу мастера.
+   * После clearBookingState() this.businessProfile может быть null — передавайте link/id из вызова.
+   */
+  /** Очистка локального состояния после успешного создания записи (201 / 202). */
+  private resetStateAfterRecordCreated(): void {
+    this._profileData.clearBookingState();
+    this._events.clearRecordDraftState();
+    this.dayId = null;
+    this.dayChoose = null;
+    this.chooseServices = [];
+    this.message = '';
+    this.duration = 0;
+    this.price = 0;
+    this.sale = 0;
+    this.yourCoupon = null;
+    this.useCoupon = false;
+    this.IsRemandDay = false;
+    this.IsRemandHours = false;
+    this.status = false;
+    this.record = null;
+    this.recordId = null;
+    this.remainingText = 150;
+  }
+
+  goPage(masterLink?: string | null, masterId?: string | null): void {
+    const link = masterLink ?? this.businessProfile?.link;
+    const id = masterId ?? this.businessProfile?.id;
+    if (link) {
+      this._route.navigate(['/', link]);
+    } else if (id) {
+      this._route.navigate(['id/', id]);
+    }
+  }
+
+  onConfirm() {
+    if (this.saveInProgress) {
+      return;
+    }
+    const masterId = this.getMasterId();
+    if (!masterId) {
+      return;
+    }
+
+    const record = {
       id: uuidv4(),
       daysOfScheduleId: this.dayId,
       isRemandDay: this.IsRemandDay,
@@ -222,30 +274,43 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
       services: this.chooseServices,
       clientId: this.profile?.id,
       serverTime: new Date().toLocaleString(),
-      couponId: this.yourCoupon ? this.yourCoupon.id : null
+      couponId: this.yourCoupon ? this.yourCoupon.id : null,
     } as Record;
-    let option: NgbModalOptions = {
-      backdrop:'static',
-      keyboard: false
-    }
-    this.unsubscribe$ = this._api.saveRecord(this.businessProfile?.id!, record).subscribe(result => {
-      if (result.code === 201){
-        //this._route.navigate(['/']);
-        this.status = !this.status;
-       
-        let modalRef = this.modalService.open(ConfirmModalComponent, option);
-        modalRef.result.then(res => {
-          this.goPage();
+    const option: NgbModalOptions = {
+      backdrop: 'static',
+      keyboard: false,
+    };
+    const masterLink = this.businessProfile?.link;
+    const masterIdForNav = this.businessProfile?.id ?? masterId;
 
-        });
-      }else {
-        let modalRef = this.modalService.open(ErrorConfirmRecordComponent, option);
-        modalRef.result.then(res => {
+    this.saveInProgress = true;
+    this.unsubscribe$ = this._api
+      .saveRecord(masterId, record)
+      .pipe(finalize(() => (this.saveInProgress = false)))
+      .subscribe((result) => {
+        if (result.code === 201 || result.code === 202) {
+          this.resetStateAfterRecordCreated();
+          const afterModal = () => this.goPage(masterLink, masterIdForNav);
 
+          if (result.code === 201) {
+            const modalRef = this.modalService.open(ConfirmModalComponent, option);
+            modalRef.result.then(afterModal, afterModal);
+          } else {
+            const modalRef = this.modalService.open(RecordSuccessTelegramModalComponent, {
+              ...option,
+              centered: true,
+              size: 'md',
+              windowClass: 'record-success-telegram-dialog',
+            });
+            modalRef.result.then(afterModal, afterModal);
+          }
+        } else {
+          const modalRef = this.modalService.open(ErrorConfirmRecordComponent, option);
+          modalRef.result.then(() => {
             this.goPage();
-        });
-      }
-    });
+          });
+        }
+      });
   }
   // openPopUpModal() {
   //   // this.status = !this.status;

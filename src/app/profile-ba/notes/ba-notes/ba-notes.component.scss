@@ -1,3 +1,5 @@
+@import "../../../../assets/styles/main/color.scss";
+
 .around_1024-beetween_large {
   display: flex;
   justify-content: space-between;
@@ -32,8 +34,8 @@
 }
 
 .stl-cancel {
-  color: #E24414;
-  border: 0px solid #E24414;
+  color: $color-error;
+  border: 0px solid $color-error;
   max-width: 240px;
   display: flex;
   align-items: center;
@@ -55,7 +57,7 @@
 
 .ba-my-notes {
   padding: 20px 1em;
-  border-bottom: 1px solid #DDE2ED;
+  border-bottom: 1px solid $grey;
 }
 
 .type-of-pay {
@@ -71,7 +73,7 @@
 
 .add_notes_stl {
   width: calc(100%);
-  background-color: rgb(255, 255, 255);
+  background-color: $white;
   padding: 1em 4em;
   margin-bottom: 20px;
 }
@@ -160,54 +162,64 @@
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: #888;
+  color: $grey-dark;
 }
 
 .custom-close:hover {
-  color: #000;
+  color: $green-dark;
 }
 
 
 .pin-btn{
-  --pin-bg:#ffffff; --pin-fg:#111827; --pin-br:#d1d5db; --pin-hover:#f3f4f6; --pin-focus:rgba(59,130,246,.2);
+  --pin-bg: #{$white};
+  --pin-fg: #{$green-dark};
+  --pin-br: #{$grey};
+  --pin-hover: #{$grey-light};
+  --pin-focus: #{rgba($green-basic, 0.22)};
   display:inline-flex; align-items:center; gap:.5rem;
   padding:.55rem .9rem; border-radius:999px; border:1px solid var(--pin-br);
   background:var(--pin-bg); color:var(--pin-fg); font:600 14px/1.1 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  box-shadow:0 1px 2px rgba(0,0,0,.04); cursor:pointer; transition:.15s ease;
+  box-shadow:0 1px 2px rgba($black, .04); cursor:pointer; transition:.15s ease;
 }
 .pin-btn:hover{ background:var(--pin-hover); transform:translateY(-1px); }
 .pin-btn:active{ transform:translateY(0); }
 .pin-btn:focus-visible{ outline:none; box-shadow:0 0 0 4px var(--pin-focus); }
 .pin-ic{ width:16px; height:16px; }
 @media (prefers-color-scheme: dark){
-  .pin-btn{ --pin-bg:#0b0c10; --pin-fg:#e5e7eb; --pin-br:#1f2937; --pin-hover:#111827; --pin-focus:rgba(96,165,250,.25); }
+  .pin-btn{
+    --pin-bg: #{$green-dark};
+    --pin-fg: #{$grey-light};
+    --pin-br: #{$grey-dark};
+    --pin-hover: #{$green-basic};
+    --pin-focus: #{rgba($green-light2, 0.28)};
+  }
 }
 
 
 
-/* Бренд-переменные (подставьте свои хексы; будут использованы и в тёмной теме) */
+/* Бренд-переменные из color.scss */
 .theme-brand{
-  --brand-surface:#ffffff;
-  --brand-text:#0f172a;
-  --brand-border:#e6e6eb;
+  --brand-surface: #{$white};
+  --brand-text: #{$green-dark};
+  --brand-border: #{$grey};
 
-  --brand-primary:#0ea5a2;        /* ваш акцентный */
-  --brand-primary-600:#0d9488;
+  --brand-primary: #{$green-light};
+  --brand-primary-600: #{$green-basic};
 
-  --success:#22c55e;              /* зелёный успех */
-  --success-600:#16a34a;
-  --success-ink:#065f46;
-  --success-bg:#ecfdf5;
+  --success: #{$color-success};
+  --success-600: #{mix($black, $color-success, 35%)};
+  --success-ink: #{$green-dark};
+  --success-bg: #{mix($white, $color-success, 92%)};
 }
 
 @media (prefers-color-scheme: dark){
   .theme-brand{
-    --brand-surface:#0b0c10;
-    --brand-text:#e5e7eb;
-    --brand-border:#1f2937;
+    --brand-surface: #{$green-dark};
+    --brand-text: #{$grey-light};
+    --brand-border: #{$green-basic};
 
-    --success-bg:#052e23;         /* мягкий тёмно-зелёный фон */
-    --success-ink:#d1fae5;
+    --success-bg: #{mix($green-dark, $color-success, 72%)};
+    --success-ink: #{mix($white, $color-success, 82%)};
   }
 }
 
@@ -218,7 +230,7 @@
   background:var(--success-bg);
   border:1px solid var(--success);
   border-radius:12px;
-  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  box-shadow:0 1px 2px rgba($black, .04);
   position:relative;
   overflow:hidden;
 }
@@ -243,7 +255,7 @@
 .cb-chip{
   display:inline-flex; align-items:center; gap:.35rem;
   padding:.18rem .5rem; border-radius:999px;
-  background:rgba(34,197,94,.12); /* прозрачный зелёный для светлой темы */
+  background:rgba($color-success, .12);
   border:1px solid var(--success);
   color:var(--success-600); font-weight:700;
 }
@@ -256,7 +268,7 @@
   padding:.25rem .35rem; border-radius:8px;
 }
 .cb-action:hover{ color:var(--brand-primary-600); text-decoration:underline; }
-.cb-action:focus-visible{ outline:none; box-shadow:0 0 0 4px rgba(14,165,162,.25); }
+.cb-action:focus-visible{ outline:none; box-shadow:0 0 0 4px rgba($green-basic, .25); }
 
 /* Адаптация для узких контейнеров */
 @media (max-width:420px){

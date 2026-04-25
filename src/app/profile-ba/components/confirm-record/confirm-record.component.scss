@@ -1,6 +1,12 @@
 
 @import "../../../../assets/styles/main/color.scss";
 
+.record-action--disabled {
+  opacity: 0.55;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
 .chooseServices{
   margin-bottom: 0;
   padding: 20px 0;

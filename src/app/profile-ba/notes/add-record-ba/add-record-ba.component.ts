@@ -7,6 +7,7 @@ import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {PaymentForType} from "../../../DTO/enums/paymentForType";
 import {GroupService} from "../../../../services/groupservice";
 import {NotesService} from "../notes-events.service";
+import { ProfileDataService } from "../../services/profile-data.service";
 import {ChooseTimeModalComponent} from "../../components/choose-time-modal/choose-time-modal.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {subGroup} from "../../../DTO/views/services/IViewSubGroups";
@@ -65,6 +66,7 @@ export class AddRecordBAComponent implements OnInit, OnDestroy {
               private _builder: FormBuilder,
               private _router: Router,
               private _events: NotesService,
+              private _profileData: ProfileDataService,
               private modalService: NgbModal,
               private _groupService: GroupService,
               private _apiRecord: RecordService) {
@@ -240,7 +242,12 @@ export class AddRecordBAComponent implements OnInit, OnDestroy {
     this._apiRecord.saveRecord(this.id!, record).subscribe(
       res => {
         if (res.code === 201){
-          this._events.transferRecordId(res.data);
+          this._profileData.clearBookingState();
+          this._events.clearRecordDraftState();
+          this.chooseServices = [];
+          this.duration = 0;
+          this.start = null;
+          this.formClient.patchValue({ about: '', name: '', phone: '+7', remandHours: false, start: '00:00' });
           this._router.navigate(['/notes/', this.id]);
         }
       });

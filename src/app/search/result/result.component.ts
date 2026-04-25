@@ -1,6 +1,6 @@
 import {Component, DestroyRef, inject, OnDestroy, OnInit, Sanitizer} from '@angular/core';
-import {BehaviorSubject, catchError, concatMap, EMPTY, filter, from, map, mergeMap, Observable, Observer, of, shareReplay, startWith, Subject, Subscription, switchMap, tap, toArray, withLatestFrom} from "rxjs";
-import {ActivatedRoute, Router} from "@angular/router";
+import {BehaviorSubject, catchError, concatMap, EMPTY, filter, from, map, merge, mergeMap, Observable, Observer, of, shareReplay, Subject, Subscription, switchMap, tap, toArray, withLatestFrom} from "rxjs";
+import {ActivatedRoute, Params, Router} from "@angular/router";
 import {SearchService} from "../../../services/search.service";
 import {IResultSearch} from "../../DTO/views/search/IResultSearch";
 import {ICategory} from "../../DTO/classes/ICategory";
@@ -14,16 +14,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
 import { IResponse } from 'src/app/DTO/classes/IResponse';
 import { IViewFullInfo } from 'src/app/DTO/views/IViewFullInfo';
-
-function safeParseIds(msg: string): number[] {
-  try {
-    const x = JSON.parse(msg);
-    const flat = Array.isArray(x) ? (x as any[]).flat?.() ?? ([] as any[]).concat(...x) : [];
-    return flat.filter(n => typeof n === 'number') as number[];
-  } catch {
-    return [];
-  }
-}
 
 @Component({
   selector: 'app-result',
@@ -41,7 +31,8 @@ export class ResultComponent implements OnInit, OnDestroy{
   public  cards: IViewBusinessProfile[] = [];
   private unsubscribe: Subscription|null = null;
   profiles$: Observable<IViewBusinessProfile[]>|null = null;
-  loading: boolean = false;
+  /** true до первого ответа search2 — иначе блок «ничего не нашлось» мелькал при пустых массивах */
+  loading: boolean = true;
   categories1Level$: Observable<ICategory[]> = new Observable();
   test$: Observable<IResponse>=new Observable();
   filtered$: Observable<ICategory[]> | undefined;
@@ -51,6 +42,9 @@ export class ResultComponent implements OnInit, OnDestroy{
   firstCards:  IResultSearch[]= [];
   seconsCards:  IResultSearch[] = [];
   thirdCards: IResultSearch[]= [];
+  /** Считаются в tap вместе с ответом API (не геттеры — тогда при else-ветке *ngIf геттер для *ngFor мог не дергаться). */
+  firstCardCategories: ICategory[] = [];
+  secondCardCategories: ICategory[] = [];
 
 
   constructor(private activatedRoute: ActivatedRoute,
@@ -59,13 +53,24 @@ export class ResultComponent implements OnInit, OnDestroy{
               private _route: Router,
               private _apiCards: CardsProfileService,
               private _dictionary: DictionaryService) {
-  this.activatedRoute.queryParams.subscribe(p => {
-    this.state = new ISearchRequest(p['address']??null, p['distance']??null, p['gender']??null, p['categoryId']??null, p['search']??null, p['geo']??null)
-
-  });
   }
 
   private destroyRef = inject(DestroyRef);
+
+  /** Параметры из URL — единый источник для первого захода и повторной навигации на тот же route. */
+  private applyQueryParams(p: Params): void {
+    this.state = new ISearchRequest(
+      p['address'] ?? null,
+      p['distance'] ?? null,
+      p['gender'] ?? null,
+      p['categoryId'] ?? null,
+      p['search'] ?? null,
+      p['geo'] ?? null,
+    );
+    const raw = p['search'];
+    const s = Array.isArray(raw) ? raw[0] : raw;
+    this.searchRequest = s != null && String(s) !== '' ? String(s) : '';
+  }
 
   getCategories(arg0: ICategory[],arg1: IResultSearch[]): ICategory[] {
       // тип
@@ -73,7 +78,9 @@ export class ResultComponent implements OnInit, OnDestroy{
 
         let ids:number[] = [];
         arg1.forEach(item => {
-          ids.push(...item.categoryIds);
+          if (item.categoryIds?.length) {
+            ids.push(...item.categoryIds);
+          }
         });
         let test = new Set(ids); // быстрее чем includes в цикле
         const filtered = arg0.filter(c => test.has(c.id));
@@ -90,44 +97,48 @@ export class ResultComponent implements OnInit, OnDestroy{
   }
 
   ngOnInit(){
-    this.loading = true;
     this.categories1Level$ =  this._dictionary.getMainCategories().pipe(
         map(allCategories => getCategoryLevel2(allCategories)
     ));
 
-    this.reloadTrigger.pipe(
-      startWith(void 0),
-
-      // 1) грузим ответ
+    merge(
+      this.activatedRoute.queryParams.pipe(tap(p => this.applyQueryParams(p))),
+      this.reloadTrigger,
+    ).pipe(
+      tap(() => {
+        this.loading = true;
+      }),
       switchMap(() =>
         this._apiSearch.search2(this.state).pipe(
-          catchError(() => of(null)) // не валим поток
+          catchError(() => of(null))
         )
       ),
-
-      // 2) склеиваем с последними категориями
       withLatestFrom(this.categories1Level$),
-
-      // 3) считаем итоговые данные
       map(([resp, categories]) => {
         if (!resp || resp.code !== 200) {
           return { resp: null, filtered: [] as ICategory[] };
         }
-        const ids = safeParseIds(resp.message);
-        const set = new Set(ids);
         return { resp, filtered: categories };
       }),
-
       tap(({ resp, filtered }) => {
-        if (resp){
-       const temp = resp?.data;
-       this.firstCards = temp.first;
-       this.seconsCards = temp.second;
-       this.thirdCards = temp.third;
-       this.categories = filtered;
+        if (resp) {
+          const temp = resp?.data;
+          this.firstCards = temp.first ?? [];
+          this.seconsCards = temp.second ?? [];
+          this.thirdCards = temp.third ?? [];
+          this.categories = filtered;
+          this.firstCardCategories = this.getCategories(filtered, this.firstCards);
+          this.secondCardCategories = this.getCategories(filtered, this.seconsCards);
+        } else {
+          this.firstCards = [];
+          this.seconsCards = [];
+          this.thirdCards = [];
+          this.firstCardCategories = [];
+          this.secondCardCategories = [];
         }
-       this.loading = false;
+        this.loading = false;
       }),
+      takeUntilDestroyed(this.destroyRef),
     ).subscribe();
 
     //   await this._apiCards.getAllClientCardList(0, false);

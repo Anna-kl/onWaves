@@ -1,5 +1,5 @@
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {BehaviorSubject, Observable, tap} from 'rxjs';
+import {BehaviorSubject, map, Observable, tap} from 'rxjs';
 
 import { environment } from '../enviroments/environment';
 import {Group} from "../app/DTO/views/services/IViewGroups";
@@ -10,6 +10,43 @@ import {Schedule} from "../app/DTO/classes/schedules/schedule";
 import {IDaysOfSchedule, IViewSchedule} from "../app/DTO/views/schedule/IViewSchedule";
 import {IViewScheduleBA} from "../app/DTO/views/schedule/IViewScheduleBA";
 import {IViewDateSchedule} from "../app/DTO/requests/IViewDateSchedule";
+
+/** JSON с бэка не приводится к интерфейсу TS: часто PascalCase (.NET), у объекта нет camelCase до нормализации. */
+function pickJson(obj: Record<string, unknown>, camel: string, pascal: string): unknown {
+  if (obj[camel] !== undefined && obj[camel] !== null) {
+    return obj[camel];
+  }
+  if (obj[pascal] !== undefined && obj[pascal] !== null) {
+    return obj[pascal];
+  }
+  return undefined;
+}
+
+function normalizeDaysInMonthRow(row: Schedule): Schedule {
+  const r = row as unknown as Record<string, unknown>;
+  const canRaw = pickJson(r, 'canAdd', 'CanAdd');
+  let canAdd: boolean | undefined;
+  if (typeof canRaw === 'boolean') {
+    canAdd = canRaw;
+  } else if (canRaw === 1 || canRaw === '1' || canRaw === 'true') {
+    canAdd = true;
+  } else if (canRaw === 0 || canRaw === '0' || canRaw === 'false') {
+    canAdd = false;
+  }
+  const dowRaw = pickJson(r, 'daysOfWork', 'DaysOfWork');
+  const daysOfWork = dowRaw instanceof Date ? dowRaw : new Date(String(dowRaw ?? ''));
+  return {
+    id: String(pickJson(r, 'id', 'Id') ?? ''),
+    daysOfWork,
+    addDate: String(pickJson(r, 'addDate', 'AddDate') ?? ''),
+    scheduleId: String(pickJson(r, 'scheduleId', 'ScheduleId') ?? ''),
+    canAdd,
+    countNew: (() => {
+      const n = pickJson(r, 'countNew', 'CountNew');
+      return n === undefined || n === null ? undefined : Number(n);
+    })(),
+  };
+}
 
 @Injectable()
 export class ScheduleService {
@@ -69,6 +106,7 @@ export class ScheduleService {
 
   public async getWorkDaysInMonth(id: string, year: number, month: number){
     return this.http.get<Schedule[]>(`${this.baseUrl}schedules/days-in-month?year=${year}&month=${month}&id=${id}`).pipe(
+      map(rows => rows.map(normalizeDaysInMonthRow)),
       tap(data => this.getWorkDayInMonth$.next(data)));
   }
 

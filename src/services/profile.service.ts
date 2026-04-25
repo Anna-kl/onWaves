@@ -1,15 +1,11 @@
 import {Injectable} from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {BehaviorSubject, Observable, tap} from 'rxjs';
-import { ICountry } from '../app/DTO/classes/ICountry';
 import { environment } from '../enviroments/environment';
-import { IProfile } from '../app/DTO/classes/profiles/IProfile';
 import { IResponse } from '../app/DTO/classes/IResponse';
 import { BusService } from './busService';
-import { ProfileUser, UserType } from 'src/app/DTO/classes/profiles/profile-user.model';
 import {ICategory} from "../app/DTO/classes/ICategory";
 import {IViewBusinessProfile} from "../app/DTO/views/business/IViewBussinessProfile";
-import {IViewChangeOrder} from "../app/DTO/views/business/IViewChangeOrder";
 import { ICoupon } from 'src/app/DTO/classes/promo/IPoupon';
 
 @Injectable({
@@ -42,6 +38,14 @@ export class ProfileService {
 
   hasCoupon(id: string){
      return this.http.get<boolean>(`${this.url}has-coupon/${id}`);
+  }
+
+  /**
+   * GET profiles/has-telegram-notification/{id}
+   * Бэкенд возвращает Task<bool> — в теле ответа JSON true/false (HttpClient.get<boolean>).
+   */
+  hasTelegramNotification(id: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.url}has-telegram-notification/${id}`);
   }
 
   getCoupon(id: string){

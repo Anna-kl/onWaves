@@ -1,5 +1,10 @@
 @import '../../../../assets/styles/main/color';
 
+:host {
+  display: block;
+  font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
 .addressPersonalPageUser{
     width: 100%;
     margin-top: 20px;
@@ -134,3 +139,127 @@
 .socials__btn.vk svg{ color: #2787F5; fill: currentColor; }
 .socials__btn.tg svg{ color: #229ED9; fill: currentColor; }
 .socials__btn.ig svg{ color: #C13584; fill: currentColor; }
+
+
+.tg-notify {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+
+  font-family: inherit;
+
+  background: $grey-light;
+  border: 1px solid $grey;
+  box-shadow: 0 1px 3px rgba($black, 0.06);
+
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tg-notify:hover {
+  background: mix($white, $grey-light, 50%);
+  border-color: mix($grey, $green-light2, 88%);
+  box-shadow: 0 2px 8px rgba($green-basic, 0.08);
+}
+
+.tg-notify__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.tg-notify__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: mix($white, $green-light2, 72%);
+  border: 1px solid mix($grey, $green-light2, 65%);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.tg-notify__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.tg-notify__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: $black;
+  letter-spacing: 0.01em;
+}
+
+.tg-notify__status {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tg-notify__status--off {
+  color: $grey-dark;
+}
+
+.tg-notify__status--on {
+  color: $color-success;
+  font-weight: 600;
+}
+
+.tg-notify__btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  text-decoration: none;
+  text-align: center;
+
+  background: $green-basic;
+  color: $white;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 8px rgba($green-basic, 0.25);
+}
+
+.tg-notify__btn:hover {
+  background: $green-dark;
+  box-shadow: 0 4px 14px rgba($green-dark, 0.28);
+}
+
+.tg-notify__btn:active {
+  transform: translateY(1px);
+}
+
+@media screen and (max-width: 480px) {
+  .tg-notify {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .tg-notify__btn {
+    width: 100%;
+    margin-top: 4px;
+  }
+}

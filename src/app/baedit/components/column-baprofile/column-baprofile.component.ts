@@ -12,7 +12,7 @@ import {stringToTime} from "../../../../helpers/dateUtils/dateUtils";
 import {select, Store} from "@ngrx/store";
 import {selectProfileMainClient} from "../../../ngrx-store/mainClient/store.select";
 import {LoginService} from "../../../auth/login.service";
-import {combineLatest, map, Observable, Subscription} from "rxjs";
+import {catchError, combineLatest, map, Observable, of, Subscription} from "rxjs";
 import {UserType} from "../../../DTO/classes/profiles/profile-user.model";
 import { Location } from '@angular/common';
 @Component({
@@ -32,7 +32,10 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
   avatar: any;
   
   address: string = '';
+  /** null — запрос ещё не завершён; true — уведомления в Telegram уже подключены; false — нет */
+  isTelegramNotificationsConnected: boolean | null = null;
   private unsubscribe$: Subscription|null = null;
+  private telegramNotificationSub?: Subscription;
   auth: Observable<boolean> = new Observable<boolean>();
   constructor(private _route: ActivatedRoute,
               private _apiSchedule: ScheduleService,
@@ -40,7 +43,8 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
               private _dataService: ProfileDataEditService,
               private sanitizer: DomSanitizer,
               private store: Store,
-              private _login: LoginService) {
+              private _login: LoginService,
+              private _profile: ProfileService) {
     this.auth = combineLatest([_login.isLoad$,_login.isAutentificate$]).pipe(map(([isLoad, isAuth]) => {
       return !(isLoad && !isAuth);
     })
@@ -79,7 +83,20 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsubscribe$?.unsubscribe();
+    this.telegramNotificationSub?.unsubscribe();
   }
+
+  private loadTelegramNotificationStatus(profileId: string): void {
+    this.telegramNotificationSub?.unsubscribe();
+    this.isTelegramNotificationsConnected = null;
+    this.telegramNotificationSub = this._profile
+      .hasTelegramNotification(profileId)
+      .pipe(catchError(() => of(false)))
+      .subscribe((connected) => {
+        this.isTelegramNotificationsConnected = connected;
+      });
+  }
+
   onEdit(){
     this._dataService.transferBusinessProfile(this.businessProfile!);
     this._router.navigate(['ba-edit', this.id]);
@@ -101,13 +118,20 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
             this.businessProfile = profiles.find(_ => _.userType === UserType.Business);
             if (id !== this.businessProfile?.id){
               this._router.navigate(['/']);
+              return;
+            }
+            if (this.businessProfile?.id) {
+              this._dataService.transferBusinessProfile(this.businessProfile);
+              this.loadTelegramNotificationStatus(this.businessProfile.id);
             }
           });
         } else {
           this.businessProfile = mainProfile;
+          this._dataService.transferBusinessProfile(this.businessProfile);
+          if (mainProfile.id) {
+            this.loadTelegramNotificationStatus(mainProfile.id);
+          }
         }
-        this._dataService.transferBusinessProfile(this.businessProfile!);
-
       }
     });
   }

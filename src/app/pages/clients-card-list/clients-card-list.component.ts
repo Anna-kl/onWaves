@@ -6,6 +6,7 @@ import {IViewBusinessProfile} from "../../DTO/views/business/IViewBussinessProfi
 import { Router } from '@angular/router';
 import {ProfileService} from "../../../services/profile.service";
 import {getAddressProfile, getAddressProfileStreet, prepareAddressProfile} from "../../../helpers/common/address";
+import { addBreakOpportunitiesAfterPunctuation } from "../../../helpers/common/text-break.helpers";
 import {IViewAddress} from "../../DTO/views/IViewAddress";
 import {HistoryService} from "../../../services/history.service";
 import {BusService} from "../../../services/busService";
@@ -26,6 +27,9 @@ import { BestProductType } from 'src/app/DTO/enums/bestProductType';
   providers:[ProfileService, HistoryService, ConfirmationService, MessageService]
 })
 export class ClientsCardListComponent implements OnChanges {
+
+  /** Для шаблона: общая функция из helpers/common/text-break.helpers */
+  readonly titleWithBreakOpportunities = addBreakOpportunitiesAfterPunctuation;
 
   prepareAbout(arg0: string|undefined) {
     if (arg0){

@@ -74,7 +74,7 @@ export class ExtsearchComponent implements OnInit {
     if (genderList['isWoman']){
       gender.push(Gender.Woman);
     }
-    if (genderList['isMen']){
+    if (genderList['isMan']){
       gender.push(Gender.Men);
     }
     if (genderList['isChildren']){

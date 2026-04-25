@@ -22,7 +22,7 @@
           <span>{{bisiness.countReviews}}</span>
         </div>  
         <!-- Имя Бизнес Аккаунта -->
-        <div class="card-client-title">{{bisiness.name}}</div>  
+        <div class="card-client-title" [title]="bisiness.name">{{ titleWithBreakOpportunities(bisiness.name) }}</div>  
         <!-- Описание БА -->
 				<div style="height: 100px; word-wrap: break-word;
         " class="bisines-about txt-gray-dark">{{prepareAbout(bisiness.about)}}</div>   

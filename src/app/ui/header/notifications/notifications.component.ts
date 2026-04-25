@@ -66,20 +66,50 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.unsubscribe$?.unsubscribe();
   }
 
-  onSeen(id: string) {
-  // локально оптимистично проставили readAt
-    if (this.messages) {
-    let message = this.messages.find(
-      n => n.id === id);
-    if (message){
-      if (message.statusNotification === StatusNotification.CREATE){
-        this._api.readNotifications(id).pipe(take(1)).subscribe();
-        message.statusNotification = StatusNotification.READ;
-      }}
+  getStatusClass(status: RecordStatus) {
+    return {
+      'notif__status--cancel': status === RecordStatus.Canceled,
+      'notif__status--new': status === RecordStatus.Created,
+      'notif__status--done': status === RecordStatus.Success
+    };
+  }
+  
+  getStatusText(status: RecordStatus) {
+    switch (status) {
+      case RecordStatus.Canceled: return 'отменено';
+      case RecordStatus.Created: return 'новая заявка';
+      case RecordStatus.Success: return 'выполнено';
+      default: return '';
     }
-  // и отправили батчем (через Subject + auditTime) на сервер
-  // this.mark$.next(id);
- }
+  }
+
+  onSeen(id: string) {
+    if (!this.messages) {
+      return;
+    }
+    const message = this.messages.find((n) => n.id === id);
+    if (!message || !this.isUnread(message)) {
+      return;
+    }
+    this._api.readNotifications(id).pipe(take(1)).subscribe();
+    message.statusNotification = StatusNotification.READ;
+  }
+
+  /** Непрочитано — всё, что не READ (CREATE, DELIVERY, неверный тип с бэка). */
+  isUnread(message: IViewNotification | null | undefined): boolean {
+    if (!message) {
+      return false;
+    }
+    const raw = message.statusNotification as unknown;
+    if (raw === undefined || raw === null) {
+      return true;
+    }
+    const n = typeof raw === 'string' ? Number(raw) : Number(raw);
+    if (Number.isNaN(n)) {
+      return true;
+    }
+    return n !== StatusNotification.READ;
+  }
 
   ngOnInit(): void {
     // this.unsubscribe$ = this.store$.pipe(select(notificationMessages)).subscribe((notificationState) => {

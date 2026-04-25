@@ -1,70 +1,159 @@
-.notification-container{
-  display:grid;
-  justify-items:center;
-}
-.notificationItem {
-  display:grid;
-  margin-bottom:10px;
-  width:100%;
-}
-.notificationBlock{
-  white-space: nowrap; /* Запрещаем перенос строк */
-  overflow: hidden; /* Обрезаем все, что не помещается в область */  
-}
-.dataTimes{
-  font-size:0.7em;
-  color:#9196A4;
-  display:flex;
-}
-.titleNotifications{
-   font-size:1.5em; 
-   position:relative; 
-}
-.textTitle{
-  font-size:1em; 
-  color:black;
-  font-weight:700;
-  overflow: hidden; /* Обрезаем все, что не помещается в область */
-  text-overflow: ellipsis; /* Добавляем многоточие */
-}
-.textArticle{
-  overflow: hidden; /* Обрезаем все, что не помещается в область */
-  text-overflow: ellipsis; /* Добавляем многоточие */
-}
-.razvernut{
-  position:absolute;
-  right:10px;
-  color:#409B89;
-  border-bottom:1px solid #409B89;
-}
-.titleNotifications.openMessage { 
-  white-space: normal; /* Запрещаем перенос строк */
-  overflow:visible ; /* Обрезаем все, что не помещается в область */ 
-} 
-.tab50{  
-  width:calc( (100% + 60px)/2 ) 
-} 
+.notif {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
 
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #eef0f3;
 
-
-.card-row .meta{ display:flex; align-items:center; gap:8px; color:#64748b; font-size:13px; }
-.card-row .ok{ font-size:16px; color:#20d0b5; }
-
-.user{ display:flex; align-items:center; gap:8px; margin:8px 0 6px; }
-.avatar{ width:28px; height:28px; border-radius:50%; background:#e6f7f3; }
-.name{ font-weight:700; color:#0f172a; }
-
-.title{ color:#0f172a; font-weight:600; margin-bottom:6px; }
-.subline{ display:flex; gap:8px; margin-bottom:6px; justify-content: right; }
-
-.chip{
-  display:inline-flex; align-items:center; gap:6px;
-  padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px;
-  border:1px solid transparent; user-select:none;
+  transition: all 0.2s ease;
 }
-.chip .ico{ width:16px; height:16px; }
 
-.chip--time{ background:#ecfeff; color:#0e7490; border-color:#a5f3fc; }       /* бирюзовый */
-.chip--free{ background:#f1f5f9; color:#334155; border-color:#cbd5e1; }       /* нейтральный */
+.notif--unread {
+  border-color: #5ecdd7;
+  box-shadow: 0 0 0 1px rgba(94, 205, 215, 0.35);
+  background: linear-gradient(135deg, #ffffff 0%, #f4fdfb 100%);
+}
 
-.desc{ color:#20d0b5; margin-top:4px; }
+.notif--read {
+  background: #f8fafc;
+  border-color: #e5e7eb;
+}
+
+.notif--read .notif__name,
+.notif--read .notif__message {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.notif:hover {
+  background: #f7f9fb;
+}
+
+.notif--unread:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #eefcf9 100%);
+}
+
+.notif--read:hover {
+  background: #f1f5f9;
+}
+
+/* avatar */
+.notif__avatar img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+/* content */
+.notif__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notif__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.notif__top-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.notif__read-state {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.notif__read-state--unread {
+  background: rgba(94, 205, 215, 0.35);
+  color: #043c48;
+  border: 1px solid rgba(13, 148, 160, 0.45);
+}
+
+.notif__name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.notif__message {
+  font-size: 13px;
+  color: #1a1a1a;
+}
+
+.notif__service a {
+  font-size: 13px;
+  color: #0088cc;
+  text-decoration: none;
+}
+
+/* статус */
+.notif__status {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.notif__status--cancel {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.notif__status--new {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.notif__status--done {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+/* время */
+.notif__time {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.notif__time--muted {
+  color: #9aa1ab;
+}
+
+/* meta */
+.notif__meta {
+  font-size: 11px;
+  color: #9aa1ab;
+}
+
+/* индикатор */
+.notif__right {
+  display: flex;
+  align-items: center;
+}
+
+.notif__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0d94a0;
+  box-shadow: 0 0 0 2px rgba(13, 148, 160, 0.25);
+}
+
+.notif--read .notif__dot {
+  display: none;
+}

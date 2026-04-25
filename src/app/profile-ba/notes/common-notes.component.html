@@ -28,9 +28,13 @@
           <app-calendar (onDate)="onDate($event)" [userId]="id" [today]="today" [isUpdate]="recordId">
           </app-calendar>
         </div>
-        <h2 *ngIf="!isWorkDay">
-          не рабочий день
-        </h2> 
+        <div class="calendar-dayoff-label" *ngIf="!isWorkDay" role="status" aria-live="polite">
+          <span class="calendar-dayoff-label__icon" aria-hidden="true">📅</span>
+          <div class="calendar-dayoff-label__text">
+            <div class="calendar-dayoff-label__title">Нерабочий день</div>
+            <div class="calendar-dayoff-label__subtitle">На выбранную дату запись недоступна</div>
+          </div>
+        </div>
         <!-- Деление \src\app\profile-ba\notes\notes-routing.module.ts -->
         <!-- 1. Записи БА -->
         <!-- src\app\profile-ba\notes\ba-notes\ba-notes.component.html-->

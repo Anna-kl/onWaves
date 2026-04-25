@@ -65,7 +65,7 @@ export class HambMenuNoRegisterComponent implements OnInit{
   isCollapsed=false;
   openPopUp() {
     this.status = !this.status;
-    const modalRef = this.modalService.open(RegisterEmailCodeComponent);
+    const modalRef = this.modalService.open(ModalRegisterComponent);
   }
 
   ngOnInit(): void {

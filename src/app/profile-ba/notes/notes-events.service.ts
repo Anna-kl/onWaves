@@ -41,4 +41,12 @@ export class NotesService {
   transferRecordId(recordId?: string): void {
     this._recordId.next(recordId);
   }
+
+  /** Сброс данных, связанных с записью (день, слот, id записи). userId (transferId) не трогаем — это контекст страницы БА. */
+  clearRecordDraftState(): void {
+    this.dayId.next(null);
+    this.today.next({ date: null, dayId: undefined, ifExist: false });
+    this._recordId.next(undefined);
+    this.isWorkDay.next(true);
+  }
 }

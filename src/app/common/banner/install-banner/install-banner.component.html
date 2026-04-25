@@ -1,10 +1,41 @@
-  <section class="install-banner" *ngIf="show()">
-    <div class="txt">
-      <b>Установить приложение ONWAVES?</b>
-      <!-- <small>Открывается как отдельное окно.</small> -->
+<section class="install-banner" *ngIf="show()">
+
+  <div class="content">
+    <div class="icon">📱</div>
+
+    <div class="text-block">
+      <div class="title">
+        Установить ONWAVES
+      </div>
+
+      <!-- ANDROID -->
+      <div class="subtitle" *ngIf="!isIOS()">
+        Быстрый доступ и работа как приложение
+      </div>
+
+      <!-- IOS -->
+      <div class="subtitle" *ngIf="isIOS()">
+        Нажмите <b>⤴</b> → <b>На экран «Домой»</b>
+      </div>
     </div>
-    <div class="actions">
-      <button (click)="install()">Установить</button>
-      <button class="ghost" (click)="dismiss()">Позже</button>
-    </div>
-  </section>
+  </div>
+
+  <div class="actions">
+
+    <!-- ANDROID -->
+    <button class="primary" *ngIf="!isIOS()" (click)="install()">
+      Установить
+    </button>
+
+    <!-- IOS -->
+    <button class="primary ghost" *ngIf="isIOS()" (click)="dismiss()">
+      Понятно
+    </button>
+
+    <button class="secondary" (click)="dismiss()">
+      Позже
+    </button>
+
+  </div>
+
+</section>

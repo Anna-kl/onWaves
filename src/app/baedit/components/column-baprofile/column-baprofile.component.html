@@ -120,6 +120,27 @@
   <div *ngIf="businessProfile" (click)="onEdit()" class="btn-white cont-horiz">
     Редактировать профиль
   </div>
+  <div
+    class="tg-notify"
+    *ngIf="businessProfile && isTelegramNotificationsConnected === false">
+    <div class="tg-notify__left">
+      <div class="tg-notify__icon">🔔</div>
+      <div class="tg-notify__text">
+        <div class="tg-notify__title">Уведомления</div>
+        <div class="tg-notify__status tg-notify__status--off">
+          не подключены
+        </div>
+      </div>
+    </div>
+
+    <a
+      class="tg-notify__btn"
+      [href]="'https://t.me/OnlineServicesOnWaves_bot?start=' + businessProfile.id"
+      target="_blank"
+      rel="noopener noreferrer">
+      Подключить
+    </a>
+  </div>
 </div>
   <!--------------------------- Это пока cкрываем для всех - по указанию Сверху!!! -------------------------->
   <!-- График работы  -->

@@ -115,13 +115,13 @@
     color: #fff;
 }
 .btn-gray{
-	background: #C0C5D5;
-	color: #fff;
+	background: $grey-dark;
+	color: $white;
 	font-weight: 700;
 }
 .btn-green{
     background: $green-light;
-	color: #fff;
+	color: $white;
 }
 .btn-green:hover {
     background: $green-basic;

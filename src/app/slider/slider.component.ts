@@ -2,7 +2,6 @@ import { Component, ViewChild, OnInit } from '@angular/core';
 
 import {DictionaryService} from "../../services/dictionary.service";
 import {ICategory} from "../DTO/classes/ICategory";
-import {ISearchRequest} from "../DTO/views/search/ISearchRequest";
 import {Router} from "@angular/router";
 
 
@@ -183,15 +182,17 @@ export class SliderComponent {
   }
 
   chooseCardForSearch(item: Tutorial) {
-    let category = this.mainCategory.find(_ => _.name === item.name);
-    const send = {
-      search: null,
-      distance:  null ,
-      categoryId: category ? category.id : null,
-      address: '',
-      gender: [],
-      geo:  null,
-    } as ISearchRequest;
-    this._route.navigate(['search/result'],  { state: { send } });
+    const category = this.mainCategory.find(_ => _.name === item.name);
+    // Только queryParams: ResultComponent читает state поиска из URL (как main-menu и extsearch).
+    this._route.navigate(['search/result'], {
+      queryParams: {
+        search: null,
+        distance: null,
+        categoryId: category ? category.id : null,
+        address: null,
+        gender: null,
+        geo: null,
+      },
+    });
   }
 }

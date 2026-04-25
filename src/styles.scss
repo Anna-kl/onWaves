@@ -1710,6 +1710,48 @@ ul.uslugi-full-txt {
 	line-height: 130%;
 	color: #11142D;
 }
+
+.calendar-dayoff-label{
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	margin: 2px 0 18px;
+	padding: 10px 14px;
+	border-radius: 12px;
+	border: 1px solid rgba($grey-dark, .25);
+	background: linear-gradient(145deg, $grey-light 0%, #fff 100%);
+	color: $black;
+	font-family: 'Montserrat', system-ui, sans-serif;
+}
+
+.calendar-dayoff-label__icon{
+	width: 28px;
+	height: 28px;
+	border-radius: 999px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba($green-light2, .25);
+	font-size: 14px;
+}
+
+.calendar-dayoff-label__text{
+	display: flex;
+	flex-direction: column;
+	line-height: 1.2;
+}
+
+.calendar-dayoff-label__title{
+	font-size: 15px;
+	font-weight: 700;
+	color: $green-dark;
+}
+
+.calendar-dayoff-label__subtitle{
+	font-size: 12px;
+	font-weight: 500;
+	color: $grey-dark;
+}
 .text-story{
 	margin-top: 50px ;
 	margin-bottom: 50px ;
@@ -1984,6 +2026,10 @@ app-modal-calendar{
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.record-success-telegram-dialog .modal-dialog {
+	max-width: 440px;
 }
 .modal-content{/*bootsrap override*/
 	max-width:540px ; 

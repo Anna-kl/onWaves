@@ -57,8 +57,12 @@
     </div>
     <!-- Далее  -->
     <div class="w100 cont-horiz ">
-      <button class="btn-green button-text" style="max-width: 360px;" [disabled]="!isFormValid()"
-        (click)="next()" [ngStyle]="{'background-color': isFormValid() ? '#409B89' : 'gray'}">
+      <button
+        class="button-text"
+        style="max-width: 360px;"
+        [ngClass]="isFormValid() ? 'btn-green' : 'btn-gray'"
+        [disabled]="!isFormValid()"
+        (click)="next()">
         Далее
       </button>
     </div>

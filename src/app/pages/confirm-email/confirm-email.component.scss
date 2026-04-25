@@ -1,15 +1,17 @@
-:host {
-  --bg: #f6f7fb;
-  --card: #ffffff;
-  --text: #111827;
-  --muted: #475467;
-  --border: #e5e7eb;
-  --shadow: 0 10px 28px rgba(16, 24, 40, 0.08);
+@import "../../../assets/styles/main/color.scss";
 
-  --brand: #0ea5a4;
-  --brand2: #22d3ee;
-  --ok: #10b981;
-  --focus: rgba(14, 165, 164, 0.35);
+:host {
+  --bg: #{$grey-light};
+  --card: #{$white};
+  --text: #{$black};
+  --muted: #{$grey-dark};
+  --border: #{$grey};
+  --shadow: 0 10px 28px rgba($black, 0.08);
+
+  --brand: #{$green-light};
+  --brand2: #{$green-light2};
+  --ok: #{$color-success};
+  --focus: #{rgba($green-basic, 0.35)};
 
   --radius: 18px;
   --max: 960px;
@@ -17,13 +19,13 @@
 
 @media (prefers-color-scheme: dark) {
   :host {
-    --bg: #0b1220;
-    --card: #0f172a;
-    --text: #f8fafc;
-    --muted: #94a3b8;
-    --border: #1f2937;
+    --bg: #{$black};
+    --card: #{$green-dark};
+    --text: #{$white};
+    --muted: #{$grey-dark};
+    --border: #{$green-basic};
     --shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
-    --focus: rgba(34, 211, 238, 0.25);
+    --focus: #{rgba($green-light2, 0.25)};
   }
 }
 
@@ -37,8 +39,8 @@
   padding: 24px;
   color: var(--text);
   background:
-    radial-gradient(1200px 600px at 15% -10%, rgba(14,165,164,.20), transparent 55%),
-    radial-gradient(900px 520px at 85% 0%, rgba(34,211,238,.16), transparent 50%),
+    radial-gradient(1200px 600px at 15% -10%, rgba($green-light, 0.2), transparent 55%),
+    radial-gradient(900px 520px at 85% 0%, rgba($green-light2, 0.16), transparent 50%),
     var(--bg);
 }
 
@@ -68,7 +70,7 @@
   height: 34px;
   border-radius: 12px;
   background: linear-gradient(135deg, var(--brand), var(--brand2));
-  box-shadow: 0 10px 22px rgba(14,165,164,.25);
+  box-shadow: 0 10px 22px rgba($green-light, 0.25);
 }
 
 .brand-title {
@@ -115,9 +117,9 @@
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  border: 1px solid rgba(16,185,129,.28);
+  border: 1px solid rgba($color-success, 0.28);
   border-radius: 999px;
-  background: rgba(16,185,129,.10);
+  background: rgba($color-success, 0.1);
   font-size: 13px;
   font-weight: 800;
 }
@@ -153,8 +155,8 @@ h1 {
   padding: 2px 10px;
   margin: 0 4px;
   border-radius: 999px;
-  border: 1px solid rgba(14,165,164,.35);
-  background: rgba(14,165,164,.10);
+  border: 1px solid rgba($green-basic, 0.35);
+  background: rgba($green-basic, 0.1);
   color: var(--text);
   font-weight: 700;
   font-size: 13px;
@@ -189,7 +191,7 @@ h1 {
 
 .btn-primary {
   background: var(--brand);
-  color: #fff;
+  color: $white;
 
   &:hover { filter: brightness(.96); }
 }
@@ -199,7 +201,7 @@ h1 {
   border-color: var(--border);
   color: var(--text);
 
-  &:hover { border-color: rgba(14,165,164,.45); }
+  &:hover { border-color: rgba($green-basic, 0.45); }
 }
 
 .arrow {
@@ -230,8 +232,8 @@ h1 {
   padding: 34px;
   border-left: 1px solid var(--border);
   background:
-    radial-gradient(520px 260px at 40% 30%, rgba(14,165,164,.18), transparent 60%),
-    radial-gradient(520px 260px at 70% 65%, rgba(34,211,238,.14), transparent 55%),
+    radial-gradient(520px 260px at 40% 30%, rgba($green-light, 0.18), transparent 60%),
+    radial-gradient(520px 260px at 70% 65%, rgba($green-light2, 0.14), transparent 55%),
     transparent;
   display: flex;
   align-items: center;
@@ -252,7 +254,7 @@ h1 {
   aspect-ratio: 1 / 1;
   border-radius: 24px;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,.02);
+  background: rgba($white, 0.02);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -265,14 +267,14 @@ h1 {
   width: 240px;
   height: 240px;
   border-radius: 999px;
-  border: 2px solid rgba(14,165,164,.35);
+  border: 2px solid rgba($green-basic, 0.35);
   animation: float 3.5s ease-in-out infinite;
 }
 
 .ring.r2 {
   width: 170px;
   height: 170px;
-  border-color: rgba(34,211,238,.28);
+  border-color: rgba($green-light2, 0.28);
   animation-delay: .6s;
 }
 
@@ -285,12 +287,12 @@ h1 {
   width: 88px;
   height: 88px;
   border-radius: 22px;
-  background: linear-gradient(135deg, rgba(16,185,129,.18), rgba(14,165,164,.16));
-  border: 1px solid rgba(16,185,129,.30);
+  background: linear-gradient(135deg, rgba($color-success, 0.18), rgba($green-basic, 0.16));
+  border: 1px solid rgba($color-success, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 14px 32px rgba(16,185,129,.10);
+  box-shadow: 0 14px 32px rgba($color-success, 0.1);
 }
 
 .check-mark {

@@ -188,18 +188,29 @@
                   </textarea>
                   <span class="textarea-count">{{message.length}}/150</span>
             </div> 
-            <div class="w100 cont-horiz margin-bottom50" (click)="onConfirm()" *ngIf="!record">
-              <div class="btn-green margin-left40 margin-right40" style="max-width: 200px;">
-                Далее
+            <div class="w100 cont-horiz margin-bottom50" *ngIf="!record">
+              <div
+                class="btn-green margin-left40 margin-right40"
+                [class.record-action--disabled]="saveInProgress"
+                style="max-width: 200px;"
+                (click)="onConfirm()">
+                {{ saveInProgress ? 'Отправка…' : 'Далее' }}
               </div>
             </div>
             <div class="around_1024-beetween_large сommunication" *ngIf="getStatusConfirm()">
               <div class="cont-horiz-start w100" style="gap: 10px 10px ; max-width: 600px;">
-                <div (click)="confirmRecord( 2)" class="btn-transparent stl-cancel">
+                <div
+                  (click)="confirmRecord(2)"
+                  class="btn-transparent stl-cancel"
+                  [class.record-action--disabled]="confirmInProgress">
                   <b>Отменить</b>
                 </div>
-                <div (click)="confirmRecord( 1)" class="btn-green w100" style="max-width: 320px;">
-                  <b>Подтвердить</b>
+                <div
+                  (click)="confirmRecord(1)"
+                  class="btn-green w100"
+                  [class.record-action--disabled]="confirmInProgress"
+                  style="max-width: 320px;">
+                  <b>{{ confirmInProgress ? 'Отправка…' : 'Подтвердить' }}</b>
                 </div>
               </div>
             </div>

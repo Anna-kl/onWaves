@@ -2,14 +2,26 @@
 
 /*--------------- Типографика -------------------*/
 
+$font-family-main: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-a, h1, h2, h3, h4,div,p, .h4-name,.intro, 
-.txt-green-light, .txt-gray-light,.hrecent,.teg-green,
-.btn-eror,.btn-gray, .btn-green, .btn-white,
-.type-name,.txt-uslugi-time, .txt-uslugi-price, .currency-name, 
+body {
+	font-family: $font-family-main;
+}
+
+button,
+input,
+textarea,
+select {
+	font-family: inherit;
+}
+
+a, h1, h2, h3, h4, div, p, .h4-name, .intro,
+.txt-green-light, .txt-gray-light, .hrecent, .teg-green,
+.btn-eror, .btn-gray, .btn-green, .btn-white,
+.type-name, .txt-uslugi-time, .txt-uslugi-price, .currency-name,
 .sms, .fio-text, .fio::placeholder, ::placeholder, .recommend-info, .price,
-.footer-text,.btn-recommend2 {
-	font-family: 'Montserrat';
+.footer-text, .btn-recommend2 {
+	font-family: $font-family-main;
 }
 a{ 
 	text-decoration:none;
@@ -88,7 +100,7 @@ p{
     color: $green-basic; 
 }
 .txt-gray-small{
-	font-family: 'Montserrat';
+	font-family: $font-family-main;
     font-style: normal;
     font-weight: 400;
     font-size: 14px;

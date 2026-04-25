@@ -21,6 +21,8 @@ export class InstallBannerComponent implements OnInit {
 
   readonly state$ = new BehaviorSubject<InstallState>('unsupported');
 
+
+
   checkTime(){
       const dismissedAt = Number(localStorage.getItem('pwa-install-dismissed') ?? 0);
       const recentlyDismissed = Date.now() - dismissedAt < 24 * 60 * 60 *1000 ;
@@ -32,7 +34,9 @@ export class InstallBannerComponent implements OnInit {
            // iOS PWA
            (typeof (navigator as any).standalone !== 'undefined' && (navigator as any).standalone === true);
   }
-
+    isIOS() {
+      return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+    }
   constructor() {
 
       // Если уже запущено как standalone — считаем установленным
@@ -84,6 +88,7 @@ export class InstallBannerComponent implements OnInit {
     localStorage.setItem('appinstalled', 'yes');
     return evt.prompt().then(() => evt.userChoice).then(({ outcome }) => outcome);
   }
+
 
   async install() {
     this.show.set(false);

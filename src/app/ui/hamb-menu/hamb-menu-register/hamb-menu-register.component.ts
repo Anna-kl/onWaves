@@ -23,7 +23,7 @@ import {UserType} from "../../../DTO/classes/profiles/profile-user.model";
 import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessProfile";
 import { FormatsComponent } from 'src/app/components/modals/formats/formats.component';
 
-import {getActionStateMainProfileClient, logoutAction} from "../../../ngrx-store/mainClient/store.action";
+import {getActionStateMainProfileClient} from "../../../ngrx-store/mainClient/store.action";
 import {select, Store} from "@ngrx/store";
 import {getActionChecedIdClient} from "../../../ngrx-store/checkedClientID/idClient.state";
 import {selectTokenMainClient} from "../../../ngrx-store/mainClient/store.select";
@@ -210,13 +210,10 @@ this.unsubscribe$ = this._login.mainCategoriesProfile$.subscribe(
   }
 
   exit() {
-
-    this._cookie.delete('auth-token-ocpio');
-    this._login.allProfiles$.next([]);
-    this._login.mainCategoriesProfile$.next(null);
-    this._login.isAutentificate$.next(false);
-    this.store$.dispatch(logoutAction());
-    window.location.replace('/');
+    this._login.logoutAndClearCaches()
+      .finally(() => {
+        window.location.replace('/');
+      });
     // this._router.navigate(['/']);
     // window.location.reload();
   }

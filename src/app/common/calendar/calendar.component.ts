@@ -111,6 +111,17 @@ export class CalendarComponent implements OnChanges {
     await this.getSchedule(this.userId!, this.year, this.month);
   }
 
+  /** Расписание на конкретную дату ячейки (год/месяц сетки + число). Без этого «сегодня» могло не совпасть с workDays при сравнении только по getDate(). */
+  private scheduleForCell(year: number, month: number, dayOfMonth: number | undefined): Schedule | undefined {
+    if (dayOfMonth == null) {
+      return undefined;
+    }
+    return this.workDays.find(w => {
+      const wDate = new Date(w.daysOfWork);
+      return wDate.getFullYear() === year && wDate.getMonth() === month && wDate.getDate() === dayOfMonth;
+    });
+  }
+
   changeToday(year: number, month: number, day?: number){
     this.days = generateCalendar(year, month);
     this.choosedDay = {
@@ -121,32 +132,79 @@ export class CalendarComponent implements OnChanges {
     this.days.forEach(item => {
       item.forEach((sub: any) => {
         sub.isChecked = this.period === undefined ? false : this.checkedInterval(sub);
-        let day = this.workDays
-          .find(_=> new Date(_.daysOfWork).getDate() === sub.day);
-          if (day){
+        const day = this.scheduleForCell(year, month, sub.day);
+        if (day) {
           sub.ifExist = true;
           sub.dayId = day.id;
           sub.canAdd = day.canAdd;
           sub.countNew = day.countNew;
-          // sub.isChecked = !this.period ? false : this.checkedInterval(sub);
-          sub.isToday = new Date(day.daysOfWork).getDate() === this.today?.getDate() ? true : false;
+          const wDate = new Date(day.daysOfWork);
+          sub.isToday =
+            wDate.getFullYear() === this.today?.getFullYear() &&
+            wDate.getMonth() === this.today?.getMonth() &&
+            wDate.getDate() === this.today?.getDate();
         }
-          if (this.today) {
-            if (sub.day === this.today.getDate() && this.month === this.today.getMonth()) {
-              sub.isChecked = true;
-              // sub.ifExist = true;
-              if (this.choosedDay) {
-                this.choosedDay.dayId = this.workDays
-                    .find(_ => new Date(_.daysOfWork).getDate() === sub.day)?.id;
-                this.choosedDay.ifExist = sub.ifExist;
+        if (this.today) {
+          if (
+            sub.day === this.today.getDate() &&
+            month === this.today.getMonth() &&
+            year === this.today.getFullYear()
+          ) {
+            sub.isChecked = true;
+            if (this.choosedDay) {
+              const sel = this.scheduleForCell(year, month, sub.day);
+              this.choosedDay.dayId = sel?.id;
+              this.choosedDay.ifExist = !!sel;
+              if (sel) {
+                this.choosedDay.canAdd = sel.canAdd;
+                this.choosedDay.countNew = sel.countNew;
               }
             }
           }
-         
+        }
+
       });
     });
   }
+  /** Начало календарного дня ячейки (00:00 локально). */
+  private cellDate(d: IViewCalendar): Date | null {
+    if (d.day == null) {
+      return null;
+    }
+    return new Date(this.year, this.month, d.day, 0, 0, 0, 0);
+  }
+
+  private startOfToday(): Date {
+    const t = new Date();
+    return new Date(t.getFullYear(), t.getMonth(), t.getDate(), 0, 0, 0, 0);
+  }
+
+  /** День уже прошёл (строго до сегодняшней даты). */
+  cellIsPast(d: IViewCalendar): boolean {
+    const cd = this.cellDate(d);
+    return cd != null && cd.getTime() < this.startOfToday().getTime();
+  }
+
+  /** Сегодняшняя дата на календаре (не путать с this.today — там выбранный день). */
+  isRealToday(d: IViewCalendar): boolean {
+    const cd = this.cellDate(d);
+    return cd != null && cd.getTime() === this.startOfToday().getTime();
+  }
+
+  /** Есть свободные слоты (рабочий день и можно добавить запись). */
+  hasFreeSlots(d: IViewCalendar): boolean {
+    return !!(d.ifExist && d.canAdd === true);
+  }
+
+  /** Рабочий день в будущем/сегодня, но свободных слотов нет (занято / нельзя записаться). */
+  isFullyBookedWorkDay(d: IViewCalendar): boolean {
+    return !!(d.ifExist && d.canAdd !== true && !this.cellIsPast(d));
+  }
+
   chooseDay(d: IViewCalendar) {
+      if (!d.day || this.cellIsPast(d)) {
+        return;
+      }
         this.days = this.days.map(week => 
         week.map(x => x.dayId === d.dayId ? { ...x, countNew: 0 } : x)
       );
