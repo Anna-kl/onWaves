@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(node --stack-trace-limit=3 dist/MainSiteOcpio/server/main.js)",
+      "Bash(npm run *)"
+    ]
+  }
+}

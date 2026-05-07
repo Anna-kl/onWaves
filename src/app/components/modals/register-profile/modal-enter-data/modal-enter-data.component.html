@@ -7,10 +7,10 @@
       <div class="cont-vert">
         <div *ngIf="phone.length > 0">
           <h3 class="margin-bottom10" style="text-align: center; font-size: 1.25rem;">
-            Введите 4 последние цифры номера
+            Введите 4 {{ smsSent ? 'цифры' : 'последние цифры номера' }}
           </h3>
           <div class="margin-bottom30">
-            с которого сейчас поступил звонок
+            {{ smsSent ? 'которые мы отправили вам в SMS' : 'с которого сейчас поступил звонок' }}
           </div>
         </div>
         <div *ngIf="email.length > 0">
@@ -46,12 +46,12 @@
             Войти с помощью телефона
           </a>
         </div> 
-        <div class="cont-horiz-around w100 margin-bottom30"  *ngIf="phone.length > 0"> 
-          <div *ngIf="secondsLeft != 1">Повторный звонок через: {{secondsLeft}}</div>
-    <a *ngIf="secondsLeft === 1" class="margin-bottom40" (click)="returnToPhone()" class="txt-green-light" style="text-decoration: underline;"> 
-            Позвонить повторно
+        <div class="cont-horiz-around w100 margin-bottom30"  *ngIf="phone.length > 0">
+          <div *ngIf="secondsLeft != 1">Получить SMS через: {{secondsLeft}}</div>
+          <a *ngIf="secondsLeft === 1" (click)="sendSms()" class="txt-green-light" style="text-decoration: underline;">
+            Отправить SMS с кодом
           </a>
-        </div> 
+        </div>
         <button
           class="button-text cont-vert margin-bottom40"
           [ngClass]="checkCode ? 'btn-green' : 'btn-gray'"

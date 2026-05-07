@@ -43,6 +43,7 @@ export class ModalEnterDataComponent implements OnInit {
   @Input() public email = '';
   @Input() public code = '';
   flagError: boolean = false;
+  smsSent = false;
   textError: string = '';
   link: string|null = null;
   private destroyRef = inject(DestroyRef);
@@ -134,6 +135,7 @@ export class ModalEnterDataComponent implements OnInit {
           this.activeModal.close();
           this.loginService.isAutentificate$.next(true);
           this.loginService.updateProfileUA();
+          this.loginService.afterLoginNavigateAwayFromLanding();
         } else {
           this.activeModal.close();
           let modalRef = this.modalService.open(ModalRegisterNextComponent);
@@ -201,6 +203,16 @@ export class ModalEnterDataComponent implements OnInit {
   returnToPhone() {
     this.activeModal.close();
     this.modalService.open(ModalRegisterComponent);
+  }
+
+  sendSms() {
+    this._authService.sendSms(this.phone).subscribe(result => {
+      if (result.code === 200) {
+        this.session = result.data;
+        this.smsSent = true;
+      }
+    });
+    this.startCountdown(60);
   }
   
 }

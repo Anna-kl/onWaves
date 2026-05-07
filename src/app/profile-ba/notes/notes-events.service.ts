@@ -42,10 +42,23 @@ export class NotesService {
     this._recordId.next(recordId);
   }
 
-  /** Сброс данных, связанных с записью (день, слот, id записи). userId (transferId) не трогаем — это контекст страницы БА. */
-  clearRecordDraftState(): void {
+  /**
+   * Сброс черновика записи (dayId, recordId).
+   * Дату для списка не обнуляем: иначе BANotesComponent по dayOff не вызывает getListSchedule (там if (res.date)).
+   * @param listDate календарный день, за который показывать записи после возврата (например дата выбранного слота)
+   */
+  clearRecordDraftState(listDate?: Date): void {
     this.dayId.next(null);
-    this.today.next({ date: null, dayId: undefined, ifExist: false });
+    const prev = this.today.getValue();
+    const date = listDate ?? prev.date ?? new Date();
+    this.today.next({
+      date,
+      dayId: undefined,
+      ifExist: prev.ifExist ?? false,
+      isLast: prev.isLast,
+      canAdd: prev.canAdd,
+      countNew: prev.countNew,
+    });
     this._recordId.next(undefined);
     this.isWorkDay.next(true);
   }

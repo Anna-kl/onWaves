@@ -19,6 +19,10 @@ export class AuthServices {
     return this.http.get<IResponse>(`${this.url}${phone}`);
   }
 
+  sendSms(phone: string): Observable<IResponse> {
+    return this.http.get<IResponse>(`${this.url}${phone}?method=sms`);
+  }
+
   checkCode(send: ISendCode): Observable<IResponse> {
     let headers: HttpHeaders = new HttpHeaders();
     return this.http.post<IResponse>(`${this.url}`, send, {headers});

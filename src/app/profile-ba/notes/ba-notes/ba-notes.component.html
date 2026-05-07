@@ -53,24 +53,21 @@
  
     </div>
     
-      <!-- <div class="modal-header">
-        <h5 class="modal-title">Изменить время записи</h5>
-        <div class="closeModal" (click)="closeModal()"></div>
-      </div>
-      <div class="modal-body">
-        <label for="newTime">Новое время:</label>
-        <input id="newTime" type="time" [(ngModel)]="newTime" class="form-control" />
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeModal()">Отменить</button>
-        <button class="btn btn-primary" (click)="saveTime()">Сохранить</button>
-      </div> -->
+
     </ng-template>
 
 
     <!-- Добавить запись end -->
     <!-- вкладка 1  Не подтверждено -->
-    <div class="accordion_tab" *ngIf="sch.recordId">
+    <div
+      class="accordion_tab"
+      *ngIf="sch.recordId"
+      seen
+      [seenEnabled]="!!sch.isNew"
+      [seenId]="scheduleSeenId(sch)"
+      [seenThreshold]="0.35"
+      [seenDelayMs]="3000"
+      (seenOnce)="onScheduleSeenNew(sch)">
       <!-- Услуга кратко -->
       <input type="checkbox" [id]="sch.recordId"  [(ngModel)]="opened[sch.recordId]">
       <label class="accordion_tab-label_white" [for]="sch.recordId" style="gap: 10px 10px;">
@@ -484,7 +481,15 @@
       </div>
       <!-- Добавить запись end -->
       <!-- вкладка 1  Не подтверждено -->
-      <div class="accordion_tab" *ngIf="sch.recordId">
+      <div
+        class="accordion_tab"
+        *ngIf="sch.recordId"
+        seen
+        [seenEnabled]="!!sch.isNew"
+        [seenId]="scheduleSeenId(sch)"
+        [seenThreshold]="0.35"
+        [seenDelayMs]="3000"
+        (seenOnce)="onScheduleSeenNew(sch)">
         <!-- Услуга кратко -->
         <input type="checkbox" [id]="sch.recordId"  [(ngModel)]="opened[sch.recordId]">
         <label class="accordion_tab-label_white" [for]="sch.recordId" style="gap: 10px 10px;">

@@ -15,4 +15,6 @@ export interface IViewScheduleBA extends INote{
   lastChanged?: Date;
   couponId?: string;
   isNew?: boolean;
+  /** Id уведомления с бэка; для mark read через notifications/change-status. Иначе используется recordId. */
+  notificationId?: string;
 }

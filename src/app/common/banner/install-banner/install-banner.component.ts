@@ -1,4 +1,5 @@
-import { Component, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, effect, inject, Inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { PwaInstallService } from 'src/services/promtp.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 
@@ -23,30 +24,33 @@ export class InstallBannerComponent implements OnInit {
 
 
 
-  checkTime(){
-      const dismissedAt = Number(localStorage.getItem('pwa-install-dismissed') ?? 0);
-      const recentlyDismissed = Date.now() - dismissedAt < 24 * 60 * 60 *1000 ;
-      let isInstalled = localStorage.getItem('appinstalled');
-      return !recentlyDismissed && isInstalled !== 'yes';
+  checkTime(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const dismissedAt = Number(localStorage.getItem('pwa-install-dismissed') ?? 0);
+    const recentlyDismissed = Date.now() - dismissedAt < 24 * 60 * 60 * 1000;
+    const isInstalled = localStorage.getItem('appinstalled');
+    return !recentlyDismissed && isInstalled !== 'yes';
   }
-    isStandalone(): boolean {
+
+  isStandalone(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
     return (window.matchMedia?.('(display-mode: standalone)').matches) ||
-           // iOS PWA
            (typeof (navigator as any).standalone !== 'undefined' && (navigator as any).standalone === true);
   }
-    isIOS() {
-      return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-    }
-  constructor() {
 
-      // Если уже запущено как standalone — считаем установленным
+  isIOS(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  }
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     if (this.isStandalone()) {
       this.state$.next('installed');
     }
-    // не показывать, если недавно отклонили (например, < 1 суток)
+
     window.addEventListener('beforeinstallprompt', (e: Event) => {
       e.preventDefault();
-      
       this.deferred = e as BIPEvent;
       this.pwa.canPrompt.set(true);
       this.state$.next('canPrompt');
@@ -85,7 +89,9 @@ export class InstallBannerComponent implements OnInit {
     this.pwa.canPrompt.set(false);
 
     // Вызвать системный диалог
-    localStorage.setItem('appinstalled', 'yes');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('appinstalled', 'yes');
+    }
     return evt.prompt().then(() => evt.userChoice).then(({ outcome }) => outcome);
   }
 
@@ -97,7 +103,9 @@ export class InstallBannerComponent implements OnInit {
   }
 
   dismiss() {
-    localStorage.setItem('pwa-install-dismissed', String(Date.now()));
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('pwa-install-dismissed', String(Date.now()));
+    }
     this.show.set(false);
   }
 

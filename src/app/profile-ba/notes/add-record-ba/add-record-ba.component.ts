@@ -18,7 +18,8 @@ import {IOptionsRecord} from "../../../DTO/classes/records/optionsRecord";
 import {getHours, getMinutes} from "../../../../helpers/common/timeHelpers";
 import {IChooseDayOfCalendar} from "../../../DTO/views/calendar/IChooseDayOfCalendar";
 import { getPrice, getPriceService, getPriceString } from 'src/helpers/common/price.helpers';
-import { isString } from 'src/helpers/dateUtils/dateUtils';
+import { formatDateToString, isString } from 'src/helpers/dateUtils/dateUtils';
+import { v4 as uuidv4 } from 'uuid';
 
 
 
@@ -235,20 +236,43 @@ export class AddRecordBAComponent implements OnInit, OnDestroy {
         start = this.start.toTimeString().split(' ')[0];
       }
 
-    const record = {daysOfScheduleId: this.dayId, start: start,
-    services: this.chooseServices, comment: data['about'],
-      options: {name: data['name'], phone: data['phone'],
-        IsRemandHours: data['remandHours'], IsRemandDay: false} as IOptionsRecord } as Record;
+    const record = {
+      id: uuidv4(),
+      daysOfScheduleId: this.dayId!,
+      start,
+      services: this.chooseServices,
+      comment: data['about'],
+      serverTime: new Date().toLocaleString(),
+      options: {
+        name: data['name'],
+        phone: data['phone'],
+        IsRemandHours: data['remandHours'],
+        IsRemandDay: false,
+      } as IOptionsRecord,
+    } as Record;
     this._apiRecord.saveRecord(this.id!, record).subscribe(
       res => {
         if (res.code === 201){
+          const listDate = this.start
+            ? new Date(
+                this.start.getFullYear(),
+                this.start.getMonth(),
+                this.start.getDate(),
+                0,
+                0,
+                0,
+                0,
+              )
+            : new Date();
           this._profileData.clearBookingState();
-          this._events.clearRecordDraftState();
+          this._events.clearRecordDraftState(listDate);
           this.chooseServices = [];
           this.duration = 0;
           this.start = null;
           this.formClient.patchValue({ about: '', name: '', phone: '+7', remandHours: false, start: '00:00' });
-          this._router.navigate(['/notes/', this.id]);
+          this._router.navigate(['/notes/', this.id], {
+            queryParams: { date: formatDateToString(listDate) },
+          });
         }
       });
   }

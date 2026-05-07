@@ -1,5 +1,6 @@
 // pwa-install.service.ts
-import { Injectable, signal } from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 export interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -10,25 +11,23 @@ export interface BeforeInstallPromptEvent extends Event {
 export class PwaInstallService {
   private deferred?: BeforeInstallPromptEvent;
 
-  // можно показывать баннер
   readonly canPrompt = signal(false);
 
-  constructor() {
-    // скрываем системный баннер и запоминаем событие
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     window.addEventListener('beforeinstallprompt', (e: Event) => {
       e.preventDefault();
       this.deferred = e as BeforeInstallPromptEvent;
       this.canPrompt.set(true);
     });
 
-    // уже установили — прячем баннер
     window.addEventListener('appinstalled', () => {
       this.deferred = undefined;
       this.canPrompt.set(false);
       localStorage.removeItem('pwa-install-dismissed');
     });
 
-    // если уже запущено как установленное — баннер не нужен
     const isStandalone =
       window.matchMedia?.('(display-mode: standalone)')?.matches ||
       (navigator as any).standalone === true;

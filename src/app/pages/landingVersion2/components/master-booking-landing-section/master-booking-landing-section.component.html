@@ -1,0 +1,151 @@
+<section class="landing-section">
+  <div class="hero">
+    <div class="hero__content">
+      <p class="hero__eyebrow">Платформа для мастеров</p>
+      <h1>Набирайте клиентов через онлайн-запись без лишних расходов</h1>
+      <p class="hero__description">
+        Подключайтесь бесплатно, принимайте записи 24/7 и управляйте услугами и
+        расписанием в одном кабинете.
+      </p>
+
+      <div class="hero__categories">
+        <span class="hero__category" *ngFor="let category of categories">{{ category }}</span>
+      </div>
+
+      <button type="button" class="hero__button" (click)="openBecomeMasterInfo()">
+        Стать мастером бесплатно
+      </button>
+    </div>
+
+    <div class="hero__visual">
+      <img src="/assets/landing/landing.jpg" alt="Платформа для записи к мастерам" />
+      <div class="hero__badge">0% скрытых комиссий</div>
+    </div>
+  </div>
+
+  <div class="process">
+    <div class="process__header">
+      <p class="process__subtitle">Почему мастера выбирают нас</p>
+      <h2>Все, что нужно для стабильной записи клиентов в одном сервисе</h2>
+    </div>
+
+    <div class="process__cards">
+      <article class="process-card" *ngFor="let step of processSteps; let idx = index">
+        <span class="process-card__index">0{{ idx + 1 }}</span>
+        <h3>{{ step.title }}</h3>
+        <p>{{ step.description }}</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="install">
+    <div class="install__header">
+      <p class="install__subtitle">Установка PWA</p>
+      <h2>Поставьте сервис на смартфон и управляйте записями как в приложении</h2>
+      <p class="install__description">
+        Для мастеров это быстрее, чем работать в браузере: записи, уведомления и расписание всегда под рукой.
+      </p>
+    </div>
+
+    <div class="install__cards">
+      <article class="install-card" *ngFor="let card of installCards">
+        <div class="install-card__top">
+          <span class="install-card__platform">{{ card.platform }}</span>
+          <h3>{{ card.title }}</h3>
+          <p>{{ card.description }}</p>
+        </div>
+
+        <ol class="install-card__steps">
+          <li *ngFor="let step of card.steps">{{ step }}</li>
+        </ol>
+
+        <button
+          type="button"
+          class="install-card__button"
+          (click)="onInstallInstructionClick(card.platform)"
+        >
+          {{ card.cta }}
+        </button>
+      </article>
+    </div>
+
+    <div class="ios-instruction" *ngIf="isIosInstructionOpen">
+      <div class="ios-instruction__header">
+        <p class="ios-instruction__subtitle">Инструкция iOS</p>
+        <h3>Как установить приложение на iPhone</h3>
+      </div>
+
+      <ol class="ios-instruction__steps">
+        <li>Откройте платформу в браузере Safari.</li>
+        <li>Нажмите на кнопку Поделиться (квадрат со стрелкой вверх).</li>
+        <li>Прокрутите меню и выберите На экран Домой.</li>
+        <li>Переименуйте ярлык при необходимости и нажмите Добавить.</li>
+        <li>Запускайте сервис с главного экрана как обычное приложение.</li>
+      </ol>
+
+      <p class="ios-instruction__tip">
+        Важно: установка PWA на iOS работает через Safari. В Chrome и других браузерах этот пункт может не отображаться.
+      </p>
+    </div>
+
+    <div class="android-instruction" *ngIf="isAndroidInstructionOpen">
+      <div class="android-instruction__header">
+        <p class="android-instruction__subtitle">Инструкция Android</p>
+        <h3>Как установить приложение на Android</h3>
+      </div>
+
+      <ol class="android-instruction__steps">
+        <li>Откройте сайт на Android в браузере Chrome.</li>
+        <li>При входе снизу появится окно с предложением установки.</li>
+        <li>Нажмите Установить и следуйте инструкциям на экране.</li>
+        <li>Подтвердите добавление приложения на главный экран.</li>
+        <li>После установки открывайте сервис как обычное приложение.</li>
+      </ol>
+
+      <p class="android-instruction__tip">
+        Если окно не появилось автоматически, откройте меню браузера и выберите пункт Установить приложение.
+      </p>
+    </div>
+
+    <div class="install__note">
+      Если страница не открывается сразу, в отдельных регионах может понадобиться VPN для первого входа.
+    </div>
+  </div>
+
+  <div class="founder-note">
+    <p class="founder-note__subtitle">Живая поддержка</p>
+    <h3>Развиваю сервис лично и внимательно отношусь к каждому мастеру</h3>
+    <p class="founder-note__text">
+      Вы общаетесь напрямую со мной без долгих цепочек поддержки. Помогу с запуском, отвечу на вопросы и
+      возьму в приоритет полезные доработки под реальные рабочие процессы.
+    </p>
+    <p class="founder-note__caption">
+      Спокойный старт, быстрый контакт и сервис, который растет вместе с вашими задачами.
+    </p>
+  </div>
+</section>
+
+<div class="master-info-modal" *ngIf="isBecomeMasterInfoOpen" (click)="closeBecomeMasterInfo()">
+  <div class="master-info-modal__content" (click)="$event.stopPropagation()">
+    <p class="master-info-modal__subtitle">Как начать</p>
+    <h3>Чтобы стать мастером, нужно пройти 2 шага</h3>
+    <ol class="master-info-modal__steps">
+      <li>
+        <span class="master-info-modal__step-title">Создайте пользовательский аккаунт.</span>
+        <span class="master-info-modal__step-text">Это базовый шаг для входа в систему.</span>
+      </li>
+      <li>
+        <span class="master-info-modal__step-title">Откройте меню в правом верхнем углу.</span>
+        <span class="master-info-modal__step-text">
+          После создания пользовательского профиля вы можете создать бизнес профиль мастера.
+        </span>
+      </li>
+    </ol>
+    <p class="master-info-modal__note">
+      Если нужно, помогу пройти эти шаги и быстро настроить профиль.
+    </p>
+    <button type="button" class="master-info-modal__button" (click)="registerFromInfoModal()">
+      Зарегистрироваться
+    </button>
+  </div>
+</div>

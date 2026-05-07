@@ -1,9 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/enviroments/environment';
 import { IResponse } from 'src/app/DTO/classes/IResponse';
 
-const VAPID_PUBLIC = 'BKS49z4Chf0aedptocj2RRd3eEtBM6_CX2d9f4fjYcnXTnkX3s0RkQKANz6aCIyS7AMmNJXAhCjmR8GajbMJFPA'; // <-- твой publicKey
+// ключ должен совпадать с тем, что используется на сервере (.NET Core)
+const VAPID_PUBLIC = environment.publicKey;
 
 function base64UrlToUint8Array(base64url: string): Uint8Array {
   const s = base64url.trim().replace(/[\r\n\s]+/g, '');     // убрать мусор
@@ -13,90 +16,79 @@ function base64UrlToUint8Array(base64url: string): Uint8Array {
   const padded = s + '='.repeat((4 - (s.length % 4)) % 4);  // паддинг
   const base64 = padded.replace(/-/g, '+').replace(/_/g, '/');
   const raw = atob(base64);
-  const out = new Uint8Array(raw.length);
+  const buf = new ArrayBuffer(raw.length);
+  const out = new Uint8Array(buf);
   for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
   return out;
 }
 
 @Injectable({ providedIn: 'root' })
 export class PushDebugService {
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object,
+  ) {}
 
   url = environment.Uri;
-  async subscribe(idUser: string){
-      const isPwa = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
-      if (isPwa){
-        this.ensurePwaSubscription(idUser);
-      } else {
-          this.enable(idUser);
-      }
+
+  async subscribe(idUser: string): Promise<void> {
+    // fix: не запускать на сервере (SSR) — window/navigator недоступны
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const isPwa = window.matchMedia('(display-mode: standalone)').matches ||
+                  (navigator as any).standalone === true;
+    if (isPwa) {
+      await this.ensurePwaSubscription(idUser);
+    } else {
+      await this.enable(idUser);
+    }
   }
 
-    async ensurePwaSubscription(idUser: string) {
-    // проверить, что мы в PWA
-   
-    const reg = await navigator.serviceWorker.ready;        // важен SW со scope="/"
+  async ensurePwaSubscription(idUser: string): Promise<void> {
+    const reg = await navigator.serviceWorker.ready;
     let sub = await reg.pushManager.getSubscription();
     if (!sub) {
-      // запросить разрешение строго по клику пользователя
       const perm = await Notification.requestPermission();
       if (perm !== 'granted') return;
-
-      const appKey = base64UrlToUint8Array(VAPID_PUBLIC);    // см. функцию ниже
-      console.log('VAPID pwa bytes:', appKey.length);           // должно быть 65
-      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: appKey });
+      const appKey = base64UrlToUint8Array(VAPID_PUBLIC);
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: appKey.buffer as ArrayBuffer });
     }
-    // отправь на сервер и привяжи к userId + deviceId
-    this.http.post<IResponse>(`${this.url}notifications/subscribe/${idUser}`, { userId: idUser, subscription: sub.toJSON() }).subscribe(result => {
-      if (result.code === 200){ 
-          console.log(`pwa подписался - ${result.data}`);
-          // alert('Подписка сохранена на сервере. Теперь можно отправить тест.');
-      }
-    });
+    this.sendSubscriptionToServer(idUser, sub);
   }
-  
 
-  async enable(id: string) {
+  async enable(id: string): Promise<void> {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
       console.warn('Push not supported'); return;
     }
 
-    // 1) регистрируем наш sw.js (scope = '/')
     const reg = await navigator.serviceWorker.register('/sw.js');
-    console.log('SW scope:', reg.scope);
 
-    // 2) спрашиваем разрешение
     const perm = await Notification.requestPermission();
-    if (perm !== 'granted') { console.warn('Permission:', perm); return; }
+    if (perm !== 'granted') { console.warn('Permission denied:', perm); return; }
 
-    // 3) подчистим старую подписку (на всякий случай)
-    const old = await reg.pushManager.getSubscription();
-    if (old) await old.unsubscribe();
+    // fix: не трогаем существующую подписку — endpoint не меняется зря
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      const appKey = base64UrlToUint8Array(VAPID_PUBLIC);
+      if (appKey.length !== 65) { throw new Error('Bad VAPID public key (must decode to 65 bytes)'); }
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: appKey.buffer as ArrayBuffer });
+    }
 
-    // 4) подписываемся
-    const appKey = base64UrlToUint8Array(VAPID_PUBLIC);
-    console.log('VAPID bytes:', appKey.length); // ДОЛЖНО быть 65
-    if (appKey.length !== 65) { throw new Error('Bad VAPID public key (must decode to 65 bytes)'); }
+    this.sendSubscriptionToServer(id, sub);
+  }
 
-    const sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: appKey
-    });
-
-    const json = sub.toJSON();
-    console.log('SUBSCRIPTION JSON:', JSON.stringify(json, null, 2));
-
-    // 5) отправляем подписку на сервер (здесь demo userId=demo)
-    this.http.post<IResponse>(`${this.url}notifications/subscribe/${id}`, { userId: id, subscription: json }).subscribe(result => {
-      if (result.code === 200){ 
-          console.log(`браузер подписался - ${result.data}`);
-          // alert('Подписка сохранена на сервере. Теперь можно отправить тест.');
+  private sendSubscriptionToServer(userId: string, sub: PushSubscription): void {
+    this.http.post<IResponse>(
+      `${this.url}notifications/subscribe/${userId}`,
+      { userId, subscription: sub.toJSON() }
+    ).subscribe(result => {
+      if (result.code === 200) {
+        console.log('Push subscription saved:', result.data);
       }
     });
-  
   }
 
   sendTest() {
-    return this.http.post(`${this.url}/api/push/send`, { userId: 'demo', title: 'Hello', body: 'from .NET', url: '/' }).toPromise();
+    return firstValueFrom(this.http.post(`${this.url}/api/push/send`, { userId: 'demo', title: 'Hello', body: 'from .NET', url: '/' }));
   }
 }

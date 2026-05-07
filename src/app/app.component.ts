@@ -1,4 +1,5 @@
-import {AfterViewInit, Component, computed, ElementRef, HostListener, Inject, OnInit, signal, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, computed, ElementRef, HostListener, Inject, OnInit, PLATFORM_ID, signal, ViewChild} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import {ActivatedRoute, NavigationEnd, Router, RouterState} from "@angular/router";
 import {IViewBusinessProfile} from "./DTO/views/business/IViewBussinessProfile";
 import {AuthService} from "../services/auth.service";
@@ -92,6 +93,7 @@ export class AppComponent implements OnInit, AfterViewInit  {
                public push: PushDebugService,
                public _aiService: AIService,
                public store$: Store,
+               @Inject(PLATFORM_ID) private platformId: Object,
   ) {
     this.handleRouteEvents();
   }
@@ -334,7 +336,7 @@ export class AppComponent implements OnInit, AfterViewInit  {
         //     }
         // });
 
-        const introSeen = localStorage.getItem('aiVoiceIntroSeen') === '1';
+        const introSeen = isPlatformBrowser(this.platformId) && localStorage.getItem('aiVoiceIntroSeen') === '1';
 
             if (!introSeen) {
               // первый заход — показываем большое инфо-окно
@@ -446,10 +448,11 @@ export class AppComponent implements OnInit, AfterViewInit  {
   }
 
   redirectMainPage() {
-    this._route.navigate(['/']);
+    this._route.navigate(['/home']);
   }
 
   onActivate($event: any) {
+    if (!isPlatformBrowser(this.platformId)) return;
     window.scroll({
       top: 0,
       left: 0,
@@ -459,7 +462,9 @@ export class AppComponent implements OnInit, AfterViewInit  {
 
     closeIntroOverlay(): void {
     this.showIntroOverlay = false;
-    localStorage.setItem('aiVoiceIntroSeen', '1');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('aiVoiceIntroSeen', '1');
+    }
 
     // при желании — показать маленькую подсказку на несколько секунд
     this.showHint = true;

@@ -190,6 +190,7 @@ export class RegisterEmailComponent implements OnInit {
                           this.activeModal.close();
                           this.loginService.isAutentificate$.next(true);
                           this.loginService.updateProfileUA();
+                          this.loginService.afterLoginNavigateAwayFromLanding();
                           
                         }
                       }

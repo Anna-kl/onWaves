@@ -11,6 +11,7 @@ import { LandingVersion2Component } from "./landingVersion2/landingVersion2.comp
 import { ProgressSpinnerModule } from "primeng/progressspinner";
 import { ConfirmPopup, ConfirmPopupModule } from 'primeng/confirmpopup';
 import { ToastModule } from 'primeng/toast';
+import { MasterBookingLandingSectionComponent } from "./landingVersion2/components/master-booking-landing-section/master-booking-landing-section.component";
 
 
 @NgModule({
@@ -20,6 +21,7 @@ import { ToastModule } from 'primeng/toast';
     MainMenuComponent,
     CardForSearchComponent,
     LandingVersion2Component,
+    MasterBookingLandingSectionComponent,
   ],
   imports: [NgIf, NgForOf, AsyncPipe, MainAppModule, 
     PaginatorModule,

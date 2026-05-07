@@ -3,6 +3,7 @@ import {environment} from "../enviroments/environment";
 import {HttpClient} from "@angular/common/http";
 import {IViewNotification} from "../app/DTO/views/notifications/IViewNotification";
 import {IChangeNotification} from "../app/DTO/views/notifications/IChangeNotification";
+import {IChangeNotificationByRecord} from "../app/DTO/views/notifications/IChangeNotificationByRecord";
 import {IResponse} from "../app/DTO/classes/IResponse";
 
 @Injectable({
@@ -24,6 +25,11 @@ export class MessageNotificationService {
 
   changeStatus(id: string, state: IChangeNotification){
     return this.http.put<IResponse>(`${this.url}change-status/${id}`, state);
+  }
+
+  /** Пометка по записи: те же поля, что в change-status, плюс recordId. */
+  changeStatusByRecord(state: IChangeNotificationByRecord) {
+    return this.http.put<IResponse>(`${this.url}change-status-by-record/`, state);
   }
 
   getCountNotifications(id: string){

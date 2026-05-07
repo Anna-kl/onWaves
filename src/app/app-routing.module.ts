@@ -42,6 +42,7 @@ import {AlbumPhoneComponent} from "./components/phone/album-phone/album-phone.co
 import {FotoPhoneComponent} from "./components/phone/foto-phone/foto-phone.component";
 import { LandingPageComponent } from './common/LandingPage/LandingPage.component';
 import { LandingVersion2Component } from './pages/landingVersion2/landingVersion2.component';
+import { redirectAuthenticatedFromLandingGuard } from "./guards/redirect-authenticated-from-landing.guard";
 import { PageClient1Component } from './maks/pageClient1/pageClient1.component';
 import { PageClient2Component } from './maks/pageClient2/pageClient2.component';
 import { LentaComponent } from './common/profile/lenta/lenta.component';
@@ -51,7 +52,12 @@ import { ConfirmEmailComponent } from './pages/confirm-email/confirm-email.compo
 
 const routes: Routes = [
 
-    { path: '', component: MainPageComponent },
+    {
+      path: "",
+      component: LandingVersion2Component,
+      canActivate: [redirectAuthenticatedFromLandingGuard],
+    },
+    { path: "home", component: MainPageComponent },
 
 
     {path: 'cabinet-ba', component: CabinetBAComponent },
@@ -87,7 +93,7 @@ const routes: Routes = [
   { path: 'static/typography', component: TypographyComponent},
   { path: 'profile-ba/dayrent', component: DayrentComponent},
   { path: 'landing', component: LandingPageComponent},
-  { path: 'landing2', component: LandingVersion2Component},
+  { path: "landing2", redirectTo: "", pathMatch: "full" },
   { path: 'search/extsearch', component: ExtsearchComponent},
   { path: 'static/policies', component: PoliciesComponent},
   { path: 'clients', component: PageClient1Component},

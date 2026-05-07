@@ -74,7 +74,7 @@ export class HeaderBAComponent implements OnInit, OnDestroy {
   }
 
   redirectMainPage() {
-    this._router.navigate(['/']);
+    this._router.navigate(['/home']);
   }
   async ngOnInit() {   
     this.auth$ = this.store$.pipe(select(selectProfileMainClient)); 

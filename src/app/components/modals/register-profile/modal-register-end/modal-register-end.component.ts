@@ -1,9 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {NgbActiveModal, NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import { Router } from '@angular/router';
-import {select, Store} from "@ngrx/store";
-import { selectLink} from "../../../../ngrx-store/links/link.selector";
-import {resolve} from "@angular/compiler-cli";
+import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {LoginService} from "../../../../auth/login.service";
 @Component({
   selector: 'app-modal-register-end',
@@ -26,10 +22,12 @@ export class ModalRegisterEndComponent implements OnInit {
     this.activeModal.close();
     this.loginService.isAutentificate$.next(true);
     this.loginService.updateProfileUA();
+    this.loginService.afterLoginNavigateAwayFromLanding();
   }
   closeModal() {
     this.activeModal.close();
     this.loginService.isAutentificate$.next(true);
     this.loginService.updateProfileUA();
+    this.loginService.afterLoginNavigateAwayFromLanding();
   }
 }

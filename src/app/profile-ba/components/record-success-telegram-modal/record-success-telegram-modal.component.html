@@ -57,11 +57,12 @@
   </div>
 
   <a
-    *ngIf="telegramUrl"
+    *ngIf="telegramSubscribeHref"
     class="telegram-success__cta"
-    [href]="telegramUrl"
+    [href]="telegramSubscribeHref"
     target="_blank"
-    rel="noopener noreferrer">
+    rel="noopener noreferrer"
+    (click)="close()">
     <span class="telegram-success__cta-icon" aria-hidden="true">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
         <path

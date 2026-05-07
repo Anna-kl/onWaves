@@ -183,7 +183,7 @@ export class LoginService {
                     );
                 } else {
                     this.cookieService.deleteAll();
-                    window.location.href = '/';
+                    this._router.navigate(['/']);
                 }
             }
           }
@@ -199,6 +199,14 @@ export class LoginService {
             if (data.code === 200) {
               this.checkRequestAccount(data);
     }});
+  }
+
+  /** После входа с лэндинга (URL `/`) уводим на основной экран приложения. */
+  afterLoginNavigateAwayFromLanding(): void {
+    const path = (this._router.url || "").split("?")[0];
+    if (path === "/" || path === "") {
+      void this._router.navigate(["/home"]);
+    }
   }
 
   private clearAuthCookies(): void {

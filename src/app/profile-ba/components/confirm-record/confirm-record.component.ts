@@ -302,6 +302,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
               size: 'md',
               windowClass: 'record-success-telegram-dialog',
             });
+            modalRef.componentInstance.accountId = this.profile?.id ?? null;
             modalRef.result.then(afterModal, afterModal);
           }
         } else {

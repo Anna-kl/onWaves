@@ -27,6 +27,8 @@ import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MessageService } from 'primeng/api';
 import { InsertPinCodeComponent } from 'src/app/components/modals/insert-pin-code/insert-pin-code.component';
+import { MessageNotificationService } from 'src/services/notification.service';
+import { StatusNotification } from 'src/app/DTO/enums/statusNotification';
 
 
 
@@ -179,7 +181,8 @@ getAllTimeWorking(time: number) {
               private renderer: Renderer2,
               private route: ActivatedRoute,
               private modalService: NgbModal,
-              private _apiRecord: RecordService) {
+              private _apiRecord: RecordService,
+              private _notifications: MessageNotificationService) {
 
     // this._events.userId.subscribe(res => {
     //   this.id = res;
@@ -242,6 +245,32 @@ getAllTimeWorking(time: number) {
   addRecord(){
     this.router.navigate([`notes/${this.profile?.id!}/add-record-ba`],
         { queryParams: {dayId: this.dayId, date: formatDateToString(this.today)}});
+  }
+
+  /** Id для SeenDirective (как message.id в уведомлениях). */
+  scheduleSeenId(sch: IViewScheduleBA): string {
+    return sch.notificationId ?? sch.recordId;
+  }
+
+  /** Карточка была в зоне видимости ≥ seenDelayMs — помечаем уведомление прочитанным по записи. */
+  onScheduleSeenNew(sch: IViewScheduleBA): void {
+    if (!sch.isNew || !this.profileId) {
+      return;
+    }
+    const notificationId = sch.notificationId ?? sch.recordId;
+    this._notifications
+      .changeStatusByRecord({
+        recordId: sch.recordId,
+        statusNotification: StatusNotification.READ,
+      })
+      .pipe(take(1))
+      .subscribe({
+        next: (res) => {
+          if (res.code === 200) {
+            sch.isNew = false;
+          }
+        },
+      });
   }
 
   protected readonly getPriceService = getPriceService;
