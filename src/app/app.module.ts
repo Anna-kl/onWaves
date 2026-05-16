@@ -153,6 +153,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { provideYConfig, YConfig
  } from 'angular-yandex-maps-v3';
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { getDeviceCompat } from '../utils/device-compat';
 import { InsertPinCodeComponent } from './components/modals/insert-pin-code/insert-pin-code.component';
 import { loadAIReducer, reducersAI } from './ngrx-store/aiStore/ai.reducers';
 import { AIEffect } from './ngrx-store/aiStore/effect/ai.effect';
@@ -304,9 +305,7 @@ registerLocaleData(localeRu, 'ru');
     ClipboardModule,
     GalleriaModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
-        enabled: !isDevMode(),
-        // Register the ServiceWorker as soon as the application is stable
-        // or after 30 seconds (whichever comes first).
+        enabled: getDeviceCompat().supportsServiceWorker,
         registrationStrategy: 'registerWhenStable:30000'
     }),
     NgbCollapse

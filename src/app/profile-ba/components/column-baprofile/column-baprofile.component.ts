@@ -179,4 +179,33 @@ export class ColumnBAProfileComponent implements  OnChanges, OnDestroy {
     return '/assets/img/onwaves/user.png';
   }
 
+  isInstagram(url: string | undefined): boolean {
+    return !!url && url.toLowerCase().includes('instagram');
+  }
+
+  getInstagramName(url: string | undefined): string {
+    if (!url) return '';
+    const username = url.replace(/\/$/, '').split('/').pop() ?? '';
+    return username ? '@' + username : url;
+  }
+
+  isPhoneTelegram(url: string | undefined): boolean {
+    return !!url && /^\+\d{7,15}$/.test(url.trim());
+  }
+
+  getTelegramUrl(url: string | undefined): string {
+    if (!url) return '';
+    const u = url.trim();
+    if (u.startsWith('https://') || u.startsWith('http://')) return u;
+    if (u.startsWith('@')) return 'https://t.me/' + u.slice(1);
+    if (u.toLowerCase().startsWith('t.me/')) return 'https://' + u;
+    return 'https://t.me/' + u;
+  }
+
+  openTelegram(url: string | undefined, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    window.open(this.getTelegramUrl(url), '_blank', 'noopener,noreferrer');
+  }
+
 }

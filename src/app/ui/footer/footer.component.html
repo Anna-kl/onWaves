@@ -1,11 +1,11 @@
 <!-- Мобильное меню --> 
 <app-mobmenu></app-mobmenu>
 <!-- Футер -->
-<div class="cont-horiz foo" [class.footernone]="choosedClient?.id">
+<div class="cont-horiz foo">
   <div class="cont-vert w100 left-right20mob" style="max-width:1200px;" >
     <div class="cont-horiz-between-start wrap w100" style="gap: 30px;" >
-      <!-- 1 Колонка -->
-      <div class="foo-column">
+      <!-- 1 Колонка (скрыта на мобиле) -->
+      <div class="foo-column foo-column--nav">
         <div class="footer-text" (click)="goToExtSearch()">Поиск</div>
         <div class="footer-text" (click)="goToOServicePage()">О сервисе</div>
         <div class="footer-text" (click)="goToHelpPage()">Помощь</div>
@@ -15,42 +15,70 @@
         <!-- <div class="btn-black" (click)="openPopUp()" > Зарегистрироваться</div> -->
         <div class="btn-black" (click)="openPopUp()" *ngIf="showRegisterButton"> Зарегистрироваться</div>
       </div>
-      <!-- 2 Колонка -->
-      <!-- <div class="foo-column cont-vert-start-center">
-        <h2>Мы в соцсетях</h2>
-  
-        <a href="https://vk.com/ocpio " style="color: black;" class="cont-horiz margin-top30">
-          <div class="ico-green-with-txt foo-btn-social cont-horiz">
-            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="15" fill="none">
-              <path fill="#fff" d="M13.05 15h.45V9.6c3 .3 5.251 2.55 6.151 5.4h4.35c-1.2-4.2-4.2-6.6-6.15-7.5 1.95-1.05 4.65-3.75 5.25-7.5h-3.9c-.9 3-3.3 5.7-5.7 6V0H9.6v10.35C7.2 9.75 4.2 6.9 4.05 0H0c.15 9.3 4.8 15 13.05 15Z"/>
+      <!-- 2 Колонка — Контакты -->
+      <div class="foo-column">
+        <div class="foo-social-title">Контакты</div>
+        <a href="mailto:askme@onwaves.online" class="foo-social-link">
+          <span class="foo-social-icon" style="background:#67C4B2;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#fff" d="M2 4h20a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm18 3.238-7.928 7.1L4 7.216V18h16V7.238ZM4.511 6l7.55 6.762L19.502 6H4.511Z"/>
             </svg>
-          </div>
-          <div class="green-txt-hover">  
-              Вконтакте 
-          </div>
-        </a>
-
-        <a href="https://t.me/ocpio_ru" style="color: black;" class="cont-horiz margin-top40">
-          <div class="ico-green-with-txt round_tg cont-horiz">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" fill="none">
-              <path fill="#fff" d="m19.841 2.332-2.955 13.92c-.217.987-.805 1.227-1.626.762l-4.5-3.315-2.169 2.09a1.139 1.139 0 0 1-.9.443h-.007l.319-4.58 8.34-7.534c.36-.32-.081-.5-.56-.181L5.48 10.426 1.04 9.04c-.96-.305-.987-.96.203-1.431L18.592.922c.806-.294 1.509.192 1.248 1.411l.001-.001Z"/>
-            </svg>
-          </div> 
-          <div class="green-txt-hover"> 
-              Телеграм 
-          </div> 
-        </a>
-  
-        <a href="https://youtube.com/@ocpio_ru" class="green-txt-hover ico-green-with-txt cont-horiz margin-top40 "  style="color: black;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" class="margin-right10">
-              <path fill="#11142D" d="M35.102 9.15c-.199-.8-.598-1.5-1.196-2-.599-.5-1.297-1-1.995-1.2-2.692-.7-13.96-.7-13.96-.7s-11.27 0-14.062.8c-.798.2-1.496.6-1.994 1.2-.599.6-.997 1.3-1.197 2C.2 12.05 0 14.95 0 17.85c0 2.9.2 5.8.798 8.7.2.8.598 1.5 1.196 2 .599.6 1.297 1 1.995 1.2 2.692.7 13.961.7 13.961.7s11.269 0 14.061-.8c.798-.2 1.496-.6 1.994-1.2.5-.6.998-1.3 1.197-2 .499-2.9.798-5.8.798-8.7-.1-2.8-.3-5.7-.898-8.6Z"/>
-              <path fill="#fff" d="M14.36 12.45v10.8l9.274-5.4-9.274-5.4Z"/>
-          </svg> 
-          Youtube 
+          </span>
+          <span class="foo-social-label">askme@onwaves.online</span>
         </a>
       </div>
-    </div> -->
-    <div class="margin-top-bottom40 margin-left20" style="text-align: center;">
+      <!-- 3 Колонка — Соцсети -->
+      <div class="foo-column">
+        <div class="foo-social-title">Мы в соцсетях</div>
+
+        <a href="https://vk.com/club238581537" target="_blank" rel="noopener noreferrer" class="foo-social-link">
+          <span class="foo-social-icon" style="background:#2787F5;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="13" fill="none" viewBox="0 0 25 15">
+              <path fill="#fff" d="M13.05 15h.45V9.6c3 .3 5.251 2.55 6.151 5.4h4.35c-1.2-4.2-4.2-6.6-6.15-7.5 1.95-1.05 4.65-3.75 5.25-7.5h-3.9c-.9 3-3.3 5.7-5.7 6V0H9.6v10.35C7.2 9.75 4.2 6.9 4.05 0H0c.15 9.3 4.8 15 13.05 15Z"/>
+            </svg>
+          </span>
+          <span class="foo-social-label">ВКонтакте</span>
+        </a>
+
+        <a href="https://t.me/OnlineServicesOnWaves_bot" target="_blank" rel="noopener noreferrer" class="foo-social-link">
+          <span class="foo-social-icon" style="background:#2AABEE;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" fill="none" viewBox="0 0 20 18">
+              <path fill="#fff" d="m19.841 2.332-2.955 13.92c-.217.987-.805 1.227-1.626.762l-4.5-3.315-2.169 2.09a1.139 1.139 0 0 1-.9.443h-.007l.319-4.58 8.34-7.534c.36-.32-.081-.5-.56-.181L5.48 10.426 1.04 9.04c-.96-.305-.987-.96.203-1.431L18.592.922c.806-.294 1.509.192 1.248 1.411Z"/>
+            </svg>
+          </span>
+          <span class="foo-social-label">Телеграм</span>
+        </a>
+
+        <a href="https://www.instagram.com/onwavesonline/" target="_blank" rel="noopener noreferrer" class="foo-social-link">
+          <span class="foo-social-icon foo-social-icon--ig">
+            <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="ig-footer" cx="30%" cy="107%" r="150%">
+                  <stop offset="0%" stop-color="#fdf497"/>
+                  <stop offset="45%" stop-color="#fd5949"/>
+                  <stop offset="60%" stop-color="#d6249f"/>
+                  <stop offset="90%" stop-color="#285AEB"/>
+                </radialGradient>
+              </defs>
+              <path fill="#fff" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5Zm0 2A3.5 3.5 0 1 0 15.5 13 3.5 3.5 0 0 0 12 9.5Zm5.8-2.8a1.2 1.2 0 1 1-1.2 1.2 1.2 1.2 0 0 1 1.2-1.2Z"/>
+            </svg>
+          </span>
+          <span class="foo-social-label">Instagram</span>
+        </a>
+
+        <a href="https://youtube.com/@ocpio_ru" target="_blank" rel="noopener noreferrer" class="foo-social-link">
+          <span class="foo-social-icon" style="background:#FF0000;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="16" fill="none" viewBox="0 0 36 26">
+              <path fill="#fff" d="M35.102 4.15c-.4-1.5-1.6-2.7-3.191-3.1C28.97 0 18 0 18 0S7.03 0 4.089.95C2.493 1.45 1.296 2.65.896 4.15.1 7.05 0 10.15 0 12.85s.1 5.8.996 8.7c.4 1.5 1.597 2.6 3.093 3C7.13 25.5 18 25.5 18 25.5s10.97 0 13.911-.95c1.496-.4 2.692-1.5 3.092-3C35.9 18.65 36 15.55 36 12.85s-.1-5.7-.898-8.7Z"/>
+              <path fill="#FF0000" d="M14.36 18.45V7.25l9.274 5.6-9.274 5.6Z"/>
+              <path fill="#fff" d="M14.36 18.45V7.25l9.274 5.6-9.274 5.6Z"/>
+            </svg>
+          </span>
+          <span class="foo-social-label">YouTube</span>
+        </a>
+      </div>
+    </div>
+    <div class="foo-copyright margin-top-bottom40 margin-left20" style="text-align: center;">
       2025 – 2026 © ONWAVES.ONLINE. Все права защищены.
     </div>
   </div>

@@ -14,7 +14,13 @@
   <!-- /Yandex.Metrika counter -->
   <title>OnWaves</title>
   <meta charset="utf-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Prevent iOS Safari disk-cache for this shell document.
+       Belt-and-suspenders alongside Apache Cache-Control: no-store.
+       Safari sometimes ignores server headers when a reverse proxy is in the chain. -->
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Будь на волнах общения,комфорта и успеха">
   <base href="/">
 

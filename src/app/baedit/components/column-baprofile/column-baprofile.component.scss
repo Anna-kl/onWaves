@@ -101,44 +101,54 @@
   }
 
 
-  .profile-links{
+  .profile-links {
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid #E7ECF3;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.site-link{
-  display: inline-flex; align-items: center; 
-  border-radius: 999px;
-  color: #67C4B2; text-decoration: none; max-width: 100%;
-}
-.site-link:hover{ background: #E9FFFA; border-color: #BFEDE3; }
-.site-link svg{ width: 35px; height: 35px; color: #00BFA6; flex: 0 0 auto; }
-.site-link__text{
-  display: inline-block; max-width: 260px;
-  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
-}
-
-.socials{ display: block; gap: 10px; margin-left: auto; }
-.socials__btn{
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
   width: 100%;
- border-radius: 50%;
- height: 45px;
- 
-  display: inline-flex; align-items: center; 
-  text-decoration: none; 
+}
+
+.site-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #67C4B2;
+  text-decoration: none;
+  max-width: 100%;
+}
+.site-link:hover { background: #E9FFFA; }
+.site-link svg { flex: 0 0 auto; }
+.site-link__text {
+  display: inline-block;
+  max-width: 240px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.socials {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.socials__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
   transition: transform .15s ease, box-shadow .15s ease;
 }
-.socials__btn:hover{ transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.06); }
-.socials__btn svg{ width: 18px; height: 18px; }
+.socials__btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.06); }
 
-.socials__btn.vk svg{ color: #2787F5; fill: currentColor; }
-.socials__btn.tg svg{ color: #229ED9; fill: currentColor; }
-.socials__btn.ig svg{ color: #C13584; fill: currentColor; }
+.socials__btn.vk svg { color: #2787F5; fill: currentColor; }
+.socials__btn.tg svg { color: #2AABEE; fill: currentColor; }
+.socials__btn.ig svg { color: #C13584; fill: currentColor; }
 
 
 .tg-notify {

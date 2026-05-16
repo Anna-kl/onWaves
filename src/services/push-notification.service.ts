@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/enviroments/environment';
 import { IResponse } from 'src/app/DTO/classes/IResponse';
+import { getDeviceCompat } from 'src/utils/device-compat';
 
 // ключ должен совпадать с тем, что используется на сервере (.NET Core)
 const VAPID_PUBLIC = environment.publicKey;
@@ -57,6 +58,10 @@ export class PushDebugService {
   }
 
   async enable(id: string): Promise<void> {
+    if (!getDeviceCompat().supportsPushNotifications) {
+      console.warn('Push notifications not supported on this device'); return;
+    }
+
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
       console.warn('Push not supported'); return;
     }
@@ -74,7 +79,7 @@ export class PushDebugService {
       sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: appKey.buffer as ArrayBuffer });
     }
 
-    this.sendSubscriptionToServer(id, sub);
+    if (sub) this.sendSubscriptionToServer(id, sub as PushSubscription);
   }
 
   private sendSubscriptionToServer(userId: string, sub: PushSubscription): void {

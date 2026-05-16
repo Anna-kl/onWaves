@@ -22,14 +22,18 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
-                            {
+              {
+                "glob": ".htaccess",
+                "input": "src",
+                "output": "/"
+              },
+              {
                 "glob": "sw.js",
                 "input": "src",
                 "output": "/"
               },
               "src/favicon.ico",
               "src/assets",
-              "src/manifest.webmanifest",
               "src/manifest.webmanifest"
             ],
             

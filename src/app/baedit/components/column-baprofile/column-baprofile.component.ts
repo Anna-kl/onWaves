@@ -147,11 +147,46 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
       this._router.navigate([`profilebisacc/${businessProfile.id}/reviews`])
     }
     displayWebsite(website: string | undefined): string {
-      if (website && website.startsWith('https:/') && website.length > 'https:/'.length) {      
+      if (website && website.startsWith('https:/') && website.length > 'https:/'.length) {
         return website;
-      } else {      
+      } else {
         return '';
       }
+    }
+
+    isInstagram(url: string | undefined): boolean {
+      return !!url && url.toLowerCase().includes('instagram');
+    }
+
+    getInstagramName(url: string | undefined): string {
+      if (!url) return '';
+      const username = url.replace(/\/$/, '').split('/').pop() ?? '';
+      return username ? '@' + username : url;
+    }
+
+    isTelegram(url: string | undefined): boolean {
+      if (!url) return false;
+      const u = url.trim().toLowerCase();
+      return u.includes('t.me') || u.includes('telegram') || /^\+\d{7,15}$/.test(url.trim());
+    }
+
+    getTelegramUrl(url: string | undefined): string {
+      if (!url) return '';
+      const u = url.trim();
+      if (u.startsWith('https://') || u.startsWith('http://')) return u;
+      if (u.startsWith('@')) return 'https://t.me/' + u.slice(1);
+      if (u.toLowerCase().startsWith('t.me/')) return 'https://' + u;
+      return 'https://t.me/' + u;
+    }
+
+    openTelegram(url: string | undefined, event: Event): void {
+      event.preventDefault();
+      event.stopPropagation();
+      window.open(this.getTelegramUrl(url), '_blank', 'noopener,noreferrer');
+    }
+
+    isPhoneTelegram(url: string | undefined): boolean {
+      return !!url && /^\+\d{7,15}$/.test(url.trim());
     }
 }
 //
