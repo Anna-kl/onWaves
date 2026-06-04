@@ -12,35 +12,45 @@ li{
     -o-transition: .75s ease-in-out;
     transition: .75s ease-in-out; 
 } 
-.nav-container2 { 
-    position: absolute;   
-    background-color: #fff; 
-    width: 360px; 
+.nav-container2 {
+    position: absolute;
+    background-color: #fff;
+    width: min(360px, 100vw);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     right: 0px;
-    top: 70px;   
-    opacity: 0; 
-	transform: translateY(-1500px); 
-    z-index: 1; 
-} 
+    top: 70px;
+    max-height: calc(100vh - 70px - 60px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100svh - 70px - 60px - env(safe-area-inset-bottom, 0px));
+    opacity: 0;
+	transform: translateY(-1500px);
+    z-index: 1;
+}
 .nav-container2.active { 
     opacity: 1; 
     transform: translateY(0px); 
     z-index: 4; 
     box-shadow: 2px 2px 10px 2px rgb(35 38 47 / 8%);
 }   
-.nav-link-wrapper2 { 
-    text-align: left; 
-	padding: 30px 30px 30px 30px;  
+.nav-link-wrapper2 {
+    text-align: left;
+    padding: 30px 30px 30px 30px;
+    padding-bottom: max(30px, calc(30px + env(safe-area-inset-bottom, 0px)));
 }  
 .nav-link-wrapper2 li { 
 	line-height: 150%;
     
 }   
 .hamburger-icon2 {
-    position: relative; 
+    position: relative;
     z-index: 4;
     margin: 20px;
+}
+
+@media screen and (max-width: 640px) {
+    .hamburger-icon2 {
+        margin: 12px 8px;
+    }
 } 
 .toggle2 {
     position: relative;

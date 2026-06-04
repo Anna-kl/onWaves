@@ -191,11 +191,10 @@
                           <div class="input-line cont-horiz-start" >
                             <input class="form-control borderNone" type="text" size="16" id="email"
                             formControlName="email"   placeholder=""  />
-                                   <!-- formControlName="webSite"   placeholder="https://"  /> -->
                           </div>
-                          <!-- Событие при ошибки -->
-                          <div *ngIf="!email?.valid && email != null" class="alert-validation">
-                              Введите валидный email
+                          <!-- Ошибка валидации email -->
+                          <div *ngIf="email.invalid && (email.dirty || email.touched)" class="alert-validation">
+                              Email некорректен (требуется @ и доменное имя)
                           </div>
                         </div>
 
@@ -267,12 +266,37 @@
             <!-- кнопки -->
             <div class="cont-horiz-around w100 two-bnt-position margin-top50" style="gap: 10px 10px">
               <button *ngIf="numberStreetPage===2" type="button" class="btn-green open"  (click)="decrement() "
-                      [ngStyle]="{ 'display': 'block' }"  >
+                      [ngStyle]="{ 'display': 'block' }"
+                      [disabled]="isSubmitting$ | async" >
                 Назад
               </button>
-              <button type="button" class="btn-green"   [ngStyle]="{'background-color': isFormValid() ? 'gray' : '#006174' }"
-                      (click)="increment()" [disabled]="isFormValid()">
-                {{textBtn}}
+              <!-- ══════════════════════════════════════════════════════════════ -->
+              <!-- КРИТИЧНО: Блокируем кнопку во время загрузки + показываем спиннер -->
+              <!-- ══════════════════════════════════════════════════════════════ -->
+              <button type="button" class="btn-green"
+                      [ngStyle]="{
+                        'background-color': (isFormValid() || (isSubmitting$ | async)) ? 'gray' : '#006174',
+                        'opacity': (isSubmitting$ | async) ? 0.6 : 1,
+                        'cursor': (isSubmitting$ | async) ? 'not-allowed' : 'pointer'
+                      }"
+                      (click)="increment()"
+                      [disabled]="isFormValid() || (isSubmitting$ | async)">
+
+                <ng-container *ngIf="!(isSubmitting$ | async); else loadingTemplate">
+                  {{textBtn}}
+                </ng-container>
+
+                <ng-template #loadingTemplate>
+                  <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <p-progressSpinner
+                      [style]="{'width':'20px','height':'20px'}"
+                      strokeWidth="4"
+                      fill="transparent"
+                      animationDuration=".5s">
+                    </p-progressSpinner>
+                    <span>Создание профиля...</span>
+                  </div>
+                </ng-template>
               </button>
             </div>
           </div>

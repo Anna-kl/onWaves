@@ -95,11 +95,19 @@ export class ProfileService {
   }
 
 
-  createBAProfile(view: IViewBusinessProfile, token: string){
+  createBAProfile(view: IViewBusinessProfile, token: string, requestId?: string){
     let  headers: HttpHeaders = new HttpHeaders();
     headers = headers.append('Authorization', 'Bearer ' + token);
-    return this.http.post<IResponse>(`${this.url}business`, view,
-      {headers});
+
+    // ══════════════════════════════════════════════════════════════
+    // КРИТИЧНО: Добавляем уникальный ID запроса для идемпотентности
+    // Бэк должен использовать этот header для предотвращения дублей
+    // ══════════════════════════════════════════════════════════════
+    if (requestId) {
+      headers = headers.append('Idempotency-Key', requestId);
+    }
+
+    return this.http.post<IResponse>(`${this.url}business`, view, {headers});
   }
 
   setStatusOrder(id: string){

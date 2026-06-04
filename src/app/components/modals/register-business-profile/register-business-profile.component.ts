@@ -1,6 +1,7 @@
-import { AfterViewInit, ChangeDetectorRef, Component,  ElementRef,  NgZone,  OnInit, ViewChild} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component,  ElementRef,  HostListener,  NgZone,  OnInit, OnDestroy, ViewChild} from '@angular/core';
 
 import {FormControl, FormGroup, Validators} from "@angular/forms";
+import { customEmailValidator } from '../../../../helpers/validators/email.validator';
 import {ServiceRegisterBusinessProfile} from "../../../../services/service-register-business";
 import {DictionaryService} from "../../../../services/dictionary.service";
 import {ICategory} from "../../../DTO/classes/ICategory";
@@ -19,7 +20,7 @@ import {StoreService} from "../../../ngrx-store/mainClient/store.service";
 import {select, Store} from "@ngrx/store";
 import {selectProfileMainClient, selectTokenMainClient} from "../../../ngrx-store/mainClient/store.select";
 import {urlProfile} from "../../../../helpers/constant/commonConstant";
-import {catchError, EMPTY, filter, map, Observable, of, switchMap, tap, throwError} from "rxjs";
+import {BehaviorSubject, catchError, EMPTY, filter, map, Observable, of, Subject, switchMap, takeUntil, tap, throwError, timeout} from "rxjs";
 import {IViewCoordinates} from "../../../DTO/views/profile/IViewCoordinates";
 import { LoginService } from 'src/app/auth/login.service';
 import { environment } from 'src/enviroments/environment';
@@ -34,10 +35,16 @@ declare const ymaps: any;
   styleUrls: ['./register-business-profile.component.scss'],
   providers: [DictionaryService, ProfileService, MessageService]
 })
-export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit {
+export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   strAddress: string = '';
   TEXT_LENGTH: number = environment.TEXT_LENGTH;
 
+  // ══════════════════════════════════════════════════════════════
+  // КРИТИЧНО: Флаги загрузки и состояния
+  // ══════════════════════════════════════════════════════════════
+  isSubmitting$ = new BehaviorSubject<boolean>(false);
+  private destroy$ = new Subject<void>();
+  private readonly requestId = this.generateRequestId();
 
   changeAddress($event: {strAddress: string,
     viewAddress: IViewAddress}) {
@@ -179,6 +186,11 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit {
       }
 
     if (this.numberStreetPage === 3){
+      // ══════════════════════════════════════════════════════════════
+      // КРИТИЧНО: Блокируем UI во время отправки
+      // ══════════════════════════════════════════════════════════════
+      this.isSubmitting$.next(true);
+
       const data = this.registrationForm.getRawValue();
       console.log(this.phone);
       let view = {
@@ -199,48 +211,58 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit {
         parentId: this.mainProfile.id, //из store
         timeZone: new Date().getTimezoneOffset()
       } as unknown as IViewBusinessProfile;
-      this._api.createBAProfile(view, this.mainToken).pipe(
-  // берём только успешный ответ с кодом 201
-          filter(result => result.code === 201),
 
-          // получаем user-объект
-          map(result => result.data as IViewAuthProfile),
+      // ══════════════════════════════════════════════════════════════
+      // КРИТИЧНО: Отправляем с Request ID для идемпотентности
+      // ══════════════════════════════════════════════════════════════
+      this._api.createBAProfile(view, this.mainToken, this.requestId).pipe(
+        // Таймаут 15 секунд
+        timeout(15000),
 
-          // увеличиваем страницу
-          tap(() => this.numberStreetPage++),
+        // берём только успешный ответ с кодом 201
+        filter(result => result.code === 201),
 
-          // если есть formData — качаем аватар, иначе сразу «резолвим» true
-          switchMap(user => {
-            if (this.formData) {
-              return this._serviceRegisterBusinessProfile
-                .save_avatar(user.profileUserId!, this.formData)
-                .pipe(
-                  filter(res => Boolean(res)),   // ждём «truthy» результата
-                  map(() => user.profileUserId)                // прокидываем флаг OK
-                );
-            } else {
-              return of(user.profileUserId);
-            }
-          }),
-            catchError(err => {
-              if (err?.status === 500) {
-                    this.messageService.add({severity:'error', summary: 'Ошибка', detail: 'Превышено число аккаунтов', life:5000});
-                return EMPTY;                // «тихое» завершение без ошибки вверх
-                // или: return throwError(() => err); // пробросить дальше, если нужно
-              }
-              return throwError(() => err);
-            }),
-        )
+        // получаем user-объект
+        map(result => result.data as IViewAuthProfile),
+
+        // увеличиваем страницу
+        tap(() => this.numberStreetPage++),
+
+        // если есть formData — качаем аватар, иначе сразу «резолвим» true
+        switchMap(user => {
+          if (this.formData) {
+            return this._serviceRegisterBusinessProfile
+              .save_avatar(user.profileUserId!, this.formData)
+              .pipe(
+                filter(res => Boolean(res)),   // ждём «truthy» результата
+                map(() => user.profileUserId)                // прокидываем флаг OK
+              );
+          } else {
+            return of(user.profileUserId);
+          }
+        }),
+
+        // Обработка ошибок
+        catchError(err => {
+          this.isSubmitting$.next(false); // Разблокируем UI
+          this.showErrorMessage(err);
+          return throwError(() => err);
+        }),
+
+        // Забыть подписку при уничтожении компонента
+        takeUntil(this.destroy$)
+      )
         // единая подписка и единый dismiss
         .subscribe({
           next: (res) => {
+            this.isSubmitting$.next(false);
             this.activeModal.dismiss();
             if (res)
               this._login.updateProfile(res);
           },
           error: err => {
-            console.error(err);
-            // тут можно показать сообщение об ошибке
+            this.isSubmitting$.next(false);
+            console.error('Ошибка при создании профиля:', err);
           }
         });
 
@@ -278,7 +300,7 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit {
         Validators.required,
         Validators.minLength(4)
       ]),
-      email: new FormControl(this.mainProfile?.email, Validators.email),
+      email: new FormControl(this.mainProfile?.email, customEmailValidator()),
       link: new FormControl('', [
         Validators.minLength(4)
       ]),
@@ -432,5 +454,80 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit {
 
   getData($event: any) {
     this.formData = $event;
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // КРИТИЧНО: Методы для управления состоянием загрузки
+  // ══════════════════════════════════════════════════════════════
+
+  /**
+   * Генерирует уникальный ID запроса для идемпотентности
+   * UUID v4 - гарантирует уникальность в рамках сессии
+   */
+  private generateRequestId(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  /**
+   * Показывает сообщение об ошибке пользователю
+   */
+  private showErrorMessage(err: any): void {
+    let message = this.getErrorMessage(err);
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Ошибка регистрации',
+      detail: message,
+      life: 5000
+    });
+  }
+
+  /**
+   * Преобразует код ошибки в человекочитаемое сообщение
+   */
+  private getErrorMessage(err: any): string {
+    // Сетевые ошибки
+    if (err?.name === 'TimeoutError') {
+      return 'Сеть медленная. Пожалуйста, проверьте соединение и попробуйте снова.';
+    }
+
+    // Ошибки от бэка
+    if (err?.status === 409) {
+      return 'Этот аккаунт уже существует. Попробуйте другой ник.';
+    }
+    if (err?.status === 400) {
+      return 'Ошибка в данных формы. Проверьте все поля.';
+    }
+    if (err?.status === 500) {
+      return 'Превышено число аккаунтов. Попробуйте позже.';
+    }
+
+    // Сетевые ошибки
+    if (err?.status === 0 || !err?.status) {
+      return 'Проблема с подключением. Проверьте интернет.';
+    }
+
+    return `Ошибка ${err?.status || ''}: ${err?.message || 'Неизвестная ошибка'}`;
+  }
+
+  /**
+   * Жизненный цикл: очистка ресурсов при уничтожении компонента
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Запретить закрытие модала через ESC во время загрузки
+   */
+  @HostListener('keydown.escape', ['$event'])
+  onEscapeKeydown(event: any): void {
+    if (this.isSubmitting$.value) {
+      event.preventDefault();
+    }
   }
 }

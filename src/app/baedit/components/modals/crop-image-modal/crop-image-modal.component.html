@@ -1,51 +1,273 @@
-<div  class="container-ba-modalka-crop cont-vert" >
-  <div class="btn-closeModal-crop" (click)="closeModal()">
-    <img src="/assets/img/modalki/uslugi_close_pc.svg" alt=""/>
+<div class="cim-modal">
+
+  <!-- ── Header ── -->
+  <div class="cim-header">
+    <h2 class="cim-title">{{ title }}</h2>
+    <button class="cim-close" (click)="closeModal()" aria-label="Закрыть">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
   </div>
-  <h2 class="margin-bottom30">
-    Загрузите фотографию
-  </h2>
-  <!--  добавляем  Аватар-->
-  <div class="column-right cont-vert">
-    <div  (click)="fileUpload.click()" class="margin-bottom30 w100">
-      <input type="file" class="file-input"  (change)="fileChangeEvent($event)"  #fileUpload/>
-      <div class="block-image-avatar" *ngIf="isShowCropped">
-        <img [src]="croppedImage" alt="" style="border-radius: 12px;" />
+
+  <!-- ── Hidden file inputs ── -->
+  <input #fileInput type="file" class="cim-file-input"
+    accept="image/jpeg,image/png,image/gif,video/mp4,video/quicktime,video/webm"
+    (change)="fileChangeEvent($event)" />
+  <input #coverFileInput type="file" class="cim-file-input"
+    accept="image/jpeg,image/png"
+    (change)="coverFileChangeEvent($event)" />
+
+  <!-- ── Media area ── -->
+  <div class="cim-media-area" [class.cim-media-area--empty]="!isCropping && !hasCroppedImage && !videoPreviewUrl">
+
+    <!-- Пустой плейсхолдер -->
+    <div *ngIf="!isEditMode && !isCropping && !hasCroppedImage && !videoPreviewUrl"
+         class="cim-placeholder" (click)="triggerFileInput()">
+      <div class="cim-placeholder__icons">
+        <div class="cim-placeholder__icon-wrap cim-placeholder__icon-wrap--photo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="3"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+        <div class="cim-placeholder__icon-wrap cim-placeholder__icon-wrap--video">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="23 7 16 12 23 17 23 7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2"/>
+          </svg>
+        </div>
+      </div>
+      <span class="cim-placeholder__text">Выбрать фото или видео</span>
+      <span class="cim-placeholder__sub">Нажмите, чтобы загрузить</span>
+    </div>
+
+    <!-- Кроппер фото -->
+    <div *ngIf="isCropping" class="cim-cropper-wrap">
+      <image-cropper
+        [imageChangedEvent]="imageChangedEvent"
+        [maintainAspectRatio]="true"
+        [aspectRatio]="4/3"
+        [resizeToWidth]="800"
+        [cropperMinWidth]="128"
+        (imageCropped)="imageCropped($event)"
+        (imageLoaded)="imageLoaded($event)"
+        (loadImageFailed)="loadImageFailed()">
+      </image-cropper>
+      <button class="cim-btn-crop-done" (click)="confirmCrop()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Применить кадрирование
+      </button>
+    </div>
+
+    <!-- Превью фото -->
+    <div *ngIf="!isCropping && hasCroppedImage && fileType === 'photo'" class="cim-preview-wrap">
+      <img [src]="croppedImage" alt="Предпросмотр" class="cim-preview-img" />
+
+      <!-- Корзина — правый верхний угол, только edit mode -->
+      <ng-container *ngIf="isEditMode">
+        <button *ngIf="!confirmDelete"
+                class="cim-preview-delete" (click)="confirmDelete = true" aria-label="Удалить">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+        </button>
+        <div *ngIf="confirmDelete" class="cim-preview-confirm">
+          <span>Удалить?</span>
+          <button class="cim-preview-confirm__yes" (click)="deletePhoto()" [disabled]="isDeleting">
+            {{ isDeleting ? '…' : 'Да' }}
+          </button>
+          <button class="cim-preview-confirm__no" (click)="confirmDelete = false">Нет</button>
+        </div>
+      </ng-container>
+
+      <button class="cim-replace-btn" (click)="triggerFileInput()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 .49-3.08"/>
+        </svg>
+        Заменить
+      </button>
+    </div>
+
+    <!-- Превью видео -->
+    <div *ngIf="videoPreviewUrl && fileType === 'video'" class="cim-video-wrap">
+      <video [src]="videoPreviewUrl" class="cim-video-preview"
+             controls preload="metadata" playsinline></video>
+      <div class="cim-video-meta">
+        <div class="cim-video-meta__icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="23 7 16 12 23 17 23 7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2"/>
+          </svg>
+        </div>
+        <span class="cim-video-meta__name">{{ videoFile?.name }}</span>
+        <span class="cim-video-meta__size">{{ formatFileSize(videoFile?.size) }}</span>
+      </div>
+      <button class="cim-replace-btn" (click)="triggerFileInput()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 .49-3.08"/>
+        </svg>
+        Заменить
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ── Прогресс загрузки видео ── -->
+  <div class="cim-progress" *ngIf="isVideoUploading">
+    <div class="cim-progress__track">
+      <div class="cim-progress__fill" [style.width.%]="uploadProgress"></div>
+    </div>
+    <span class="cim-progress__label">{{ uploadProgress }}% загружено</span>
+  </div>
+
+  <!-- ── Обложка для видео (необязательно) ── -->
+  <div class="cim-section" *ngIf="fileType === 'video' && !isEditMode">
+    <div class="cim-label-row">
+      <label class="cim-label">
+        Обложка видео <span class="cim-optional">(необязательно)</span>
+      </label>
+    </div>
+    <p class="cim-field-hint">Если не выбрать — сервер возьмёт первый кадр автоматически.</p>
+
+    <!-- Кроппер обложки -->
+    <div *ngIf="isCroppingCover" class="cim-cover-cropper-wrap">
+      <image-cropper
+        [imageChangedEvent]="coverImageChangedEvent"
+        [maintainAspectRatio]="true"
+        [aspectRatio]="4/3"
+        [resizeToWidth]="800"
+        [cropperMinWidth]="128"
+        (imageCropped)="coverImageCropped($event)"
+        (loadImageFailed)="loadCoverImageFailed()">
+      </image-cropper>
+      <button class="cim-btn-crop-done" (click)="confirmCoverCrop()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Применить
+      </button>
+    </div>
+
+    <!-- Превью обложки -->
+    <div *ngIf="!isCroppingCover && hasCoverImage" class="cim-cover-preview-wrap">
+      <img [src]="croppedCoverImage" alt="Обложка" class="cim-cover-preview-img" />
+      <div class="cim-cover-preview-actions">
+        <button class="cim-replace-btn" (click)="triggerCoverInput()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 1 0 .49-3.08"/>
+          </svg>
+          Заменить
+        </button>
+        <button class="cim-replace-btn cim-replace-btn--remove" (click)="removeCover()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Удалить
+        </button>
       </div>
     </div>
-    <image-cropper
-    style="border-radius: 12px;" 
-      class="margin-bottom30"
-      [resizeToWidth]="256"
-      [cropperMinWidth]="128"
-      *ngIf="!isShowCropped"
-      [imageChangedEvent]="imageChangedEvent"
-      [maintainAspectRatio]="true"
-      [aspectRatio]="4/4"
-      (imageCropped)="imageCropped($event)"
-      (imageLoaded)="imageLoaded($event)"
-    (loadImageFailed)="showErrorImage()">
-    </image-cropper>
 
-    <div  class="btn-crop-modalka margin-bottom30" >
-      <div class="saveBtn" 
-      *ngIf="this.imageChangedEvent && this.isShowCropped"
-       style="padding-left: 80px;    padding-right: 80px;    padding-top: 10px;    padding-bottom: 10px;"
-        (click)="cropImage()">
-        Сохранить
+    <!-- Кнопка выбора обложки -->
+    <button *ngIf="!isCroppingCover && !hasCoverImage"
+            class="cim-cover-pick-btn" (click)="triggerCoverInput()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+      Выбрать обложку
+    </button>
+  </div>
+
+  <!-- ── Подсказка ── -->
+  <p class="cim-hint">{{ mediaHint }}</p>
+
+  <!-- ── Описание ── -->
+  <div class="cim-section">
+    <div class="cim-label-row">
+      <label class="cim-label">Краткое описание</label>
+      <span class="cim-counter" [class.cim-counter--warn]="descriptionLength >= maxDescription">
+        {{ descriptionLength }}/{{ maxDescription }}
+      </span>
+    </div>
+    <textarea
+      class="cim-textarea"
+      [(ngModel)]="description"
+      [maxlength]="maxDescription"
+      placeholder="Опишите фото или видео…"
+      rows="3">
+    </textarea>
+    <p class="cim-field-hint">Описание помогает клиентам лучше понять работу.</p>
+  </div>
+
+  <!-- ── Привязка к услугам ── -->
+  <div class="cim-services-card" *ngIf="services.length > 0">
+    <div class="cim-services-header">
+      <div class="cim-services-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+      </div>
+      <div>
+        <div class="cim-label">
+          Связать с услугами <span class="cim-optional">(необязательно)</span>
+        </div>
+        <p class="cim-sublabel">Выберите одну или несколько услуг</p>
       </div>
     </div>
-
-    <div class="bntForAvatar margin-bottom30"
-     (click)="cropImage()" 
-     *ngIf="this.imageChangedEvent && !this.isShowCropped">
-      Готово
+    <div class="cim-chips">
+      <button *ngFor="let service of visibleServices"
+        class="cim-chip"
+        [class.cim-chip--selected]="isServiceSelected(service.id)"
+        (click)="toggleService(service.id!)">
+        {{ service.name }}
+        <svg *ngIf="isServiceSelected(service.id)" width="12" height="12" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <button *ngIf="services.length > visibleServicesCount"
+        class="cim-chip cim-chip--expand"
+        (click)="showAllServices = !showAllServices">
+        {{ showAllServices ? 'Скрыть' : 'Ещё +' + (services.length - visibleServicesCount) }}
+      </button>
     </div>
-    <!-- Выбрать другое  -->
-    <a href="javascript:void(0)" [ngClass]="textCropImage !== 'Выбрать другое' ? 'inputAvatar margin-bottom30 cont-horiz' : 'choose-another-foto'" (click)="fileUpload.click()">
-      <input type="file" class="file-input "  (change)="fileChangeEvent($event)"  #fileUpload/>
-      {{textCropImage}}
-    </a>
+  </div>
+
+  <!-- ── Кнопки ── -->
+  <div class="cim-actions">
+    <button class="cim-btn cim-btn--cancel" (click)="closeModal()" [disabled]="isVideoUploading">
+      Отмена
+    </button>
+    <button class="cim-btn cim-btn--save" [disabled]="!canSave" (click)="save()">
+      <span *ngIf="isVideoUploading" class="cim-btn__spinner"></span>
+      {{ saveLabel }}
+    </button>
   </div>
 
 </div>

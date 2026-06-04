@@ -1,112 +1,192 @@
 @import '../../../../../assets/styles/main/color.scss';
 
-.container-ba-modalka-album{
+/* Desktop - 500px width */
+.container-ba-modalka-album {
   display: flex;
-  justify-items: center; 
-  width: 500px;  
-  background-color: #fff; 
+  flex-direction: column;
+  align-items: center;
+  width: 500px;
+  background-color: #fff;
+  padding: 20px;
+  gap: 20px;
+  box-sizing: border-box;
 }
-@media screen and (max-width: 480px) { 
-  .container-ba-modalka-album{
-    width: 320px;  
-  }
-}
+
 .btn-closeModal-uslugi {
   width: 100%;
-  display:flex;
-  justify-content: end; 
-} 
-.block-uslugi { 
-  margin-top:10px;
-  width: 80%;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
 }
-h2{
-  margin-bottom:10px;
+
+.btn-closeModal-uslugi img {
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
 }
-.text-first{
-  color:$green-light;
+
+.block-uslugi {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
-.input-uslugi-modal{
-  border:1px solid #9196A4;
-  margin:20px 0 10px 0;
-  padding:10px 18px;
-  border-radius:24px;
+
+h2 {
+  margin: 0 0 10px 0;
+  font-size: 1.3rem;
+  color: $black;
 }
-.text-under-input{
-  color:#9196A4;
-  size:14px;
-  margin-left:20px;
-} 
-/*   ------  правая колонка - фото ---------    */
-.column-right{
-  display:flex;
-  align-items: start;
-  max-width: 80%;
-  min-width: 79%; 
-} 
-.avatartext{
+
+.text-first {
   color: $green-light;
-  margin:40px 0 20px 0;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
-.file-input {
-  display: none;
-}
-.inputAvatar {
-  display:grid;
-  background-color: $green-basic;
-  text-align:center;
-  color: #fff;
-  cursor: pointer;
-  font-weight: bold;
-  border-radius:100px;
-  padding: 13px 30px;
-  margin-bottom:30px;
+
+.input-uslugi-modal {
   width: 100%;
+  border: 1.5px solid #9196A4;
+  padding: 12px 18px;
+  border-radius: 24px;
+  background: #fff;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+
+  input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: transparent;
+    box-sizing: border-box;
+
+    &::placeholder {
+      color: #c0c5d5;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &:focus-within {
+    border-color: $green-light;
+  }
 }
-.inputAvatar:hover {
-  background:$green-light;
+
+.input-uslugi-modal[style*="margin-bottom: 0"] {
+  margin-bottom: 0 !important;
 }
-.bntForAvatar{
-  background-color: $green-basic;
-  text-align:center;
-  color: #fff;
-  cursor: pointer;
-  font-weight: bold;
-  border-radius:100px;
-  padding: 13px 0;
+
+.text-under-input {
+  color: #9196A4;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+small {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  display: block;
+  margin: 5px 0 0 0;
+}
+
+.btn-uslugi-modalka {
   width: 100%;
-  margin-top:30px;
+  display: flex;
+  justify-content: center;
 }
-.block-image-avatar{
-  display:grid;
-    justify-content: center;
-    justify-items: center;
-  position:relative;
-}
-.delete-image-avatar{
-  position:absolute;
-  bottom:15px;
-  right:15px;
-  border-radius: 30px;
-  padding: 9px 10px;
-  border: 1px solid #E24414;
-  background: #FFF;
-} 
-/*  кнопка Сохранить   */
-.btn-uslugi-modalka{
-  display:grid;
-  margin-top:60px;
-  justify-items: center;
-}
+
 .saveBtn {
-  display:grid;
-  justify-self: center;
-  /*background-color: $green-basic;*/
-  text-align:center;
+  width: 100%;
+  max-width: 300px;
+  padding: 14px 32px;
+  text-align: center;
   color: #fff;
   cursor: pointer;
   font-weight: bold;
-  border-radius:24px;
-  padding: 13px 130px;
-  margin-top:20px;
+  border-radius: 24px;
+  border: none;
+  transition: all 0.2s;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.btn-gray {
+  background-color: #c0c5d5;
+  cursor: not-allowed;
+}
+
+.btn-green {
+  background-color: $green-basic;
+
+  &:hover {
+    background-color: $green-light;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* ═════════════════════════════════════════════
+   MOBILE OVERRIDE - все свойства с !important
+   ═════════════════════════════════════════════ */
+@media screen and (max-width: 768px) {
+  .container-ba-modalka-album {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    border-radius: 20px 20px 0 0 !important;
+    gap: 16px !important;
+  }
+
+  .btn-closeModal-uslugi {
+    width: 100% !important;
+    margin-bottom: 15px !important;
+  }
+
+  .block-uslugi {
+    width: 100% !important;
+    gap: 12px !important;
+  }
+
+  h2 {
+    font-size: 1.15rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  .text-first {
+    font-size: 0.9rem !important;
+  }
+
+  .input-uslugi-modal {
+    width: 100% !important;
+    padding: 11px 16px !important;
+  }
+
+  .text-under-input {
+    font-size: 0.75rem !important;
+    margin-top: 4px !important;
+  }
+
+  small {
+    font-size: 0.8rem !important;
+  }
+
+  .btn-uslugi-modalka {
+    width: 100% !important;
+    margin-top: 8px !important;
+  }
+
+  .saveBtn {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px 24px !important;
+    font-size: 0.95rem !important;
+  }
 }  

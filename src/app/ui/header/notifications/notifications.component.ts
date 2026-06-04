@@ -84,15 +84,17 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   onSeen(id: string) {
-    if (!this.messages) {
-      return;
-    }
+    if (!this.messages) return;
     const message = this.messages.find((n) => n.id === id);
-    if (!message || !this.isUnread(message)) {
-      return;
-    }
+    if (!message || !this.isUnread(message)) return;
+
     this._api.readNotifications(id).pipe(take(1)).subscribe();
-    message.statusNotification = StatusNotification.READ;
+
+    // store-объекты заморожены (Object.freeze) — нельзя мутировать напрямую.
+    // Создаём новый массив с обновлённой копией нужного элемента.
+    this.messages = this.messages.map(n =>
+      n.id === id ? { ...n, statusNotification: StatusNotification.READ } : n
+    );
   }
 
   /** Непрочитано — всё, что не READ (CREATE, DELIVERY, неверный тип с бэка). */

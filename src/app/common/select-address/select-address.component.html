@@ -1,75 +1,76 @@
+<div class="discription-column-left">
+  Укажите адрес вашей организации.
+</div>
 
-    <div class="discription-column-left">
-      Укажите адрес вашей организации.
-    </div>
-    <!-- Страна -->
-    <div class="select">
-      <select [(ngModel)]="myCountry" (ngModelChange)="getListRegions( myCountry)">
-       <option [ngValue]="null" disabled>Страна *</option>
-        <option *ngFor="let country of countryList$ | async"  [ngValue]="country">
-          {{country}}
-        </option>
-      </select>
-    </div>
-    <!-- Регион -->
-    <div class="select">
-      <select [(ngModel)]="myRegion" (ngModelChange)="change($event, 'region')">
-          <option [ngValue]="null" disabled>Регион *</option>
-        <option *ngFor="let region of allRegions$ | async"  [ngValue]="region">
-          {{region}}
-        </option>
-      </select>
-    </div>
-    <!-- Населенный пункт -->
-    <div style="display: flex;">
-      <input type="checkbox"
-          [(ngModel)]="isAnotherCity"
-          class="custom-checkbox"
-          id="choose-another"
-          (ngModelChange)="setAnotherCity()"
->     <label class="text-first" for="choose-another">
-      Другой населенный пункт</label>
+<div class="select">
+  <select [ngModel]="myCountry"
+          (ngModelChange)="myCountry = $any($event); getListRegions(myCountry)">
+    <option [ngValue]="null" disabled>Страна *</option>
+    <option *ngFor="let country of countryList$ | async" [ngValue]="country">
+      {{ country }}
+    </option>
+  </select>
+</div>
 
-  </div>
+<div class="select">
+  <select [ngModel]="myRegion"
+          (ngModelChange)="myRegion = $any($event); change(myRegion, 'region')">
+    <option [ngValue]="null" disabled>Регион *</option>
+    <option *ngFor="let region of allRegions$ | async" [ngValue]="region">
+      {{ region }}
+    </option>
+  </select>
+</div>
 
-      <div class="select" *ngIf="!isAnotherCity">
-      <select
-        [ngModel]="myCity"
-        (ngModelChange)="change($event, 'city')">
-        <option [ngValue]="null" disabled>Населенный пункт *</option>
-        <option *ngFor="let city of allCity "
-                [ngValue]="city">
-          {{ city }}
-        </option>
-      </select>
-    </div>
-    <div class="help-text" style="margin-top: -30px;">
-      обязательное поле
-    </div>
-    <!-- Улица -->
+<div style="display: flex;">
+  <input type="checkbox"
+         [(ngModel)]="isAnotherCity"
+         class="custom-checkbox"
+         id="choose-another"
+         (ngModelChange)="setAnotherCity()">
+  <label class="text-first" for="choose-another">
+    Другой населенный пункт
+  </label>
+</div>
 
-<!-- 
-  Свой вариант города -->
-  <div *ngIf="isAnotherCity">
-    <input type="text"
-      placeholder="Населенный пункт *"
-      [(ngModel)]="address!.city"
-      (ngModelChange)="change($event, 'city')">
-  </div>
-  <!-- Модальное окно -->
- 
-    <div>
-      <input type="text"
-        placeholder="Улица *"
-        [(ngModel)]="address!.street"
-        (ngModelChange)="change($event, 'street')">
-    </div>
+<div class="select" *ngIf="!isAnotherCity">
+  <select [ngModel]="myCity"
+          (ngModelChange)="myCity = $any($event); change(myCity, 'city')">
+    <option [ngValue]="null" disabled>Населенный пункт *</option>
+    <option *ngFor="let city of allCity" [ngValue]="city">
+      {{ city }}
+    </option>
+  </select>
+</div>
 
-    <!-- Дом/корпус * -->
-    <div>
-      <input type="text" [(ngModel)]="address!.home" (ngModelChange)="change($event, 'home')" placeholder="Дом/корпус *" />
-    </div>
-    <!-- Офис/квартира * -->
-    <div>
-      <input type="text" [(ngModel)]="address!.apartment" (ngModelChange)="change($event, 'apartment')" placeholder="Офис/квартира *" />
-    </div>
+<div class="help-text" style="margin-top: -30px;">
+  обязательное поле
+</div>
+
+<div *ngIf="isAnotherCity">
+  <input type="text"
+         placeholder="Населенный пункт *"
+         [ngModel]="address!.city"
+         (ngModelChange)="change($any($event), 'city')">
+</div>
+
+<div>
+  <input type="text"
+         placeholder="Улица *"
+         [ngModel]="address!.street"
+         (ngModelChange)="change($any($event), 'street')">
+</div>
+
+<div>
+  <input type="text"
+         [ngModel]="address!.home"
+         (ngModelChange)="change($any($event), 'home')"
+         placeholder="Дом/корпус *">
+</div>
+
+<div>
+  <input type="text"
+         [ngModel]="address!.apartment"
+         (ngModelChange)="change($any($event), 'apartment')"
+         placeholder="Офис/квартира *">
+</div>

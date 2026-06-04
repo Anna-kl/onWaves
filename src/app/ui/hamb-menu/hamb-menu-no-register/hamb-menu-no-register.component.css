@@ -1,3 +1,21 @@
 .cont-vert-start {
     cursor: pointer;
 }
+
+.nrg-brand-logo {
+    height: 56px;
+    width: auto;
+    max-width: clamp(100px, 44vw, 300px);
+    object-fit: contain;
+    margin-left: 12px;
+    display: block;
+    flex-shrink: 1;
+}
+
+@media screen and (max-width: 400px) {
+    .nrg-brand-logo {
+        height: 44px;
+        max-width: clamp(88px, 38vw, 180px);
+        margin-left: 8px;
+    }
+}

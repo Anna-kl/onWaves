@@ -18,7 +18,7 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {AlbumsService} from "../../../../../services/albums.service";
 import {GroupService} from "../../../../../services/groupservice";
 import {Service} from "../../../../DTO/classes/services/Service";
-import { map, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { map, Subject, switchMap, takeUntil, tap, BehaviorSubject, catchError, timeout, of, forkJoin } from 'rxjs';
 import {PaymentForType} from "../../../../DTO/enums/paymentForType";
 import {MessageService} from "primeng/api";
 import {DisallowSymbolsDirective} from "src/app/disallow-symbols.directive";
@@ -48,6 +48,13 @@ export class Arenda2Component implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
   currencyType: CurrencyType = CurrencyType.RUB;
+
+  // ══════════════════════════════════════════════════════════════
+  // КРИТИЧНО: Флаги состояния загрузки и идемпотентность
+  // ══════════════════════════════════════════════════════════════
+  isSaving$ = new BehaviorSubject<boolean>(false);
+  isLoadingImages$ = new BehaviorSubject<boolean>(false);
+  private readonly requestId = this.generateRequestId();
 
   getIsRange(flag: boolean): boolean {
     let data = this.serviceGroup?.value;
@@ -268,7 +275,8 @@ export class Arenda2Component implements OnInit, OnDestroy {
        if (!priceControl.get('startRange')?.value)
         flag = false;
       }else
-        if (!priceControl.get('price')?.value){
+        // Цена может быть 0 (проверяем что не null/undefined)
+        if (priceControl.get('price')?.value === null || priceControl.get('price')?.value === undefined){
           flag = false;
         }
     }
@@ -302,12 +310,62 @@ export class Arenda2Component implements OnInit, OnDestroy {
   updateCounter() {
     this.remainingChars = this.maxChars - this.text.length;
     if (this.remainingChars < 0) {
-      this.text = this.text.slice(0, this.maxChars); // ограничиваем количество символов
+      this.text = this.text.slice(0, this.maxChars);
       this.remainingChars = 0;
     }
   }
 
-  save() {
+  /**
+   * Генерирует уникальный ID запроса для идемпотентности
+   * UUID v4 - гарантирует уникальность в рамках сессии
+   */
+  private generateRequestId(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  /**
+   * Показывает сообщение об ошибке пользователю
+   */
+  private showErrorMessage(err: any): void {
+    const message = this.getErrorMessage(err);
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Ошибка создания услуги',
+      detail: message,
+      life: 5000
+    });
+  }
+
+  /**
+   * Преобразует код ошибки в человекочитаемое сообщение
+   */
+  private getErrorMessage(err: any): string {
+    if (err?.name === 'TimeoutError') {
+      return 'Сеть медленная. Пожалуйста, проверьте соединение и попробуйте снова.';
+    }
+
+    if (err?.status === 409) {
+      return 'Услуга с таким названием уже существует.';
+    }
+    if (err?.status === 400) {
+      return 'Ошибка в данных формы. Проверьте все поля.';
+    }
+    if (err?.status === 500) {
+      return 'Ошибка сервера. Попробуйте позже.';
+    }
+
+    if (err?.status === 0 || !err?.status) {
+      return 'Проблема с подключением. Проверьте интернет.';
+    }
+
+    return `Ошибка ${err?.status || ''}: ${err?.message || 'Неизвестная ошибка'}`;
+  }
+
+  save(): void {
     let flagValidation = true;
     this.isErrorGender = false;
     this.isErrorName = false;
@@ -315,81 +373,151 @@ export class Arenda2Component implements OnInit, OnDestroy {
     this.isErrorPrice = false;
     let data = this.serviceGroup?.getRawValue();
     let gender: Gender[] = [];
-    if (data['isWoman']) {
-      gender.push(Gender.Woman)
-    }
-    if (data['isMen']) {
-      gender.push(Gender.Men)
-    }
-    if (data['isChildren']) {
-      gender.push(Gender.Children)
-    }
-    if (data['isPet']) {
-      gender.push(Gender.Pet)
-    }
-    if (data['isAll']) {
-      gender.push(Gender.All)
-    }
-    if ((data['durationHours'] === '00' && data['durationMinutes'] === '00') && !data['isTimeUnlimited']){
+
+    if (data['isWoman']) gender.push(Gender.Woman);
+    if (data['isMen']) gender.push(Gender.Men);
+    if (data['isChildren']) gender.push(Gender.Children);
+    if (data['isPet']) gender.push(Gender.Pet);
+    if (data['isAll']) gender.push(Gender.All);
+
+    if ((data['durationHours'] === '00' && data['durationMinutes'] === '00') && !data['isTimeUnlimited']) {
       this.isErrorTime = true;
       flagValidation = false;
     }
-    // if (data['price'] === 0){
-    //   this.isErrorPrice = true;
-    //   flagValidation = false;
-    // }
-    if (gender.length === 0){
+    if (gender.length === 0) {
       this.isErrorGender = true;
       flagValidation = false;
     }
-    if (data['name'].length === 0){
+    if (data['name'].length === 0) {
       this.isErrorName = true;
       flagValidation = false;
     }
-    if (flagValidation) {
-      let service: Service = new Service (this.service ? this.service.id : null, data['name'].replace('\n',''),
-        gender, this.profile?.id!, data['price'], PaymentForType.ForService, 
-        data['group'].id !== '' ? data['group']['id'] : null, 
-        data['about'],  getTimeFromFields(data['durationHours'], data['durationMinutes']),
-        data['isTimeUnlimited'], this.category?.id);
 
-      this._apiService.saveService(service).pipe(takeUntil(this.destroy$)).subscribe(
-          result => {
-            if (result.code === 201) {
-              let serv = result.data as Service;
-              if (this.imagesId.length > 0) {
-                this._apiImage.saveImageService(this.imagesId, serv.id!).pipe(takeUntil(this.destroy$)).subscribe(
-                    res_images => {
+    if (!flagValidation) return;
 
-                    }
-                );
-              }
-              this.showSuccess();
-              this.location.back();
-            }
+    // ══════════════════════════════════════════════════════════════
+    // КРИТИЧНО: Блокируем UI во время отправки
+    // ══════════════════════════════════════════════════════════════
+    this.isSaving$.next(true);
+
+    const service = new Service(
+      this.service ? this.service.id : null,
+      data['name'].replace('\n', ''),
+      gender,
+      this.profile?.id!,
+      data['price'],
+      PaymentForType.ForService,
+      data['group'].id !== '' ? data['group']['id'] : null,
+      data['about'],
+      getTimeFromFields(data['durationHours'], data['durationMinutes']),
+      data['isTimeUnlimited'],
+      this.category?.id
+    );
+
+    // ══════════════════════════════════════════════════════════════
+    // КРИТИЧНО: Передаем requestId для идемпотентности
+    // ══════════════════════════════════════════════════════════════
+    this._apiService.saveService(service, this.requestId).pipe(
+      timeout(15000),
+      tap(result => {
+        if (result.code === 201) {
+          const serv = result.data as Service;
+          // Загружаем изображения если они есть
+          if (this.imagesId?.length > 0) {
+            this.saveImages(this.imagesId, serv.id!);
+          } else {
+            this.showSuccess();
+            this.isSaving$.next(false);
+            this.location.back();
           }
-      );
-    }
+        } else {
+          this.isSaving$.next(false);
+          this.showErrorMessage({ status: result.code, message: 'Неудачный ответ сервера' });
+        }
+      }),
+      catchError(err => {
+        this.isSaving$.next(false);
+        this.showErrorMessage(err);
+        console.error('Ошибка при создании услуги:', err);
+        return of(null);
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe();
+  }
+
+  /**
+   * Загружает изображения для услуги
+   */
+  private saveImages(imageIds: string[], serviceId: string): void {
+    this._apiImage.saveImageService(imageIds, serviceId)
+      .pipe(
+        timeout(15000),
+        tap(() => {
+          this.showSuccess();
+          this.isSaving$.next(false);
+          this.location.back();
+        }),
+        catchError(err => {
+          this.isSaving$.next(false);
+          this.showSuccess(); // Услуга создана, только изображения не загружены
+          console.error('Ошибка при загрузке изображений:', err);
+          this.location.back();
+          return of(null);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe();
   }
 
   getImage(image: any) {
     return this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${image}`);
   }
 
-  addFoto() {
+  /**
+   * Загружает изображения из альбома
+   * Использует RxJS composition вместо вложенных подписок
+   */
+  addFoto(): void {
     const modalRef = this.modalService.open(ChooseAlbumComponent);
     modalRef.componentInstance.profileId = this.profile?.id;
-    modalRef.result.then((result: string[]) => {
-      this.imagesId = result;
-      this.images = [];
-      this.imagesId.forEach((item: string) => {
-          this._apiImage.getImage(item).pipe(takeUntil(this.destroy$)).subscribe(
-              result_image => {
-                this.images.push(result_image);
-              }
-          );
+
+    modalRef.result
+      .then((result: string[]) => {
+        this.imagesId = result;
+        this.images = [];
+        this.isLoadingImages$.next(true);
+
+        // Загружаем все изображения параллельно с forkJoin
+        forkJoin(
+          result.map(item =>
+            this._apiImage.getImage(item).pipe(
+              timeout(10000),
+              catchError(err => {
+                console.error(`Ошибка загрузки изображения ${item}:`, err);
+                return of(null);
+              })
+            )
+          )
+        )
+          .pipe(
+            tap(images => {
+              this.images = images.filter((img): img is IViewImage => img !== null);
+              this.isLoadingImages$.next(false);
+            }),
+            catchError(err => {
+              console.error('Ошибка при загрузке изображений:', err);
+              this.isLoadingImages$.next(false);
+              this.showErrorMessage({ message: 'Ошибка загрузки изображений' });
+              return of([]);
+            }),
+            takeUntil(this.destroy$)
+          )
+          .subscribe();
+      })
+      .catch(err => {
+        // Пользователь отменил выбор
+        console.log('Выбор альбома отменен', err);
       });
-    });
   }
 
   goToBackInUslugi() {

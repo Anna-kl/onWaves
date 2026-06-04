@@ -59,7 +59,7 @@
         <div class="cont-horiz-start-start wrap gallery-tab" >
           <div class="choose-card-albom-ba-foto"  *ngFor="let image of images" (click)="setMain(image.id)" >
             <!-- Подгрузка фото из альбома -->
-            <img [src]="getImage(image.image)" class="choose-edit-ba-gallery-foto " >
+            <img [src]="image.url" class="choose-edit-ba-gallery-foto">
             <div class="choose-albom-ba-foto-control-panel cont-vert-around" >
               <div class="cont-vert">
                 <div [ngClass]="image.isChoose ? 'v-white' : 'v-white-hover'">

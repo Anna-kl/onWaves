@@ -86,8 +86,8 @@ export class SelectAddressComponent implements OnInit {
       .subscribe(_=> {
       });
   }
-  change($event: Event|null, type: string) {
-   if ($event)
+  change(value: string | null, type: string) {
+   if (value)
     switch (type){
       case 'country': {
         this.getListRegions(this.myCountry!);
@@ -121,9 +121,9 @@ export class SelectAddressComponent implements OnInit {
         }
         case 'city': {
           this.getListStreet(this.myCity);
-          if ($event)
+          if (value)
             this.address = {
-                city: this.myCity ?? $event.toString(),
+                city: this.myCity ?? value,
                 street: '',
                 region: this.myRegion,
                 home: '',
@@ -133,10 +133,10 @@ export class SelectAddressComponent implements OnInit {
             break;
         }
         case 'street': {
-          if ($event)
+          if (value)
             this.address = {
                 city: this.myCity ?? this.address?.city,
-                street: $event.toString(),
+                street: value,
                 region: this.myRegion,
                 home: '',
                 apartment: '',
@@ -145,25 +145,25 @@ export class SelectAddressComponent implements OnInit {
             break;
         }
         case 'home': {
-           if ($event)
+           if (value)
             this.address = {
                 city: this.myCity ?? this.address?.city,
                 street: this.address?.street,
                 region: this.myRegion,
-                home: $event.toString(),
+                home: value,
                 apartment: '',
                 country: this.myCountry
             } as IViewAddress;
              break;
         }
         case 'apartment': {
-           if ($event)
+           if (value)
             this.address = {
                 city: this.myCity ?? this.address?.city,
                 street: this.address?.street,
                 region: this.myRegion,
                 home: this.address?.home,
-                apartment: $event.toString(),
+                apartment: value,
                 country: this.myCountry
             } as IViewAddress;
             break;

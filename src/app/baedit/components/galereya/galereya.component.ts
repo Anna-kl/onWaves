@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BackendService } from '../../../../services/backend.service';
 import { IViewBusinessProfile } from "../../../DTO/views/business/IViewBussinessProfile";
@@ -6,19 +6,20 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { CreateAlbumComponent } from "../modals/create-album/create-album.component";
 import { AlbumsService } from "../../../../services/albums.service";
 import { IAlbumWithFoto } from "../../../DTO/views/images/IAlbumWithFoto";
-
 import { CropImageModalComponent } from "../modals/crop-image-modal/crop-image-modal.component";
 import { IViewImage } from "../../../DTO/views/images/IViewImage";
-import { DomSanitizer } from "@angular/platform-browser";
 import { MessageService } from "primeng/api";
-import { ShowFotoComponent } from "../../../common/modals/galereya/show-foto/show-foto.component";
 import { DelalbumComponent } from './delalbum/delalbum.component';
 import { DeleteAlbumComponent } from "../modals/delete-album/delete-album.component";
 import { select, Store } from "@ngrx/store";
 import { selectProfileMainClient } from "../../../ngrx-store/mainClient/store.select";
-import { Subject, takeUntil } from "rxjs";
+import { Subject, forkJoin, of, takeUntil } from "rxjs";
+import { map, switchMap } from 'rxjs/operators';
 import { isUpdateRequest } from 'src/app/ngrx-store/update/update.action';
+import { GroupService } from '../../../../services/groupservice';
+import { isMediaVideoType, normalizeImageMedia, NormalizedMedia } from '../../../../helpers/common/media.helpers';
 
+type GalleryImage = IViewImage & NormalizedMedia;
 
 @Component({
   selector: 'app-galereya',
@@ -35,10 +36,9 @@ export class GalereyaComponent implements OnDestroy {
   CountReviews = 0;
   Rating = 0;
   albums: IAlbumWithFoto[] = [];
-  images: IViewImage[] = [];
+  images: GalleryImage[] = [];
   chooseAlbum?: IAlbumWithFoto = undefined;
-  private screenHeight: number = 0;
-  private screenWidth: number = 0;
+  serviceMap: Record<string, string> = {};
   isActive: string = '';
   destroy$: Subject<void> = new Subject<void>();
   private modalRef: any;
@@ -50,11 +50,12 @@ export class GalereyaComponent implements OnDestroy {
     private _apiImage: AlbumsService,
     private backendService: BackendService,
     private messageService: MessageService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private groupService: GroupService
   ) {
 
     this.route.params.subscribe(params => {
-      this.isActive = params['isActive']; 
+      this.isActive = params['isActive'];
     });
 
     this.store$.pipe(select(selectProfileMainClient)).pipe(takeUntil(this.destroy$)).subscribe(
@@ -63,6 +64,7 @@ export class GalereyaComponent implements OnDestroy {
           this.profile = result;
           if (this.profile) {
             this.loadAlbum();
+            this.loadServiceNames(this.profile.id!);
           }
         }
       }
@@ -82,7 +84,7 @@ export class GalereyaComponent implements OnDestroy {
     if (this.chooseAlbum) {
       this._apiImage.getImages(this.chooseAlbum.id).subscribe(
         images => {
-          this.images = images;
+          this.images = images.map(image => this.toGalleryImage(image));
         });
     }
   }
@@ -99,6 +101,59 @@ export class GalereyaComponent implements OnDestroy {
         }
       });
   }
+
+  loadServiceNames(profileId: string): void {
+    forkJoin([
+      this.groupService.getServiceWithout(profileId),
+      this.groupService.getGroupServices(profileId).pipe(
+        switchMap(groups => {
+          if (!groups?.length) return of([] as any[]);
+          const requests = groups.filter((g: any) => g.id).map((g: any) => this.groupService.getService(g.id!));
+          return requests.length
+            ? forkJoin(requests).pipe(map((r: any[][]) => r.flat()))
+            : of([] as any[]);
+        })
+      )
+    ]).subscribe({
+      next: ([withoutGroup, fromGroups]) => {
+        [...withoutGroup, ...fromGroups].forEach((s: any) => {
+          if (s.id) this.serviceMap[s.id] = s.name;
+        });
+      }
+    });
+  }
+
+  getServiceNames(ids?: string[]): string[] {
+    if (!ids?.length) return [];
+    return ids.map(id => this.serviceMap[id]).filter(Boolean);
+  }
+
+  isUUID(text?: string): boolean {
+    if (!text) return false;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\.(png|jpg|jpeg|gif|mp4|webm))?$/i;
+    return uuidRegex.test(text);
+  }
+
+  getImageDescription(image: IViewImage): string | null {
+    if (image.description) return image.description;
+    if (image.name && !this.isUUID(image.name)) return image.name;
+    return null;
+  }
+
+  isVideo(image: IViewImage): boolean {
+    return isMediaVideoType(image.typeImage);
+  }
+
+  private toGalleryImage(image: IViewImage): GalleryImage {
+    const media = normalizeImageMedia(image);
+
+    return {
+      ...image,
+      url: media.mediaUrl || image.url,
+      ...media
+    };
+  }
+
   // fileChangeEvent(event: any): void {
   //   const fileToUpload:File = event.target.files[0];
   //   this.formData.append('file', myFile, fileToUpload.name );
@@ -144,7 +199,7 @@ export class GalereyaComponent implements OnDestroy {
 
   createAlbum() {
     this.modalRef  = this.modalService.open(CreateAlbumComponent);
-    this.modalRef .componentInstance.profileUserId = this.profile?.id;
+    this.modalRef .componentInstance.profileUserId = this.profile?.id ?? this.id;
     this.modalRef .result.then((result:any) => {
       if (result) {
         this.loadAlbum();
@@ -155,8 +210,9 @@ export class GalereyaComponent implements OnDestroy {
   saveImage() {
     let album = this.albums.find(_ => _.id === this.chooseAlbum?.id);
     const modalRef = this.modalService.open(CropImageModalComponent,
-      { modalDialogClass: 'my-crop' });
+      { modalDialogClass: 'my-crop', scrollable: true });
     modalRef.componentInstance.albumId = this.chooseAlbum?.id;
+    modalRef.componentInstance.profileId = this.profile?.id ?? this.id ?? '';
     modalRef.result.then(result => {
       if (result) {
         if (album) {
@@ -167,12 +223,6 @@ export class GalereyaComponent implements OnDestroy {
     });
   }
 
-  @HostListener('window:resize', ['$event'])
-  @HostListener('window')
-  getScreenSize() {
-    this.screenHeight = window.innerHeight;
-    this.screenWidth = window.innerWidth;
-  }
 
   // getImage(image: any) {
   //   return this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${image}`);
@@ -192,29 +242,12 @@ export class GalereyaComponent implements OnDestroy {
   }
 
   showGalery(image: IViewImage) {
-    this.getScreenSize();
-    if (this.screenWidth > 500) {
-      const modalRef = this.modalService.open(ShowFotoComponent);
-      modalRef.componentInstance.albumId = image.albumId;
-      modalRef.componentInstance.nameAlbum = this.chooseAlbum!.name;
-      modalRef.componentInstance.imageId = image.id;
-      modalRef.dismissed.subscribe((reason: any) => {
-        this.loadAlbum();
-      });
-      modalRef.result.then(result => {
-        if (result) {
-          this.loadAlbum();
-        }
-      })
-    } else {
-      this.router.navigate(['common/foto-phone'],
-        {
-          queryParams: {
-            albumId: image.albumId, nameAlbum: this.chooseAlbum!.name, isEdit: true,
-            imageId: image.id, page: this.router.url
-          }
-        });
-    }
+    const modalRef = this.modalService.open(CropImageModalComponent, { modalDialogClass: 'my-crop' });
+    modalRef.componentInstance.editImage = image;
+    modalRef.componentInstance.profileId = this.profile?.id ?? this.id;
+    modalRef.result
+      .then(result => { if (result) this.choosedAlbum(this.chooseAlbum!.id); })
+      .catch(() => {});
   }
 
   checkAddFoto() {

@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {environment} from "../../enviroments/environment";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {BehaviorSubject, filter, map, take, takeUntil, takeWhile, tap} from "rxjs";
+import {BehaviorSubject, catchError, EMPTY, filter, map, take, takeUntil, takeWhile, tap} from "rxjs";
 import {CookieService} from "ngx-cookie-service";
 import {Md5} from "ts-md5";
 import {IResponse} from "../DTO/classes/IResponse";
@@ -83,16 +83,15 @@ export class LoginService {
                         this.isLoad$.next(true);
                         this._push.subscribe(data.message);
                         this.checkRequestAccount(data);
-                        // this.store$.dispatch(getActionStateMainProfileClient(
-                        //     { tokenMainClient: data.data.token,
-                        //          profileMainClient: data.data.profile }));
-
-                        // this._notification.requestPermission(data.message);
-                        // this._notification.receiveMessage();
                     } else {
                         this.isAutentificate$.next(false);
                         this.isLoad$.next(true);
                     }
+                }),
+                catchError(() => {
+                    this.isAutentificate$.next(false);
+                    this.isLoad$.next(true);
+                    return EMPTY;
                 }));
         }
         else {

@@ -1,0 +1,30 @@
+<div #hostEl
+     class="ow-video"
+     [class.ow-video--compact]="compact"
+     [class.is-loading]="state === 'loading'"
+     [class.is-playing]="state === 'playing'"
+     [class.is-ready]="state === 'ready' || state === 'firstFrame'"
+     [class.is-error]="state === 'error'">
+
+  <video #videoEl
+         playsinline
+         preload="none"
+         [attr.poster]="visiblePoster">
+  </video>
+
+  <div class="ow-cover" (click)="onPlayClick($event)">
+    <span class="ow-ring r1"></span>
+    <span class="ow-ring r2"></span>
+    <span class="ow-ring r3"></span>
+
+    <div class="ow-play">
+      <span class="ow-pulse"></span>
+      <span class="ow-tri"></span>
+    </div>
+
+    <div class="ow-spin"></div>
+    <div class="ow-loading"><span>Видео загружается…</span></div>
+    <div class="ow-error"><span>Видео недоступно</span></div>
+    <div class="ow-logo">Onwaves<i>.Online</i></div>
+  </div>
+</div>

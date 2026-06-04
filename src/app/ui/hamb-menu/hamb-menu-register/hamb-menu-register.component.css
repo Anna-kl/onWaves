@@ -43,3 +43,115 @@
 .toggle2 {
   width: 35px;
 }
+
+/* ── Строка профиля с кнопкой выхода ── */
+.menu-profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.menu-logout-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  border: none;
+  background: rgba(212, 108, 84, 0.10);
+  cursor: pointer;
+  padding: 8px 13px;
+  border-radius: 14px;
+  color: #d46c54;
+  transition: color 0.18s, background 0.18s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menu-logout-btn:hover {
+  background: rgba(212, 108, 84, 0.18);
+  color: #b8513a;
+  transform: scale(1.05);
+}
+
+.menu-logout-btn:active {
+  background: rgba(212, 108, 84, 0.26);
+  color: #b8513a;
+  transform: scale(0.97);
+}
+
+.menu-logout-btn__label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+/* ── Секция «О сервисе» в меню ── */
+.hmenu-about {
+  border-top: 1px solid #f0f2f5;
+  padding-top: 16px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hmenu-about__title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9196A4;
+  margin-bottom: 2px;
+}
+
+.hmenu-about__socials {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hmenu-about__social {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  color: #23262F;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hmenu-about__social-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hmenu-about__social-icon--ig {
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285AEB 90%) !important;
+}
+
+.hmenu-about__link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #9196A4;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hmenu-about__link:hover {
+  color: #006174;
+}
+
+.hmenu-about__copyright {
+  font-size: 11px;
+  color: #c0c5d5;
+  margin-top: 4px;
+}

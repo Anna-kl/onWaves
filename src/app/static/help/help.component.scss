@@ -63,6 +63,29 @@
   padding: 60px 20px;
 }
 
+.help-toggle {
+  display: inline-flex;
+  gap: 8px;
+  background: #F0F2F5;
+  border-radius: 100px;
+  padding: 4px;
+  margin: 32px auto;
+}
+
+@media screen and (max-width: 640px) {
+  .container {
+    padding: 24px 16px;
+  }
+
+  .hero h1 {
+    font-size: 24px;
+  }
+
+  .help-toggle {
+    margin: 20px auto;
+  }
+}
+
 /* HERO */
 .hero {
   text-align: center;

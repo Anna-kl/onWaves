@@ -19,16 +19,16 @@ export const environment = {
   telegramChannelUrl: 'https://t.me/onwaves',
 
 
-//    Uri: 'https://localhost:5001/v1/api/',
-//    hubUri: 'http://localhost:5000/',
-//  UriFoto: 'https://localhost:5001/v1/api/', 
-//  UriAI: 'http://127.0.0.1:8000/api/',
+   Uri: 'https://localhost:5001/v1/api/',
+   hubUri: 'http://localhost:5000/',
+ UriFoto: 'https://localhost:5001/v1/api/', 
+ UriAI: 'http://127.0.0.1:8000/api/',
    publicKey:"BLBx-hf2WrL2qEa0qKb-aCJbcxEvyn62GDTyyP9KTS5K7ZL0K7TfmOKSPqp8vQF0DaG8hpSBknz_x3qf5F4iEFo",
   privateKey:"PkVHOUKgY29NM7myQXXoGbp_bH_9j-cxW5cO-fGcSsA",
-     Uri: 'https://onwaves-server.online/v1/api/',
-     UriFoto: 'https://onwaves-server.online/v1/api/',
-     hubUri: 'https://onwaves-server.online/',
-     UriAI: 'https://onwaves-server.online/flask-api/api/'
+    //  Uri: 'https://onwaves-server.online/v1/api/',
+    //  UriFoto: 'https://onwaves-server.online/v1/api/',
+    //  hubUri: 'https://onwaves-server.online/',
+    //  UriAI: 'https://onwaves-server.online/flask-api/api/'
 
     //      Uri: 'https://81.177.175.185/ocpio-api/v1/api/',
     //  UriFoto: 'https://ocpio-server.ru/v1/api/',

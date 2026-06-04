@@ -1,9 +1,6 @@
 @media screen and (max-width: 640px) {
-  .foo-column--nav {
-    display: none;
-  }
-  .foo-copyright {
-    display: none;
+  .foo {
+    display: none !important;
   }
 }
 

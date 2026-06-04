@@ -1,6 +1,6 @@
 
 import { NgModule } from '@angular/core';
-import {provideRouter, RouterModule, Routes, withHashLocation} from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { MainPageComponent } from 'src/app/pages/main-page.component';
 
 import { GrafikComponent } from './baedit/components/grafik/grafik.component';
@@ -43,6 +43,7 @@ import {FotoPhoneComponent} from "./components/phone/foto-phone/foto-phone.compo
 import { LandingPageComponent } from './common/LandingPage/LandingPage.component';
 import { LandingVersion2Component } from './pages/landingVersion2/landingVersion2.component';
 import { redirectAuthenticatedFromLandingGuard } from "./guards/redirect-authenticated-from-landing.guard";
+import { profileEditGuard } from "./guards/profile-edit.guard";
 import { PageClient1Component } from './maks/pageClient1/pageClient1.component';
 import { PageClient2Component } from './maks/pageClient2/pageClient2.component';
 import { LentaComponent } from './common/profile/lenta/lenta.component';
@@ -60,16 +61,16 @@ const routes: Routes = [
     { path: "home", component: MainPageComponent },
 
 
-    {path: 'cabinet-ba', component: CabinetBAComponent },
+    {path: 'cabinet-ba', component: CabinetBAComponent, canActivate: [profileEditGuard] },
 
   { path: 'common/albums-phone', component: AlbumPhoneComponent},
   { path: 'common/foto-phone', component: FotoPhoneComponent},
-  { path: 'grafik/:id', component: GrafikComponent },
+  { path: 'grafik/:id', component: GrafikComponent, canActivate: [profileEditGuard] },
   { path: 'profile-user/:id', component: MyNotesComponent },
-  { path: 'oplata/:id', component: OplataComponent },
+  { path: 'oplata/:id', component: OplataComponent, canActivate: [profileEditGuard] },
    { path: 'confirm-url/:id', component: ConfirmEmailComponent },
   // { path: 'uslugi/:id', component: UslugiComponent },
-  { path: 'galereya/:id', component: GalereyaComponent },
+  { path: 'galereya/:id', component: GalereyaComponent, canActivate: [profileEditGuard] },
   { path: 'static/help', component: HelpComponent },
   { path: 'static/settings', component: SettingsComponent },
   { path: 'static/helpQuestion', component: HelpQuestionComponent },
@@ -83,15 +84,15 @@ const routes: Routes = [
   { path: 'static/stranica', component: StranicaComponent},
   { path: 'notification', component: NotificationPageComponent},
   { path: 'static/notifications', component: NotificationsComponent},
-  { path: 'profile-ba/rubric', component: MainRubricComponent},
-  { path: 'profile-ba/uslugis', component: UslugisComponent},
-  { path: 'profile-ba/mobmenu', component: MobmenuComponent},
-  { path: 'profile-ba/uslugis2', component: Uslugis2Component},
-  { path: 'profile-ba/mobmenu2', component: Mobmenu2Component},
+  { path: 'profile-ba/rubric', component: MainRubricComponent, canActivate: [profileEditGuard] },
+  { path: 'profile-ba/uslugis', component: UslugisComponent, canActivate: [profileEditGuard] },
+  { path: 'profile-ba/mobmenu', component: MobmenuComponent, canActivate: [profileEditGuard] },
+  { path: 'profile-ba/uslugis2', component: Uslugis2Component, canActivate: [profileEditGuard] },
+  { path: 'profile-ba/mobmenu2', component: Mobmenu2Component, canActivate: [profileEditGuard] },
   { path: 'static/lowermenu', component: LowermenuComponent},
 
   { path: 'static/typography', component: TypographyComponent},
-  { path: 'profile-ba/dayrent', component: DayrentComponent},
+  { path: 'profile-ba/dayrent', component: DayrentComponent, canActivate: [profileEditGuard] },
   { path: 'landing', component: LandingPageComponent},
   { path: "landing2", redirectTo: "", pathMatch: "full" },
   { path: 'search/extsearch', component: ExtsearchComponent},
@@ -119,9 +120,9 @@ const routes: Routes = [
 // ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: false, initialNavigation: 'enabledBlocking' }), ],
+  imports: [RouterModule.forRoot(routes, { useHash: false, initialNavigation: 'enabledBlocking' })],
   exports: [RouterModule],
-  providers:[provideRouter(routes) ]
+  providers: []
 })
 export class AppRoutingModule {
 }

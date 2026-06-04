@@ -58,4 +58,8 @@ $color-warning:#dbdf9b;
 $color-error:#d46c54;
 .color-error{color:$color-error;}
 .background-error{background-color:$color-error;}
+/*13 — Ярлыки/метки поверх фото */
+$color-label: #1D3C48;
+.color-label { color: $color-label; }
+.background-label { background-color: $color-label; }
 /* ---- ЦВЕТА END ----*/

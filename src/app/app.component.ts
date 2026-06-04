@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, computed, ElementRef, HostListener, Inject, OnInit, PLATFORM_ID, signal, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, computed, ElementRef, HostListener, Inject, NgZone, OnInit, PLATFORM_ID, signal, ViewChild} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import {ActivatedRoute, NavigationEnd, Router, RouterState} from "@angular/router";
 import {IViewBusinessProfile} from "./DTO/views/business/IViewBussinessProfile";
@@ -93,6 +93,7 @@ export class AppComponent implements OnInit, AfterViewInit  {
                public push: PushDebugService,
                public _aiService: AIService,
                public store$: Store,
+               private ngZone: NgZone,
                @Inject(PLATFORM_ID) private platformId: Object,
   ) {
     this.handleRouteEvents();
@@ -283,40 +284,38 @@ export class AppComponent implements OnInit, AfterViewInit  {
       const pathEl = this.wavePathRef.nativeElement;
     let t = 0;
 
-    const animate = () => {
-      const waveLength = 20;
-      const baseAmp = 5;
-      const crestAmp = 13;
-      const crestSpeed = 0.3;
-      const points: string[] = [];
-    
+    this.ngZone.runOutsideAngular(() => {
+      const animate = () => {
+        const waveLength = 20;
+        const baseAmp = 5;
+        const crestAmp = 13;
+        const crestSpeed = 0.3;
+        const points: string[] = [];
 
-      const crestCenter = (Math.sin(t * crestSpeed) + 1) * 30; // 0..100
+        const crestCenter = (Math.sin(t * crestSpeed) + 1) * 30; // 0..100
 
-      for (let x = 0; x <= 100; x += 2) {
-        // Вычислим дополнительную амплитуду для гребня (локально)
-        const crestInfluence = Math.exp(-Math.pow((x - crestCenter) / 5, 2)); // Гауссов пик
-        const amp = baseAmp + crestAmp * crestInfluence;
+        for (let x = 0; x <= 100; x += 2) {
+          const crestInfluence = Math.exp(-Math.pow((x - crestCenter) / 5, 2));
+          const amp = baseAmp + crestAmp * crestInfluence;
+          const y = 5 + Math.sin((x / waveLength + t) * Math.PI) * amp;
+          points.push(`${x},${y}`);
+        }
 
-        let y = 5 + Math.sin((x / waveLength + t) * Math.PI) * amp;
-        // console.log(y);
-        // y = y > 0 ? (-1)*y : 0;
-        points.push(`${x},${y}`);
-      }
+        let d = `M${points[0]}`;
+        for (let i = 1; i < points.length; i++) {
+          d += ` L${points[i]}`;
+        }
 
-      let d = `M${points[0]}`;
-      for (let i = 1; i < points.length; i++) {
-        d += ` L${points[i]}`;
-      }
+        pathEl.setAttribute('d', d);
+        t += 0.02;
+        requestAnimationFrame(animate);
+      };
 
-      pathEl.setAttribute('d', d);
-      t += 0.02;
-      requestAnimationFrame(animate);
-    };
-
-    animate();
+      animate();
+    });
     }
   }
+
   async ngOnInit() {
     
         // this.store$.select(aiCurrentState).subscribe(result => {
@@ -361,11 +360,7 @@ export class AppComponent implements OnInit, AfterViewInit  {
             });
     // this.notification.receiveMessage();
     // this.message = this.notification.currentMessage;
-    this._login.checkCookie()?.subscribe(
-        response => {
-          console.log(response);
-        }
-    )
+    this._login.checkCookie()?.subscribe()
 
     this.store$.select(getProfileMainClient).subscribe(result => {
         if (result){

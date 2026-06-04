@@ -25,13 +25,12 @@
     <button class="active" onclick="switchTab('clients', this)">Для клиентов</button>
     <button onclick="switchTab('masters', this)">Для мастеров</button>
   </div> -->
-            <div class="cont-horiz padding-top40 padding-bottom40"
-           style="max-width:100%;" >
-            <div class=" cont-vert" [ngClass]="btnProfile ? 'btn-recommend1' : 'btn-recommend3'"
-            (click)="setClient()" >Для клиентов</div>
-            <div class="cont-vert" [ngClass]="!btnProfile ? 'btn-recommend1' : 'btn-recommend2'"
-             (click)="setMaster()">Для мастеров</div>
-          </div>
+            <div class="help-toggle">
+              <div [ngClass]="btnProfile ? 'btn-recommend1' : 'btn-recommend3'"
+                   (click)="setClient()">Для клиентов</div>
+              <div [ngClass]="!btnProfile ? 'btn-recommend1' : 'btn-recommend2'"
+                   (click)="setMaster()">Для мастеров</div>
+            </div>
 
     </div>
         <div class="faq-section" *ngIf="btnProfile">

@@ -4,14 +4,16 @@ export interface IViewImage {
   id: string;
   name: string;
   dateCreated: Date;
-  isComporess: string;
-  albumId: string;
-  image: any;
+  albumId?: string;
   typeImage: TypeImage;
   isCover: boolean;
-  url: string|null;
+  url: string;
+  thumbUrl?: string;
+  description?: string;
+  serviceIds?: string[];
 }
 
 export interface IChooseImage extends IViewImage{
   isChoose: boolean;
 }
+

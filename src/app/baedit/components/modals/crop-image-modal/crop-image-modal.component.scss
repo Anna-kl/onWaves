@@ -1,120 +1,705 @@
 @import '../../../../../assets/styles/main/color.scss';
 
-.container-ba-modalka-crop{
+/* ════════════════════════════════════════════
+   Modal container
+   ════════════════════════════════════════════ */
+.cim-modal {
+  width: 480px;
+  max-height: 85vh;
+  background: #fff;
+  padding: 28px 28px 24px;
+  border-radius: 24px;
   display: flex;
-  justify-items: center;
-  width: 450px;
-  background-color: #fff;
-}
-@media screen and (max-width: 480px) {
-	.container-ba-modalka-crop{
-    width: 320px;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+
+  @media (max-width: 520px) {
+    width: 100%;
+    padding: 20px 16px 16px;
+    gap: 16px;
+    border-radius: 20px 20px 0 0;
+    max-height: 92dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 }
-.btn-closeModal-crop {
-  width: 100%;
-  display:flex;
-  justify-content: end;
-}
-/*   ------  правая колонка - фото ---------    */
-.column-right{
-  display:flex;
-  /*align-items: start;*/
-  max-width: 80%;
-  min-width: 79%;
+
+/* ── Header ── */
+.cim-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.choose-another-foto {
-  text-decoration: underline;
+.cim-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0;
+  letter-spacing: -0.3px;
 }
-.avatartext{
-  color: $green-light;
-  margin:40px 0 20px 0;
-}
-.file-input {
-  display: none;
-}
-.inputAvatar {
-  display:flex;
-  background-color: $green-basic;
-  text-align:center;
+
+/* ── Кнопка корзины на превью ── */
+.cim-preview-delete {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(226, 68, 20, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   color: #fff;
   cursor: pointer;
-  font-weight: bold;
-  border-radius:100px;
-  padding: 13px 30px;
-  margin-bottom:30px;
-  width: 100%;
-}
-.inputAvatar:hover {
-  background:$green-light;
-}
-.bntForAvatar{
-  background-color: $green-basic;
-  text-align:center;
-  color: #fff;
-  cursor: pointer;
-  font-weight: bold;
-  border-radius:100px;
-  padding: 13px 0;
-  width: 100%;
-  width: 250px;
-  /*margin-top:30px;*/
-}
-.block-image-avatar{
-  display:flex;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  justify-items: center;
-  position:relative;
+  transition: background 0.15s, transform 0.12s;
+
+  &:hover {
+    background: #e24414;
+    transform: scale(1.08);
+  }
 }
-.delete-image-avatar{
-  position:absolute;
-  bottom:15px;
-  right:15px;
-  border-radius: 30px;
-  padding: 9px 10px;
-  border: 1px solid #E24414;
-  background: #FFF;
+
+/* ── Подтверждение удаления на превью ── */
+.cim-preview-confirm {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 100px;
+  padding: 5px 10px 5px 12px;
+
+  span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+  }
 }
-/*  кнопка Сохранить   */
-.btn-crop-modalka{
-  display:grid;
-  /*margin-top:60px;*/
-  justify-items: center;
-}
-.saveBtn {
-  display:flex;
-  justify-self: center;
-  text-align:center;
+
+.cim-preview-confirm__yes {
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 100px;
+  border: none;
+  background: #e24414;
   color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
   cursor: pointer;
-  font-weight: bold;
-  border-radius:24px;
-  padding: 13px 130px;
-  margin-top:20px;
-  background-color: $green-basic;
-}
-.upfile6 {
-  width: 0
-}
-app-crop-image-modal {
-  background: #FFFFFF;
-}
-ngb-modal-window.d-block.modal.fade.show {
-  position: fixed;
-  height: 100vh;
-}
-.str1-profile.border2px {
-  width:500px
-}
-.modal-container {
-  background: #FFFFFF;
-}
-.str1-profile.border2px {
-  background-color: white;
+  transition: opacity 0.15s;
+
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+  &:hover:not(:disabled) { opacity: 0.85; }
 }
 
+.cim-preview-confirm__no {
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 100px;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  background: transparent;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
 
-image-cropper img{
+  &:hover { background: rgba(255,255,255,0.15); }
+}
+
+.cim-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid $grey;
+  background: #fff;
+  color: $grey-dark;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: $black;
+    color: $black;
+    background: $grey-light;
+  }
+}
+
+.cim-file-input { display: none; }
+
+/* ════════════════════════════════════════════
+   Media area
+   ════════════════════════════════════════════ */
+.cim-media-area {
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  background: $grey-light;
+  flex-shrink: 0;
+  max-height: 350px;
+
+  &--empty {
+    border: 2px dashed $grey;
+    background: #fff;
+    min-height: 340px;
+    max-height: none;
+    transition: border-color 0.2s, background 0.2s;
+
+    &:hover {
+      border-color: $green-light;
+      background: rgba(13, 148, 160, 0.03);
+    }
+  }
+}
+
+/* ── Placeholder ── */
+.cim-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 44px 20px;
+  cursor: pointer;
+  width: 100%;
+  min-height: 340px;
+}
+
+.cim-placeholder__icons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.cim-placeholder__icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--photo {
+    background: linear-gradient(135deg, rgba(0,97,116,0.1), rgba(13,148,160,0.15));
+    color: $green-basic;
+  }
+
+  &--video {
+    background: linear-gradient(135deg, rgba(94,205,215,0.12), rgba(13,148,160,0.1));
+    color: $green-light;
+  }
+}
+
+.cim-placeholder__text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $green-basic;
+  letter-spacing: -0.1px;
+}
+
+.cim-placeholder__sub {
+  font-size: 0.8rem;
+  color: $grey-dark;
+}
+
+/* ── Cropper ── */
+.cim-cropper-wrap {
+  width: 100%;
+  max-height: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  overflow: hidden;
+}
+
+.cim-btn-crop-done {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: $green-basic;
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 11px 32px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+
+  &:hover {
+    background: $green-dark;
+    transform: translateY(-1px);
+  }
+}
+
+/* ── Photo preview ── */
+.cim-preview-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.cim-preview-img {
+  width: 100%;
+  height: 100%;
+  max-height: 350px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Video preview ── */
+.cim-video-wrap {
+  position: relative;
+  width: 100%;
+  background: #000;
+}
+
+.cim-video-preview {
+  width: 100%;
+  max-height: 350px;
+  display: block;
+  object-fit: contain;
+}
+
+.cim-video-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(8px);
+}
+
+.cim-video-meta__icon {
+  color: $green-basic;
+  flex-shrink: 0;
+  display: flex;
+}
+
+.cim-video-meta__name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $black;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.cim-video-meta__size {
+  font-size: 0.78rem;
+  color: $grey-dark;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Replace button (shared: photo + video) ── */
+.cim-replace-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(255,255,255,0.92);
+  border: 1.5px solid rgba(0,97,116,0.3);
+  border-radius: 100px;
+  padding: 7px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $green-basic;
+  backdrop-filter: blur(4px);
+  transition: all 0.15s;
+  z-index: 2;
+
+  &:hover {
+    background: #fff;
+    border-color: $green-basic;
+    box-shadow: 0 2px 8px rgba(0,97,116,0.18);
+  }
+}
+
+/* ════════════════════════════════════════════
+   Progress bar (video upload)
+   ════════════════════════════════════════════ */
+.cim-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: -6px;
+}
+
+.cim-progress__track {
+  height: 5px;
+  border-radius: 100px;
+  background: $grey;
+  overflow: hidden;
+}
+
+.cim-progress__fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, $green-basic 0%, $green-light 100%);
+  transition: width 0.3s ease;
+}
+
+.cim-progress__label {
+  font-size: 0.78rem;
+  color: $grey-dark;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Hint ── */
+.cim-hint {
+  font-size: 0.8rem;
+  color: $grey-dark;
+  line-height: 1.5;
+  margin: -8px 0 0;
+}
+
+/* ════════════════════════════════════════════
+   Sections
+   ════════════════════════════════════════════ */
+.cim-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cim-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.cim-label {
+  font-weight: 700;
+  font-size: 1rem;
+  color: $black;
+  margin: 0;
+}
+
+.cim-optional {
+  font-weight: 400;
+  color: $grey-dark;
+  font-size: 0.85rem;
+}
+
+.cim-counter {
+  font-size: 0.8rem;
+  color: $grey-dark;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.15s;
+
+  &--warn { color: $color-error; }
+}
+
+.cim-textarea {
+  width: 100%;
+  border: 1.5px solid $grey;
+  border-radius: 14px;
+  padding: 13px 15px;
+  font-size: 0.93rem;
+  color: $black;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  background: #fff;
+
+  &::placeholder { color: #c0c5d5; font-size: 0.88rem; }
+
+  &:focus {
+    border-color: $green-light;
+    box-shadow: 0 0 0 3px rgba(13,148,160,0.1);
+  }
+}
+
+.cim-sublabel,
+.cim-field-hint {
+  font-size: 0.8rem;
+  color: $grey-dark;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ════════════════════════════════════════════
+   Services block
+   ════════════════════════════════════════════ */
+.cim-services-card {
+  background: linear-gradient(135deg, #f3fafb 0%, #eaf6f8 100%);
+  border: 1.5px solid rgba(13,148,160,0.2);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cim-services-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.cim-services-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, $green-basic, $green-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Chips ── */
+.cim-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.cim-chip {
+  border: 1.5px solid #c8dfe3;
+  border-radius: 100px;
+  padding: 7px 15px;
+  font-size: 0.87rem;
+  font-weight: 500;
+  background: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #354045;
+  line-height: 1.4;
+  transition: all 0.15s;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: $green-light;
+    color: $green-basic;
+  }
+
+  &--selected {
+    background: linear-gradient(135deg, $green-basic 0%, $green-light 100%);
+    border-color: transparent;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,97,116,0.25);
+
+    &:hover {
+      background: linear-gradient(135deg, $green-dark, $green-basic);
+    }
+  }
+
+  &--expand {
+    background: rgba(255,255,255,0.7);
+    color: $green-basic;
+    border-color: $green-light2;
+    font-weight: 600;
+
+    &:hover { background: #fff; }
+  }
+}
+
+/* ════════════════════════════════════════════
+   Action buttons
+   ════════════════════════════════════════════ */
+.cim-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.cim-btn {
+  flex: 1;
+  height: 52px;
+  border-radius: 100px;
+  font-size: 0.97rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &--cancel {
+    background: #fff;
+    border: 1.5px solid $green-basic;
+    color: $green-basic;
+
+    &:hover:not(:disabled) {
+      border-color: $green-light;
+      color: $green-light;
+    }
+
+    &:disabled { opacity: 0.45; cursor: not-allowed; }
+  }
+
+  &--save {
+    background: linear-gradient(135deg, $green-basic 0%, $green-light 100%);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(0,97,116,0.28);
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, $green-dark, $green-basic);
+      box-shadow: 0 4px 16px rgba(0,97,116,0.4);
+      transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) { transform: translateY(0); }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+}
+
+/* ── Spinner for video upload ── */
+.cim-btn__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: cim-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes cim-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ════════════════════════════════════════════
+   Video cover section
+   ════════════════════════════════════════════ */
+.cim-cover-cropper-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .cim-btn-crop-done {
+    align-self: flex-end;
+  }
+}
+
+.cim-cover-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cim-cover-preview-img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
   border-radius: 12px;
+  display: block;
+}
+
+.cim-cover-preview-actions {
+  display: flex;
+  gap: 10px;
+
+  .cim-replace-btn {
+    position: static;
+    backdrop-filter: none;
+    flex: 1;
+    justify-content: center;
+
+    &--remove {
+      color: $color-error;
+      border-color: rgba(226,68,20,0.3);
+
+      &:hover {
+        border-color: $color-error;
+        box-shadow: 0 2px 8px rgba(226,68,20,0.18);
+      }
+    }
+  }
+}
+
+.cim-cover-pick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1.5px dashed rgba(13,148,160,0.45);
+  border-radius: 12px;
+  background: rgba(13,148,160,0.04);
+  color: $green-basic;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  width: 100%;
+  justify-content: center;
+
+  &:hover {
+    border-color: $green-basic;
+    background: rgba(13,148,160,0.09);
+  }
+}
+
+/* ── Modal host overrides ── */
+app-crop-image-modal { background: #fff; }
+
+image-cropper img { border-radius: 8px; }
+
+@media (max-width: 520px) {
+  /* modal-content убираем padding и выравнивание на мобиле */
+  ngb-modal-window .modal-content {
+    padding: 0 !important;
+    align-items: stretch !important;
+    border-radius: 20px 20px 0 0;
+    overflow: hidden;
+  }
+
+  /* modal-dialog прижимаем к низу экрана */
+  ngb-modal-window .modal-dialog {
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    align-self: flex-end;
+  }
+
+  /* сам modal выравниваем по низу */
+  ngb-modal-window.modal {
+    display: flex !important;
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
 }

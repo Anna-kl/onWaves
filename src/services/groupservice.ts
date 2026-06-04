@@ -70,9 +70,22 @@ export class GroupService {
   changeGroup(serviceId: string, groupId: string){
     return this.http.get(`${this.baseUrl}change-group/${serviceId}?groupId=${groupId}`);
   }
-  saveService(service: Service){
-    let  headers: HttpHeaders = new HttpHeaders();
-    return this.http.post<IResponse>(`${this.baseUrl}`, service ,{headers});
+  /**
+   * Сохраняет услугу с поддержкой идемпотентности
+   * @param service - данные услуги
+   * @param requestId - UUID для идемпотентности (опционально)
+   */
+  saveService(service: Service, requestId?: string){
+    let headers: HttpHeaders = new HttpHeaders();
+
+    // ══════════════════════════════════════════════════════════════
+    // КРИТИЧНО: Добавить Idempotency-Key header для предотвращения дублей
+    // ══════════════════════════════════════════════════════════════
+    if (requestId) {
+      headers = headers.append('Idempotency-Key', requestId);
+    }
+
+    return this.http.post<IResponse>(`${this.baseUrl}`, service, {headers});
   }
 
 

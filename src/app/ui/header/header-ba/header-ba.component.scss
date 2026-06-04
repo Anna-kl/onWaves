@@ -1,13 +1,30 @@
 @import '../../../../assets/styles/main/color.scss';
 
+.header-inner {
+  height: 70px;
+  box-sizing: border-box;
+}
 
-.brand-logo{
-  height: 70px;                 // фикс высоты для шапки
-  width: auto;                  // ширина по пропорциям
-  max-width: clamp(110px, 50vw, 300px); // адаптивная ширина
+.brand-logo {
+  height: 56px;
+  width: auto;
+  max-width: clamp(100px, 44vw, 300px);
   object-fit: contain;
   margin-left: 12px;
   display: block;
+  flex-shrink: 1;
+}
+
+@media screen and (max-width: 400px) {
+  .brand-logo {
+    height: 44px;
+    max-width: clamp(88px, 38vw, 180px);
+    margin-left: 8px;
+  }
+  .menu-avatar-client {
+    padding-left: 10px;
+    min-width: 32px;
+  }
 }
 
 .bell_main_menu{

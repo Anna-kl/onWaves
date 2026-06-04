@@ -10,35 +10,29 @@
     <div class="nav-link-wrapper2 cont-vert-between">
       <div class="menu-tab">
         <!-- Выбранный пользователь -->
-        <div class="cont-horiz-start"  (click)="chooseUser(mainProfile)">
-          <div class="cont-horiz margin-right15">
-            <!-- Аватар пользователя -->
-            <div  class="container-avatar-image">
-              <img [src]="getAvatar(mainProfile.avatar)" class="grande-image ifactive-img"  alt="">
-              <img [src]="getIconAvatar(mainProfile.userType!, true)" class="little-image"  alt="">
-            </div>
-            <!-- <ng-template #baImage>
+        <div class="menu-profile-header">
+          <div class="cont-horiz-start" (click)="chooseUser(mainProfile)" style="flex:1; min-width:0;">
+            <div class="cont-horiz margin-right15">
+              <!-- Аватар пользователя -->
               <div  class="container-avatar-image">
-              <img [src]="getAvatar(mainProfile.avatar)" class="grande-image ifactive-img"  alt="">
-              <img src="/assets/img/ui/sac-avatar-no-active.svg" class="little-image"  alt="">
-              </div>
-            </ng-template> -->
-          </div>
-          <div class="cont-vert-start-center">
-            <div class="cont-horiz margin-bottom10">
-              <div class="ua-name">
-                <span>{{mainProfile.name}} {{mainProfile.family}}</span>
+                <img [src]="getAvatar(mainProfile.avatar)" class="grande-image ifactive-img"  alt="">
+                <img [src]="getIconAvatar(mainProfile.userType!, true)" class="little-image"  alt="">
               </div>
             </div>
-            <!--div class="cont-horiz-start-start">
-              <div class="txt-green-light margin-right10" style="font-size: 10px;">
-                21 сообщение
+            <div class="cont-vert-start-center">
+              <div class="cont-horiz margin-bottom10">
+                <div class="ua-name">
+                  <span>{{mainProfile.name}} {{mainProfile.family}}</span>
+                </div>
               </div>
-              <div class="txt-green-light" style="font-size: 10px;">
-                55 записей
-              </div>
-            </div-->
+            </div>
           </div>
+          <button class="menu-logout-btn" (click)="exit()" title="Выйти">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none">
+              <path fill="currentColor" fill-rule="evenodd" d="M7.953 1.361a9 9 0 0 1 10.108 3.793.667.667 0 0 1-1.123.72 7.667 7.667 0 1 0 0 8.257.667.667 0 1 1 1.123.72A9 9 0 1 1 7.953 1.36Zm6.1 5.603a.667.667 0 0 1 .943 0l2.565 2.565a.667.667 0 0 1 0 .942L15 13.036a.667.667 0 1 1-.943-.942l1.43-1.43H6.832a.667.667 0 0 1 0-1.333h8.654l-1.43-1.43a.667.667 0 0 1 0-.942Z" clip-rule="evenodd"/>
+            </svg>
+            <span class="menu-logout-btn__label">Выход</span>
+          </button>
         </div>
         <hr>
 
@@ -177,7 +171,7 @@
             </svg>
             <b> Пригласить друга</b>
           </li> -->
-            <li class="nav-item cont-horiz margin-bottom10" *ngIf="mainProfile.link" (click)="copy(mainProfile.link)">
+            <!-- <li class="nav-item cont-horiz margin-bottom10" *ngIf="mainProfile.link" (click)="copy(mainProfile.link)">
                       <svg width="25px" style="margin-left: 8px!important;"  class="ico-menu-ua-ba" height="25px" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
           aria-hidden="true" role="img" class="iconify iconify--noto" preserveAspectRatio="xMidYMid meet" fill="#000000">
           <g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
@@ -192,16 +186,72 @@
             <a style="margin-left: 15px;" href="javascript:void(0)">
               Ссылка-приглашение
             </a>
-          </li> 
+          </li>  -->
 
-          <li class="nav-item w100 margin-top-bottom10 cont-horiz-start" (click)="exit()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" class="ico-menu-ua-ba">
-              <path fill="#409B89" fill-rule="evenodd" d="M9.544 1.633a10.8 10.8 0 0 1 12.13 4.552.8.8 0 0 1-1.348.861 9.2 9.2 0 1 0 0 9.908.8.8 0 0 1 1.348.861A10.8 10.8 0 1 1 9.544 1.633Zm7.32 6.724a.8.8 0 0 1 1.13 0l3.078 3.077a.8.8 0 0 1 0 1.132l-3.077 3.077a.8.8 0 0 1-1.132-1.132l1.712-1.711H8.198a.8.8 0 1 1 0-1.6h10.377l-1.712-1.711a.8.8 0 0 1 0-1.132Z" clip-rule="evenodd"/>
-            </svg>
-            <a style="color: #E24414;" >
-              <b>Выход</b>
+          <!-- ── О сервисе ── -->
+          <div class="hmenu-about">
+            <div class="hmenu-about__title">О сервисе</div>
+
+            <!-- Соцсети -->
+            <div class="hmenu-about__socials">
+              <a href="https://vk.com/club238581537" target="_blank" rel="noopener noreferrer" class="hmenu-about__social">
+                <span class="hmenu-about__social-icon" style="background:#2787F5;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="10" fill="none" viewBox="0 0 25 15">
+                    <path fill="#fff" d="M13.05 15h.45V9.6c3 .3 5.251 2.55 6.151 5.4h4.35c-1.2-4.2-4.2-6.6-6.15-7.5 1.95-1.05 4.65-3.75 5.25-7.5h-3.9c-.9 3-3.3 5.7-5.7 6V0H9.6v10.35C7.2 9.75 4.2 6.9 4.05 0H0c.15 9.3 4.8 15 13.05 15Z"/>
+                  </svg>
+                </span>
+                <span>ВКонтакте</span>
+              </a>
+              <a href="https://t.me/OnlineServicesOnWaves_bot" target="_blank" rel="noopener noreferrer" class="hmenu-about__social">
+                <span class="hmenu-about__social-icon" style="background:#2AABEE;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="14" fill="none" viewBox="0 0 20 18">
+                    <path fill="#fff" d="m19.841 2.332-2.955 13.92c-.217.987-.805 1.227-1.626.762l-4.5-3.315-2.169 2.09a1.139 1.139 0 0 1-.9.443h-.007l.319-4.58 8.34-7.534c.36-.32-.081-.5-.56-.181L5.48 10.426 1.04 9.04c-.96-.305-.987-.96.203-1.431L18.592.922c.806-.294 1.509.192 1.248 1.411Z"/>
+                  </svg>
+                </span>
+                <span>Телеграм</span>
+              </a>
+              <a href="https://www.instagram.com/onwavesonline/" target="_blank" rel="noopener noreferrer" class="hmenu-about__social">
+                <span class="hmenu-about__social-icon hmenu-about__social-icon--ig">
+                  <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#fff" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5Zm0 2A3.5 3.5 0 1 0 15.5 13 3.5 3.5 0 0 0 12 9.5Zm5.8-2.8a1.2 1.2 0 1 1-1.2 1.2 1.2 1.2 0 0 1 1.2-1.2Z"/>
+                  </svg>
+                </span>
+                <span>Instagram</span>
+              </a>
+              <a href="https://youtube.com/@ocpio_ru" target="_blank" rel="noopener noreferrer" class="hmenu-about__social">
+                <span class="hmenu-about__social-icon" style="background:#FF0000;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" fill="none" viewBox="0 0 36 26">
+                    <path fill="#fff" d="M35.102 4.15c-.4-1.5-1.6-2.7-3.191-3.1C28.97 0 18 0 18 0S7.03 0 4.089.95C2.493 1.45 1.296 2.65.896 4.15.1 7.05 0 10.15 0 12.85s.1 5.8.996 8.7c.4 1.5 1.597 2.6 3.093 3C7.13 25.5 18 25.5 18 25.5s10.97 0 13.911-.95c1.496-.4 2.692-1.5 3.092-3C35.9 18.65 36 15.55 36 12.85s-.1-5.7-.898-8.7Z"/>
+                    <path fill="#fff" d="M14.36 18.45V7.25l9.274 5.6-9.274 5.6Z"/>
+                  </svg>
+                </span>
+                <span>YouTube</span>
+              </a>
+            </div>
+
+            <!-- Контакт и ссылки -->
+            <a href="mailto:askme@onwaves.online" class="hmenu-about__link">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                <path fill="#67C4B2" d="M2 4h20a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm18 3.238-7.928 7.1L4 7.216V18h16V7.238ZM4.511 6l7.55 6.762L19.502 6H4.511Z"/>
+              </svg>
+              askme@onwaves.online
             </a>
-          </li>
+            <div class="hmenu-about__link" (click)="goToOServicePage()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+                <path fill="#9196A4" fill-rule="evenodd" d="M11.997 2.2a9.797 9.797 0 1 1-4.054 18.714l-4.8.868a.8.8 0 0 1-.892-1.069l1.369-3.64A9.797 9.797 0 0 1 11.997 2.2Z" clip-rule="evenodd"/>
+              </svg>
+              О сервисе
+            </div>
+            <div class="hmenu-about__link" (click)="goToPolicies()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+                <path fill="#9196A4" fill-rule="evenodd" d="M12 2a5 5 0 0 1 5 5v1h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v1h6V7a3 3 0 0 0-3-3Z" clip-rule="evenodd"/>
+              </svg>
+              Политика конфиденциальности
+            </div>
+
+            <div class="hmenu-about__copyright">2025–2026 © ONWAVES.ONLINE</div>
+          </div>
+
         </div>
 
       </div>

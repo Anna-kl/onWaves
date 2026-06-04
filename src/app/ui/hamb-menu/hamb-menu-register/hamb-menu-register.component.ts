@@ -226,6 +226,9 @@ this.unsubscribe$ = this._login.mainCategoriesProfile$.subscribe(
   goToOServicePage() {
     this._router.navigate(['static/oservice']);
   }
+  goToPolicies() {
+    this._router.navigate(['static/policies']);
+  }
   protected readonly getIconAvatar = getIconAvatar;
   protected readonly UserType = UserType;
 

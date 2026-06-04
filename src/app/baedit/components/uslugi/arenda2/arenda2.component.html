@@ -295,14 +295,46 @@
               
           </div>
 
+          <!-- ══════════════════════════════════════════════════════════════ -->
+          <!-- КРИТИЧНО: Блокируем кнопки во время загрузки + показываем спиннер -->
+          <!-- ══════════════════════════════════════════════════════════════ -->
           <div class="w100 cont-horiz margin-top-bottom50"  style="gap: 10px 10px ; flex-wrap: wrap;">
-              <button class="btn-green" style="flex: 1;" (click)="backToCategories()">
+              <button class="btn-green" style="flex: 1;" (click)="backToCategories()"
+                      [disabled]="isSaving$ | async">
                   Назад
               </button>
-              <button [class]="isFormValid() ? 'btn-green' : 'btn-gray'"
-                  type="submit" style="flex: 1;" [disabled]="!isFormValid()">
-                Сохранить
+              <button [class]="(isFormValid() && !(isSaving$ | async)) ? 'btn-green' : 'btn-gray'"
+                  type="submit" style="flex: 1;"
+                  [ngStyle]="{'opacity': (isSaving$ | async) ? 0.6 : 1, 'cursor': (isSaving$ | async) ? 'not-allowed' : 'pointer'}"
+                  [disabled]="!isFormValid() || (isSaving$ | async)">
+
+                <ng-container *ngIf="!(isSaving$ | async); else savingTemplate">
+                    Сохранить
+                </ng-container>
+
+                <ng-template #savingTemplate>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <p-progressSpinner
+                            [style]="{'width':'20px','height':'20px'}"
+                            strokeWidth="4"
+                            fill="transparent"
+                            animationDuration=".5s">
+                        </p-progressSpinner>
+                        <span>Создание услуги...</span>
+                    </div>
+                </ng-template>
               </button>
+          </div>
+
+          <!-- Индикатор загрузки фото -->
+          <div *ngIf="isLoadingImages$ | async" class="w100 cont-horiz margin-top50" style="justify-content: center; gap: 10px;">
+              <p-progressSpinner
+                  [style]="{'width':'20px','height':'20px'}"
+                  strokeWidth="4"
+                  fill="transparent"
+                  animationDuration=".5s">
+              </p-progressSpinner>
+              <span>Загрузка изображений...</span>
           </div>
       </form>
     </div>

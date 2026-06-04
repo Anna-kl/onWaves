@@ -233,15 +233,17 @@ ul{
 	width: 150px;
 	height: 150px;
 }
-.hmenu{ 
-    background-color:#ffffff ;
-    width:100vw;
+.hmenu {
+    background-color: #ffffff;
+    width: 100vw;
+    max-width: 100%;
     height: 70px;
+    box-sizing: border-box;
     z-index: 1500;
-	position: fixed;
-	top: 0px;
-	padding-left: 50px;
-	padding-right: 50px;
+    position: fixed;
+    top: 0;
+    padding-left: 50px;
+    padding-right: 50px;
 }
 .hmenu1200{
 	max-width: 1200px;
@@ -837,56 +839,40 @@ html, body {
   overflow-x: hidden;
 }
 
+/* отступ снизу под фиксированное мобильное меню */
+@media screen and (max-width: 639px) {
+  body {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+}
+
 * {
   box-sizing: border-box;
 }
 /* Переключатель галерея-лента ba-before(1.22).html START*/
-.btn-recommend1, .btn-recommend2{
-	width:50%; 
-	padding: 10px 0px;
+.btn-recommend1, .btn-recommend2, .btn-recommend3 {
+	padding: 10px 24px;
 	border-radius: 100px;
 	cursor: pointer;
-}
-.btn-recommend3 {
-    width: 50%;
-    padding: 10px 0px;
-    border-radius: 100px;
-    cursor: pointer;
-}
-
-.btn-recommend3{
-	background-color: #FFFFFF;
-	color:  #23262F;
-	box-shadow: 2px 2px 10px 2px #23262F14;
-	margin-right: -30px;
-	z-index: 2;
-	font-style: normal;
-	font-weight: normal;
+	white-space: nowrap;
+	text-align: center;
+	position: relative;
+	font-size: 14px;
 	line-height: 130%;
+	transition: background 0.2s, color 0.2s, box-shadow 0.2s;
 }
-.btn-recommend1{
+.btn-recommend1 {
 	background: $green-basic;
 	color: #fff;
-	font-weight: bold;
-	/* Основные/Дополнительный */
-	box-shadow: 2px 2px 10px 2px rgba(35, 38, 47, 0.08);
+	font-weight: 600;
+	box-shadow: 0 4px 14px rgba(0, 97, 116, 0.25);
 	z-index: 1;
 }
-.btn-recommend2{
+.btn-recommend2, .btn-recommend3 {
 	background-color: #FFFFFF;
-	color:  #23262F;
+	color: #23262F;
 	box-shadow: 2px 2px 10px 2px #23262F14;
-	margin-left: -30px;
-	z-index: 2;
-	font-style: normal;
-	font-weight: normal;
-	line-height: 130%;
-}
-
-@media screen and (min-width: 768px) and (max-width: 1024px){
-    .btn-recommend1, .btn-recommend2 {
-		width: 200px;
-	}
+	font-weight: 400;
 }
 /* Переключатель галерея-лента ba-before(1.22).html END*/
 .contest{
@@ -1588,8 +1574,7 @@ app-modalalbum{
 	list-style-type: disc;
 	padding: 5px;
 }
-ul.uslugi-full-txt {
-}
+ul.uslugi-full-txt { list-style-type: disc; }
 .menu-service{ 
 	padding: 20px;
 	position: fixed;
@@ -1939,8 +1924,6 @@ ul.uslugi-full-txt {
 	flex-grow: 2;
 }
 /*- ba_service_my_notes(1.54).html -*/
-.label-inside{
-}
 /* help_questions(1.115).html */
 .questions{
 	color: #11142D;
@@ -2217,10 +2200,7 @@ span.dropdown-toggle > img{
 	color: #fff;
 	background-color: #21334E;
 }
-@media (max-width: 480px){ 
-	.modal_540, .modal_540_black { 
-	} 
-}    
+    
 .flag_area{
 	width: 90px;
 	height: 40px;

@@ -37,13 +37,16 @@ export class MobmenuComponent {
   }
 
   GoToProfile() {
-      if (this.choosedClient) {
-        // Главное Меню юзера
-        if (this.choosedClient.userType === UserType.User) {
-          this.router.navigate(['/page-user/', this.choosedClient?.id]);
-        } else { // Главное Меню бизнеса
-          this.router.navigate(['/profilebisacc/', this.choosedClient!.id]);
-        }
+    if (this.choosedClient) {
+      if (this.choosedClient.userType === UserType.User) {
+        this.router.navigate(['/page-user/', this.choosedClient?.id]);
+      } else {
+        this.router.navigate(['/profilebisacc/', this.choosedClient!.id]);
       }
     }
+  }
+
+  isActive(path: string): boolean {
+    return this.router.url.includes(path);
+  }
 }
