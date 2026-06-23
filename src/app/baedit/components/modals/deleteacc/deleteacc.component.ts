@@ -77,8 +77,7 @@ export class DeleteaccComponent implements OnInit, OnDestroy {
           expiry.setDate(expiry.getDate()+365);
           let profileUA = this._allProfiles.filter(_ => _.id !== this.profile?.id);
           if (profileUA){
-          this._cookie.set('profileId-ocpio', profileUA.pop()?.id!,
-              expiry );
+          this._cookie.set('profileId-ocpio', profileUA.pop()?.id!, expiry, '/');
           }
        //  this._loginService.allProfiles$.next(this._allProfiles);
           this._loginService.updateProfileUA();

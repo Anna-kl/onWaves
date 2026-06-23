@@ -32,6 +32,11 @@
                 "input": "src",
                 "output": "/"
               },
+              {
+                "glob": "index.html",
+                "input": "src/static-landing",
+                "output": "/landing"
+              },
               "src/favicon.ico",
               "src/assets",
               "src/manifest.webmanifest"
@@ -48,9 +53,7 @@
             ],
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.js"
-            ],
-            "serviceWorker": true,
-            "ngswConfigPath": "ngsw-config.json"
+            ]
           },
           "configurations": {
             "production": {

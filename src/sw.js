@@ -1,104 +1,184 @@
-self.addEventListener('install', (e) => self.skipWaiting());
-self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+const CACHE_NAME = 'onwaves-cache-v2';
 
-/** Убираем undefined — Chrome/Android иногда капризничают с лишними ключами */
+// Основные файлы для прекеша (чтобы работало без интернета)
+const PRECACHE_URLS = [
+  '/',
+  '/index.html',
+  '/manifest.webmanifest',
+  '/assets/img/favicons/favicon.ico'
+];
+
+self.addEventListener('install', function(event) {
+  self.skipWaiting(); // Форсируем установку нового воркера
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(function(cache) {
+      return cache.addAll(PRECACHE_URLS);
+    })
+  );
+});
+
+self.addEventListener('activate', function(event) {
+  // Очистка старых кешей при обновлении версии CACHE_NAME
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(function() {
+      return self.clients.claim();
+    })
+  );
+});
+
+// === ЛОГИКА ОПТИМИЗАЦИИ И КЕШИРОВАНИЯ ===
+self.addEventListener('fetch', function(event) {
+  const request = event.request;
+
+  // Кешируем только базовые GET-запросы к нашему домену
+  if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  // Стратегия 1: Network First для HTML (чтобы Ангуляр всегда обновлялся)
+  if (request.mode === 'navigate' || request.headers.get('accept').includes('text/html')) {
+    event.respondWith(
+      fetch(request)
+        .then(function(networkResponse) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(request, responseClone);
+          });
+          return networkResponse;
+        })
+        .catch(function() {
+          // Если нет сети, отдаем сохраненный HTML
+          return caches.match(request);
+        })
+    );
+    return;
+  }
+
+  // Стратегия 2: Stale-While-Revalidate для JS, CSS и картинок
+  event.respondWith(
+    caches.match(request).then(function(cachedResponse) {
+      const fetchPromise = fetch(request).then(function(networkResponse) {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(function(error) {
+        // Заглушка, чтобы не падало, если нет ни сети, ни кеша
+        console.warn('Fetch failed, no cache fallback for:', request.url);
+      });
+
+      // Мгновенно отдаем кеш, а в фоне качаем свежую версию
+      return cachedResponse || fetchPromise;
+    })
+  );
+});
+
+// === ЛОГИКА PUSH-УВЕДОМЛЕНИЙ (Адаптирована для старых iOS) ===
+
+// Заменили современный Object.fromEntries на старый добрый цикл
 function compact(obj) {
-  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+  var result = {};
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key) && obj[key] !== undefined) {
+      result[key] = obj[key];
+    }
+  }
+  return result;
 }
 
-/**
- * Парсинг тела push. Ожидаемые форматы с бэкенда:
- * 1) { "notification": { "title", "body", "icon", "image", "badge", "tag", ... }, "data": { "url": "/path" } }
- * 2) Плоский объект с title/body (как раньше)
- *
- * «Красивее» на телефоне: image (большая картинка в шторке Android), badge (монохромная иконка в статус-баре),
- * tag + renotify (группировка), vibrate, actions (кнопки «Открыть» / «Позже»).
- */
 function parsePushPayload(event) {
-  const defaults = {
+  var defaults = {
     title: 'OnWaves',
     body: '',
     options: {
       icon: '/assets/icons/icon-192x192.png',
       badge: '/assets/icons/maskable-192x192.png',
-      data: {},
-    },
+      data: {}
+    }
   };
 
-  if (!event.data) {
-    return defaults;
-  }
+  if (!event.data) return defaults;
 
   try {
-    const p = event.data.json();
-    const n = p.notification ?? p;
+    var p = event.data.json();
+    // Заменили "??" на безопасные проверки
+    var n = (p.notification !== undefined && p.notification !== null) ? p.notification : p;
 
-    const rootData =
-      p.data != null && typeof p.data === 'object' && !Array.isArray(p.data) ? p.data : {};
-    const nestedData =
-      n.data != null && typeof n.data === 'object' && !Array.isArray(n.data) ? n.data : {};
-    const mergedData = { ...rootData, ...nestedData };
+    var rootData = (p.data != null && typeof p.data === 'object' && !Array.isArray(p.data)) ? p.data : {};
+    var nestedData = (n.data != null && typeof n.data === 'object' && !Array.isArray(n.data)) ? n.data : {};
+    var mergedData = Object.assign({}, rootData, nestedData);
 
-    const title = n.title || p.title || defaults.title;
-    const body = n.body || p.body || '';
+    var title = n.title || p.title || defaults.title;
+    var body = n.body || p.body || '';
 
-    const options = compact({
-      body,
+    var options = compact({
+      body: body,
       icon: n.icon || p.icon || defaults.options.icon,
       badge: n.badge || p.badge || defaults.options.badge,
       image: n.image || p.image,
       tag: n.tag || p.tag,
-      renotify: n.renotify ?? p.renotify,
-      requireInteraction: n.requireInteraction ?? p.requireInteraction,
-      silent: n.silent ?? p.silent,
+      renotify: (n.renotify !== undefined) ? n.renotify : p.renotify,
+      requireInteraction: (n.requireInteraction !== undefined) ? n.requireInteraction : p.requireInteraction,
+      silent: (n.silent !== undefined) ? n.silent : p.silent,
       vibrate: n.vibrate || p.vibrate,
       timestamp: n.timestamp || p.timestamp,
       actions: n.actions || p.actions,
       lang: n.lang || p.lang,
       dir: n.dir || p.dir,
-      data: mergedData,
+      data: mergedData
     });
 
-    return { title, options };
-  } catch {
-    const text = event.data.text();
+    return { title: title, options: options };
+  } catch (e) {
+    var text = event.data.text();
     return {
       title: defaults.title,
       options: compact({
         body: text,
         icon: defaults.options.icon,
         badge: defaults.options.badge,
-        data: {},
-      }),
+        data: {}
+      })
     };
   }
 }
 
-self.addEventListener('push', (event) => {
+self.addEventListener('push', function(event) {
   event.waitUntil(
-    (async () => {
-      const { title, options } = parsePushPayload(event);
-      await self.registration.showNotification(title, options);
-    })()
+    Promise.resolve().then(function() {
+      var payload = parsePushPayload(event);
+      return self.registration.showNotification(payload.title, payload.options);
+    })
   );
 });
 
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener('notificationclick', function(event) {
   event.notification.close();
-  const data = event.notification.data || {};
-  let url = typeof data.url === 'string' ? data.url : '/';
-  /* Опционально с бэкенда: data.actionUrls: { "reply": "/chat/5", "dismiss": "/" } под id из actions[].action */
+  var data = event.notification.data || {};
+  var url = typeof data.url === 'string' ? data.url : '/';
+
   if (event.action && data.actionUrls && typeof data.actionUrls === 'object' && data.actionUrls[event.action]) {
     url = data.actionUrls[event.action];
   }
 
-  const fullUrl = new URL(url, self.location.origin).href;
+  var fullUrl = new URL(url, self.location.origin).href;
 
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-      const w = clients[0];
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clients) {
+      var w = clients[0];
       if (w && 'navigate' in w) {
-        return w.navigate(fullUrl).then(() => w.focus());
+        return w.navigate(fullUrl).then(function() { return w.focus(); });
       }
       if (self.clients.openWindow) {
         return self.clients.openWindow(fullUrl);

@@ -10,8 +10,8 @@ import {LoginService} from "./auth/login.service";
 import {IResponse} from "./DTO/classes/IResponse";
 import {Title} from "@angular/platform-browser";
 import { AnalyticsService } from 'src/services/analytics.service';
-import { PushService } from 'src/services/pwPush';
 import {  PushDebugService } from 'src/services/push-notification.service';
+import { getDeviceCompat } from 'src/utils/device-compat';
 
 import { NewsletterService } from 'src/services/newsLetter';
 import { HttpClient } from '@angular/common/http';
@@ -317,7 +317,12 @@ export class AppComponent implements OnInit, AfterViewInit  {
   }
 
   async ngOnInit() {
-    
+    if (isPlatformBrowser(this.platformId) && getDeviceCompat().supportsServiceWorker) {
+      navigator.serviceWorker.register('/sw.js').then(reg => {
+        setInterval(() => reg.update(), 60 * 60 * 1000);
+      });
+    }
+
         // this.store$.select(aiCurrentState).subscribe(result => {
         //     if (result.operation === 'open calendar'){
         //             this._route.navigate(['/notes/', this.user?.id], {  queryParams: result,  });
@@ -360,7 +365,8 @@ export class AppComponent implements OnInit, AfterViewInit  {
             });
     // this.notification.receiveMessage();
     // this.message = this.notification.currentMessage;
-    this._login.checkCookie()?.subscribe()
+    // checkCookie() теперь запускается в APP_INITIALIZER (initializeAuth) до старта роутера —
+    // см. login.service.ts. Повторный вызов здесь приводил бы к дублированию запроса.
 
     this.store$.select(getProfileMainClient).subscribe(result => {
         if (result){
@@ -443,7 +449,7 @@ export class AppComponent implements OnInit, AfterViewInit  {
   }
 
   redirectMainPage() {
-    this._route.navigate(['/home']);
+    this._route.navigate(['/']);
   }
 
   onActivate($event: any) {

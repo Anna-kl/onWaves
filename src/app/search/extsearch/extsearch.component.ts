@@ -50,7 +50,7 @@ export class ExtsearchComponent implements OnInit {
       result => {
         this.location = result;
       }
-    )
+    ).catch(() => {})
   }
 
 

@@ -60,11 +60,9 @@ export class ModalRegisterNextComponent implements OnInit {
           let expiry = new Date();
 
           expiry.setDate(expiry.getDate()+365);
-          this._cookie.set('auth-token-ocpio', response.token,
-            expiry);
+          this._cookie.set('auth-token-ocpio', response.token, expiry, '/');
 
-          this._cookie.set('profileId-ocpio', response.profileUserId!,
-            expiry);
+          this._cookie.set('profileId-ocpio', response.profileUserId!, expiry, '/');
 
           const modalRef = this.modalService.open(ModalRegisterEndComponent);
           modalRef.componentInstance.Id = response.profileUserId;

@@ -1,10 +1,15 @@
 {
+  "id": "/",
   "name": "OnWaves",
   "short_name": "OnWaves",
+  "description": "Будь на волнах общения, комфорта и успеха",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#1f8f8f",
+  "categories": ["lifestyle", "business"],
   "icons": [
     {
       "src": "assets/icons/icon-192x192.png",

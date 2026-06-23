@@ -1,0 +1,86 @@
+.consent-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid #EEF1F4;
+}
+
+.consent-row:last-of-type {
+    border-bottom: none;
+}
+
+.consent-row-name {
+    font-weight: 600;
+    color: #1A1A1A;
+}
+
+.consent-row-hint {
+    font-size: 13px;
+    color: #8A93A2;
+    margin-top: 2px;
+}
+
+.consent-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 26px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.consent-switch input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.consent-switch-track {
+    position: absolute;
+    inset: 0;
+    background-color: #D7DCE3;
+    border-radius: 999px;
+    transition: background-color .2s ease-in-out;
+}
+
+.consent-switch-track::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background-color: #FFFFFF;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform .2s ease-in-out;
+}
+
+.consent-switch input:checked + .consent-switch-track {
+    background-color: #006174;
+}
+
+.consent-switch input:checked + .consent-switch-track::before {
+    transform: translateX(18px);
+}
+
+.consent-switch input:focus-visible + .consent-switch-track {
+    outline: 2px solid #006174;
+    outline-offset: 2px;
+}
+
+.consent-unsubscribe-all {
+    color: #C0392B;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.consent-unsubscribe-all:hover {
+    color: #962D20;
+}

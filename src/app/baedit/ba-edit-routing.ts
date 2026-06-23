@@ -1,6 +1,7 @@
 import {RouterModule, Routes} from "@angular/router";
 
 import {NgModule} from "@angular/core";
+import {profileEditGuard} from "../guards/profile-edit.guard";
 import {BAEditComponent} from "./baedit.component";
 import {MainProfileComponent} from "./components/main-profile/main-profile.component";
 import {RubricComponent} from "./components/rubric/rubric.component";
@@ -18,7 +19,9 @@ import { LentaComponent } from "../common/profile/lenta/lenta.component";
 import { AddPostComponent } from "../common/profile/addPost/addPost.component";
 
 const routes: Routes = [
-  { path:'ba-edit/:id', component: BAEditComponent, children: [
+  // Без guard'а страница редактирования бизнес-профиля была доступна неавторизованным
+  // пользователям напрямую по ссылке /ba-edit/:id — добавлена проверка авторизации.
+  { path:'ba-edit/:id', component: BAEditComponent, canActivate: [profileEditGuard], children: [
       {path: '',     component: MainProfileComponent},
 
       {path: 'galereya', component: GalereyaComponent},

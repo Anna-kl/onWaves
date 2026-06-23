@@ -51,9 +51,22 @@
                        Нужно ваше согласие с политикой.
                   </div>
         </label>
-        
+
       </div>
- 
+
+    </div>
+
+    <!-- Согласие на информационные уведомления (необязательно) -->
+    <div class="cont-horiz-start margin-bottom40" style="align-items: center;" *ngIf="consentTextVersion">
+      <div class="cont-horiz w100 form-check">
+        <input class="form-check-input" type="checkbox" [(ngModel)]="checkNotifyConsent" id="flexCheckNotifyConsent">
+        <label class="form-check-label margin-left10" for="flexCheckNotifyConsent">
+          <p>
+            Хочу получать SMS о статусе записей и новостях сервиса
+            (<span class="txt-green-light" (click)="openConsentText($event)">текст согласия</span>)
+          </p>
+        </label>
+      </div>
     </div>
     <!-- Далее  -->
     <div class="w100 cont-horiz ">
@@ -263,5 +276,14 @@ E‑mail: privacy@onwaves.online<br>
 Версия 1.0. Действует с 06.05.2025г.. -->
     </div>
     <button class="btn btn-secondary" (click)="closePolicy()">Закрыть</button>
+  </div>
+</div>
+<div class="modal-backdrop" *ngIf="showConsentModal" (click)="closeConsentText()">
+  <div class="modal-window" (click)="$event.stopPropagation()">
+    <h2>Согласие на информационные уведомления</h2>
+    <div class="modal-body">
+      <p style="white-space: pre-wrap;">{{consentText}}</p>
+    </div>
+    <button class="btn btn-secondary" (click)="closeConsentText()">Закрыть</button>
   </div>
 </div>

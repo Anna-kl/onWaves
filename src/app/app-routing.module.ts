@@ -40,7 +40,6 @@ import { ReviewsComponent } from './baedit/profilebisacc/reviews/reviews.compone
 import { PoliciesComponent } from './static/policies/policies.component';
 import {AlbumPhoneComponent} from "./components/phone/album-phone/album-phone.component";
 import {FotoPhoneComponent} from "./components/phone/foto-phone/foto-phone.component";
-import { LandingPageComponent } from './common/LandingPage/LandingPage.component';
 import { LandingVersion2Component } from './pages/landingVersion2/landingVersion2.component';
 import { redirectAuthenticatedFromLandingGuard } from "./guards/redirect-authenticated-from-landing.guard";
 import { profileEditGuard } from "./guards/profile-edit.guard";
@@ -55,10 +54,13 @@ const routes: Routes = [
 
     {
       path: "",
+      component: MainPageComponent,
+    },
+    {
+      path: "landing",
       component: LandingVersion2Component,
       canActivate: [redirectAuthenticatedFromLandingGuard],
     },
-    { path: "home", component: MainPageComponent },
 
 
     {path: 'cabinet-ba', component: CabinetBAComponent, canActivate: [profileEditGuard] },
@@ -72,7 +74,7 @@ const routes: Routes = [
   // { path: 'uslugi/:id', component: UslugiComponent },
   { path: 'galereya/:id', component: GalereyaComponent, canActivate: [profileEditGuard] },
   { path: 'static/help', component: HelpComponent },
-  { path: 'static/settings', component: SettingsComponent },
+  { path: 'static/settings', component: SettingsComponent, canActivate: [profileEditGuard] },
   { path: 'static/helpQuestion', component: HelpQuestionComponent },
   { path: 'static/helpQuestionAnswer', component: HelpQuestionsAnswerComponent},
   { path: 'search/extsearch/:search', component: ExtsearchComponent},
@@ -93,8 +95,6 @@ const routes: Routes = [
 
   { path: 'static/typography', component: TypographyComponent},
   { path: 'profile-ba/dayrent', component: DayrentComponent, canActivate: [profileEditGuard] },
-  { path: 'landing', component: LandingPageComponent},
-  { path: "landing2", redirectTo: "", pathMatch: "full" },
   { path: 'search/extsearch', component: ExtsearchComponent},
   { path: 'static/policies', component: PoliciesComponent},
   { path: 'clients', component: PageClient1Component},

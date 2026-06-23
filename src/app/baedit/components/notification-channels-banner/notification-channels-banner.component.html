@@ -1,0 +1,15 @@
+<div class="consent-banner" *ngIf="show()">
+  <div class="consent-banner-icon">🔔</div>
+
+  <div class="consent-banner-text">
+    <div class="consent-banner-title">Подключите уведомления</div>
+    <div class="consent-banner-subtitle">
+      У вас не включён ни один канал — вы можете пропустить сообщения о новых записях и статусах от клиентов
+    </div>
+  </div>
+
+  <div class="consent-banner-actions">
+    <button class="consent-banner-primary" (click)="openChannelSelect()">Подключить</button>
+    <button class="consent-banner-close" (click)="dismiss()" aria-label="Скрыть уведомление">&times;</button>
+  </div>
+</div>

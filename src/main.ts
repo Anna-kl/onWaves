@@ -26,7 +26,11 @@ async function bootstrap(): Promise<void> {
       }
     } catch { /* non-critical */ }
 
-    if (hadSW) {
+    // Защита от бесконечного цикла перезагрузок в Safari
+    const alreadyReloaded = sessionStorage.getItem('sw_cleared_reload');
+
+    if (hadSW && !alreadyReloaded) {
+      sessionStorage.setItem('sw_cleared_reload', 'true');
       window.location.reload();
       return;
     }

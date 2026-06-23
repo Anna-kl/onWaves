@@ -45,7 +45,7 @@ export class ProfileService {
    * Бэкенд возвращает Task<bool> — в теле ответа JSON true/false (HttpClient.get<boolean>).
    */
   hasTelegramNotification(id: string): Observable<boolean> {
-    return this.http.get<boolean>(`${this.url}has-telegram-notification/${id}`);
+    return this.http.get<boolean>(`${this.url}messenger-channels-status/${id}`);
   }
 
   getCoupon(id: string){

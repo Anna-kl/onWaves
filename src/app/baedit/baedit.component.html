@@ -11,6 +11,7 @@
 						<h1>Редактор бизнес-аккаунта</h1>
 					</div>
 				</div>
+				<app-notification-channels-banner class="w100" [profileId]="profile?.id ?? null"></app-notification-channels-banner>
 				<app-menueditbaprofile class="w100" [chooseMainMenu]="menu"></app-menueditbaprofile>
         			<router-outlet class="w100"></router-outlet>
 			</div>

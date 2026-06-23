@@ -9,7 +9,7 @@ import {getAddressProfile} from "../../../../helpers/common/address";
 import {NgbActiveModal, NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
 import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
 import { RecordSuccessTelegramModalComponent } from '../record-success-telegram-modal/record-success-telegram-modal.component';
-import {Location} from "@angular/common";
+import {DatePipe, Location} from "@angular/common";
 import {IViewRecordData} from "../../../DTO/views/records/IViewRecordData";
 import {DomSanitizer} from "@angular/platform-browser";
 import {IViewScheduleBA} from "../../../DTO/views/schedule/IViewScheduleBA";
@@ -26,6 +26,7 @@ import {PaymentMethodType} from "../../../DTO/enums/paymentMethodType";
 import { finalize, map, Observable, Subscription, switchMap, tap } from 'rxjs';
 import { getPrice, getPriceService, getPriceString } from 'src/helpers/common/price.helpers';
 import { ErrorConfirmRecordComponent } from '../errorConfirmRecord/error-confirm-record.component';
+import { BookingContactModalComponent } from '../booking-contact-modal/booking-contact-modal.component';
 import { ProfileService } from 'src/services/profile.service';
 import { ICoupon } from 'src/app/DTO/classes/promo/IPoupon';
 import { v4 as uuidv4 } from 'uuid';
@@ -276,6 +277,44 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
       serverTime: new Date().toLocaleString(),
       couponId: this.yourCoupon ? this.yourCoupon.id : null,
     } as Record;
+
+    if (!this.profile) {
+      this.openBookingContactModal(masterId, record);
+      return;
+    }
+
+    this.submitRecord(masterId, record);
+  }
+
+  /** Гость: контакты + лёгкая регистрация перед сохранением записи (BookingContactModalComponent). */
+  private openBookingContactModal(masterId: string, record: Record): void {
+    const masterLink = this.businessProfile?.link;
+    const masterIdForNav = this.businessProfile?.id ?? masterId;
+    const summaryTitle = this.chooseServices.map(service => service.name).join(', ');
+    const summaryWhen = this.dayChoose
+      ? new DatePipe('ru').transform(this.dayChoose, 'd MMMM yyyy, HH:mm') ?? ''
+      : '';
+
+    const modalRef = this.modalService.open(BookingContactModalComponent, {
+      backdrop: 'static',
+      keyboard: false,
+    });
+    modalRef.componentInstance.masterId = masterId;
+    modalRef.componentInstance.record = record;
+    modalRef.componentInstance.summaryTitle = summaryTitle;
+    modalRef.componentInstance.summaryWhen = summaryWhen;
+
+    modalRef.result.then(
+      () => {
+        this.resetStateAfterRecordCreated();
+        this.goPage(masterLink, masterIdForNav);
+      },
+      () => {}
+    );
+  }
+
+  /** Авторизованный пользователь: сохранение записи и обработка 201/202/ошибки. */
+  private submitRecord(masterId: string, record: Record): void {
     const option: NgbModalOptions = {
       backdrop: 'static',
       keyboard: false,

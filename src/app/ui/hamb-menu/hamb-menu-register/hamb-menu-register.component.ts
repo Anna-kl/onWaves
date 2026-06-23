@@ -165,7 +165,7 @@ this.unsubscribe$ = this._login.mainCategoriesProfile$.subscribe(
     let expiry = new Date();
 
     expiry.setDate(expiry.getDate()+365);
-    this._cookie.set('profileId-ocpio', user.id!, expiry);
+    this._cookie.set('profileId-ocpio', user.id!, expiry, '/');
     this.changeUser(user);
     this.store$.dispatch(getActionStateMainProfileClient(
       { tokenMainClient: this.token, profileMainClient: user }));

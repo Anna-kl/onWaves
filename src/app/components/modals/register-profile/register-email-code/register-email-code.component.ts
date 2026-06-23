@@ -1,101 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ICountry } from 'src/app/DTO/classes/ICountry';
 import { AuthServices } from '../../services/auth.service';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalEnterDataComponent } from '../modal-enter-data/modal-enter-data.component';
 import { ModalRegisterComponent } from '../modal-register/modal-register.component';
-import { IViewAuthProfile } from 'src/app/DTO/views/profile/IViewAuthProfile';
-import { LoginService } from 'src/app/auth/login.service';
-import { BusService } from 'src/services/busService';
-import { CookieService } from 'ngx-cookie-service';
+import { ConsentService } from 'src/services/consent.service';
 
 @Component({
   selector: 'app-register-email-code',
   templateUrl: './register-email-code.component.html',
   styleUrls: ['./register-email-code.component.css'],
-  providers:[AuthServices]
+  providers: [AuthServices, ConsentService]
 })
-export class RegisterEmailCodeComponent {
-    constructor(private authService: AuthServices,
-      private activeModal: NgbActiveModal,
-      private modalService: NgbModal,
-      private loginService: LoginService,
-       private _busService: BusService,
-         private _cookie: CookieService
-    ){}
+export class RegisterEmailCodeComponent implements OnInit {
 
-    returnToPhone() {
-          this.activeModal.close();
-            let modal = this.modalService.open(ModalRegisterComponent);
-    }
-    next() {
-      let data = this.email.getRawValue()
-       this.authService.registerEmail(data).subscribe(
-         result => {
-            if (result.code === 200){
-              this.activeModal.close(); // добавил Муконин. Чтобы закрывалось предыдущее окно.
-              const modalRef = this.modalService.open(ModalEnterDataComponent);
-              modalRef.componentInstance.session = result.data;
-              modalRef.componentInstance.email = data;
-            }
-            if (result.code === 500){
-              this.flagError = true;
-              this.messageError = `Превышено число запросов`;
-            }
-            if (result.code === 204){
-              this.flagError = true;
-              let validateError = result.data.toString().split('.')[0];
-              this.messageError = `Повторно запросить код можно будет через ${validateError}`;
-            }
-            // else{
-            //           let user = result.data as IViewAuthProfile;
-            //           this._busService.transferToken(user);
-            //           this.activeModal.close();
-            //           this.modalService.dismissAll();
-              
-            //           const profileUserId = result.data?.profileUserId;
-            //           if (profileUserId != null) {
-            //             // this.notification.requestPermission(result.message);
-            //             let expiry = new Date();
-            //             expiry.setDate(expiry.getDate()+365);
-              
-            //             this._cookie.set('auth-token-ocpio', user.token,
-            //               expiry );
-              
-            //             if(user.profileUserId) {
-            //               this._cookie.set('profileId-ocpio', user.profileUserId,
-            //                expiry );
-              
-            //             }
-            //             this.activeModal.close();
-            //             this.loginService.isAutentificate$.next(true);
-            //             this.loginService.updateProfileUA();
-            // }
-        //  }
-        });
-    }
-    closeModal() {
-     this.activeModal.close();
-    }
-    openPolicy(event: MouseEvent) {
-    event.preventDefault();
-    this.showPolicyModal = true;
-  }
-
-
-  isFormValid(): boolean {
-    return !!this.countries && !!this.phone && this.checkRule && !this.error;
-  }
-
-  email = new FormControl<string>('', {
-  nonNullable: true,
-  validators: [
-    Validators.required,
-    Validators.email,
-    Validators.maxLength(254), // практичный предел
-  ],
-});
+  public checkNotifyConsent = false;
+  consentText: string = '';
+  consentTextVersion: string = '';
+  showConsentModal = false;
 
   public phone: string = '';
   error: boolean = true;
@@ -109,12 +32,98 @@ export class RegisterEmailCodeComponent {
   isShow: boolean = false;
   messageError: string = '';
 
-  returnToEmail() {
-  throw new Error('Method not implemented.');
+  email = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      Validators.email,
+      Validators.maxLength(254),
+    ],
+  });
+
+  constructor(
+    private authService: AuthServices,
+    private activeModal: NgbActiveModal,
+    private modalService: NgbModal,
+    private _consentService: ConsentService,
+  ) {}
+
+  ngOnInit(): void {
+    this.loadConsentText();
   }
 
-  closePolicy() {
-  throw new Error('Method not implemented.');
+  private loadConsentText(): void {
+    this._consentService.getTextVersions().subscribe(versions => {
+      const version = versions?.[0];
+      if (!version) return;
+      this.consentTextVersion = version;
+      this._consentService.getText(version).subscribe(text => this.consentText = text);
+    });
   }
 
+  private sendNotifyConsentIfNeeded(email: string): void {
+    if (!this.checkNotifyConsent || !this.consentTextVersion) return;
+    this._consentService.sendConsentBulk({
+      profileUserId: null,
+      email,
+      channels: null,
+      isGranted: true,
+      consentTextVersion: this.consentTextVersion,
+      source: 'registration',
+    }).subscribe();
   }
+
+  openConsentText(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showConsentModal = true;
+  }
+
+  closeConsentText(): void {
+    this.showConsentModal = false;
+  }
+
+  returnToPhone(): void {
+    this.activeModal.close();
+    this.modalService.open(ModalRegisterComponent);
+  }
+
+  next(): void {
+    const data = this.email.getRawValue();
+    this.authService.registerEmail(data).subscribe(result => {
+      if (result.code === 200) {
+        this.sendNotifyConsentIfNeeded(data);
+        this.activeModal.close();
+        const modalRef = this.modalService.open(ModalEnterDataComponent);
+        modalRef.componentInstance.session = result.data;
+        modalRef.componentInstance.email = data;
+      }
+      if (result.code === 500) {
+        this.flagError = true;
+        this.messageError = `Превышено число запросов`;
+      }
+      if (result.code === 204) {
+        this.flagError = true;
+        const validateError = result.data.toString().split('.')[0];
+        this.messageError = `Повторно запросить код можно будет через ${validateError}`;
+      }
+    });
+  }
+
+  closeModal(): void {
+    this.activeModal.close();
+  }
+
+  openPolicy(event: MouseEvent): void {
+    event.preventDefault();
+    this.showPolicyModal = true;
+  }
+
+  closePolicy(): void {
+    this.showPolicyModal = false;
+  }
+
+  isFormValid(): boolean {
+    return !!this.countries && !!this.phone && this.checkRule && !this.error;
+  }
+}

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpEvent } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
 import {BehaviorSubject, Observable, tap} from 'rxjs';
 import { IViewFullInfo } from 'src/app/DTO/views/IViewFullInfo';
 import { CurrencyType } from 'src/app/DTO/enums/currencyType';
@@ -7,6 +7,7 @@ import { PaymentMethodType } from 'src/app/DTO/enums/paymentMethodType';
 import { IResponse } from 'src/app/DTO/classes/IResponse';
 // import { HttpEvent } from '@angular/common/http';
 import { environment } from 'src/enviroments/environment';
+import { CookieService } from 'ngx-cookie-service';
 import {IViewBusinessProfile} from "../app/DTO/views/business/IViewBussinessProfile";
 import {IFreeSlotSchedule} from "../app/DTO/views/schedule/IFreeSlotSchedule";
 import {IViewCategoryProfile} from "../app/DTO/views/categories/IViewCategoryProfile";
@@ -25,7 +26,7 @@ export class BackendService {
   private url = environment.Uri + 'profiles/';
   public categoriesProfile$ = new BehaviorSubject<IViewCategoryProfile[]>([]);
   public mainCategoriesProfile$ = new BehaviorSubject<string[]>([]);
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cookieService: CookieService) {}
 
   getFullProfile(id: string): Observable<IViewBusinessProfile> {
     const url = `${this.url}get-full-baprofile/${id}`;
@@ -42,7 +43,9 @@ export class BackendService {
   // }
   saveProfile(id: string, profile: IViewBusinessProfile): Observable<any> {
     const url = `${this.url}update-baprofile/${id}`;
-    return this.http.put(url, profile);
+    const token = this.cookieService.get('auth-token-ocpio');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    return this.http.put(url, profile, { headers });
   }
 
   getMainCategoryProfile(id: string){

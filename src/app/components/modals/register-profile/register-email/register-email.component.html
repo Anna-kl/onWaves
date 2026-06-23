@@ -84,12 +84,24 @@
         </label>
         
       </div>
-          <span class="eror-txt" *ngIf="hasError">{{errorText}}</span>
+      <div class="cont-horiz w100 form-check" *ngIf="consentTextVersion">
+        <input class="form-check-input" type="checkbox"
+               [(ngModel)]="checkNotifyConsent" [ngModelOptions]="{standalone: true}"
+               id="notifyConsentEmail">
+        <label class="form-check-label margin-left10" for="notifyConsentEmail">
+          <p>
+            Хочу получать SMS о статусе записей и новостях сервиса
+            (<span class="txt-green-light" (click)="openConsentText($event)">текст согласия</span>)
+          </p>
+        </label>
+      </div>
+
+      <span class="eror-txt" *ngIf="hasError">{{errorText}}</span>
     <button class="button-text mobile360"
      [ngClass]="{'btn-green': registerForm.valid, 'btn-gray': !registerForm.valid}"
     (click)="register()" >
       Войти
-    </button>  
+    </button>
     
 
     <div class="modal-backdrop" *ngIf="showPolicyModal">
@@ -288,11 +300,21 @@
           </a>
         </div> 
 
-        <div class="cont-horiz-around w100 margin-bottom30"> 
+        <div class="cont-horiz-around w100 margin-bottom30">
 
-        <a class="margin-bottom40" (click)="returnToPhone()" class="txt-green-light" style="text-decoration: underline; margin-top: 10px;"> 
+        <a class="margin-bottom40" (click)="returnToPhone()" class="txt-green-light" style="text-decoration: underline; margin-top: 10px;">
             Войти по номеру телефона
           </a>
-        </div> 
+        </div>
   </div>
 </form>
+
+<div class="modal-backdrop" *ngIf="showConsentModal" (click)="closeConsentText()">
+  <div class="modal-window" (click)="$event.stopPropagation()">
+    <h2>Согласие на информационные уведомления</h2>
+    <div class="modal-body">
+      <p style="white-space: pre-wrap;">{{consentText}}</p>
+    </div>
+    <button class="btn btn-secondary" (click)="closeConsentText()">Закрыть</button>
+  </div>
+</div>

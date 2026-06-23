@@ -10,13 +10,14 @@ import { ICountry } from '../../../../DTO/classes/ICountry';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {Router} from "@angular/router";
 import { RegisterEmailCodeComponent } from '../register-email-code/register-email-code.component';
+import { ConsentService } from '../../../../../services/consent.service';
 
 @Component({
   selector: 'app-modal-register',
   templateUrl: './modal-register.component.html',
   styleUrls: ['./modal-register.component.css'],
 
-  providers: [AuthServices, DictionaryService]
+  providers: [AuthServices, DictionaryService, ConsentService]
 
 })
 export class ModalRegisterComponent implements OnInit {
@@ -32,6 +33,12 @@ export class ModalRegisterComponent implements OnInit {
   public checkRule = true;
   isShow: boolean = false;
   messageError: string = '';
+
+  /** Согласие на информационные SMS-уведомления о записях, статусах и новостях сервиса. Необязательно. */
+  public checkNotifyConsent = false;
+  consentText: string = '';
+  consentTextVersion: string = '';
+  showConsentModal = false;
 
   iconsFlags: any[] = [
     {id:1, icon: '../assets/img/ico/flags/flag_RU_pc_24.svg', name:'Россия', mask: '(XXX)XXX-XX-XX', code:'+7',  countNumber:'' },
@@ -57,6 +64,7 @@ export class ModalRegisterComponent implements OnInit {
 
               private authService: AuthServices,
               private _dictionary: DictionaryService,
+              private _consentService: ConsentService,
               private _router: Router,
               private sanitizer: DomSanitizer) {
     this.chCountry = this.iconsFlags.find(_ => _.id === 1)!;
@@ -74,6 +82,33 @@ export class ModalRegisterComponent implements OnInit {
         });
 
       });
+    this.loadConsentText();
+  }
+
+  private loadConsentText(): void {
+    this._consentService.getTextVersions().subscribe(versions => {
+      const version = versions?.[0];
+      if (!version) {
+        return;
+      }
+      this.consentTextVersion = version;
+      this._consentService.getText(version).subscribe(text => this.consentText = text);
+    });
+  }
+
+  /** Зафиксировать согласие на уведомления по всем каналам, если пользователь его дал. Регистрация не блокируется при отказе. */
+  private sendNotifyConsentIfNeeded(phone: string): void {
+    if (!this.checkNotifyConsent || !this.consentTextVersion) {
+      return;
+    }
+    this._consentService.sendConsentBulk({
+      profileUserId: null,
+      phone: phone,
+      channels: null,
+      isGranted: true,
+      consentTextVersion: this.consentTextVersion,
+      source: 'registration'
+    }).subscribe();
   }
   closeModal() {
     this.activeModal.close();
@@ -83,6 +118,7 @@ export class ModalRegisterComponent implements OnInit {
    this.authService.register(tempPhone).subscribe(
      result => {
         if (result.code === 200){
+          this.sendNotifyConsentIfNeeded(tempPhone);
           this.activeModal.close(); // добавил Муконин. Чтобы закрывалось предыдущее окно.
           const modalRef = this.modalService.open(ModalEnterDataComponent);
           modalRef.componentInstance.session = result.data;
@@ -163,5 +199,16 @@ export class ModalRegisterComponent implements OnInit {
   openPolicy(event: MouseEvent) {
     event.preventDefault();
     this.showPolicyModal = true;
+  }
+
+  closeConsentText() {
+    this.showConsentModal = false;
+  }
+
+  /** Показать полный текст согласия на информационные уведомления */
+  openConsentText(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showConsentModal = true;
   }
 }

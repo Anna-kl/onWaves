@@ -1,4 +1,4 @@
-import {LOCALE_ID, NgModule, isDevMode} from '@angular/core';
+import {APP_INITIALIZER, LOCALE_ID, NgModule} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AppRoutingModule } from './app-routing.module';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -61,6 +61,8 @@ import {ColumnBAProfileEditComponent} from "./baedit/components/column-baprofile
 import {RubricComponent} from "./baedit/components/rubric/rubric.component";
 import {MenueditbaprofileComponent} from "./baedit/menu-ba-edit/menueditbaprofile.component";
 import {BAEditComponent} from "./baedit/baedit.component";
+import {NotificationChannelsBannerComponent} from "./baedit/components/notification-channels-banner/notification-channels-banner.component";
+import {NotificationChannelSelectModalComponent} from "./baedit/components/notification-channel-select-modal/notification-channel-select-modal.component";
 import {ProfileDataEditService} from "./baedit/services/ba-edit-service";
 import {MainProfileComponent} from "./baedit/components/main-profile/main-profile.component";
 import {UslugiComponent} from "./baedit/components/uslugi/uslugi.component";
@@ -125,7 +127,7 @@ import {NotificationEffect} from "./ngrx-store/notification/effect/notification.
 import {reducers} from "./ngrx-store/notification/notification.reducers";
 import {UIModule} from "./ui/ui.module";
 import { DeleteaccComponent } from './baedit/components/modals/deleteacc/deleteacc.component';
-import {LoginService} from "./auth/login.service";
+import {LoginService, initializeAuth} from "./auth/login.service";
 import {loadUpdateReducer} from "./ngrx-store/update/update.reducers";
 import { DelalbumComponent } from './baedit/components/galereya/delalbum/delalbum.component';
 
@@ -152,8 +154,6 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { EffectsModule } from '@ngrx/effects';
 import { provideYConfig, YConfig
  } from 'angular-yandex-maps-v3';
-import { ServiceWorkerModule } from '@angular/service-worker';
-import { getDeviceCompat } from '../utils/device-compat';
 import { InsertPinCodeComponent } from './components/modals/insert-pin-code/insert-pin-code.component';
 import { loadAIReducer, reducersAI } from './ngrx-store/aiStore/ai.reducers';
 import { AIEffect } from './ngrx-store/aiStore/effect/ai.effect';
@@ -174,7 +174,6 @@ const mapConfig: YConfig  = {
 // Регистрируем локаль "ru"
 registerLocaleData(localeRu, 'ru');
 
-// registerLocaleData(localeRu, 'ru');
 @NgModule({
   declarations: [
     EmailSanitizeDirective,
@@ -205,6 +204,8 @@ registerLocaleData(localeRu, 'ru');
     RubricComponent,
     MenueditbaprofileComponent,
     BAEditComponent,
+    NotificationChannelsBannerComponent,
+    NotificationChannelSelectModalComponent,
     MainProfileComponent,
     UslugiComponent,
     ContactsComponent,
@@ -280,16 +281,6 @@ registerLocaleData(localeRu, 'ru');
     CommonComponentsModule,
     BaEditModule,
     PagesModule, ProgressSpinnerModule, MenuModule, ImageCropperModule,
-    // AngularFireMessagingModule,
-    // AngularFireModule.initializeApp({ /* See project settings in Firebase Console for this information */
-    //     apiKey: "AIzaSyBiOQ4X8q8Kf5UHwTq_TaRSTb9j0xClRJs",
-    //     authDomain: "ocpio-311510.firebaseapp.com",
-    //     projectId: "ocpio-311510",
-    //     storageBucket: "ocpio-311510.appspot.com",
-    //     messagingSenderId: "625145012665",
-    //     appId: "1:625145012665:web:b19feea8ea4bd2679fd668",
-    //     measurementId: "G-T8F0R2G5YN"
-    // }),
     EffectsModule.forFeature([NotificationEffect, LinkEffect, AIEffect]),
     EffectsModule.forRoot([]),
     StoreModule.forFeature('notification', reducers),
@@ -304,23 +295,14 @@ registerLocaleData(localeRu, 'ru');
     CalendarModule, AutocompleteLibModule, NgScrollbar, ScrollViewport,
     ClipboardModule,
     GalleriaModule,
-    ServiceWorkerModule.register('ngsw-worker.js', {
-        enabled: getDeviceCompat().supportsServiceWorker,
-        registrationStrategy: 'registerWhenStable:30000'
-    }),
+    
     NgbCollapse
 ],
   providers: [NgbDropdown,ProfileDataEditService, BusService,LoginService,   provideNgxMask(),
-    { provide: LOCALE_ID, useValue: 'ru' }, provideYConfig(mapConfig)],
+    { provide: LOCALE_ID, useValue: 'ru' }, provideYConfig(mapConfig),
+    { provide: APP_INITIALIZER, useFactory: initializeAuth, deps: [LoginService], multi: true }],
 
-  bootstrap: [AppComponent],
-
-    exports: [
-
-
-        // CategoryTreeComponent,
-        // AccordionComponent
-    ]
+  bootstrap: [AppComponent]
 })
 export class AppModule {
 }

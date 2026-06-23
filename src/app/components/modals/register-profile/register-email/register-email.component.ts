@@ -16,6 +16,7 @@ import { LoginService } from 'src/app/auth/login.service';
 import { BusService } from 'src/services/busService';
 import { IViewProfileMenu } from 'src/app/DTO/views/profile/IViewProfileMenu';
 import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
+import { ConsentService } from 'src/services/consent.service';
 
 @Component({
   selector: 'app-register-email',
@@ -50,6 +51,10 @@ export class RegisterEmailComponent implements OnInit {
     });
 
     showPolicyModal = false;
+    checkNotifyConsent = false;
+    consentTextVersion = '';
+    consentText = '';
+    showConsentModal = false;
 
     toRegister() {
         this.isRegister = !this.isRegister;
@@ -107,9 +112,11 @@ export class RegisterEmailComponent implements OnInit {
       const expiry = new Date();
       expiry.setDate(expiry.getDate() + 365);
 
-      this._cookie.set('uuid-ocpio', id, expiry);
-      this._cookie.set('auth-token-ocpio', response.token, expiry);
-      this._cookie.set('profileId-ocpio', response.profileUserId!, expiry);
+      this._cookie.set('uuid-ocpio', id, expiry, '/');
+      this._cookie.set('auth-token-ocpio', response.token, expiry, '/');
+      this._cookie.set('profileId-ocpio', response.profileUserId!, expiry, '/');
+
+      this.sendNotifyConsentIfNeeded(data['email'], response.profileUserId!);
 
       const modalRef = this.modalService.open(ModalRegisterEndComponent);
       modalRef.componentInstance.Id = response.profileUserId;
@@ -166,7 +173,7 @@ export class RegisterEmailComponent implements OnInit {
                      
                       expiry.setDate(expiry.getDate()+365);
                 
-                      this._cookie.set('uuid-ocpio', id, expiry);
+                      this._cookie.set('uuid-ocpio', id, expiry, '/');
                     
                   
                         this._busService.transferToken(result.data);
@@ -179,12 +186,10 @@ export class RegisterEmailComponent implements OnInit {
                           let expiry = new Date();
                           expiry.setDate(expiry.getDate()+365);
                 
-                          this._cookie.set('auth-token-ocpio', temp.token,
-                            expiry );
-                
+                          this._cookie.set('auth-token-ocpio', temp.token, expiry, '/');
+
                           if(profile) {
-                            this._cookie.set('profileId-ocpio', profile.id!,
-                             expiry );
+                            this._cookie.set('profileId-ocpio', profile.id!, expiry, '/');
                 
                           }
                           this.activeModal.close();
@@ -213,13 +218,46 @@ export class RegisterEmailComponent implements OnInit {
       private auth: AuthService,
       public activeModal: NgbActiveModal,
       private profile: ProfileService,
-        private _cookie: CookieService,
-    private _busService: BusService,
+      private _cookie: CookieService,
+      private _busService: BusService,
       private loginService: LoginService,
+      private _consentService: ConsentService,
     ){}
 
+    private loadConsentText(): void {
+      this._consentService.getTextVersions().subscribe(versions => {
+        const version = versions?.[0];
+        if (!version) return;
+        this.consentTextVersion = version;
+        this._consentService.getText(version).subscribe(text => this.consentText = text);
+      });
+    }
+
+    private sendNotifyConsentIfNeeded(email: string, profileUserId: string): void {
+      if (!this.checkNotifyConsent || !this.consentTextVersion) return;
+      this._consentService.sendConsentBulk({
+        profileUserId,
+        email,
+        channels: null,
+        isGranted: true,
+        consentTextVersion: this.consentTextVersion,
+        source: 'registration',
+      }).subscribe();
+    }
+
+    openConsentText(event: MouseEvent): void {
+      event.preventDefault();
+      event.stopPropagation();
+      this.showConsentModal = true;
+    }
+
+    closeConsentText(): void {
+      this.showConsentModal = false;
+    }
+
     ngOnInit(): void {
-       this.email.valueChanges.pipe(
+      this.loadConsentText();
+      this.email.valueChanges.pipe(
           debounceTime(300),
           distinctUntilChanged()
         ).subscribe(result => {

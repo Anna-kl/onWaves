@@ -32,4 +32,9 @@ export class AuthServices {
     let headers: HttpHeaders = new HttpHeaders();
     return this.http.post<IResponse>(`${this.url}register-email/`, {email}, {headers});
   }
+
+  /** Лёгкая регистрация без SMS-кода: вернёт существующий профиль по телефону или создаст новый. */
+  quickRegister(payload: { phone: string; name: string }): Observable<IResponse> {
+    return this.http.post<IResponse>(`${this.url}quick-register`, payload);
+  }
 }

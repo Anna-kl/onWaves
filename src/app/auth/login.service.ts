@@ -52,22 +52,24 @@ export class LoginService {
 
     prepareSend(){
       let token = this.cookieService.get('auth-token-ocpio');
-            let id = '';
-            if (this.isUuid()) {
-                id = this.cookieService.get('uuid-ocpio');
-            } else {
-                const md5 = new Md5();
-                let expiry = new Date();
-                let secure = true;
-                expiry.setDate(expiry.getDate()+365);
-                id = md5.appendStr(`${new Date().toLocaleDateString()}${token}`).end()!.toString().substring(20);
-                this.cookieService.set('uuid-ocpio', id,
-                    expiry );
-            }
-            const send = {
-                token,
-                'uuid': id,
-            };
+      let id = '';
+      if (this.cookieService.check('uuid-ocpio')) {
+          // uuid держим в кеше на всю сессию — пересоздаём только когда cookie реально стёрта
+          // (logoutAndClearCaches при нажатии "Выход"), а не на каждый запрос.
+          id = this.cookieService.get('uuid-ocpio');
+      } else {
+          let expiry = new Date();
+          expiry.setDate(expiry.getDate()+365);
+          const md5 = new Md5();
+          id = md5.appendStr(`${new Date().toLocaleDateString()}${token}`).end()!.toString().substring(20);
+          // ВАЖНО: явный path '/', иначе cookie ставится на путь текущего роута SPA
+          // и clearAuthCookies() при логауте её не находит — отсюда "протекание" между аккаунтами.
+          this.cookieService.set('uuid-ocpio', id, expiry, '/');
+      }
+      const send = {
+          token,
+          'uuid': id,
+      };
       return send;
     }
     checkCookie(){
@@ -99,9 +101,6 @@ export class LoginService {
             this.isLoad$.next(true);
             return null;
         }
-    }
-    isUuid(): boolean {
-        return this.cookieService.check('uuid-ocpio');
     }
 
     isProfileId() {
@@ -155,13 +154,10 @@ export class LoginService {
           profile?.userType!).subscribe(
           result => {
 
-            if (result.code !== 404) {
-                  
-              if (result.data.length > 0){
-                view.push(result.data.pop());                
-              }
+            if (result.code !== 404 && Array.isArray(result.data)) {
+              view.push(...result.data);
             }
-              
+
             if (profileId){
                 this.allProfiles$.next(view);
                 let tempProfile =  view.find((_:IViewBusinessProfile) => _.id === profileId);
@@ -181,7 +177,8 @@ export class LoginService {
                         }
                     );
                 } else {
-                    this.cookieService.deleteAll();
+                    // profileId-ocpio устарел/не найден среди профилей пользователя —
+                    // не сносим JWT-сессию, просто уводим выбрать профиль заново.
                     this._router.navigate(['/']);
                 }
             }
@@ -200,11 +197,11 @@ export class LoginService {
     }});
   }
 
-  /** После входа с лэндинга (URL `/`) уводим на основной экран приложения. */
+  /** После входа с лэндинга (URL `/landing`) уводим на основной экран приложения. */
   afterLoginNavigateAwayFromLanding(): void {
     const path = (this._router.url || "").split("?")[0];
-    if (path === "/" || path === "") {
-      void this._router.navigate(["/home"]);
+    if (path === "/landing") {
+      void this._router.navigate(["/"]);
     }
   }
 
@@ -246,4 +243,20 @@ export class LoginService {
       } catch {}
   }
 
+}
+
+/**
+ * APP_INITIALIZER: гарантирует, что проверка авторизации (isLoad$) завершится
+ * до старта роутера — иначе guard'ы, ожидающие isLoad$, и checkCookie(),
+ * вызываемый из AppComponent.ngOnInit, образуют дедлок при initialNavigation: 'enabledBlocking'.
+ */
+export function initializeAuth(loginService: LoginService): () => Promise<void> {
+  return () => new Promise<void>(resolve => {
+    const check$ = loginService.checkCookie();
+    if (!check$) {
+      resolve();
+      return;
+    }
+    check$.subscribe({ complete: () => resolve() });
+  });
 }

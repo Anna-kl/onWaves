@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>onWaves — бесплатная платформа онлайн-записи для мастеров</title>
+<link rel="icon" type="image/jpeg" href="assets/onwaves-appicon.jpg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --teal:#0E8A99; --g1:#12909F; --g2:#075A66;
+    --ink:#16303C; --muted:#5b7079;
+    --bg:#EEF1F3; --card:#ffffff; --line:#e3e8eb;
+    --mint:#e8f3f4; --mint2:#dbe9eb; --sand:#F3EEE6;
+    --shadow:0 24px 60px -34px rgba(7,60,70,.55);
+    --shadow-sm:0 10px 30px -18px rgba(7,60,70,.45);
+    --r:24px;
+    --maxw:1180px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.5;
+  }
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+  section{position:relative;}
+  h1,h2,h3{margin:0;letter-spacing:-.02em;text-wrap:balance;}
+  p{margin:0;text-wrap:pretty;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);}
+
+  /* ---------- buttons ---------- */
+  .btn{display:inline-flex;align-items:center;gap:10px;font-family:inherit;font-weight:700;font-size:16px;
+    border:0;border-radius:999px;padding:15px 28px;cursor:pointer;transition:.18s ease;white-space:nowrap;}
+  .btn-primary{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;box-shadow:0 16px 34px -16px rgba(7,90,102,.7);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 22px 40px -16px rgba(7,90,102,.75);}
+  .btn-ghost{background:#fff;color:var(--g2);border:1.5px solid var(--mint2);}
+  .btn-ghost:hover{border-color:var(--teal);color:var(--teal);}
+  .btn-light{background:rgba(255,255,255,.16);color:#fff;border:1.5px solid rgba(255,255,255,.32);}
+  .btn-light:hover{background:rgba(255,255,255,.26);}
+  .btn-white{background:#fff;color:var(--g2);}
+  .btn-white:hover{transform:translateY(-2px);}
+  .btn .arr{transition:transform .18s ease;}
+  .btn:hover .arr{transform:translateX(3px);}
+
+  /* ---------- header ---------- */
+  header{position:sticky;top:0;z-index:60;transition:.25s ease;}
+  header .bar{display:flex;align-items:center;justify-content:space-between;height:74px;}
+  header.scrolled{background:rgba(238,241,243,.82);backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--line);}
+  .logo{display:flex;align-items:center;gap:11px;font-weight:800;font-size:21px;color:var(--g2);}
+  .logo svg{color:var(--teal);flex:none;}
+  .logo-mark{flex:none;border-radius:50%;object-fit:cover;display:block;}
+  .logo b{font-weight:800;}
+  .logo span{font-weight:500;color:var(--ink);opacity:.8;}
+  nav.main{display:flex;gap:30px;}
+  nav.main a{font-weight:600;font-size:15px;color:var(--ink);opacity:.78;transition:.15s;}
+  nav.main a:hover{opacity:1;color:var(--teal);}
+  .head-cta{display:flex;align-items:center;gap:12px;}
+  .head-cta .btn{padding:11px 22px;font-size:15px;}
+  .link-login{font-weight:700;font-size:15px;color:var(--g2);padding:11px 8px;}
+  .link-login:hover{color:var(--teal);}
+  @media(max-width:980px){nav.main,.link-login{display:none;}}
+
+  /* ---------- hero ---------- */
+  .hero{padding:46px 0 70px;}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center;}
+  .hero-card{background:var(--card);border-radius:34px;box-shadow:var(--shadow);padding:0;overflow:hidden;}
+  .hero.var-soft .hero-inner{padding:54px 60px;}
+  .hero-eyebrow{margin-bottom:20px;}
+  .hero h1{font-size:clamp(38px,5.1vw,62px);font-weight:800;line-height:1.02;margin-bottom:22px;}
+  .hero h1 em{font-style:normal;color:var(--teal);position:relative;}
+  .hero h1 em::after{content:"";position:absolute;left:0;right:0;bottom:.06em;height:.14em;border-radius:99px;
+    background:linear-gradient(90deg,var(--g1),var(--g2));opacity:.22;}
+  .hero-sub{font-size:19px;line-height:1.6;color:var(--muted);max-width:520px;margin-bottom:26px;}
+  .badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px;}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:var(--mint);color:var(--g2);
+    font-weight:700;font-size:14.5px;padding:9px 16px;border-radius:999px;border:1px solid var(--mint2);}
+  .badge svg{color:var(--teal);}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
+  .hero-note{font-size:13.5px;color:var(--muted);margin-top:16px;display:flex;align-items:center;gap:8px;}
+
+  /* hero background variants */
+  .hero.var-gradient{background:linear-gradient(150deg,var(--g1),var(--g2));}
+  .hero.var-gradient .hero-card{background:transparent;box-shadow:none;}
+  .hero.var-gradient .kicker{color:#9fe7ef;}
+  .hero.var-gradient h1{color:#fff;}
+  .hero.var-gradient h1 em{color:#fff;}
+  .hero.var-gradient h1 em::after{background:#fff;opacity:.35;}
+  .hero.var-gradient .hero-sub{color:rgba(255,255,255,.86);}
+  .hero.var-gradient .badge{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.26);}
+  .hero.var-gradient .badge svg{color:#9fe7ef;}
+  .hero.var-gradient .btn-primary{background:#fff;color:var(--g2);}
+  .hero.var-gradient .hero-note{color:rgba(255,255,255,.8);}
+  .hero.var-gradient .phone-glow{opacity:.5;}
+  .hero.var-sand{background:var(--sand);}
+  .hero.var-sand .hero-card{background:transparent;box-shadow:none;}
+
+  /* ---------- phone mockup ---------- */
+  .phone-stage{position:relative;display:flex;justify-content:center;align-items:center;min-height:540px;}
+  .phone-glow{position:absolute;width:420px;height:420px;border-radius:50%;
+    background:radial-gradient(circle,rgba(18,144,159,.30),transparent 62%);filter:blur(8px);z-index:0;}
+  .phone{position:relative;z-index:2;width:300px;height:610px;border-radius:46px;background:#0c2630;
+    padding:13px;box-shadow:0 50px 90px -40px rgba(6,46,54,.85),0 0 0 1px rgba(255,255,255,.04) inset;}
+  .phone-screen{position:relative;width:100%;height:100%;border-radius:34px;overflow:hidden;background:#fbfdfd;}
+  .phone-notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:128px;height:26px;
+    background:#0c2630;border-radius:0 0 16px 16px;z-index:5;}
+  .scr{padding:30px 0 0;display:flex;flex-direction:column;height:100%;}
+  .scr-bar{display:flex;align-items:center;gap:9px;padding:8px 15px 6px;}
+  .scr-bar .scr-logo{height:21px;width:auto;display:block;}
+  .scr-bar .sp{flex:1;}
+  .scr-bell2{color:#f0a93a;display:flex;}
+  .scr-ava{width:23px;height:23px;border-radius:50%;background:linear-gradient(135deg,var(--g1),var(--g2));flex:none;}
+  .scr-menu{display:flex;flex-direction:column;gap:3px;}
+  .scr-menu i{width:18px;height:2px;background:var(--ink);border-radius:2px;display:block;}
+  .scr-title{font-weight:800;font-size:15px;padding:8px 16px 6px;}
+  .scr-month{display:flex;align-items:center;justify-content:space-between;padding:2px 22px 8px;}
+  .scr-month b{font-size:14px;}
+  .scr-month .ch{color:var(--teal);font-size:17px;font-weight:700;}
+  .scr-wd{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 12px 3px;}
+  .scr-wd span{text-align:center;font-size:8.5px;color:var(--muted);font-weight:700;}
+  .scr-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 12px;}
+  .scr-cal .cell{aspect-ratio:1/1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9aa7ab;background:transparent;line-height:1;}
+  .scr-cal .cell.past{background:#eceff0;color:#b7c1c4;}
+  .scr-cal .cell.act{background:var(--teal);color:#fff;}
+  .scr-cal .cell.act.out{background:#fff;border:1.5px solid var(--teal);color:var(--teal);}
+  .scr-cal .cell .pl{font-size:8px;margin-top:1px;}
+  .scr-legend{display:flex;gap:11px;justify-content:center;padding:9px 10px 6px;border-bottom:1px solid var(--line);margin:0 12px;}
+  .scr-legend span{display:flex;align-items:center;gap:4px;font-size:8.5px;font-weight:600;color:var(--muted);}
+  .scr-legend i{width:8px;height:8px;border-radius:50%;display:block;}
+  .scr-legend .lg-a{background:var(--teal);}
+  .scr-legend .lg-b{background:#f0c23a;}
+  .scr-legend .lg-c{background:#d6dddf;}
+  .scr-bk{display:flex;flex-direction:column;gap:4px;padding:8px 14px 4px;flex:1;}
+  .scr-bk .bk{display:flex;align-items:center;gap:9px;border-left:3px solid #7c5cff;background:#fff;border-radius:0 10px 10px 0;padding:7px 6px 7px 9px;}
+  .scr-bk .bk .ava{width:25px;height:25px;border-radius:50%;background:#e7eef0;color:var(--g2);display:flex;align-items:center;justify-content:center;flex:none;}
+  .scr-bk .bk .nm{font-weight:800;font-size:11.5px;}
+  .scr-bk .bk .meta{font-size:9.5px;color:var(--muted);margin-top:1px;}
+  .scr-bk .bk .st{font-weight:700;color:#7c5cff;}
+  .scr-bk .bk .st.ok{color:#1f9d6b;}
+  .scr-bk .bk .ch2{margin-left:auto;color:var(--teal);font-size:14px;font-weight:700;}
+  .scr-nav{margin-top:auto;display:flex;background:#fff;border-top:1px solid var(--line);padding:8px 4px 12px;}
+  .scr-nav div{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:8.5px;font-weight:700;color:#9aa7ab;}
+  .scr-nav div.on{color:var(--teal);}
+  .scr-nav .nic{width:17px;height:17px;}
+  /* floating chips */
+  .chip-float{position:absolute;z-index:4;background:#fff;border-radius:16px;padding:12px 15px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:10px;font-weight:700;}
+  .chip-a{top:54px;left:-6px;}
+  .chip-b{bottom:78px;right:-14px;}
+  .chip-float .ic{width:34px;height:34px;border-radius:11px;background:var(--mint);color:var(--teal);display:flex;align-items:center;justify-content:center;flex:none;}
+  .chip-float .big{font-size:15px;line-height:1.1;}
+  .chip-float .small{font-size:11.5px;color:var(--muted);font-weight:600;}
+
+  /* ---------- category strip ---------- */
+  .cats{padding:8px 0 6px;}
+  .cats-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:center;}
+  .cat-pill{display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);
+    border-radius:999px;padding:11px 19px;font-weight:700;font-size:15px;box-shadow:var(--shadow-sm);}
+  .cat-pill svg{color:var(--teal);}
+  .cats-note{text-align:center;color:var(--muted);font-size:15px;margin-top:18px;}
+  .cats-note b{color:var(--ink);}
+
+  /* ---------- generic section head ---------- */
+  .sec{padding:84px 0;}
+  .sec-head{max-width:680px;margin-bottom:46px;}
+  .sec-head.center{margin-left:auto;margin-right:auto;text-align:center;}
+  .sec-head h2{font-size:clamp(30px,3.6vw,44px);font-weight:800;line-height:1.06;margin:14px 0 0;}
+  .sec-head p{font-size:18px;color:var(--muted);margin-top:16px;line-height:1.6;}
+
+  /* features */
+  .feat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+  .feat{background:var(--card);border-radius:var(--r);padding:30px 26px;box-shadow:var(--shadow-sm);border:1px solid rgba(227,232,235,.7);transition:.2s;}
+  .feat:hover{transform:translateY(-4px);box-shadow:var(--shadow);}
+  .feat .ic{width:54px;height:54px;border-radius:16px;background:var(--mint);color:var(--teal);display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+  .feat h3{font-size:19px;font-weight:800;margin-bottom:10px;}
+  .feat p{font-size:15px;color:var(--muted);line-height:1.55;}
+  @media(max-width:980px){.feat-grid{grid-template-columns:repeat(2,1fr);}}
+
+  /* ai agents (fishka) */
+  .ai{background:linear-gradient(180deg,#e7f2f3,var(--bg));}
+  .ai-tag{display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--mint2);border-radius:999px;padding:8px 16px;font-weight:700;font-size:13.5px;color:var(--g2);box-shadow:var(--shadow-sm);margin-bottom:18px;}
+  .ai-tag .live{width:9px;height:9px;border-radius:50%;background:#e69a1f;box-shadow:0 0 0 4px rgba(230,154,31,.18);animation:livepulse 1.8s infinite;}
+  @keyframes livepulse{50%{opacity:.45;}}
+  .ai-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:8px;}
+  .ai-card{background:#fff;border-radius:var(--r);padding:30px 28px;border:1px solid rgba(227,232,235,.8);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;transition:.2s;}
+  .ai-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);}
+  .ai-card .ic{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+  .ai-card h3{font-size:20px;font-weight:800;margin-bottom:10px;}
+  .ai-card p{font-size:15px;color:var(--muted);line-height:1.55;margin-bottom:18px;}
+  .ai-ex{margin-top:auto;display:flex;gap:10px;align-items:flex-start;background:var(--mint);border-radius:14px;padding:12px 14px;}
+  .ai-ex .ab{font-size:10px;font-weight:800;letter-spacing:.04em;color:#fff;background:var(--teal);border-radius:7px;padding:4px 7px;flex:none;margin-top:1px;}
+  .ai-ex .tx{font-size:13px;color:var(--g2);font-weight:600;line-height:1.4;}
+  .ai-foot{margin-top:28px;text-align:center;font-size:16px;color:var(--muted);}
+  .ai-foot b{color:var(--ink);}
+  @media(max-width:860px){.ai-grid{grid-template-columns:1fr;}}
+
+  /* cta form */
+  .cta-form{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:560px;margin:0 auto;}
+  .cta-form input{flex:1;min-width:240px;font-family:inherit;font-size:16px;font-weight:600;border:0;border-radius:999px;padding:17px 24px;color:var(--ink);background:#fff;outline:none;box-shadow:0 10px 24px -16px rgba(0,0,0,.4);}
+  .cta-form input::placeholder{color:#9aa9af;font-weight:500;}
+  .cta-ok{margin:6px auto 0;max-width:520px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);border-radius:16px;padding:16px 22px;font-size:16px;font-weight:700;}
+
+  /* how it works */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;counter-reset:s;}
+  .step{position:relative;padding-top:18px;}
+  .step .n{font-size:15px;font-weight:800;color:var(--teal);background:var(--mint);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
+  .step h3{font-size:18px;font-weight:800;margin-bottom:9px;}
+  .step p{font-size:15px;color:var(--muted);line-height:1.55;}
+  .step::before{content:"";position:absolute;top:39px;left:54px;right:-22px;height:2px;background:linear-gradient(90deg,var(--mint2),transparent);}
+  .step:last-child::before{display:none;}
+  @media(max-width:980px){.steps{grid-template-columns:repeat(2,1fr);}.step::before{display:none;}}
+
+  /* promotion split */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:center;}
+  .split.rev .split-media{order:-1;}
+  .split-text h2{font-size:clamp(28px,3.4vw,40px);font-weight:800;line-height:1.08;margin:14px 0 18px;}
+  .split-text p{font-size:17px;color:var(--muted);line-height:1.6;margin-bottom:24px;}
+  .checklist{display:flex;flex-direction:column;gap:14px;margin-bottom:28px;}
+  .check{display:flex;gap:13px;align-items:flex-start;font-size:16px;font-weight:600;}
+  .check .ck{width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px;}
+  @media(max-width:860px){.split{grid-template-columns:1fr;gap:34px;}.split.rev .split-media{order:0;}}
+
+  /* gallery mock */
+  .gal-mock{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);padding:22px;border:1px solid var(--line);}
+  .gal-mock .gm-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .gal-mock .gm-head .dot{width:11px;height:11px;border-radius:50%;background:var(--line);}
+  .gal-mock .gm-head .t{margin-left:6px;font-weight:800;font-size:14px;}
+  .gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .gal-item{position:relative;aspect-ratio:1/1;border-radius:16px;overflow:hidden;background:var(--mint2);}
+  .gal-item .tag{position:absolute;top:8px;left:8px;background:rgba(14,138,153,.92);color:#fff;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:8px;z-index:3;}
+  .gal-item .play{position:absolute;inset:0;margin:auto;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;z-index:3;}
+  .gal-item .play .tri{width:0;height:0;border-left:13px solid var(--g2);border-top:8px solid transparent;border-bottom:8px solid transparent;margin-left:3px;}
+
+  /* founder */
+  .founder{background:var(--sand);}
+  .founder-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:54px;align-items:center;}
+  .founder-photo{position:relative;}
+  .founder-photo image-slot{width:100%;aspect-ratio:4/5;display:block;box-shadow:var(--shadow);}
+  .founder-badge{position:absolute;bottom:-18px;left:24px;background:#fff;border-radius:18px;padding:14px 18px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:12px;}
+  .founder-badge .ic{width:40px;height:40px;border-radius:12px;background:var(--mint);color:var(--teal);display:flex;align-items:center;justify-content:center;}
+  .founder-badge b{font-size:14px;}.founder-badge span{font-size:12px;color:var(--muted);}
+  .founder h2{font-size:clamp(28px,3.4vw,42px);font-weight:800;line-height:1.07;margin:14px 0 20px;}
+  .founder .lead{font-size:18px;color:var(--ink);line-height:1.65;margin-bottom:18px;}
+  .founder .lead b{color:var(--g2);}
+  .founder p.sub{font-size:16px;color:var(--muted);line-height:1.6;margin-bottom:26px;}
+  .founder-stats{display:flex;gap:34px;margin-bottom:30px;flex-wrap:wrap;}
+  .fstat .v{font-size:30px;font-weight:800;color:var(--g2);line-height:1;}
+  .fstat .l{font-size:13.5px;color:var(--muted);margin-top:6px;}
+  @media(max-width:860px){.founder-grid{grid-template-columns:1fr;gap:50px;}}
+
+  /* comparison */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .cmp{border-radius:var(--r);padding:34px 30px;}
+  .cmp.them{background:#fff;border:1px solid var(--line);}
+  .cmp.us{background:linear-gradient(155deg,var(--g1),var(--g2));color:#fff;box-shadow:var(--shadow);}
+  .cmp h3{font-size:22px;font-weight:800;margin-bottom:6px;}
+  .cmp .cap{font-size:14px;opacity:.7;margin-bottom:24px;}
+  .cmp.us .cap{opacity:.82;}
+  .cmp ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:15px;}
+  .cmp li{display:flex;gap:13px;align-items:flex-start;font-size:16px;font-weight:600;}
+  .cmp li .mk{width:24px;height:24px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .cmp.them li .mk{background:#fbeaea;color:#cf5b5b;}
+  .cmp.them li{color:var(--muted);}
+  .cmp.us li .mk{background:rgba(255,255,255,.2);color:#fff;}
+  @media(max-width:760px){.compare{grid-template-columns:1fr;}}
+
+  /* video */
+  .video-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .vid{position:relative;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);background:#0a5560;}
+  .vid image-slot{width:100%;aspect-ratio:16/10;display:block;}
+  .vid-yt{cursor:pointer;aspect-ratio:16/10;}
+  .vid-yt .yt-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .vid-yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0;z-index:6;}
+  .vid-yt .play{transition:.18s;}
+  .vid-yt:hover .play{transform:scale(1.07);}
+  .vid-yt::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.45));z-index:2;}
+  .vid .play{position:absolute;inset:0;margin:auto;width:78px;height:78px;border-radius:50%;background:rgba(255,255,255,.94);
+    display:flex;align-items:center;justify-content:center;z-index:4;box-shadow:0 20px 44px -16px rgba(0,0,0,.5);pointer-events:none;}
+  .vid .play .tri{width:0;height:0;border-left:24px solid var(--g2);border-top:14px solid transparent;border-bottom:14px solid transparent;margin-left:6px;}
+  .vid .vlabel{position:absolute;left:18px;bottom:16px;z-index:4;color:#fff;font-weight:800;font-size:17px;text-shadow:0 2px 14px rgba(0,0,0,.5);pointer-events:none;}
+  @media(max-width:760px){.video-grid{grid-template-columns:1fr;}}
+
+  /* pwa */
+  .pwa{background:linear-gradient(160deg,#0f2c36,#0a4651);color:#fff;border-radius:34px;padding:60px;overflow:hidden;position:relative;}
+  .pwa-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;}
+  .pwa h2{font-size:clamp(28px,3.4vw,40px);font-weight:800;line-height:1.08;margin-bottom:18px;}
+  .pwa p{font-size:17px;color:rgba(255,255,255,.82);line-height:1.6;margin-bottom:26px;max-width:480px;}
+  .pwa-steps{display:flex;flex-direction:column;gap:16px;}
+  .pwa-step{display:flex;gap:14px;align-items:center;font-size:16px;font-weight:600;}
+  .pwa-step .n{width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.14);color:#9fe7ef;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;}
+  .pwa-visual{display:flex;justify-content:center;}
+  .pwa-icon{width:150px;height:150px;border-radius:36px;background:linear-gradient(150deg,var(--g1),var(--g2));display:flex;align-items:center;justify-content:center;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);}
+  @media(max-width:860px){.pwa{padding:42px 28px;}.pwa-grid{grid-template-columns:1fr;gap:38px;}}
+
+  /* faq */
+  .faq{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+  .qa{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.2s;}
+  .qa summary{list-style:none;cursor:pointer;padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:18px;font-weight:700;font-size:17.5px;}
+  .qa summary::-webkit-details-marker{display:none;}
+  .qa .plus{width:30px;height:30px;flex:none;border-radius:50%;background:var(--mint);color:var(--teal);display:flex;align-items:center;justify-content:center;transition:.2s;font-size:20px;font-weight:600;}
+  .qa[open] .plus{transform:rotate(45deg);background:var(--teal);color:#fff;}
+  .qa .a{padding:0 26px 24px;font-size:16px;color:var(--muted);line-height:1.6;}
+  .qa[open]{box-shadow:var(--shadow-sm);}
+
+  /* final cta */
+  .final{background:linear-gradient(150deg,var(--g1),var(--g2));border-radius:34px;padding:70px 40px;text-align:center;color:#fff;position:relative;overflow:hidden;}
+  .final::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.16),transparent 60%);}
+  .final-inner{position:relative;z-index:2;}
+  .final h2{font-size:clamp(32px,4.2vw,52px);font-weight:800;line-height:1.04;margin-bottom:18px;}
+  .final p{font-size:19px;color:rgba(255,255,255,.88);margin-bottom:34px;}
+  .final .btn-white{font-size:18px;padding:18px 38px;}
+  .final-sub{margin-top:18px;font-size:14px;color:rgba(255,255,255,.78);}
+
+  /* footer */
+  footer{padding:60px 0 40px;}
+  .foot-grid{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;align-items:flex-start;padding-bottom:30px;border-bottom:1px solid var(--line);}
+  .foot-brand{max-width:300px;}
+  .foot-brand p{font-size:14.5px;color:var(--muted);margin-top:14px;line-height:1.55;}
+  .foot-cols{display:flex;gap:64px;flex-wrap:wrap;}
+  .foot-col h4{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);margin:0 0 16px;}
+  .foot-col a{display:block;font-size:15px;color:var(--muted);margin-bottom:11px;transition:.15s;}
+  .foot-col a:hover{color:var(--teal);}
+  .foot-bottom{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-top:24px;font-size:14px;color:var(--muted);}
+
+  /* ---------- tweaks panel ---------- */
+  #tweaks{position:fixed;right:22px;bottom:22px;z-index:200;width:288px;background:#fff;border-radius:20px;
+    box-shadow:0 30px 70px -24px rgba(7,60,70,.55);border:1px solid var(--line);padding:18px;display:none;}
+  #tweaks.on{display:block;}
+  #tweaks .tk-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  #tweaks .tk-h b{font-size:15px;}
+  #tweaks .tk-x{border:0;background:var(--bg);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--muted);}
+  .tk-row{margin-bottom:16px;}
+  .tk-row .lab{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:9px;}
+  .tk-swatches{display:flex;gap:9px;}
+  .tk-sw{width:34px;height:34px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.15s;}
+  .tk-sw.sel{border-color:var(--ink);}
+  .tk-seg{display:flex;background:var(--bg);border-radius:11px;padding:3px;gap:3px;}
+  .tk-seg button{flex:1;border:0;background:transparent;font-family:inherit;font-weight:700;font-size:12.5px;color:var(--muted);padding:8px 0;border-radius:9px;cursor:pointer;transition:.15s;}
+  .tk-seg button.sel{background:#fff;color:var(--g2);box-shadow:var(--shadow-sm);}
+  .tk-toggle{display:flex;align-items:center;justify-content:space-between;}
+  .tk-toggle span{font-size:14px;font-weight:600;}
+  .tk-switch{width:46px;height:26px;border-radius:99px;background:var(--line);position:relative;cursor:pointer;transition:.2s;border:0;}
+  .tk-switch.on{background:var(--teal);}
+  .tk-switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;}
+  .tk-switch.on::after{left:23px;}
+
+  @media(max-width:860px){
+    .hero-grid{grid-template-columns:1fr;gap:46px;}
+    .hero.var-soft .hero-inner{padding:38px 26px;}
+    .phone-stage{min-height:0;}
+    .foot-grid{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <rect width="100" height="100" rx="22" fill="#0E8A99"/>
+    <circle cx="50" cy="50" r="26" fill="none" stroke="#fff" stroke-width="3.4" opacity=".4"/>
+    <path d="M28 56 C36 44 42 44 50 53 C58 62 64 62 72 48" fill="none" stroke="#fff" stroke-width="4.6" stroke-linecap="round"/>
+  </svg>
+</template>
+
+<!-- ============ HEADER ============ -->
+<header id="hdr">
+  <div class="wrap bar">
+    <a href="#" class="logo" aria-label="onWaves">
+      <img class="logo-mark" src="assets/onwaves-logo.png" alt="onWaves" width="42" height="42" />
+      <span><b>on</b>Waves</span>
+    </a>
+    <nav class="main">
+      <a href="#features">Возможности</a>
+      <a href="#how">Как это работает</a>
+      <a href="#ai">ИИ-агенты</a>
+      <a href="#promo">Продвижение</a>
+      <a href="#founder">О сервисе</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <div class="head-cta">
+      <a href="#" class="link-login">Вход</a>
+      <a href="#cta" class="btn btn-primary">Стать мастером</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero var-soft" id="hero">
+  <div class="wrap">
+    <div class="hero-card">
+      <div class="hero-inner">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="kicker hero-eyebrow">Платформа для мастеров</div>
+            <h1>Принимайте записи <em>24/7</em> — бесплатно и без комиссий</h1>
+            <p class="hero-sub">onWaves — это онлайн-запись, расписание и продвижение в одном кабинете — бесплатно для мастеров. А совсем скоро подключатся <b style="color:var(--ink);font-weight:800;">ИИ-агенты</b>, которые возьмут на себя график и помогут с клиентами.</p>
+            <div class="badges">
+              <span class="badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Бесплатно для мастеров</span>
+              <span class="badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>0% скрытых комиссий</span>
+              <span class="badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18 9l-4.1 1.4L12 15l-1.9-4.6L6 9l4.1-1.4z"/></svg>ИИ-агенты — скоро</span>
+            </div>
+            <div class="hero-actions">
+              <a href="#cta" class="btn btn-primary">Стать мастером бесплатно <svg class="arr" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+              <a href="#video" class="btn btn-ghost"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Смотреть, как это работает</a>
+            </div>
+            <p class="hero-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Без карты и абонплаты. Никаких списаний за записи.</p>
+          </div>
+
+          <div class="hero-right">
+            <div class="phone-stage">
+              <div class="phone-glow"></div>
+              <div class="chip-float chip-a">
+                <div class="ic" style="font-weight:800;font-size:18px;line-height:1;">₽</div>
+                <div><div class="big">0%</div><div class="small">комиссий</div></div>
+              </div>
+              <div class="chip-float chip-b">
+                <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
+                <div><div class="big">+3 записи</div><div class="small">сегодня</div></div>
+              </div>
+              <div class="phone">
+                <div class="phone-screen">
+                  <div class="phone-notch"></div>
+                  <div class="scr">
+                    <div class="scr-bar">
+                      <img class="scr-logo" src="assets/onwaves-logo.png" alt="onWaves" />
+                      <span class="sp"></span>
+                      <span class="scr-bell2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+                      <span class="scr-ava"></span>
+                      <span class="scr-menu"><i></i><i></i><i></i></span>
+                    </div>
+                    <div class="scr-title">Мои записи</div>
+                    <div class="scr-month"><span class="ch">‹</span><b>Июнь</b><span class="ch">›</span></div>
+                    <div class="scr-wd"><span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span>сб</span><span>вс</span></div>
+                    <div class="scr-cal">
+                      <div class="cell past">1</div><div class="cell past">2</div><div class="cell past">3</div><div class="cell past">4</div><div class="cell past">5</div><div class="cell past">6</div><div class="cell past">7</div>
+                      <div class="cell past">8</div><div class="cell past">9</div><div class="cell past">10</div><div class="cell past">11</div><div class="cell past">12</div><div class="cell act">13<span class="pl">+</span></div><div class="cell act out">14<span class="pl">+</span></div>
+                      <div class="cell">15</div><div class="cell">16</div><div class="cell">17</div><div class="cell">18</div><div class="cell">19</div><div class="cell">20</div><div class="cell">21</div>
+                      <div class="cell">22</div><div class="cell">23</div><div class="cell">24</div><div class="cell">25</div><div class="cell">26</div><div class="cell">27</div><div class="cell">28</div>
+                      <div class="cell">29</div><div class="cell">30</div>
+                    </div>
+                    <div class="scr-legend"><span><i class="lg-a"></i>есть окна</span><span><i class="lg-b"></i>занято</span><span><i class="lg-c"></i>прошло</span></div>
+                    <div class="scr-bk">
+                      <div class="bk">
+                        <span class="ava"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6z"/></svg></span>
+                        <div class="bkinfo"><div class="nm">Павел Вальмон</div><div class="meta"><span class="st">В ожидании</span> · 25 апр.</div></div>
+                        <span class="ch2">⌄</span>
+                      </div>
+                      <div class="bk">
+                        <span class="ava"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6z"/></svg></span>
+                        <div class="bkinfo"><div class="nm">Ирина Соколова</div><div class="meta"><span class="st ok">Подтверждена</span> · 3 мая</div></div>
+                        <span class="ch2">⌄</span>
+                      </div>
+                    </div>
+                    <div class="scr-nav">
+                      <div><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Поиск</div>
+                      <div class="on"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Записи</div>
+                      <div><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 7-8"/><path d="M16 8h5v5"/></svg>Кабинет</div>
+                      <div><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>Профиль</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CATEGORY STRIP ============ -->
+<section class="cats">
+  <div class="wrap">
+    <div class="cats-row">
+      <span class="cat-pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3c0 1.5 1 2 1 4H8a6 6 0 0 0 8 0h-2c0-2 1-2.5 1-4a3 3 0 0 0-3-3zM6 14l-2 8M18 14l2 8M9 14v8M15 14v8"/></svg>Красота</span>
+      <span class="cat-pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7zM1 5h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H1z"/></svg>Фото и видео</span>
+      <span class="cat-pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Компьютеры и IT</span>
+      <span class="cat-pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 7h.01"/></svg>Бытовые услуги</span>
+      <span class="cat-pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 7l-3-3-8 8 3 3M11 4l6 6M21 13l-6 6-3-3 6-6z"/></svg>Строительство</span>
+    </div>
+    <p class="cats-note">Мы рады мастеру <b>любой профессии</b> — от ногтевого сервиса до ремонта и IT.</p>
+  </div>
+</section>
+
+<!-- ============ AI AGENTS (FISHKA) ============ -->
+<section class="sec ai" id="ai">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="ai-tag"><span class="live"></span>В разработке · скоро у каждого мастера</span>
+      <h2>ИИ-агенты, которые возьмут рутину на себя</h2>
+      <p>Направление, над которым мы сейчас работаем. Агенты подключаются примерно через месяц активной работы — когда узнают ваш график, услуги и клиентов, чтобы помогать действительно по делу.</p>
+    </div>
+    <div class="ai-grid">
+      <div class="ai-card">
+        <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14v3l2 1"/></svg></div>
+        <h3>Агент расписания</h3>
+        <p>Будет оптимизировать график: подбирать удобные слоты, заполнять свободные окна и предупреждать о накладках.</p>
+        <div class="ai-ex"><span class="ab">Скоро</span><span class="tx">Окно в 14:00 — предложить клиенту из листа ожидания?</span></div>
+      </div>
+      <div class="ai-card">
+        <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>Агент клиентов</h3>
+        <p>Будет напоминать о записи, мягко возвращать тех, кто давно не приходил, и отвечать на типовые вопросы за вас.</p>
+        <div class="ai-ex"><span class="ab">Скоро</span><span class="tx">Напомню 3 клиентам о записи на завтра ✓</span></div>
+      </div>
+      <div class="ai-card">
+        <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 5.8L20 9l-5.6 2.2L12 17l-2.4-5.8L4 9l5.6-1.2zM19 15l1 2.4L22 18l-2 .6L19 21l-1-2.4L16 18l2-.6z"/></svg></div>
+        <h3>Агент роста</h3>
+        <p>Будет подсказывать, что показать в галерее и какие услуги продвигать, чтобы вас находило больше людей.</p>
+        <div class="ai-ex"><span class="ab">Скоро</span><span class="tx">Добавьте 2 фото — профиль покажем чаще</span></div>
+      </div>
+    </div>
+    <p class="ai-foot">Агенты включаются примерно <b>через месяц работы</b>, когда узнают ваш стиль. А запись, расписание и продвижение работают <b>бесплатно с первого дня</b>.</p>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="sec" id="features">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">Почему мастера выбирают нас</div>
+      <h2>Всё для стабильной записи клиентов — в одном сервисе</h2>
+      <p>Никаких таблиц, переписок и упущенных клиентов. onWaves берёт на себя запись, расписание и напоминания.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
+        <h3>Быстрый старт без затрат</h3>
+        <p>Регистрация и базовые функции бесплатны. Вы начинаете работать без комиссии и скрытых списаний.</p>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
+        <h3>Гибкое управление услугами</h3>
+        <p>Добавляйте услуги, меняйте цены и длительность, собирайте понятный прайс для клиентов.</p>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
+        <h3>Оповещения и расписание</h3>
+        <p>Автоуведомления о новых записях и изменениях помогают держать личный график под контролем.</p>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg></div>
+        <h3>Продвижение услуг</h3>
+        <p>Галерея работ, метки «Продвигаю» и попадание в рекомендации — клиенты находят вас сами.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="sec" id="how" style="padding-top:0;">
+  <div class="wrap">
+    <div class="sec-head center">
+      <div class="kicker">Как это работает</div>
+      <h2>От регистрации до первой записи — за один вечер</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Зарегистрируйтесь</h3><p>Создайте профиль мастера за 10 минут. Карта и оплата не нужны.</p></div>
+      <div class="step"><div class="n">2</div><h3>Настройте услуги</h3><p>Добавьте услуги, цены и удобное расписание под свой ритм.</p></div>
+      <div class="step"><div class="n">3</div><h3>Принимайте записи</h3><p>Клиенты бронируют онлайн 24/7, вы получаете уведомления.</p></div>
+      <div class="step"><div class="n">4</div><h3>Продвигайтесь</h3><p>Загружайте работы, попадайте в рекомендации и набирайте клиентов.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROMOTION SPLIT ============ -->
+<section class="sec" id="promo" style="background:#fff;">
+  <div class="wrap">
+    <div class="split">
+      <div class="split-text">
+        <div class="kicker">Продвижение внутри платформы</div>
+        <h2>Не просто запись — а поток новых клиентов</h2>
+        <p>onWaves помогает не только удержать клиентов, но и находить новых. Покажите свои работы, и платформа сама приведёт людей, которые ищут вашу услугу рядом.</p>
+        <div class="checklist">
+          <div class="check"><span class="ck"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Галерея фото и видео ваших работ</div>
+          <div class="check"><span class="ck"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Метка «Продвигаю» для приоритетных услуг</div>
+          <div class="check"><span class="ck"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Показ в разделах «Рекомендуем» и «Рядом»</div>
+          <div class="check"><span class="ck"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Понятный профиль с услугами, ценами и отзывами</div>
+        </div>
+        <a href="#cta" class="btn btn-primary">Создать профиль мастера <svg class="arr" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="split-media">
+        <div class="gal-mock">
+          <div class="gm-head"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">Галерея · мои работы</span></div>
+          <div class="gal-grid">
+            <div class="gal-item"><span class="tag">Продвигаю</span><image-slot id="gal1" shape="rounded" radius="16" placeholder="Фото работы" style="width:100%;height:100%;"></image-slot></div>
+            <div class="gal-item"><span class="tag">Продвигаю</span><span class="play"><span class="tri"></span></span><image-slot id="gal2" shape="rounded" radius="16" placeholder="Видео" style="width:100%;height:100%;"></image-slot></div>
+            <div class="gal-item"><image-slot id="gal3" shape="rounded" radius="16" placeholder="Фото" style="width:100%;height:100%;"></image-slot></div>
+            <div class="gal-item"><image-slot id="gal4" shape="rounded" radius="16" placeholder="Фото" style="width:100%;height:100%;"></image-slot></div>
+            <div class="gal-item"><span class="tag">Продвигаю</span><image-slot id="gal5" shape="rounded" radius="16" placeholder="Фото" style="width:100%;height:100%;"></image-slot></div>
+            <div class="gal-item"><image-slot id="gal6" shape="rounded" radius="16" placeholder="Фото" style="width:100%;height:100%;"></image-slot></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOUNDER ============ -->
+<section class="sec founder" id="founder">
+  <div class="wrap">
+    <div class="founder-grid">
+      <div class="founder-photo">
+        <image-slot id="founder" shape="rounded" radius="24" placeholder="Фото основателя (необязательно)"></image-slot>
+        <div class="founder-badge">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-2 9.6V14l-1 8h6l-1-8v-2.4A5 5 0 0 0 12 2z"/></svg></div>
+          <div><b>Основатель + ИИ</b><br><span>дорабатываю под мастера</span></div>
+        </div>
+      </div>
+      <div class="founder-text">
+        <div class="kicker">Стартап, который слышит</div>
+        <h2>Да, мы стартап — и в этом наша сила</h2>
+        <p class="lead">onWaves развивает основатель лично, активно используя ИИ и передовые технологии. Мы <b>открыты к замечаниям, всегда на связи и готовы меняться</b> под то, как работаете именно вы.</p>
+        <p class="sub">Здесь нет колл-центра и шаблонных ответов. Не хватает функции или что-то неудобно — напишите, и мы доработаем приложение под ваш запрос. Сервис растёт вместе с мастерами, которые им пользуются.</p>
+        <div class="founder-stats">
+          <div class="fstat"><div class="v">0₽</div><div class="l">за подключение и записи</div></div>
+          <div class="fstat"><div class="v">1:1</div><div class="l">общение с основателем</div></div>
+          <div class="fstat"><div class="v">∞</div><div class="l">доработок под запрос</div></div>
+        </div>
+        <a href="#cta" class="btn btn-primary">Предложить функцию <svg class="arr" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMPARISON ============ -->
+<section class="sec" style="background:#fff;">
+  <div class="wrap">
+    <div class="sec-head center">
+      <div class="kicker">Честное сравнение</div>
+      <h2>Что обычно платят мастера — и что у вас на onWaves</h2>
+    </div>
+    <div class="compare">
+      <div class="cmp them">
+        <h3>Обычные сервисы записи</h3>
+        <p class="cap">Привычная модель большинства платформ</p>
+        <ul>
+          <li><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></span>Абонплата и пакеты «за всё сразу»</li>
+          <li><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></span>Комиссия с каждой записи</li>
+          <li><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></span>Скрытые платежи и доплаты</li>
+          <li><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></span>Шаблон без доработок под вас</li>
+        </ul>
+      </div>
+      <div class="cmp us">
+        <h3><span style="display:inline-flex;align-items:center;gap:10px;"><img src="assets/onwaves-logo-white.png" alt="" width="26" height="26" style="display:block;" />onWaves</span></h3>
+        <p class="cap">Бесплатно и прозрачно — для мастеров</p>
+        <ul>
+          <li><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>0₽ за подключение и базовые функции</li>
+          <li><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>0% комиссий с ваших записей</li>
+          <li><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Никаких скрытых платежей</li>
+          <li><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Доработки под ваш запрос</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VIDEO ============ -->
+<section class="sec" id="video" style="padding-top:0;">
+  <div class="wrap">
+    <div class="sec-head center">
+      <div class="kicker">onWaves в деле</div>
+      <h2>Посмотрите, как мастера работают в приложении</h2>
+      <p>Короткие ролики о том, как устроены запись, расписание и продвижение. Перетащите кадр-обложку в плитку ниже.</p>
+    </div>
+    <div class="video-grid">
+      <div class="vid vid-yt" data-yt="muGywqkVs70">
+        <img class="yt-poster" src="https://i.ytimg.com/vi/muGywqkVs70/maxresdefault.jpg" alt="onWaves — видео" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/muGywqkVs70/hqdefault.jpg'" />
+        <span class="play"><span class="tri"></span></span>
+        <span class="vlabel">Знакомство с onWaves</span>
+      </div>
+      <div class="vid">
+        <image-slot id="vid2" shape="rect" placeholder="Обложка видео 2" style="background:linear-gradient(150deg,#0E8A99,#0a4651);"></image-slot>
+        <span class="play"><span class="tri"></span></span>
+        <span class="vlabel">Как зарегистрироваться</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PWA ============ -->
+<section class="sec" style="padding-top:0;">
+  <div class="wrap">
+    <div class="pwa">
+      <div class="pwa-grid">
+        <div>
+          <div class="kicker" style="color:#9fe7ef;">Установка PWA</div>
+          <h2>Поставьте onWaves на смартфон — как обычное приложение</h2>
+          <p>Скачивать из сторов не нужно. Запись, уведомления и расписание всегда под рукой — быстрее, чем работать в браузере.</p>
+          <div class="pwa-steps">
+            <div class="pwa-step"><span class="n">1</span>Откройте onWaves в браузере телефона</div>
+            <div class="pwa-step"><span class="n">2</span>Нажмите «Добавить на главный экран»</div>
+            <div class="pwa-step"><span class="n">3</span>Запускайте как приложение — в одно касание</div>
+          </div>
+        </div>
+        <div class="pwa-visual">
+          <div class="pwa-icon">
+            <img src="assets/onwaves-appicon.jpg" alt="onWaves" width="150" height="150" style="width:100%;height:100%;object-fit:cover;border-radius:36px;display:block;" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="sec" id="faq" style="padding-top:0;">
+  <div class="wrap">
+    <div class="sec-head center">
+      <div class="kicker">Частые вопросы</div>
+      <h2>Коротко о главном</h2>
+    </div>
+    <div class="faq">
+      <details class="qa" open><summary>Это правда бесплатно?<span class="plus">+</span></summary><div class="a">Да. Регистрация, профиль, онлайн-запись и базовые функции бесплатны для мастеров. Карта и абонплата не нужны.</div></details>
+      <details class="qa"><summary>Есть ли комиссия с записей?<span class="plus">+</span></summary><div class="a">Нет. Мы не берём процент с ваших записей и не делаем скрытых списаний — то, что вы зарабатываете, остаётся вашим.</div></details>
+      <details class="qa"><summary>Каким мастерам подходит onWaves?<span class="plus">+</span></summary><div class="a">Любым. Красота, фото и видео, IT, бытовые услуги, ремонт и строительство — мы рады мастеру любой профессии.</div></details>
+      <details class="qa"><summary>Нужно ли скачивать приложение из стора?<span class="plus">+</span></summary><div class="a">Нет. onWaves — это PWA: откройте сайт в браузере телефона и добавьте на главный экран. Работает как обычное приложение.</div></details>
+      <details class="qa"><summary>Как быстро можно начать?<span class="plus">+</span></summary><div class="a">Около 10 минут: зарегистрируйтесь, добавьте услуги и расписание — и можно принимать записи.</div></details>
+      <details class="qa"><summary>Можно ли запросить доработку под себя?<span class="plus">+</span></summary><div class="a">Да! Сервис развивает основатель лично с использованием ИИ. Не хватает функции — напишите, и мы доработаем приложение под ваш запрос.</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="sec" id="cta" style="padding-top:0;">
+  <div class="wrap">
+    <div class="final">
+      <div class="final-inner">
+        <h2>Станьте одним из первых мастеров onWaves</h2>
+        <p>Оставьте контакт — помогу подключиться и настроить профиль. Это бесплатно.</p>
+        <form class="cta-form" id="regForm">
+          <input type="text" name="contact" placeholder="Телефон или email" required />
+          <button type="submit" class="btn btn-white">Стать мастером бесплатно</button>
+        </form>
+        <div class="cta-ok" id="regOk" hidden>Готово! Я свяжусь с вами и помогу подключиться 💛</div>
+        <div class="final-sub">Подключение за 10 минут · без карты · 0% комиссий</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="logo" style="font-size:20px;">
+          <img class="logo-mark" src="assets/onwaves-logo.png" alt="onWaves" width="36" height="36" />
+          <span><b>on</b>Waves</span>
+        </a>
+        <p>Платформа онлайн-записи и продвижения услуг. Там, где встречаются мастера и клиенты.</p>
+      </div>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h4>Сервис</h4>
+          <a href="#features">Возможности</a>
+          <a href="#how">Как это работает</a>
+          <a href="#promo">Продвижение</a>
+          <a href="#video">Видео</a>
+        </div>
+        <div class="foot-col">
+          <h4>Мастеру</h4>
+          <a href="#cta">Стать мастером</a>
+          <a href="#faq">Вопросы</a>
+          <a href="#founder">О сервисе</a>
+          <a href="#">Вход</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 onWaves. Сделано с заботой о мастерах.</span>
+      <span>Бесплатно для мастеров · 0% скрытых комиссий</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ TWEAKS ============ -->
+<div id="tweaks">
+  <div class="tk-h"><b>Tweaks</b><button class="tk-x" id="tkClose">×</button></div>
+  <div class="tk-row">
+    <div class="lab">Акцентный цвет</div>
+    <div class="tk-swatches" id="tkAccent"></div>
+  </div>
+  <div class="tk-row">
+    <div class="lab">Фон Hero</div>
+    <div class="tk-seg" id="tkHero">
+      <button data-v="soft">Светлый</button>
+      <button data-v="gradient">Градиент</button>
+      <button data-v="sand">Тёплый</button>
+    </div>
+  </div>
+  <div class="tk-row tk-toggle">
+    <span>Блок основателя</span>
+    <button class="tk-switch" id="tkFounder"></button>
+  </div>
+</div>
+
+<script src="image-slot.js"></script>
+<script>
+  // ---- defaults (persisted by host) ----
+  const TWEAKS = /*EDITMODE-BEGIN*/{
+    "accent": "#0E8A99",
+    "heroStyle": "gradient",
+    "showFounder": true
+  }/*EDITMODE-END*/;
+
+  const ACCENTS = {
+    "#0E8A99": {teal:"#0E8A99", g1:"#12909F", g2:"#075A66", label:"Петроль"},
+    "#0F766E": {teal:"#0F766E", g1:"#13988C", g2:"#0A5249", label:"Изумруд"},
+    "#1481C4": {teal:"#1481C4", g1:"#2E9BDC", g2:"#0C5C8E", label:"Океан"}
+  };
+
+  function applyTweaks(){
+    const a = ACCENTS[TWEAKS.accent] || ACCENTS["#0E8A99"];
+    const r = document.documentElement.style;
+    r.setProperty('--teal', a.teal);
+    r.setProperty('--g1', a.g1);
+    r.setProperty('--g2', a.g2);
+    const hero = document.getElementById('hero');
+    hero.className = 'hero var-' + TWEAKS.heroStyle;
+    document.getElementById('founder').style.display = TWEAKS.showFounder ? '' : 'none';
+    // sync controls
+    document.querySelectorAll('#tkAccent .tk-sw').forEach(s=>s.classList.toggle('sel', s.dataset.v===TWEAKS.accent));
+    document.querySelectorAll('#tkHero button').forEach(b=>b.classList.toggle('sel', b.dataset.v===TWEAKS.heroStyle));
+    document.getElementById('tkFounder').classList.toggle('on', !!TWEAKS.showFounder);
+  }
+
+  function persist(edits){
+    Object.assign(TWEAKS, edits);
+    applyTweaks();
+    try{ window.parent.postMessage({type:'__edit_mode_set_keys', edits}, '*'); }catch(e){}
+  }
+
+  // build swatches
+  const sw = document.getElementById('tkAccent');
+  Object.entries(ACCENTS).forEach(([hex,v])=>{
+    const b=document.createElement('button');
+    b.className='tk-sw';b.dataset.v=hex;b.title=v.label;
+    b.style.background='linear-gradient(135deg,'+v.g1+','+v.g2+')';
+    b.onclick=()=>persist({accent:hex});
+    sw.appendChild(b);
+  });
+  document.querySelectorAll('#tkHero button').forEach(b=>b.onclick=()=>persist({heroStyle:b.dataset.v}));
+  document.getElementById('tkFounder').onclick=()=>persist({showFounder:!TWEAKS.showFounder});
+
+  // ---- tweaks host protocol ----
+  const panel = document.getElementById('tweaks');
+  window.addEventListener('message', (e)=>{
+    const t = e.data && e.data.type;
+    if(t==='__activate_edit_mode') panel.classList.add('on');
+    else if(t==='__deactivate_edit_mode') panel.classList.remove('on');
+  });
+  document.getElementById('tkClose').onclick=()=>{
+    panel.classList.remove('on');
+    try{ window.parent.postMessage({type:'__edit_mode_dismissed'}, '*'); }catch(e){}
+  };
+  try{ window.parent.postMessage({type:'__edit_mode_available'}, '*'); }catch(e){}
+
+  applyTweaks();
+
+  // ---- header shadow on scroll ----
+  const hdr = document.getElementById('hdr');
+  const onScroll = ()=>hdr.classList.toggle('scrolled', window.scrollY>10);
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // ---- youtube facade ----
+  document.querySelectorAll('.vid-yt').forEach(v=>{
+    v.addEventListener('click', ()=>{
+      if(v.dataset.loaded) return;
+      v.dataset.loaded='1';
+      const id=v.dataset.yt;
+      const f=document.createElement('iframe');
+      f.src='https://www.youtube.com/embed/'+id+'?autoplay=1&rel=0';
+      f.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      f.allowFullscreen=true;
+      v.appendChild(f);
+    });
+  });
+
+  // ---- registration form ----
+  const regForm = document.getElementById('regForm');
+  if(regForm){
+    regForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      regForm.hidden = true;
+      document.getElementById('regOk').hidden = false;
+    });
+  }
+
+  // ---- single-open FAQ ----
+  const qas = document.querySelectorAll('.qa');
+  qas.forEach(q=>q.addEventListener('toggle', ()=>{
+    if(q.open) qas.forEach(o=>{ if(o!==q) o.open=false; });
+  }));
+</script>
+</body>
+</html>

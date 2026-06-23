@@ -7,19 +7,17 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {ProfileDataEditService} from "../../services/ba-edit-service";
 import {IViewAddress} from "../../../DTO/views/IViewAddress";
 import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessProfile";
-import {ProfileService} from "../../../../services/profile.service";
 import {stringToTime} from "../../../../helpers/dateUtils/dateUtils";
 import {select, Store} from "@ngrx/store";
 import {selectProfileMainClient} from "../../../ngrx-store/mainClient/store.select";
 import {LoginService} from "../../../auth/login.service";
-import {catchError, combineLatest, map, Observable, of, Subscription} from "rxjs";
+import {combineLatest, map, Observable, Subscription} from "rxjs";
 import {UserType} from "../../../DTO/classes/profiles/profile-user.model";
-import { Location } from '@angular/common';
 @Component({
   selector: 'app-column-ba-edit-profile',
   templateUrl: './column-baprofile.component.html',
   styleUrls: ['./column-baprofile.component.scss'],
-  providers: [ScheduleService, ProfileService ]
+  providers: [ScheduleService]
 })
 export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
   @Input() id: string | null = null;
@@ -32,10 +30,7 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
   avatar: any;
   
   address: string = '';
-  /** null — запрос ещё не завершён; true — уведомления в Telegram уже подключены; false — нет */
-  isTelegramNotificationsConnected: boolean | null = null;
   private unsubscribe$: Subscription|null = null;
-  private telegramNotificationSub?: Subscription;
   auth: Observable<boolean> = new Observable<boolean>();
   constructor(private _route: ActivatedRoute,
               private _apiSchedule: ScheduleService,
@@ -43,8 +38,7 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
               private _dataService: ProfileDataEditService,
               private sanitizer: DomSanitizer,
               private store: Store,
-              private _login: LoginService,
-              private _profile: ProfileService) {
+              private _login: LoginService) {
     this.auth = combineLatest([_login.isLoad$,_login.isAutentificate$]).pipe(map(([isLoad, isAuth]) => {
       return !(isLoad && !isAuth);
     })
@@ -83,18 +77,6 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsubscribe$?.unsubscribe();
-    this.telegramNotificationSub?.unsubscribe();
-  }
-
-  private loadTelegramNotificationStatus(profileId: string): void {
-    this.telegramNotificationSub?.unsubscribe();
-    this.isTelegramNotificationsConnected = null;
-    this.telegramNotificationSub = this._profile
-      .hasTelegramNotification(profileId)
-      .pipe(catchError(() => of(false)))
-      .subscribe((connected) => {
-        this.isTelegramNotificationsConnected = connected;
-      });
   }
 
   onEdit(){
@@ -122,15 +104,11 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
             }
             if (this.businessProfile?.id) {
               this._dataService.transferBusinessProfile(this.businessProfile);
-              this.loadTelegramNotificationStatus(this.businessProfile.id);
             }
           });
         } else {
           this.businessProfile = mainProfile;
           this._dataService.transferBusinessProfile(this.businessProfile);
-          if (mainProfile.id) {
-            this.loadTelegramNotificationStatus(mainProfile.id);
-          }
         }
       }
     });

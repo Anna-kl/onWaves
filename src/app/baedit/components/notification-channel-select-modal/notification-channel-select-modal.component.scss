@@ -1,0 +1,126 @@
+@import "../../../../assets/styles/main/color.scss";
+
+.channel-modal {
+  padding: 28px 24px;
+  position: relative;
+}
+
+.channel-modal__header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.channel-modal__title {
+  font-size: 20px;
+  font-weight: 600;
+  color: $black;
+  margin: 0 0 8px;
+}
+
+.channel-modal__subtitle {
+  font-size: 14px;
+  line-height: 1.5;
+  color: $grey-dark;
+  margin: 0;
+}
+
+.channel-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  color: $grey-dark;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba($black, 0.05);
+  }
+}
+
+.channel-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.channel-modal__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba($black, 0.08);
+  border-radius: 14px;
+  background: $white;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+  text-align: left;
+
+  &:hover:not(:disabled) {
+    border-color: $color-info;
+    box-shadow: 0 2px 8px rgba($color-info, 0.12);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--loading {
+    pointer-events: none;
+  }
+}
+
+.channel-modal__icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--telegram {
+    background: rgba(42, 171, 238, 0.1);
+  }
+
+  &--vk {
+    background: rgba(0, 119, 255, 0.1);
+  }
+
+  &--max {
+    background: rgba(255, 102, 0, 0.1);
+  }
+}
+
+.channel-modal__name {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+  color: $black;
+}
+
+.channel-modal__arrow {
+  flex-shrink: 0;
+  color: $grey-dark;
+}
+
+.channel-modal__error {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(red, 0.07);
+  color: #c0392b;
+  font-size: 13px;
+  text-align: center;
+}

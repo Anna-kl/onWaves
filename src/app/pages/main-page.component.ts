@@ -1,5 +1,7 @@
 
 import { Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {ProfileService} from "../../services/profile.service";
 import {selectProfileMainClient} from "../ngrx-store/mainClient/store.select";
 import {select, Store} from "@ngrx/store";
@@ -7,6 +9,7 @@ import { Subscription, take } from 'rxjs';
 import { IViewBusinessProfile } from '../DTO/views/business/IViewBussinessProfile';
 import { BackendService } from 'src/services/backend.service';
 import { LoginService } from '../auth/login.service';
+import { ModalRegisterComponent } from 'src/app/components/modals/register-profile/modal-register/modal-register.component';
 
 interface SubSubcategory {
   name: string;
@@ -36,6 +39,8 @@ export class MainPageComponent implements OnInit, OnDestroy {
               private _apiProfile: ProfileService,
               private backendService: BackendService,
               private _loginService: LoginService,
+              private route: ActivatedRoute,
+              private modalService: NgbModal,
               private store: Store) {
 
   }
@@ -44,6 +49,10 @@ export class MainPageComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<any> {
+    if (this.route.snapshot.queryParamMap.get('action') === 'register') {
+      this.modalService.open(ModalRegisterComponent);
+    }
+
     this.unsubscribe$ = this.store.pipe(select(selectProfileMainClient)).subscribe(
       result => {
         if (result){

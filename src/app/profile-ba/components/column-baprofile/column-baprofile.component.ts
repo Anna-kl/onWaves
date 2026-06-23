@@ -12,10 +12,8 @@ import {
   ModalRegisterComponent
 } from "../../../components/modals/register-profile/modal-register/modal-register.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {loadLinkAction, setLinkAction} from "../../../ngrx-store/links/link.action";
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { Subject, takeUntil } from 'rxjs';
-import { ShowPhoneCouponComponent } from '../../popup/show-phone-coupon/show-phone-coupon.component';
 import { SocialType } from 'src/app/DTO/enums/socialType';
 
 
@@ -156,18 +154,8 @@ export class ColumnBAProfileComponent implements  OnChanges, OnDestroy {
 
   onlineRecord(option?: string) {
     this._dataService.transferDate(null);
-    this.businessProfileService.sendWhoisVisit(this.businessProfile?.id!, option ?? 'click_call', this.profileUA ? this.profileUA.id! : null).pipe(takeUntil(this.destroy$)).subscribe();
-    if (this.profileUA) {
-      this._router.navigate(['choose-service'], {relativeTo: this.route});
-    } else {
-      this.store$.dispatch(loadLinkAction(
-          {request: `profile-ba/${this.businessProfile?.link ? this.businessProfile.link : this.businessProfile?.id}/choose-service`,
-                }));
-      // const modalRef = this.modalService.open(ShowPhoneCouponComponent);
-      // modalRef.componentInstance.phoneNumber = this.businessProfile?.phone;
-      // modalRef.componentInstance.click = option;
-    }
-
+    this.businessProfileService.sendWhoisVisit(this.businessProfile?.id!, option ?? 'click_record', this.profileUA ? this.profileUA.id! : null).pipe(takeUntil(this.destroy$)).subscribe();
+    this._router.navigate(['choose-service'], {relativeTo: this.route});
   }
 
   getAvatar(businessProfile: IViewBusinessProfile | null) {

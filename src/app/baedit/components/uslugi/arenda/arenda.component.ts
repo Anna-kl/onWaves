@@ -106,9 +106,11 @@ export class ArendaComponent implements OnInit, OnDestroy {
               private messageService: MessageService,
               private location: Location,
               private _dataService: ProfileDataEditService) {
-    // ══════════════════════════════════════════════════════════════
-    // ПРИМЕЧАНИЕ: Логика перенесена в ngOnInit для правильного управления подписками
-    // ══════════════════════════════════════════════════════════════
+    const temp = this.router.getCurrentNavigation()?.extras.state;
+    if (temp) {
+      this.service = temp['subGroup'];
+      this.groups = temp['groups'];
+    }
   }
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -128,10 +130,6 @@ export class ArendaComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // ══════════════════════════════════════════════════════════════
-    // Получить навигационные данные и профиль
-    // ══════════════════════════════════════════════════════════════
-    this.loadNavigationData();
     this.loadProfile();
 
     // Инициализировать форму после загрузки данных
@@ -149,17 +147,6 @@ export class ArendaComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe();
-  }
-
-  /**
-   * Загружает данные навигации из router state
-   */
-  private loadNavigationData(): void {
-    const temp = this.router.getCurrentNavigation()?.extras.state;
-    if (temp) {
-      this.service = temp['subGroup'];
-      this.groups = temp['groups'];
-    }
   }
 
   /**

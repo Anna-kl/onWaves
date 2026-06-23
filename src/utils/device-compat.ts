@@ -8,7 +8,7 @@ export interface DeviceCompat {
 export function getDeviceCompat(): DeviceCompat {
   const ua = navigator.userAgent;
 
-  const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+  const isIOS = (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && !(window as any).MSStream;
   let iosVersion: [number, number, number] | null = null;
 
   if (isIOS) {

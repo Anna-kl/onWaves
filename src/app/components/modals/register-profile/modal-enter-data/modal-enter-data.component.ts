@@ -102,7 +102,7 @@ export class ModalEnterDataComponent implements OnInit {
       let secure = true;
       expiry.setDate(expiry.getDate()+365);
 
-      this._cookieService.set('uuid-ocpio', id, expiry);
+      this._cookieService.set('uuid-ocpio', id, expiry, '/');
     }
     const sendCode = this.codeForm.getRawValue();
     const send = {
@@ -124,12 +124,10 @@ export class ModalEnterDataComponent implements OnInit {
           let expiry = new Date();
           expiry.setDate(expiry.getDate()+365);
 
-          this._cookieService.set('auth-token-ocpio', user.token,
-            expiry );
+          this._cookieService.set('auth-token-ocpio', user.token, expiry, '/');
 
           if(user.profileUserId) {
-            this._cookieService.set('profileId-ocpio', user.profileUserId,
-             expiry );
+            this._cookieService.set('profileId-ocpio', user.profileUserId, expiry, '/');
 
           }
           this.activeModal.close();
@@ -206,7 +204,8 @@ export class ModalEnterDataComponent implements OnInit {
   }
 
   sendSms() {
-    this._authService.sendSms(this.phone).subscribe(result => {
+    const fullPhone = `${this.code.replace('+', '')}${this.phone}`;
+    this._authService.sendSms(fullPhone).subscribe(result => {
       if (result.code === 200) {
         this.session = result.data;
         this.smsSent = true;

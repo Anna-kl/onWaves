@@ -45,6 +45,29 @@
                     <input  type="text" size="13" placeholder="romashka@kmail.com"
                     formControlName="email">
                 </div>
+
+                <div class="h4-name margin-bottom10">
+                    Уведомления
+                </div>
+                <div class="txt-green-light margin-bottom20">
+                    Выберите каналы, по которым вам можно присылать информационные сообщения
+                    о записях, статусах и новостях сервиса. Согласие можно изменить в любой момент.
+                </div>
+                <div class="consent-row" *ngFor="let item of consentItems">
+                    <label class="consent-switch">
+                        <input type="checkbox" [checked]="item.isGranted" (change)="onToggleConsent(item, $event)">
+                        <span class="consent-switch-track"></span>
+                    </label>
+                    <div class="consent-row-text">
+                        <div class="consent-row-name">{{item.name}}</div>
+                        <div class="consent-row-hint">{{item.hint}}</div>
+                    </div>
+                </div>
+                <div class="cont-horiz-start margin-top10 margin-bottom30">
+                    <a class="consent-unsubscribe-all" (click)="unsubscribeFromAll()">
+                        Отписаться от всех рассылок
+                    </a>
+                </div>
                 <!--div class="h4-name margin-top30 margin-bottom20">Уведомления</div>
                 <div class="cont-horiz-start margin-bottom20">
                     <input class="custom-checkbox" type="checkbox" id="lichnyj_akkaunt" name="#" value="#">

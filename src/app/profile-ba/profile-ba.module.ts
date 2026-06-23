@@ -45,6 +45,7 @@ import { ErrorConfirmRecordComponent } from "./components/errorConfirmRecord/err
 import { YMapComponent } from "angular-yandex-maps-v3";
 import { CouponNewUserComponent } from './popup/coupon-new-user/coupon-new-user.component';
 import { ShowPhoneCouponComponent } from './popup/show-phone-coupon/show-phone-coupon.component';
+import { BookingContactModalComponent } from './components/booking-contact-modal/booking-contact-modal.component';
 
 
 @NgModule({
@@ -72,6 +73,7 @@ import { ShowPhoneCouponComponent } from './popup/show-phone-coupon/show-phone-c
     SetIntervalStartComponent,
     ErrorConfirmRecordComponent,
     CouponNewUserComponent,
+    BookingContactModalComponent,
     // ShowPhoneCouponComponent
   ],
     imports: [

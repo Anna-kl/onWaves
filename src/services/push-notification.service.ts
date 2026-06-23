@@ -66,7 +66,7 @@ export class PushDebugService {
       console.warn('Push not supported'); return;
     }
 
-    const reg = await navigator.serviceWorker.register('/sw.js');
+    const reg = await navigator.serviceWorker.ready;
 
     const perm = await Notification.requestPermission();
     if (perm !== 'granted') { console.warn('Permission denied:', perm); return; }

@@ -1,0 +1,41 @@
+<div class="channel-modal">
+  <div class="channel-modal__header">
+    <h3 class="channel-modal__title">Подключите уведомления</h3>
+    <p class="channel-modal__subtitle">
+      Выберите мессенджер, в который вы хотите получать уведомления о новых записях
+    </p>
+    <button class="channel-modal__close" (click)="activeModal.dismiss()" aria-label="Закрыть">&times;</button>
+  </div>
+
+  <div class="channel-modal__list">
+    <button
+      *ngFor="let ch of channels"
+      class="channel-modal__item"
+      [class.channel-modal__item--loading]="isLoading"
+      [disabled]="isLoading"
+      (click)="selectChannel(ch)">
+      <div class="channel-modal__icon" [ngClass]="'channel-modal__icon--' + ch.icon">
+        <ng-container [ngSwitch]="ch.icon">
+          <svg *ngSwitchCase="'telegram'" viewBox="0 0 24 24" width="28" height="28">
+            <path fill="#2AABEE" d="M21.5 3.4 2.9 10.7c-1 .4-1 1.9 0 2.2l4.6 1.5 1.8 5.5c.3 1 1.6 1.1 2.2.3l2.9-3.6 4.9 3.6c.8.6 2 .1 2.2-.9l3-14c.2-1-.7-1.8-1.6-1.5Z"/>
+          </svg>
+          <svg *ngSwitchCase="'vk'" viewBox="0 0 24 24" width="28" height="28">
+            <path fill="#0077FF" d="M3 7.2c.1 3.8 2.1 7.2 5.6 9.5h2v-3.3c1.2.1 2 .9 2.6 1.8.6.8 1.3 1.5 2.4 1.5h2.6v-2c-.8 0-1.3-.4-1.8-1-.6-.7-1.3-1.5-1.3-1.9.1-.3.5-.6 1-.9.9-.6 1.7-1.5 2-2.6h-2.7c-.3.9-1 1.8-1.9 2.4-.4.2-.8.4-1.2.4V7.2H10v4.7c-.5-.1-1-.4-1.5-.8-1.2-1-2.1-2.4-2.5-3.9H3Z"/>
+          </svg>
+          <svg *ngSwitchCase="'max'" viewBox="0 0 24 24" width="28" height="28">
+            <circle cx="12" cy="12" r="10" fill="#FF6600"/>
+            <text x="12" y="16" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">M</text>
+          </svg>
+        </ng-container>
+      </div>
+      <span class="channel-modal__name">{{ ch.name }}</span>
+      <svg class="channel-modal__arrow" width="20" height="20" viewBox="0 0 20 20">
+        <path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="channel-modal__error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+</div>

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalRegisterComponent } from 'src/app/components/modals/register-profile/modal-register/modal-register.component';
 
@@ -9,7 +10,7 @@ import { ModalRegisterComponent } from 'src/app/components/modals/register-profi
 })
 export class LandingVersion2Component implements OnInit {
 
-  constructor(private modalService: NgbModal){
+  constructor(private modalService: NgbModal, private route: ActivatedRoute){
 
   }
 
@@ -20,6 +21,9 @@ export class LandingVersion2Component implements OnInit {
 
 
   ngOnInit() {
+    if (this.route.snapshot.queryParamMap.get('action') === 'register') {
+      this.openPopUp();
+    }
   }
 
 }

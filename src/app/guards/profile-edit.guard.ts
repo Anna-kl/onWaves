@@ -43,10 +43,8 @@ export const profileEditGuard: CanActivateFn = (_route, _state) => {
 
       // Пользователь аутентифицирован, но профиль не попал в store —
       // сессия неполная (истёк profileId-ocpio при живом JWT).
-      // Редиректим на /home, где пользователь может выбрать профиль.
-      // Не редиректим на '/', так как там guard отправит обратно на /home
-      // и получится двойной редирект.
-      return router.createUrlTree(['/home']);
+      // Редиректим на '/', где пользователь может выбрать профиль.
+      return router.createUrlTree(['/']);
     })
   );
 };
