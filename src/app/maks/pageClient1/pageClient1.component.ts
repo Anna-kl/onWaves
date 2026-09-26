@@ -14,6 +14,7 @@ import { IViewRecordUser } from 'src/app/DTO/views/records/IViewRecordUser';
 import { selectProfileMainClient } from 'src/app/ngrx-store/mainClient/store.select';
 import { ReviewsUserComponent } from 'src/app/profile-user/components/reviews-user/reviews-user.component';
 import { getAddressProfile } from 'src/helpers/common/address';
+import { resolveAvatarUrl } from 'src/helpers/common/avatar1';
 import { getHours, getMinutes } from 'src/helpers/common/timeHelpers';
 import { UTCToLocale } from 'src/helpers/dateUtils/dateUtils';
 import { RecordService } from 'src/services/record.service';
@@ -151,11 +152,7 @@ export class PageClient1Component implements OnInit {
 
 
   getAvatar(avatar: any) {
-    if (avatar) {
-      return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
-    } else {
-      return  '/assets/img/onwaves/user.png';
-    }
+    return resolveAvatarUrl(avatar);
   }
     checkStatus(recordStatus: RecordStatus) {
         return recordStatus === RecordStatus.Success;

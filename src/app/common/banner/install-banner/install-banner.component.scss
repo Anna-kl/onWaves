@@ -1,11 +1,11 @@
 @import "../../../../assets/styles/main/color.scss";
 
 .install-banner {
-  position: fixed;
-  bottom: 70px; // выше footer
-  left: 16px;
-  right: 16px;
-  z-index: 1000;
+  position: relative;
+  box-sizing: border-box;
+  margin: 0 auto 24px;
+  max-width: 560px;
+  width: calc(100% - 32px);
 
   display: flex;
   flex-direction: column;
@@ -17,7 +17,7 @@
   background: $white;
   box-shadow: 0 10px 30px rgba($black, 0.12);
 
-  animation: slideUp 0.25s ease;
+  animation: bannerIn 0.25s ease-out;
 }
 
 .content {
@@ -80,9 +80,24 @@ button {
   border: 1px solid $grey;
 }
 
-@keyframes slideUp {
+@media (max-width: 600px) {
+  .install-banner {
+    width: calc(100% - 24px);
+    padding: 16px 14px 14px;
+    border-radius: 22px;
+    box-shadow: 0 12px 32px rgba($black, 0.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .install-banner {
+    animation: none;
+  }
+}
+
+@keyframes bannerIn {
   from {
-    transform: translateY(20px);
+    transform: translateY(-8px);
     opacity: 0;
   }
   to {

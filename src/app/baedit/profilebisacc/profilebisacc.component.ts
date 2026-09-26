@@ -1,4 +1,5 @@
 import {ActivatedRoute, Router} from '@angular/router';
+import { ToastService } from 'src/services/toast.service';
 
 import {GroupService} from '../../../services/groupservice';
 import {environment} from '../../../enviroments/environment';
@@ -19,9 +20,7 @@ import {ModalComponent} from "src/app/baedit/components/uslugi/modal/modal.compo
 import {
   CreateServiceModalComponent
 } from "src/app/baedit/components/modals/create-service-modal/create-service-modal.component";
-import {Service} from "../../DTO/classes/services/Service";
-import {MessageService} from "primeng/api";
-import {FormatuslugiComponent} from "../../components/modals/formatuslugi/formatuslugi.component";
+import {Service} from "../../DTO/classes/services/Service";import {FormatuslugiComponent} from "../../components/modals/formatuslugi/formatuslugi.component";
 //import {ICardBusinessView} from "../../DTO/views/ICardBusinessView";
 
 declare const ymaps: any;
@@ -30,7 +29,7 @@ declare const ymaps: any;
   templateUrl: './profilebisacc.component.html',
   styleUrls: ['./profilebisacc.component.css'],
   providers: [GroupService, DictionaryService,
-     ProfileService, MessageService ]
+     ProfileService]
 })
 export class ProfileBasicComponent implements OnInit{
   btnProfile: boolean = true;
@@ -64,8 +63,8 @@ export class ProfileBasicComponent implements OnInit{
   constructor(private route: ActivatedRoute,
     private _router: Router,
               private _dictionaries: DictionaryService,
-              private  messageService: MessageService,
-              private modalService: NgbModal,) { }
+              private  messageService: ToastService,
+              private modalService: NgbModal) { }
 
   onAddress($event: IViewAddress){
     // this._dictionaries.getPoint(getAddressProfile($event)).subscribe(

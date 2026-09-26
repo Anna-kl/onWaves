@@ -4,6 +4,7 @@ import { ConsentChannel } from '../../enums/consentChannel';
 export interface IViewConsent {
   channel: ConsentChannel;
   isGranted: boolean;
+  isSubscribed: boolean;
   grantedAt: string | null;
   revokedAt: string | null;
   consentTextVersion: string;

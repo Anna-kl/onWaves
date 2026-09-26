@@ -1,7 +1,7 @@
 <!-- Уведомления --->
 <div class="cont-vert left-right20mob" >
     <div class="w100" style="background-color: #fafafa; max-width: 1200px;">
-        <div  class="cont-horiz-start margin-top50 margin-bottom50" >
+        <div class="notifications-header cont-horiz-start margin-top50">
             <div class="cont-horiz btn-back"   style="cursor: pointer" (click)="goToMain()"> 
             </div> 
             <h1>Уведомления</h1> 
@@ -23,7 +23,7 @@
                         <app-loader-on-waves></app-loader-on-waves>
            
                     </ng-template>
-                    <div id="content-1" *ngIf="messages; else loading">
+                    <div id="content-1" class="notifications-list" *ngIf="messages; else loading">
 
                         <span *ngIf="messages.length == 0" class="text-body-emphasis">
                           У вас еще нет уведомлений
@@ -41,7 +41,7 @@
                       
                           <!-- Аватар -->
                           <div class="notif__avatar">
-                            <img [src]="getAvatar(message.avatar)">
+                            <img [src]="getAvatar(message.avatarUrl)">
                           </div>
                       
                           <!-- Контент -->
@@ -83,7 +83,12 @@
                             <div class="notif__time notif__time--muted" *ngIf="!message.isTimeUnlimited">
                               Без фиксированного времени
                             </div>
-                      
+
+                            <!-- адрес выезда (разъездная услуга) -->
+                            <div class="notif__time" *ngIf="recordLocationText(message) as addr">
+                              📍 Выезд: {{ addr }}
+                            </div>
+
                             <!-- дата создания -->
                             <div class="notif__meta">
                               {{message.created | date: 'short'}}

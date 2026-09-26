@@ -1,3 +1,19 @@
+.notifications-header {
+  margin-bottom: 24px;
+}
+
+/* Глобальный tabs_simple.scss добавляет content-1 отступ 50px,
+   хотя на странице уведомлений переключателей вкладок нет. */
+:host div#content-1.notifications-list {
+  margin-top: 0;
+}
+
+@media (max-width: 600px) {
+  .notifications-header {
+    margin-bottom: 18px;
+  }
+}
+
 .notif {
   display: flex;
   gap: 12px;

@@ -41,7 +41,9 @@
               [class.day_off]="!d.ifExist && !d.isChecked"
               [class.calendar_work_day]="d.isChecked"
               [class.day_is_busy]="d.isBusy"
-              [class.calendar_click]="d.isToday" (click)="addDays(d)">
+              [class.calendar_click]="d.isToday"
+              [class.calendar-checking]="checkingDay"
+              (click)="addDays(d)">
           {{d.day}}
         </div>
       </div>

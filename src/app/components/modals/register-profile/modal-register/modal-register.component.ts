@@ -39,6 +39,7 @@ export class ModalRegisterComponent implements OnInit {
   consentText: string = '';
   consentTextVersion: string = '';
   showConsentModal = false;
+  zvonokSending = false;
 
   iconsFlags: any[] = [
     {id:1, icon: '../assets/img/ico/flags/flag_RU_pc_24.svg', name:'Россия', mask: '(XXX)XXX-XX-XX', code:'+7',  countNumber:'' },
@@ -141,6 +142,49 @@ export class ModalRegisterComponent implements OnInit {
         // }
      }
    )
+  }
+
+  /** Запасной flash-call: Plusofon часто «успешен», а звонок до абонента не доходит. */
+  nextZvonok() {
+    if (!this.isFormValid() || this.zvonokSending) {
+      return;
+    }
+    const tempPhone = `${this.chCountry.code?.replace('+','')}${this.phone}`;
+    this.zvonokSending = true;
+    this.authService.sendZvonok(tempPhone).subscribe({
+      next: result => {
+        this.zvonokSending = false;
+        this.handleCodeSession(result, tempPhone, 'zvonok');
+      },
+      error: () => {
+        this.zvonokSending = false;
+        this.flagError = true;
+        this.messageError = 'Не удалось заказать звонок через Zvonok';
+      }
+    });
+  }
+
+  private handleCodeSession(result: { code?: number; data?: unknown }, tempPhone: string, channel: 'call' | 'zvonok') {
+    if (result.code === 200) {
+      this.sendNotifyConsentIfNeeded(tempPhone);
+      this.activeModal.close();
+      const modalRef = this.modalService.open(ModalEnterDataComponent);
+      modalRef.componentInstance.session = result.data;
+      modalRef.componentInstance.phone = this.phone;
+      modalRef.componentInstance.code = this.chCountry.code;
+      modalRef.componentInstance.mask = this.chCountry.mask;
+      modalRef.componentInstance.lastChannel = channel;
+      return;
+    }
+    if (result.code === 500) {
+      this.flagError = true;
+      this.messageError = `Превышено число запросов`;
+    }
+    if (result.code === 204) {
+      this.flagError = true;
+      const validateError = result.data?.toString().split('.')[0];
+      this.messageError = `Повторно запросить код можно будет через ${validateError}`;
+    }
   }
 
   // back() {

@@ -1,22 +1,20 @@
- <div class="container" *ngIf="geo">
-                      <y-map
-                        [props]="{
-                          location: {
-                            center: [geo.lng,geo.lat],
-                            zoom: 12,
-                          },
-                        }"
-                      >
-                      
-                      <y-map-default-scheme-layer />
-                      <y-map-default-features-layer />
-                        <y-map-marker
-                          [props]="{
-                            coordinates: [geo.lng,geo.lat],
-                            draggable: true,
-                          }"
-                      >
-                      <svg fill="#043c48" width="64px" height="64px" viewBox="0 0 24 24" id="place" data-name="Line Color" xmlns="http://www.w3.org/2000/svg" class="icon line-color" stroke="#043c48"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle id="secondary" cx="12" cy="9" r="2" style="fill: none; stroke: #7dcfbd; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></circle><path id="primary" d="M12,21S6,14,6,9A6,6,0,0,1,18,9C18,14,12,21,12,21Z" style="fill: none; stroke: #043c48; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></path></g></svg>
-                    </y-map-marker>
-                      </y-map>
-                    </div>
+<div class="container" *ngIf="mapLocation">
+  <y-map [props]="{ location: mapLocation }">
+    <y-map-default-scheme-layer />
+    <y-map-default-features-layer />
+    <y-map-marker
+      *ngFor="let p of points"
+      [props]="{ coordinates: [p.lng, p.lat] }"
+    >
+      <div class="avatar-pin">
+        <img *ngIf="avatarUrl" class="avatar-pin__img" [src]="avatarUrl" alt="Аватар мастера">
+        <div *ngIf="!avatarUrl" class="avatar-pin__fallback">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+          </svg>
+        </div>
+        <div class="avatar-pin__tail"></div>
+      </div>
+    </y-map-marker>
+  </y-map>
+</div>

@@ -1,9 +1,11 @@
 <div #hostEl
      class="ow-video"
      [class.ow-video--compact]="compact"
+     [class.ow-video--expandable]="expandable"
+     [class.ow-video--static]="!interactive"
      [class.is-loading]="state === 'loading'"
      [class.is-playing]="state === 'playing'"
-     [class.is-ready]="state === 'ready' || state === 'firstFrame'"
+     [class.is-ready]="state === 'ready'"
      [class.is-error]="state === 'error'">
 
   <video #videoEl
@@ -12,19 +14,26 @@
          [attr.poster]="visiblePoster">
   </video>
 
-  <div class="ow-cover" (click)="onPlayClick($event)">
-    <span class="ow-ring r1"></span>
-    <span class="ow-ring r2"></span>
-    <span class="ow-ring r3"></span>
+  <button class="ow-cover"
+          type="button"
+          [attr.aria-label]="playLabel"
+          (click)="onPlayClick($event)">
+    <span class="ow-ring r1" aria-hidden="true"></span>
+    <span class="ow-ring r2" aria-hidden="true"></span>
+    <span class="ow-ring r3" aria-hidden="true"></span>
 
-    <div class="ow-play">
+    <span class="ow-play" aria-hidden="true">
       <span class="ow-pulse"></span>
       <span class="ow-tri"></span>
-    </div>
+    </span>
 
-    <div class="ow-spin"></div>
-    <div class="ow-loading"><span>Видео загружается…</span></div>
-    <div class="ow-error"><span>Видео недоступно</span></div>
-    <div class="ow-logo">Onwaves<i>.Online</i></div>
-  </div>
+    <span class="ow-spin" aria-hidden="true"></span>
+    <span class="ow-loading">{{ loadingLabel }}</span>
+    <span class="ow-progress" aria-hidden="true">
+      <i [class.is-indeterminate]="loadedPercent === null"
+         [style.width.%]="loadedPercent ?? 40"></i>
+    </span>
+    <span class="ow-error">Видео недоступно — повторить</span>
+    <span class="ow-logo" aria-hidden="true">Onwaves<i>.Online</i></span>
+  </button>
 </div>

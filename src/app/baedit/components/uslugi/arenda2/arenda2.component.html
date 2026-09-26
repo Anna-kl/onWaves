@@ -84,8 +84,7 @@
               <div class="txt-green-light margin-bottom25 w100" >
                   Укажите время продолжительности услуги
               </div> 
-              <div class="w100 cont-horiz margin-bottom30"
-            >
+              <div class="w100 cont-horiz-center-end margin-bottom30">
                 <!-- Часы -->
                 <div>
                     <div class="w100 cont-horiz color-grey-dark">
@@ -109,9 +108,8 @@
 
                 </div>
 
-                <!-- Двоеточие -->
-                <img src="assets/img/ba-edit/uslugi/Frame%204605.png"
-                 class="margin-right10 margin-left10">
+                <!-- Двоеточие: PNG из макета в репо нет, текстовый разделитель как в stranica -->
+                <span class="time-colon" aria-hidden="true">:</span>
                 <!-- Минуты -->
                 <div >
                     <div class="w100 cont-horiz color-grey-dark">
@@ -204,28 +202,19 @@
                 </div>
             </div>
           </div>
-          <!--------------------------------- Фотографии  новая ----------------------------->
-<!--          <div class="container-for-images-arenda" >-->
-<!--            <div class="txt-green-light margin-bottom10">-->
-<!--              Добавьте фотографию-->
-<!--            </div>-->
-<!--            <div class="container-images">-->
-<!--              <div class="green-kub" (click)="addFoto()" *ngIf="images.length<3;">-->
-<!--                  <span>Добавить фото</span>-->
-<!--              </div>-->
-<!--              <div class="image-blocks" *ngFor="let image of images">-->
-<!--                <img class="image-taille" [src]=getImage(image.image) alt=""/>-->
-<!--                <img class="image-icon-position" src="assets/img/ba-edit/uslugi/delete_button_desktop.svg" alt=""/>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
+          <app-service-media
+            [profileId]="profile?.id ?? null"
+            [serviceId]="service?.id ?? null"
+            (idsChange)="onMediaIds($event)">
+          </app-service-media>
           <!--------------------------------- Фотографии  старая ----------------------------->  
           <!-- Цена -->
-          <div class="cont-vert-center-start w100" formGroupName="price"
-              style=" padding: 50px;">
+          <div class="cont-vert-center-start w100 price-block" formGroupName="price">
               <div class="w100 cont-horiz-start txt-green-light margin-bottom30 ">
                   Укажите стоимость услуги
               </div>
+              <div class="price-block__row">
+              <div class="price-block__main">
               <div class="cont-horiz-start w100">
                 <div class="input-line-mini cont-horiz-start" 
                 [ngClass]="getIsRange(true) ? 'test-disable':''"
@@ -238,7 +227,7 @@
                 </div>
 
                 <select class="accordion_tab-label_mini cont-horiz-between"
-                formControlName="currencyType" (change)="changeDb($event)"  [disabled]="getIsRange(true)"
+                formControlName="currencyType" (change)="changeDb($event)"
                     style="width: 100px;"  [style.color]="getIsRange(true) ? 'gray': 'black'">
                   <option  *ngFor="let currency of currencies"  [ngValue]="currency">
                   {{getNameCurrency(currency)}}
@@ -291,8 +280,26 @@
                 </div>
             
             
-                </div>    
-              
+                </div>
+              </div>
+
+                <app-service-price-unit
+                  class="price-block__units"
+                  [value]="serviceGroup.get('price')?.get('priceUnit')?.value"
+                  [implicitValue]="implicitPriceUnit"
+                  (valueChange)="setPriceUnit($event)">
+                </app-service-price-unit>
+          </div>
+          </div>
+
+          <!-- Формат оказания услуги (radio) — варианты из форматов работы профиля -->
+          <app-service-format-select
+            [profileId]="profile?.id ?? null"
+            [value]="locationType"
+            (valueChange)="locationType = $event">
+          </app-service-format-select>
+          <div class="alert-validation" *ngIf="isErrorFormat" style="color: #d46c54; margin-bottom: 12px;">
+            *Выберите формат оказания услуги
           </div>
 
           <!-- ══════════════════════════════════════════════════════════════ -->
@@ -314,12 +321,7 @@
 
                 <ng-template #savingTemplate>
                     <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <p-progressSpinner
-                            [style]="{'width':'20px','height':'20px'}"
-                            strokeWidth="4"
-                            fill="transparent"
-                            animationDuration=".5s">
-                        </p-progressSpinner>
+                        <span class="app-spinner" style="width:20px;height:20px"></span>
                         <span>Создание услуги...</span>
                     </div>
                 </ng-template>
@@ -328,15 +330,9 @@
 
           <!-- Индикатор загрузки фото -->
           <div *ngIf="isLoadingImages$ | async" class="w100 cont-horiz margin-top50" style="justify-content: center; gap: 10px;">
-              <p-progressSpinner
-                  [style]="{'width':'20px','height':'20px'}"
-                  strokeWidth="4"
-                  fill="transparent"
-                  animationDuration=".5s">
-              </p-progressSpinner>
+              <span class="app-spinner" style="width:20px;height:20px"></span>
               <span>Загрузка изображений...</span>
           </div>
       </form>
     </div>
-    <p-toast position="bottom-center" ></p-toast>
 </div> 

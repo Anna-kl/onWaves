@@ -8,57 +8,36 @@ import {ChangeAvatarUAComponent} from "../../common/modals/change-avatar-ua/chan
 import {LoginService} from "../../auth/login.service";
 import { IViewPost } from 'src/app/DTO/views/posts/IViewPost';
 import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
+import { resolveAvatarUrl } from 'src/helpers/common/avatar1';
 import { PostService } from 'src/services/posts.service';
 import { filter, forkJoin, mergeMap, Observable, of, skipWhile, Subscription, switchMap, tap } from 'rxjs';
 import { ProfileService } from 'src/services/profile.service';
-import { ICoupon } from 'src/app/DTO/classes/promo/IPoupon';
+import { WelcomeCouponMe } from 'src/app/DTO/views/promo/welcome-coupon';
+import { WelcomeCouponService } from 'src/services/welcome-coupon.service';
+import { formatRub, welcomeTierList } from 'src/helpers/common/welcome-coupon';
 import { Md5 } from 'ts-md5';
 import { AuthService } from 'src/services/auth.service';
 import { DictionaryService } from 'src/services/dictionary.service';
 import { ServiceRegisterBusinessProfile } from 'src/services/service-register-business';
-import { LocationService } from 'src/services/location.service';
 
 @Component({
   selector: 'app-personal-page-user',
   templateUrl: './personal-page-user.component.html',
   styleUrls: ['./personal-page-user.component.scss'],
-  providers: [PostService,AuthService, LocationService]
+  providers: [PostService,AuthService]
 })
 export class PersonalPageUserComponent implements OnInit, OnDestroy {
-  showAuto = true;
-
   addCities() {
     if (this.mainProfileCleint && this.address)
       this._profile.changeCity(this.mainProfileCleint.id!, this.address).subscribe(result => {
         if (result.code === 200){
+          this.savedCity = this.address;
           this.addCity = false;
         }
     });
   }
+  /** Показывать кнопку «Подтвердить» — выбран город, отличный от сохранённого. */
   addCity = false;
-  allCities:any[] = [];
-
-  setKeywordForce(v: string) {
-  this.keyword = v;
-
-  // принудительно пересоздаём компонент, чтобы он заново принял searchKeyword
-  this.showAuto = false;
-  setTimeout(() => this.showAuto = true);
-  }
-
-  onChangeSearch(val: string) {
-    if (val.length > 0) {
-      if (this.data.find(_ => _.name.includes(val))) {
-        this._location.getAddress(val).subscribe(
-            result => {
-              let address = result;
-              this.addCity = true;
-            }
-        );
-      }
-
-    }
-  }
 
 
   toStringFromInputs(): string {
@@ -163,12 +142,10 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
   posts: IViewPost[] = [];
   private unsubscribe$: Subscription|null = null;
   slice: number = 1;
-    // Флаг наличия купона
-  hasCoupon = true;
-
-  // Значение купона в рублях
-  couponValue = 0;
-  hasCoupon$: Observable<ICoupon|null>|null = null;
+  /** Раздел «Мой купон»: состояние права приходит с сервера (coupons/welcome/me). */
+  welcomeMe: WelcomeCouponMe | null = null;
+  protected readonly formatRub = formatRub;
+  protected readonly welcomeTierList = welcomeTierList;
   phoneInput: string|undefined = undefined;
   emailInput: string|undefined = undefined;
   
@@ -177,9 +154,9 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
               private _loginService: LoginService,
               private _post: PostService,
               private _auth: AuthService,
-              private _location: LocationService,
               private _serviceRegisterBusinessProfile: ServiceRegisterBusinessProfile,
               private _profile: ProfileService,
+              private _welcomeCoupon: WelcomeCouponService,
               private modalService: NgbModal) {
     //получаем данные профиля из store
     
@@ -227,21 +204,22 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
       // }).unsubscribe();
   }
   address: string|null = null;
-  async selectEvent(item: any) {
-    this.address = item.name;
+  /** Город, уже сохранённый в профиле — с ним сравниваем выбор, чтобы не предлагать сохранять то же самое. */
+  private savedCity: string|null = null;
 
+  /** Справочник городов целиком; фильтрацию и рендер подсказок делает app-city-autocomplete. */
+  cities: string[] = [];
+
+  /** Город выбран (или очищен) в комбобоксе. */
+  onCityChange(city: string|null) {
+    this.address = city;
+    this.addCity = !!city && city !== this.savedCity;
   }
-
-  data: any[] = [];
-  keyword:string = 'name';
 
   public async getListCities(){
     (await this._serviceRegisterBusinessProfile.getCities())
-      .subscribe(_=> {
-        let index = this.data.length + 1;
-        _.forEach(item => {
-          this.data.push({id: index, name: item, type: 'city'});
-        });
+      .subscribe(list => {
+        this.cities = list ?? [];
       });
   }
 
@@ -272,12 +250,14 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
             this.phoneInput = this.mainProfileCleint.phone;
             this.emailInput = this.mainProfileCleint.email;
             if (this.mainProfileCleint.address){
-              this.address = this.mainProfileCleint.address.city!;
-              // this.setKeywordForce(this.keyword);
+              this.address = this.mainProfileCleint.address.city ?? null;
+              this.savedCity = this.address;
+              this.addCity = false;
             }
           }
-          if(user)
-            this.hasCoupon$ = this._profile.getCoupon(user.id!);
+          if (user?.id) {
+            this._welcomeCoupon.getMine(user.id).subscribe(me => this.welcomeMe = me);
+          }
         // Если нет ни одного запроса — возвращаем пустой поток
         return requests.length ? forkJoin(requests) : of([]);
       })
@@ -334,12 +314,7 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
   }
 
   getAvatar(avatar: any) {
-    if (avatar) {
-      avatar = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
-    } else {
-      avatar = '/assets/img/onwaves/user.png';
-    }
-    return avatar;
+    return resolveAvatarUrl(avatar);
   }
 
 
@@ -370,7 +345,7 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
     if (this.mainProfileCleint){
     const modalRef = this.modalService.open(ChangeAvatarUAComponent);
     modalRef.componentInstance.id = this.mainProfileCleint.id;
-    modalRef.componentInstance.avatar = this.mainProfileCleint.avatar;
+    modalRef.componentInstance.avatar = this.mainProfileCleint.avatarUrl;
     modalRef.result.then(result => {
       if (result){
         this._loginService.updateProfile(this.mainProfileCleint?.id!);

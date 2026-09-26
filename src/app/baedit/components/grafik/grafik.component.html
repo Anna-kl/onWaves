@@ -1,5 +1,4 @@
 <div class="container-ba-grafik" >
-<div class="container-ba-grafik" >
   <!--  верхняя надпись текст-->
   <div class="text-title">
     Вы можете создать несколько вариантов графика работы и применить их
@@ -11,10 +10,14 @@
       Принимать заказы
       <label>
         <!-- [disabled]="getStatusDisable()" -->
-        <input type="checkbox" [(ngModel)]="profile.isGetOrder" (ngModelChange)="changeGetOrder()"/>
+        <input type="checkbox" [(ngModel)]="profile.isGetOrder" (ngModelChange)="changeGetOrder()"
+               [disabled]="!!profile.isPromo"/>
         <i></i>
       </label>
     </div>
+    <p class="hint-promo" *ngIf="profile.isPromo">
+      На промо-странице запись отключена. Снимите флаг «Промо-страница» в разделе «Профиль».
+    </p>
   </div>
   <!------------------------  block-card ----------------------------->
   <div class="container-card wrap" *ngIf="schedules$|async as schedules">
@@ -108,7 +111,7 @@
               <div class="cont-horiz-start margin-bottom10  card-day-text">
                 Начало:
               </div>
-              <div class="w100 cont-horiz">
+              <div class="w100 cont-horiz-center-end">
                 <!-- Часы -->
                 <div>
                   <div class="w100 cont-horiz color-grey-dark">
@@ -125,8 +128,8 @@
                     </select>
                   </div>
                 </div>
-                <!-- Двоеточие -->
-                <img src="assets/img/ba-edit/uslugi/Frame%204605.png" class="margin-right10 margin-left10">
+                <!-- Двоеточие: PNG из макета в репо нет, текстовый разделитель как в stranica -->
+                <span class="time-colon" aria-hidden="true">:</span>
                 <!-- Минуты -->
                 <div>
                   <div class="w100 cont-horiz color-grey-dark">
@@ -148,7 +151,7 @@
               <div class="cont-horiz-start margin-top20 margin-bottom10 card-day-text" >
                 Конец
               </div>
-              <div class="w100 cont-horiz">
+              <div class="w100 cont-horiz-center-end">
                 <!-- Часы -->
                 <div>
                   <div class="w100 cont-horiz color-grey-dark">
@@ -165,8 +168,8 @@
                     </select>
                   </div>
                 </div>
-                <!-- Двоеточие -->
-                <img src="assets/img/ba-edit/uslugi/Frame%204605.png" class="margin-right10 margin-left10">
+                <!-- Двоеточие: PNG из макета в репо нет, текстовый разделитель как в stranica -->
+                <span class="time-colon" aria-hidden="true">:</span>
                 <!-- Минуты -->
                 <div >
                   <div class="w100 cont-horiz color-grey-dark">
@@ -221,7 +224,7 @@
               <div class="cont-horiz-start margin-bottom10 card-day-text">
                 Начало:
               </div>
-              <div class="w100 cont-horiz">
+              <div class="w100 cont-horiz-center-end">
                 <!-- Часы -->
                 <div>
                   <div class="w100 cont-horiz color-grey-dark">
@@ -236,8 +239,8 @@
                     </select>
                   </div>
                 </div>
-                <!-- Двоеточие -->
-                <img src="assets/img/ba-edit/uslugi/Frame%204605.png" class="margin-right10 margin-left10">
+                <!-- Двоеточие: PNG из макета в репо нет, текстовый разделитель как в stranica -->
+                <span class="time-colon" aria-hidden="true">:</span>
                 <!-- Минуты -->
                 <div >
                   <div class="w100 cont-horiz color-grey-dark">
@@ -260,7 +263,7 @@
               <div class="cont-horiz-start margin-top20 margin-bottom10 card-day-text" >
                 Конец:
               </div>
-              <div class="w100 cont-horiz">
+              <div class="w100 cont-horiz-center-end">
                 <!-- Часы -->
                 <div>
                   <div class="w100 cont-horiz color-grey-dark">
@@ -275,8 +278,8 @@
                     </select>
                   </div>
                 </div>
-                <!-- Двоеточие -->
-                <img src="assets/img/ba-edit/uslugi/Frame%204605.png" class="margin-right10 margin-left10">
+                <!-- Двоеточие: PNG из макета в репо нет, текстовый разделитель как в stranica -->
+                <span class="time-colon" aria-hidden="true">:</span>
                 <!-- Минуты -->
                 <div >
                   <div class="w100 cont-horiz color-grey-dark">
@@ -305,37 +308,42 @@
             <option *ngFor="let group of startHours" [ngValue]="group">
                 {{getStrText(group)}}
             </option>
-            <!-- *ngFor="let group of groups" [ngValue]="group" {{group.name}}
-            <option>
-            </option>--->
           </select>
         </div>
-        <!-- нижние кнопки удалить или календарь-->
-        <div class="w100 cont-horiz">
-          <div *ngIf="!sch.isActive || !profile?.isGetOrder; else bntCalandrier" class="no-bntCalandier"
-                (click)="deleteCalandrierCart(sch.id)" >
-            Удалить график
-          </div>
+        <div class="cont-horiz-between w100 gap-after-title">
+          Перерыв между записями
         </div>
-        <ng-template #bntCalandrier>
-          <button class="btn-green blockBntCalandier"
-                 *ngIf="sch.id" [ngStyle]="{'background-color': checkTimer(sch) ? 'gray' : '#409B89' }"
-                  [disabled]="checkTimer(sch)"  (click)="chooseDays(sch)" >
-
-            <div> Применить к дням </div>
-            <div class="bntCalandier">
-              <img src="/assets/img/ba-edit/ico-calendar-white.png" alt="">
-            </div>
-
+        <div class="gap-after-hint">Необязательно. «Нет» — клиенты идут встык</div>
+        <div class="input-line-mini cont-horiz-start" style="width: 100%;">
+          <select style="border: none"
+                  [(ngModel)]="sch.gapAfterMinutes"
+                  (ngModelChange)="setStartPeriod(sch)">
+            <option *ngFor="let group of gapAfterHours" [ngValue]="group">
+                {{gapAfterLabel(group)}}
+            </option>
+          </select>
+        </div>
+        <div class="w100 grafik-card-actions">
+          <ng-container *ngIf="sch.isActive && profile?.isGetOrder">
+            <p class="gap-after-hint" *ngIf="checkTimer(sch)">
+              Укажите время работы — начало и конец смены не должны совпадать
+            </p>
+            <button type="button" class="btn-green blockBntCalandier"
+                    [ngStyle]="{'background-color': (checkTimer(sch) || savingDraft) ? 'gray' : '#409B89' }"
+                    [disabled]="checkTimer(sch) || savingDraft"
+                    (click)="chooseDays(sch)" >
+              <div> Применить к дням </div>
+              <div class="bntCalandier">
+                <img src="/assets/img/ba-edit/ico-calendar-white.png" alt="">
+              </div>
+            </button>
+          </ng-container>
+          <button type="button" class="grafik-delete"
+                  [disabled]="deleting"
+                  (click)="deleteCalandrierCart(sch, schedules)">
+            Удалить график
           </button>
-          <button class="btn-green blockBntCalandier"
-                  *ngIf="!sch.id" [ngStyle]="{'background-color': checkTimer(sch) ? 'gray' : '#409B89' }"
-                  [disabled]="checkTimer(sch)"  (click)="addScheduler(sch)" >
-
-            <div> Создать </div>
-
-          </button>
-        </ng-template>
+        </div>
       </div>
     </div>
     <!---------------Создать группу услуг *---------------->
@@ -356,7 +364,6 @@
 <!--       (click)="saveChanges()">Сохранить</div>-->
 <!--</div>-->
 <!--   всплывающее уведомление-->
-<p-toast position="bottom-center" *ngIf="isEdit"></p-toast>
 
 <!-------------------- квадрат --------------------->
 <!-------------------- включено-отключено --------------------->
@@ -493,5 +500,4 @@
 <!--  </div>-->
 <!--</div>-->
 
-</div>
 </div>

@@ -1,3 +1,13 @@
+a.footer-text {
+  display: block;
+  color: #11142D;
+  text-decoration: none;
+  cursor: pointer;
+}
+a.footer-text:visited {
+  color: #11142D;
+}
+
 @media screen and (max-width: 640px) {
   .foo {
     display: none !important;

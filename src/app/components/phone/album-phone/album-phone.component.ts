@@ -1,18 +1,17 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import { ToastService } from 'src/services/toast.service';
 import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessProfile";
 import {IAlbumWithFoto} from "../../../DTO/views/images/IAlbumWithFoto";
 import {IViewImage} from "../../../DTO/views/images/IViewImage";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AlbumsService} from "../../../../services/albums.service";
-import {DomSanitizer} from "@angular/platform-browser";
-import {MessageService} from "primeng/api";
-import {Subject, takeUntil} from "rxjs";
+import {DomSanitizer} from "@angular/platform-browser";import {Subject, takeUntil} from "rxjs";
 
 @Component({
   selector: 'app-album-phone',
   templateUrl: './album-phone.component.html',
   styleUrls: ['./album-phone.component.css'],
-  providers: [AlbumsService, MessageService]
+  providers: [AlbumsService]
 })
 export class AlbumPhoneComponent implements OnInit, OnDestroy {
   destroy$: Subject<void> = new Subject<void>();
@@ -24,7 +23,7 @@ export class AlbumPhoneComponent implements OnInit, OnDestroy {
                   private _apiImage: AlbumsService,
                   private sanitizer: DomSanitizer,
                   private _activateRoute: ActivatedRoute,
-                  private messageService: MessageService) {
+                  private messageService: ToastService) {
   }
 
   albumId: string|null = null;

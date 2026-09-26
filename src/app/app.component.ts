@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, computed, ElementRef, HostListener, Inject, NgZone, OnInit, PLATFORM_ID, signal, ViewChild} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import {ActivatedRoute, NavigationEnd, Router, RouterState} from "@angular/router";
+import {ActivatedRoute, NavigationEnd, NavigationStart, Router} from "@angular/router";
 import {IViewBusinessProfile} from "./DTO/views/business/IViewBussinessProfile";
 import {AuthService} from "../services/auth.service";
 import {ProfileService} from "../services/profile.service";
@@ -8,10 +8,11 @@ import {ProfileService} from "../services/profile.service";
 import {BehaviorSubject, filter, map, Observable, tap} from "rxjs";
 import {LoginService} from "./auth/login.service";
 import {IResponse} from "./DTO/classes/IResponse";
-import {Title} from "@angular/platform-browser";
 import { AnalyticsService } from 'src/services/analytics.service';
+import { SeoService, SeoPageData } from 'src/services/seo.service';
 import {  PushDebugService } from 'src/services/push-notification.service';
 import { getDeviceCompat } from 'src/utils/device-compat';
+import { environment } from 'src/enviroments/environment';
 
 import { NewsletterService } from 'src/services/newsLetter';
 import { HttpClient } from '@angular/common/http';
@@ -22,6 +23,7 @@ import { UserType } from './DTO/classes/profiles/profile-user.model';
 import { requestAIAction } from './ngrx-store/aiStore/ai.action';
 import { aiCurrentState } from './ngrx-store/aiStore/ai.selectors';
 import { animate, keyframes, style, transition, trigger } from '@angular/animations';
+import { VideoPlaybackCoordinatorService } from './common/video-player/video-playback-coordinator.service';
 
 
 
@@ -89,11 +91,12 @@ export class AppComponent implements OnInit, AfterViewInit  {
   constructor(private _route: Router,
               private analytics: AnalyticsService,
               public _login: LoginService,
-              private titleService: Title,
+              private seo: SeoService,
                public push: PushDebugService,
                public _aiService: AIService,
                public store$: Store,
                private ngZone: NgZone,
+               private videoCoordinator: VideoPlaybackCoordinatorService,
                @Inject(PLATFORM_ID) private platformId: Object,
   ) {
     this.handleRouteEvents();
@@ -249,37 +252,93 @@ export class AppComponent implements OnInit, AfterViewInit  {
 
   
 
-  getTitle(state: RouterState, parent: ActivatedRoute): string[] {
-    const data = [];
-    if (parent && parent.snapshot.data && parent.snapshot.data['title']) {
-      data.push(parent.snapshot.data['title']);
+  /**
+   * Собирает SEO-данные самого глубокого активного маршрута, наследуя поля от
+   * родителей: раздел задаёт noindex один раз, дочерние экраны его не повторяют.
+   */
+  private collectRouteSeo(): SeoPageData & { dynamicSeo?: boolean } {
+    let route: ActivatedRoute | null = this._route.routerState.root;
+    const collected: SeoPageData & { dynamicSeo?: boolean } = {};
+    while (route) {
+      const data = route.snapshot.data ?? {};
+      if (data['title']) collected.title = data['title'];
+      if (data['description']) collected.description = data['description'];
+      if (data['shareTitle']) collected.shareTitle = data['shareTitle'];
+      if (data['ogType']) collected.ogType = data['ogType'];
+      if (data['noindex'] !== undefined) collected.noindex = data['noindex'];
+      if (data['dynamicSeo'] !== undefined) collected.dynamicSeo = data['dynamicSeo'];
+      route = route.firstChild;
     }
-    if (state && parent && parent.firstChild) {
-      data.push(...this.getTitle(state, parent.firstChild));
-    }
-    return data;
+    return collected;
   }
+
+  /** Переносит SEO-данные активного маршрута в теги документа. */
+  private applySeoForUrl(url: string): void {
+    const { dynamicSeo, ...seoData } = this.collectRouteSeo();
+    if (dynamicSeo) {
+      // Заголовок и описание такой страницы ставит сам компонент из данных
+      // бэка — здесь только каноникал и robots, они выводятся из URL.
+      this.seo.updateNavigationOnly(url, seoData.noindex === true);
+    } else {
+      this.seo.update(url, seoData);
+    }
+  }
+
+  /** «Назад» в браузере — не сбрасываем скролл, чтобы вернуться к списку. */
+  private lastNavWasPopstate = false;
 
   handleRouteEvents() {
     this._route.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        this.lastNavWasPopstate = event.navigationTrigger === 'popstate';
+      }
       if (event instanceof NavigationEnd) {
-        const title = this.getTitle(this._route.routerState, this._route.routerState.root).join('-');
-        this.titleService.setTitle(title);
-        // gtag('event', 'page_view', {
-        //   page_title: title,
-        //   page_path: event.urlAfterRedirects,
-        //   page_location: this.document.location.href
-        // });
+        this.applySeoForUrl(event.urlAfterRedirects || event.url);
+        this.scrollPageToTop();
       }
     });
+
+    // Первичную навигацию одной подпиской не поймать: роутер настроен на
+    // initialNavigation: 'enabledBlocking', она завершается ещё до создания
+    // AppComponent — её NavigationEnd происходит раньше, чем подписка выше.
+    // Именно этот случай и есть SSR-ответ, который читает робот, поэтому
+    // применяем данные текущего маршрута сразу. Повторный вызов безвреден:
+    // сервис не добавляет теги, а перезаписывает их.
+    if (this._route.navigated) {
+      this.applySeoForUrl(this._route.url);
+    }
+  }
+
+  /**
+   * Динамические страницы (data.dynamicHit) сами отправляют хит в Метрику после
+   * того, как выставят настоящий title. Для них app.component хит НЕ шлёт, иначе
+   * просмотр запишется со стухшим document.title.
+   */
+  private isDynamicHitRoute(): boolean {
+    let route: ActivatedRoute | null = this._route.routerState.root;
+    while (route) {
+      if (route.snapshot.data?.['dynamicHit']) return true;
+      route = route.firstChild;
+    }
+    return false;
+  }
+
+  /** Хит для статических страниц; для динамических — пропускаем (шлёт компонент). */
+  private sendPageHit(url: string): void {
+    if (this.isDynamicHitRoute()) return;
+    this.analytics.trackPage(url, document.title);
   }
   baProfiles: IViewBusinessProfile[] = [];
 
 
 
   @ViewChild('wavePath', { static: false }) wavePathRef: ElementRef<SVGPathElement>|undefined;
+  /** Оболочка роутера с overflow-y — window.scroll её не двигает. */
+  @ViewChild('pageScroll') private pageScroll?: ElementRef<HTMLElement>;
 
   ngAfterViewInit(): void {
+    // requestAnimationFrame отсутствует на сервере (SSR) — анимацию волны запускаем только в браузере.
+    if (!isPlatformBrowser(this.platformId)) return;
     if(this.wavePathRef){
       const pathEl = this.wavePathRef.nativeElement;
     let t = 0;
@@ -317,10 +376,29 @@ export class AppComponent implements OnInit, AfterViewInit  {
   }
 
   async ngOnInit() {
-    if (isPlatformBrowser(this.platformId) && getDeviceCompat().supportsServiceWorker) {
-      navigator.serviceWorker.register('/sw.js').then(reg => {
-        setInterval(() => reg.update(), 60 * 60 * 1000);
-      });
+    if (isPlatformBrowser(this.platformId)) {
+      // Единый плеер на всю страницу: старт одного видео ставит остальные на паузу.
+      this.videoCoordinator.install();
+
+      if (environment.production && getDeviceCompat().supportsServiceWorker) {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+          setInterval(() => reg.update(), 60 * 60 * 1000);
+        });
+      } else {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map(registration => registration.unregister()));
+        }
+
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          await Promise.all(
+            cacheNames
+              .filter(cacheName => cacheName.startsWith('onwaves-cache-'))
+              .map(cacheName => caches.delete(cacheName))
+          );
+        }
+      }
     }
 
         // this.store$.select(aiCurrentState).subscribe(result => {
@@ -358,11 +436,18 @@ export class AppComponent implements OnInit, AfterViewInit  {
             }
 
 
+            // Аналитика (Яндекс.Метрика) и document.title доступны только в браузере —
+            // на сервере (SSR) хиты не шлём.
+            if (isPlatformBrowser(this.platformId)) {
               this._route.events.pipe(
-              filter((evt): evt is NavigationEnd => evt instanceof NavigationEnd)
-            ).subscribe(evt => {
-              this.analytics.trackPage(evt.urlAfterRedirects);
-            });
+                filter((evt): evt is NavigationEnd => evt instanceof NavigationEnd)
+              ).subscribe(evt => {
+                this.sendPageHit(evt.urlAfterRedirects);
+              });
+              // initialNavigation:'enabledBlocking' завершает первый переход ДО создания
+              // AppComponent, поэтому подписка выше его не ловит — шлём initial-хит вручную.
+              this.sendPageHit(this._route.url);
+            }
     // this.notification.receiveMessage();
     // this.message = this.notification.currentMessage;
     // checkCookie() теперь запускается в APP_INITIALIZER (initializeAuth) до старта роутера —
@@ -452,13 +537,25 @@ export class AppComponent implements OnInit, AfterViewInit  {
     this._route.navigate(['/']);
   }
 
-  onActivate($event: any) {
-    if (!isPlatformBrowser(this.platformId)) return;
-    window.scroll({
-      top: 0,
-      left: 0,
-      behavior: 'smooth'
-    });
+  onActivate(_event: unknown) {
+    this.scrollPageToTop();
+  }
+
+  /**
+   * SPA не сбрасывает scrollY: с главной (карточки ниже первого экрана)
+   * профиль мастера открывался с середины. На SSR window нет.
+   * Instant, не smooth — иначе анимация пересекается с подгрузкой контента.
+   */
+  private scrollPageToTop(): void {
+    if (!isPlatformBrowser(this.platformId) || this.lastNavWasPopstate) {
+      return;
+    }
+    const reset = () => {
+      window.scrollTo(0, 0);
+      this.pageScroll?.nativeElement.scrollTo(0, 0);
+    };
+    reset();
+    requestAnimationFrame(reset);
   }
 
     closeIntroOverlay(): void {

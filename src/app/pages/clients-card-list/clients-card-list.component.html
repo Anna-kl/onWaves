@@ -1,17 +1,23 @@
 <div class="tabs padding-bottom40 w100">
 
-      <p-progressSpinner *ngIf="!cards"></p-progressSpinner>
+      <span class="app-spinner" *ngIf="!cards"></span>
 
   <article class="article-container wrap" style="gap:5px 4px;"  *ngIf="cards">
-    <div class="card-client" *ngFor="let bisiness of cards " (click)="goToProfile(bisiness)"
-   >
+    <!-- Карточка — настоящая <a href>, не (click) на div: иначе Google не
+         видит внутренние ссылки на профили и не обходит каталог с главной.
+         routerLink на <a> в SSR даёт href="/slug", а в браузере остаётся SPA. -->
+    <a class="card-client"
+       *ngFor="let bisiness of cards"
+       [routerLink]="profileCommands(bisiness)"
+       (click)="onProfileNavigate(bisiness)">
       <!-- Фото -->
-      <img [src]="getAvatar(bisiness.avatar)" 
+      <img [src]="getAvatar(bisiness.avatarUrl)"
        class="card-img card-client-avatar" alt="" />
       <!-- Описание -->
       <div class="card-info cont-vert-start-start">
-        <!-- Комментарии и рейтинг --> 
-        <div class="cont-horiz-start" style="gap: 10px 10px;">
+        <!-- Комментарии и рейтинг -->
+        <!-- Собственный рейтинг на платформе -->
+        <div class="cont-horiz-start" style="gap: 10px 10px;" *ngIf="hasOwnReviews(bisiness)">
           <!-- Иконка рейтинга -->
           <img src="./assets/img/ico/ico_rating_pc24.svg" alt=""/>
           <!-- Количество звезд рейтинга -->
@@ -20,22 +26,54 @@
           <img src="./assets/img/ico/ico_feedback_pc24.svg" alt=""/>
           <!-- Количество комментариев -->
           <span>{{bisiness.countReviews}}</span>
-        </div>  
+        </div>
+
+        <!-- Внешний рейтинг — показывается только когда своего нет (как на персональной странице) -->
+        <div class="cont-horiz-start card-ext-rating" style="gap: 8px;" *ngIf="hasExternalReviews(bisiness)">
+          <img src="./assets/img/ico/ico_rating_pc24.svg" alt=""/>
+          <span>{{ bisiness.externalRating }}</span>
+          <img src="./assets/img/ico/ico_feedback_pc24.svg" alt=""/>
+          <span>{{ bisiness.externalReviewCount }}</span>
+          <!-- Источник -->
+          <ng-container [ngSwitch]="bisiness.externalRatingSource">
+            <span *ngSwitchCase="ExternalReviewSource.Avito" class="card-ext-source">
+              <svg width="16" height="16" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="6"  cy="12" r="5.5" fill="#00C04B"/>
+                <circle cx="13" cy="6"  r="4.5" fill="#00B2FF"/>
+                <circle cx="4"  cy="4"  r="2.5" fill="#9B59F5"/>
+                <circle cx="15" cy="14" r="2"   fill="#FF4433"/>
+              </svg>
+              Авито
+            </span>
+            <span *ngSwitchCase="ExternalReviewSource.Profi" class="card-ext-source">
+              <svg width="16" height="16" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                <rect width="18" height="18" rx="4" fill="#E8102D"/>
+                <path d="M3,4 H15 V14 H13 V6 H5 V14 H3 Z" fill="white"/>
+              </svg>
+              Профи.ру
+            </span>
+            <span *ngSwitchCase="ExternalReviewSource.YandexServices" class="card-ext-source">
+              <svg width="16" height="16" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="9" fill="#1C1C28"/>
+                <ellipse cx="11.5" cy="5" rx="3.5" ry="2" transform="rotate(-40 11.5 5)" fill="#EF5E2B"/>
+                <ellipse cx="7.5" cy="13" rx="5.5" ry="2.8" transform="rotate(-40 7.5 13)" fill="#FFD426"/>
+              </svg>
+              Яндекс
+            </span>
+          </ng-container>
+        </div>
         <!-- Имя Бизнес Аккаунта -->
         <div class="card-client-title" [title]="bisiness.name">{{ titleWithBreakOpportunities(bisiness.name) }}</div>  
-        <!-- Описание БА -->
-				<div style="height: 100px; word-wrap: break-word;
-        " class="bisines-about txt-gray-dark">{{prepareAbout(bisiness.about)}}</div>   
-        <div class="bisines-address">
-          <!-- Город -->
-          г.{{bisiness.address?.city}}<br>
-          <!-- Адрес --> 
-          {{getAddressProfileStreet(bisiness.address)}}
-        </div>  
+        <!-- Описание БА: высота по тексту, не фиксированные 100px — иначе адрес режется при пустом низе. -->
+				<div class="bisines-about txt-gray-dark">{{prepareAbout(bisiness.about)}}</div>
+        <!-- Адрес забирает оставшийся низ карточки; полный текст в title. -->
+        <div class="bisines-address" *ngIf="addressText(bisiness)" [title]="addressText(bisiness)">
+          {{ addressText(bisiness) }}
+        </div>
         <!-- Телефон  
         <div>{{bisiness.phone}}</div> -->
         <div class="row justify-content-start svg_i" >
-          <button (click)="confirm($event, bisiness.bestProductType)" style=" border: none;
+          <button type="button" (click)="confirm($event, bisiness.bestProductType)" style=" border: none;
                   background: transparent; ">
        
           <!-- <svg version="1.1" id="Icons"  *ngIf="bisiness.bestProductType === BestProductType.BEST_PRICE"
@@ -53,11 +91,11 @@
                 </div>
       </div> 
    
-            </div>
+            </a>
   </article>
 </div>
  <div class=""> <!-- card flex justify-content-center gap-2 -->
-<!-- <p-toast  position="100,100"/> -->
+<!---->
 <p-confirmPopup 
 [style]="{   
   top: positionPopup[0], 

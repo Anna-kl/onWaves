@@ -1,4 +1,5 @@
 import {NgModule} from "@angular/core";
+import { RouterModule } from '@angular/router';
 import { UABeforeComponent } from './uabefore/uabefore.component';
 import {ClientsCardListComponent} from "./clients-card-list/clients-card-list.component";
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
@@ -8,10 +9,9 @@ import {PaginatorModule} from "primeng/paginator";
 import {CommonComponentsModule} from "../common/common.module";
 import { CardForSearchComponent } from './card-for-search/card-for-search.component';
 import { LandingVersion2Component } from "./landingVersion2/landingVersion2.component";
-import { ProgressSpinnerModule } from "primeng/progressspinner";
 import { ConfirmPopup, ConfirmPopupModule } from 'primeng/confirmpopup';
-import { ToastModule } from 'primeng/toast';
 import { MasterBookingLandingSectionComponent } from "./landingVersion2/components/master-booking-landing-section/master-booking-landing-section.component";
+import { MastersLandingComponent } from "./masters-landing/masters-landing.component";
 
 
 @NgModule({
@@ -22,11 +22,12 @@ import { MasterBookingLandingSectionComponent } from "./landingVersion2/componen
     CardForSearchComponent,
     LandingVersion2Component,
     MasterBookingLandingSectionComponent,
-  ],
-  imports: [NgIf, NgForOf, AsyncPipe, MainAppModule, 
+    MastersLandingComponent],
+  imports: [NgIf, NgForOf, AsyncPipe, MainAppModule,
+    RouterModule,
     PaginatorModule,
-    ConfirmPopupModule, ToastModule,
-    ProgressSpinnerModule, CommonComponentsModule],
-  exports: [ClientsCardListComponent, UABeforeComponent, MainMenuComponent, LandingVersion2Component],
+    ConfirmPopupModule,
+    CommonComponentsModule],
+  exports: [ClientsCardListComponent, UABeforeComponent, MainMenuComponent, LandingVersion2Component, MastersLandingComponent],
 })
 export class PagesModule {}

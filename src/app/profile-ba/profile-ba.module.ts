@@ -15,7 +15,6 @@ import {CarouselModule} from "primeng/carousel";
 import {ButtonModule} from "primeng/button";
 import {SliderotComponent} from "./components/sliderot/sliderot.component";
 import {ImageModule} from "primeng/image";
-import {ToastModule} from "primeng/toast";
 import { PageUserBAComponent } from './components/page-user-ba/page-user-ba.component';
 import {ColumnBAProfileComponent} from "./components/column-baprofile/column-baprofile.component";
 import {AddRecordBAComponent} from "./notes/add-record-ba/add-record-ba.component";
@@ -30,6 +29,9 @@ import { ArendaComponent } from '../baedit/components/uslugi/arenda/arenda.compo
 import { UslugisComponent } from './uslugis/uslugis.component';
 
 import { Arenda2Component } from '../baedit/components/uslugi/arenda2/arenda2.component';
+import { ServiceFormatSelectComponent } from '../baedit/components/uslugi/service-format-select/service-format-select.component';
+import { ServicePriceUnitSelectComponent } from '../baedit/components/uslugi/service-price-unit/service-price-unit.component';
+import { ServiceMediaComponent } from '../baedit/components/uslugi/service-media/service-media.component';
 import { Uslugis2Component } from './uslugis2/uslugis2.component';
 
 import { DayrentComponent } from './dayrent/dayrent.component';
@@ -40,12 +42,13 @@ import { RecordSuccessTelegramModalComponent } from './components/record-success
 import {UIModule} from "../ui/ui.module";
 import { ConfirmRecord2Component } from './components/confirm-record2/confirm-record2.component';
 import { SetIntervalStartComponent } from './components/set-interval-start/set-interval-start.component';
-import {ProgressSpinnerModule} from "primeng/progressspinner";
 import { ErrorConfirmRecordComponent } from "./components/errorConfirmRecord/error-confirm-record.component";
 import { YMapComponent } from "angular-yandex-maps-v3";
 import { CouponNewUserComponent } from './popup/coupon-new-user/coupon-new-user.component';
 import { ShowPhoneCouponComponent } from './popup/show-phone-coupon/show-phone-coupon.component';
 import { BookingContactModalComponent } from './components/booking-contact-modal/booking-contact-modal.component';
+import { LandingUiModule } from './landing-ui.module';
+import { CellingsOfferComponent } from './components/cellings-offer/cellings-offer.component';
 
 
 @NgModule({
@@ -62,6 +65,9 @@ import { BookingContactModalComponent } from './components/booking-contact-modal
     CommonNotesComponent,
     CabinetBAComponent,
     ArendaComponent,
+    ServiceFormatSelectComponent,
+    ServicePriceUnitSelectComponent,
+    ServiceMediaComponent,
     UslugisComponent,
     Arenda2Component,
     Uslugis2Component,
@@ -74,10 +80,15 @@ import { BookingContactModalComponent } from './components/booking-contact-modal
     ErrorConfirmRecordComponent,
     CouponNewUserComponent,
     BookingContactModalComponent,
+    CellingsOfferComponent,
     // ShowPhoneCouponComponent
   ],
     imports: [
       YMapComponent,
+      // Public profile booking routes must be registered before notes/:id.
+      // Otherwise a profile whose slug is "notes" opens notes/:id with
+      // id="choose-service" instead of /:id/choose-service.
+      ProfileBARouting,
       ProfileBANotesRouting,
       NgxMaskDirective, NgxMaskPipe,
         NgClass,
@@ -88,14 +99,12 @@ import { BookingContactModalComponent } from './components/booking-contact-modal
         CarouselModule,
         ButtonModule,
         ImageModule,
-        ToastModule,
         ReactiveFormsModule,
         NgxMaskDirective,
         UIModule,
         CommonComponentsModule,
         CommonModule,
-        ProgressSpinnerModule,
-    ],
+        LandingUiModule],
   exports: [
     ProfileBARouting,
     ProfileBANotesRouting,
@@ -109,7 +118,9 @@ import { BookingContactModalComponent } from './components/booking-contact-modal
     CommonNotesComponent,
     ReviewsComponent,
     PageUserBAComponent,
-    CouponNewUserComponent
+    CouponNewUserComponent,
+    CellingsOfferComponent,
+    LandingUiModule
   ],
   providers: [ProfileDataService, NotesService]
 })

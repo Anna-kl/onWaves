@@ -55,12 +55,24 @@
                 </div>
                 <div class="consent-row" *ngFor="let item of consentItems">
                     <label class="consent-switch">
-                        <input type="checkbox" [checked]="item.isGranted" (change)="onToggleConsent(item, $event)">
+                        <input type="checkbox" [checked]="isToggleOn(item)" [disabled]="item.isPending"
+                               [attr.aria-label]="'Согласие: ' + item.name"
+                               (change)="onToggleConsent(item, $event)">
                         <span class="consent-switch-track"></span>
                     </label>
                     <div class="consent-row-text">
                         <div class="consent-row-name">{{item.name}}</div>
                         <div class="consent-row-hint">{{item.hint}}</div>
+                        <button type="button" class="consent-row-status" *ngIf="needsSetup(item)"
+                                (click)="openSubscribeModal(item)">
+                            <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+                                <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                                <path d="M8 4.4v4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                <circle cx="8" cy="11.4" r="1" fill="currentColor"/>
+                            </svg>
+                            <span>Канал не подключён — подключить</span>
+                            <span class="consent-row-status__arrow" aria-hidden="true">→</span>
+                        </button>
                     </div>
                 </div>
                 <div class="cont-horiz-start margin-top10 margin-bottom30">
@@ -104,4 +116,3 @@
         </form>
     </div>
 </div>
-<p-toast position="bottom-center" ></p-toast>

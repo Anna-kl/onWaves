@@ -20,6 +20,12 @@ import {IChooseDayOfCalendar} from "../../../DTO/views/calendar/IChooseDayOfCale
 import { getPrice, getPriceService, getPriceString } from 'src/helpers/common/price.helpers';
 import { formatDateToString, isString } from 'src/helpers/dateUtils/dateUtils';
 import { v4 as uuidv4 } from 'uuid';
+import { WorkLocationType } from '../../../DTO/enums/workLocationType';
+import { IWorkLocation } from '../../../DTO/views/IWorkLocation';
+import { IRecordLocation } from '../../../DTO/classes/records/recordLocation';
+import { ProfileService } from 'src/services/profile.service';
+import { serviceWorkLocationType } from 'src/helpers/common/address';
+import { applyHourlyDuration } from 'src/helpers/common/hourly';
 
 
 
@@ -34,7 +40,7 @@ function sameDay(a?: Date, b?: Date) {
   selector: 'app-add-record-ba',
   templateUrl: './add-record-ba.component.html',
   styleUrls: ['./add-record-ba.component.scss'],
-  providers: [ScheduleService, GroupService, RecordService]
+  providers: [ScheduleService, GroupService, RecordService, ProfileService]
 })
 export class AddRecordBAComponent implements OnInit, OnDestroy {
 
@@ -63,6 +69,48 @@ export class AddRecordBAComponent implements OnInit, OnDestroy {
   slotError =  false;
   private unsubscribe$: Subscription|null = null;
 
+  // ── Локация записи (характер услуги + адрес выезда клиента) ──
+  protected readonly WorkLocationType = WorkLocationType;
+  masterWorkLocations: IWorkLocation[] = [];
+  clientLocation = { city: '', street: '', house: '', apartment: '', comment: '' };
+  isErrorClientAddress = false;
+  isErrorMixedCharacter = false;
+
+  /** Уникальные характеры выбранных услуг (без legacy null). */
+  get bookingTypes(): WorkLocationType[] {
+    return Array.from(new Set(
+      this.chooseServices.map(s => serviceWorkLocationType(s)).filter((t): t is WorkLocationType => t != null)
+    ));
+  }
+  get isMixedCharacter(): boolean { return this.bookingTypes.length > 1; }
+  get bookingCharacter(): WorkLocationType | null {
+    return this.bookingTypes.length === 1 ? this.bookingTypes[0] : null;
+  }
+  /** Выездная запись — нужен адрес клиента. */
+  get isMobileBooking(): boolean { return this.bookingCharacter === WorkLocationType.Mobile; }
+  /** Города выезда мастера (для выпадающего списка «Город»). */
+  get mobileCities(): string[] {
+    const m = this.masterWorkLocations.find(w => w.locationType === WorkLocationType.Mobile);
+    return (m?.cities ?? []).filter(c => !!c && `${c}`.trim().length > 0);
+  }
+  get isClientAddressValid(): boolean {
+    const a = this.clientLocation;
+    return !!(a.city.trim() && a.street.trim() && a.house.trim());
+  }
+  /** Локация записи: для выезда — адрес клиента; иначе null (бэк заполняет сам). */
+  private buildLocation(): IRecordLocation | null {
+    if (!this.isMobileBooking) return null;
+    const a = this.clientLocation;
+    return {
+      locationType: WorkLocationType.Mobile,
+      city: a.city.trim(),
+      street: a.street.trim(),
+      house: a.house.trim(),
+      apartment: a.apartment.trim() || null,
+      comment: a.comment.trim() || null,
+    };
+  }
+
   constructor(private _routeActivate: ActivatedRoute,
               private _builder: FormBuilder,
               private _router: Router,
@@ -70,6 +118,7 @@ export class AddRecordBAComponent implements OnInit, OnDestroy {
               private _profileData: ProfileDataService,
               private modalService: NgbModal,
               private _groupService: GroupService,
+              private _profileService: ProfileService,
               private _apiRecord: RecordService) {
 
 
@@ -196,6 +245,9 @@ export class AddRecordBAComponent implements OnInit, OnDestroy {
       this.id = res;
       // this.getGroupsWithServices();
       this.getPaymentsMethod();
+      if (res) {
+        this.loadMasterWorkLocations(res);
+      }
     });
     this.filter$?.subscribe(async response => {
       this.dayId = response;
@@ -206,6 +258,17 @@ export class AddRecordBAComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
     this.unsubscribe$?.unsubscribe();
+  }
+
+  /** Форматы работы мастера — источник списка городов выезда. */
+  private loadMasterWorkLocations(id: string): void {
+    this._profileService.getWorkLocation(id).subscribe({
+      next: (res) => {
+        const data = res?.code === 200 ? res.data : null;
+        this.masterWorkLocations = Array.isArray(data) ? data as IWorkLocation[] : (data ? [data as IWorkLocation] : []);
+      },
+      error: () => this.masterWorkLocations = []
+    });
   }
 
 
@@ -230,6 +293,19 @@ export class AddRecordBAComponent implements OnInit, OnDestroy {
     return this.formClient.controls['about'].value.length;
   }
   saveRecord(){
+    // Нельзя смешивать услуги разного характера в одной записи (бэк вернёт 400).
+    this.isErrorMixedCharacter = false;
+    if (this.isMixedCharacter) {
+      this.isErrorMixedCharacter = true;
+      return;
+    }
+    // Выездная услуга — адрес клиента обязателен.
+    this.isErrorClientAddress = false;
+    if (this.isMobileBooking && !this.isClientAddressValid) {
+      this.isErrorClientAddress = true;
+      return;
+    }
+
     const data = this.formClient.getRawValue();
     let start: string = '';
     if (this.start) {
@@ -249,6 +325,7 @@ export class AddRecordBAComponent implements OnInit, OnDestroy {
         IsRemandHours: data['remandHours'],
         IsRemandDay: false,
       } as IOptionsRecord,
+      location: this.buildLocation(),
     } as Record;
     this._apiRecord.saveRecord(this.id!, record).subscribe(
       res => {
@@ -283,18 +360,16 @@ export class AddRecordBAComponent implements OnInit, OnDestroy {
     if (subGroup.paymentForType === PaymentForType.ForHour) {
 
       const modalRef = this.modalService.open(ChooseTimeModalComponent);
-      modalRef.result.then((result: number) => {
-        if (result !== null){
-          subGroup.price.price = result/60 * subGroup.price.price!;
-          subGroup.duration = result;
+      modalRef.result.then((result: number | null) => {
+        if (applyHourlyDuration(subGroup, result)){
           this.chooseServices.push(subGroup);
           this.services$.next(subGroup);
-        } 
+        }
         else {
           subGroup.isChecked = false;
-         // this.services$.next(subGroup);
         }
-        // this.getPrice();
+      }).catch(() => {
+        subGroup.isChecked = false;
       });
     }
 
@@ -322,7 +397,17 @@ export class AddRecordBAComponent implements OnInit, OnDestroy {
     if (!this.formClient.valid){
       return true;
     }
-    return this.chooseServices.length === 0;
+    if (this.chooseServices.length === 0){
+      return true;
+    }
+    // Смешаны характеры услуг или для выезда не заполнен адрес клиента — блокируем.
+    if (this.isMixedCharacter){
+      return true;
+    }
+    if (this.isMobileBooking && !this.isClientAddressValid){
+      return true;
+    }
+    return false;
   }
 
   setInterval($event: IChooseDayOfCalendar|null){

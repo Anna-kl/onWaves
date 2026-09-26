@@ -1,0 +1,494 @@
+<div class="calc-root" *ngIf="connection" role="dialog" aria-modal="true" [attr.aria-labelledby]="'calc-title'">
+  <section class="calc-panel" #panel tabindex="-1" [class.calc-panel--still]="!animateIn">
+    <header class="calc-head" [class.calc-head--compact]="hasStarted">
+      <div class="calc-head__tools">
+        <button type="button" class="calc-head__tool" (click)="clearChat()" [disabled]="busy || !hasStarted"
+                aria-label="Начать расчёт заново" title="Начать расчёт заново">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+              d="M3.2 8A4.8 4.8 0 0 1 12 4.7M12.8 8A4.8 4.8 0 0 1 4 11.3"/>
+            <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+              d="M12 4.7V2.8h1.9M4 11.3v1.9H2.1"/>
+          </svg>
+        </button>
+        <button type="button" class="calc-head__tool" (click)="close($event)" aria-label="Закрыть">
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <path d="M4 4l10 10M14 4 4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <h2 class="calc-head__title" id="calc-title">{{ headline }}</h2>
+      <p class="calc-head__lead">{{ leadText }}</p>
+      <p class="calc-head__free">Расчёт бесплатный · без обязательств</p>
+    </header>
+
+    <div class="calc-thread" #thread *ngIf="viewMode === 'chat'">
+      <div class="calc-msg calc-msg--bot">
+        <span class="calc-msg__ava" aria-hidden="true">A</span>
+        <div class="calc-msg__col">
+          <div class="calc-msg__bubble">{{ greeting }}</div>
+          <time class="calc-msg__time">{{ timeOf('hello') }}</time>
+        </div>
+      </div>
+
+      <ng-container *ngFor="let turn of pastTurns">
+        <div class="calc-msg calc-msg--bot">
+          <span class="calc-msg__ava" aria-hidden="true">A</span>
+          <div class="calc-msg__col">
+            <p class="calc-msg__kicker" *ngIf="instanceKicker(turn.step)">{{ instanceKicker(turn.step) }}</p>
+            <div class="calc-msg__bubble">{{ turn.step.title }}</div>
+            <time class="calc-msg__time">{{ timeOf(turn.step.id) }}</time>
+          </div>
+        </div>
+        <div class="calc-msg calc-msg--user">
+          <div class="calc-msg__col">
+            <div class="calc-msg__bubble">{{ answerLabel(turn.step, turn.answer) }}</div>
+            <time class="calc-msg__time">{{ timeOf('a-' + turn.answer.stepId) }}</time>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!result && step">
+        <div class="calc-msg calc-msg--bot">
+          <span class="calc-msg__ava" aria-hidden="true">A</span>
+          <div class="calc-msg__col">
+            <p class="calc-msg__kicker" *ngIf="instanceKicker(step)">{{ instanceKicker(step) }}</p>
+            <div class="calc-msg__bubble">
+              {{ step.title }}
+              <span class="calc-msg__hint" *ngIf="step.description">{{ step.description }}</span>
+            </div>
+            <img
+              *ngIf="showImage(step.imageUrl)"
+              class="calc-msg__photo"
+              [src]="step.imageUrl!"
+              [alt]="step.imageAlt || step.title"
+              (error)="hideImage(step.imageUrl)">
+            <time class="calc-msg__time">{{ timeOf(step.id) }}</time>
+          </div>
+        </div>
+
+        <div class="calc-choices" *ngIf="step.answerKind === kinds.Choice || step.answerKind === kinds.ChoiceMultiple"
+             [class.calc-choices--multi]="step.answerKind === kinds.ChoiceMultiple">
+          <p class="calc-choices__hint" *ngIf="step.answerKind === kinds.ChoiceMultiple">
+            {{ multipleHint }}
+          </p>
+          <ng-container *ngIf="imagedOptions.length; else noPhotos">
+            <div class="calc-cards"
+                 [class.calc-cards--duo]="imagedOptions.length === 2"
+                 [class.calc-cards--trio]="imagedOptions.length === 3"
+                 [class.calc-cards--quad]="imagedOptions.length === 4">
+              <button
+                type="button"
+                class="calc-card"
+                *ngFor="let option of imagedOptions; trackBy: trackOption"
+                [class.calc-card--on]="isSelected(option)"
+                [disabled]="busy"
+                [attr.aria-pressed]="isSelected(option)"
+                (click)="pickOption(option)">
+                <span class="calc-card__check" *ngIf="step.answerKind === kinds.ChoiceMultiple" aria-hidden="true"></span>
+                <img
+                  *ngIf="showImage(optionPhoto(option))"
+                  [src]="optionPhoto(option)!"
+                  [alt]="optionPhotoAlt(option)"
+                  (error)="hideImage(optionPhoto(option))">
+                <span class="calc-card__ph" *ngIf="!showImage(optionPhoto(option))" aria-hidden="true"></span>
+                <strong>{{ option.label }}</strong>
+              </button>
+            </div>
+            <div class="calc-chips" *ngIf="textOptions.length">
+              <button
+                type="button"
+                class="calc-chip"
+                *ngFor="let option of textOptions; trackBy: trackOption"
+                [class.calc-chip--on]="isSelected(option)"
+                [disabled]="busy"
+                [attr.aria-pressed]="isSelected(option)"
+                (click)="pickOption(option)">
+                {{ option.label }}
+              </button>
+            </div>
+          </ng-container>
+          <ng-template #noPhotos>
+            <div class="calc-rows" *ngIf="hasOptionDescriptions(step); else chips">
+              <button
+                type="button"
+                class="calc-row"
+                *ngFor="let option of step.options; trackBy: trackOption"
+                [class.calc-row--on]="isSelected(option)"
+                [disabled]="busy"
+                [attr.aria-pressed]="isSelected(option)"
+                (click)="pickOption(option)">
+                <strong>{{ option.label }}</strong>
+                <small *ngIf="option.description">{{ option.description }}</small>
+              </button>
+            </div>
+            <ng-template #chips>
+              <div class="calc-chips">
+                <button
+                  type="button"
+                  class="calc-chip"
+                  *ngFor="let option of step.options; trackBy: trackOption"
+                  [class.calc-chip--on]="isSelected(option)"
+                  [disabled]="busy"
+                  [attr.aria-pressed]="isSelected(option)"
+                  (click)="pickOption(option)">
+                  {{ option.label }}
+                </button>
+              </div>
+            </ng-template>
+          </ng-template>
+          <button
+            type="button"
+            class="calc-btn calc-btn--primary calc-btn--sm"
+            *ngIf="step.answerKind === kinds.ChoiceMultiple"
+            (click)="submitStep()"
+            [disabled]="busy || (step.isRequired && !optionIds.length)">
+            Далее
+          </button>
+        </div>
+
+        <div class="calc-number" *ngIf="step.answerKind === kinds.Number">
+          <div class="calc-chips" *ngIf="numberPresets.length">
+            <button
+              type="button"
+              class="calc-chip"
+              *ngFor="let n of numberPresets"
+              [class.calc-chip--on]="numberValue === n"
+              [disabled]="busy"
+              (click)="pickNumber(n)">
+              {{ n }}
+            </button>
+          </div>
+          <div class="calc-number__row">
+            <button
+              type="button"
+              class="calc-number__nudge"
+              (click)="nudgeNumber(-1)"
+              [disabled]="busy || !canNudge(-1)"
+              aria-label="Меньше">−</button>
+            <input
+              class="calc-number__input"
+              type="text"
+              inputmode="numeric"
+              name="calcNumberChat"
+              [(ngModel)]="composerText"
+              [placeholder]="composerPlaceholder"
+              [disabled]="busy"
+              autocomplete="off"
+              (keyup.enter)="sendComposer()">
+            <button
+              type="button"
+              class="calc-number__nudge"
+              (click)="nudgeNumber(1)"
+              [disabled]="busy || !canNudge(1)"
+              aria-label="Больше">+</button>
+          </div>
+          <button
+            type="button"
+            class="calc-btn calc-btn--primary"
+            (click)="sendComposer()"
+            [disabled]="busy || !composerText.trim()">
+            Далее
+          </button>
+        </div>
+      </ng-container>
+
+      <div class="calc-typing" *ngIf="busy" aria-live="polite">
+        <span class="calc-msg__ava" aria-hidden="true">A</span>
+        <span class="calc-typing__dots"><i></i><i></i><i></i></span>
+        <span class="visually-hidden">Считаем…</span>
+      </div>
+
+      <article class="calc-result" *ngIf="result" [class.calc-result--warn]="resultIsUnavailable" [attr.aria-live]="'polite'">
+        <header class="calc-result__top">
+          <span class="calc-result__ok" aria-hidden="true">{{ resultIsUnavailable ? '!' : '✓' }}</span>
+          <div>
+            <h3>{{ resultTitle }}</h3>
+            <time>{{ timeOf('result') }}</time>
+          </div>
+        </header>
+        <p class="calc-result__sum" *ngIf="sumText">{{ sumText }}</p>
+        <p class="calc-result__source" *ngIf="!resultIsUnavailable">{{ priceSourceText }}</p>
+        <p class="calc-result__lead" *ngIf="result.unavailableReason">{{ result.unavailableReason }}</p>
+        <p class="calc-result__lead" *ngIf="!resultIsUnavailable && resultSummary">{{ resultSummary }}</p>
+        <ul class="calc-result__rows" *ngIf="!resultIsUnavailable && result.breakdown?.length">
+          <li *ngFor="let row of result.breakdown">
+            <span>
+              {{ row.label || row.key }}
+              <small *ngIf="rowDetail(row)">{{ rowDetail(row) }}</small>
+            </span>
+            <strong>{{ rowAmount(row.amount) }}</strong>
+          </li>
+        </ul>
+        <div class="calc-result__measure" *ngIf="!resultIsUnavailable && measurements.length">
+          <p>{{ extrasTitle }}</p>
+          <ul *ngIf="measurements.length > 1">
+            <li *ngFor="let item of measurements">{{ item.label }}</li>
+          </ul>
+          <p class="calc-result__measure-note">{{ extrasHint }}</p>
+          <button
+            type="button"
+            class="calc-link calc-result__measure-link"
+            *ngIf="canWriteMaster"
+            (click)="openMasterMax()">
+            Написать мастеру, чтобы уточнить
+          </button>
+        </div>
+
+        <p class="calc-result__sent" *ngIf="leadSent">Заявка отправлена. Мастер свяжется с вами.</p>
+
+        <button
+          type="button"
+          class="calc-link"
+          *ngIf="!leadSent && result.ctaKind === ctaKinds.Lead && !showLeadForm"
+          (click)="openLeadForm()">
+          Не готовы выбрать время? Оставьте телефон — мастер перезвонит
+        </button>
+
+        <div class="calc-result__leadform" *ngIf="!leadSent && result.ctaKind === ctaKinds.Lead && showLeadForm">
+          <label>
+            <span>Имя</span>
+            <input type="text" name="leadName" [(ngModel)]="leadName" autocomplete="name">
+          </label>
+          <label>
+            <span>Телефон</span>
+            <input type="tel" name="leadPhone" [(ngModel)]="leadPhone" autocomplete="tel">
+          </label>
+          <label>
+            <span>Город</span>
+            <input type="text" name="leadCity" [(ngModel)]="leadCity">
+          </label>
+          <label>
+            <span>Комментарий</span>
+            <textarea rows="2" name="leadComment" [(ngModel)]="leadComment"></textarea>
+          </label>
+          <label class="calc-result__consent">
+            <input type="checkbox" [(ngModel)]="consentAccepted" name="consent">
+            <span>Согласен на обработку персональных данных, чтобы мастер получил заявку</span>
+          </label>
+          <button
+            type="button"
+            class="calc-btn calc-btn--ghost"
+            (click)="submitLead()"
+            [disabled]="busy">
+            {{ busy ? 'Отправляем…' : 'Жду звонка мастера' }}
+          </button>
+        </div>
+      </article>
+
+      <p class="calc-error" *ngIf="error">{{ error }}</p>
+    </div>
+
+    <aside class="calc-run-dock" *ngIf="viewMode === 'chat' && showRunningQuote">
+      <ng-container *ngTemplateOutlet="runningQuote"></ng-container>
+    </aside>
+
+    <div class="calc-form" *ngIf="viewMode === 'form'">
+      <div class="calc-form__top">
+        <button type="button" class="calc-btn calc-btn--ghost calc-btn--sm" (click)="goBack()" [disabled]="!canGoBack || busy">Назад</button>
+        <p>{{ connection.name }}</p>
+      </div>
+
+      <ng-container *ngIf="!result && step">
+        <p class="calc-msg__kicker" *ngIf="instanceKicker(step)">{{ instanceKicker(step) }}</p>
+        <img *ngIf="showImage(step.imageUrl)" class="calc-form__hero" [src]="step.imageUrl!" [alt]="step.imageAlt || step.title" (error)="hideImage(step.imageUrl)">
+        <h3>{{ step.title }}</h3>
+        <p class="calc-form__lead" *ngIf="step.description">{{ step.description }}</p>
+
+        <div class="calc-field" *ngIf="step.answerKind === kinds.Number">
+          <span>{{ unitLabel(step.unit) || 'Количество' }}</span>
+          <input
+            type="number"
+            [min]="step.minValue ?? null"
+            [max]="step.maxValue ?? null"
+            [step]="step.stepValue || 1"
+            [placeholder]="step.placeholder || ''"
+            [(ngModel)]="numberValue"
+            name="calcNumber">
+        </div>
+
+        <div class="calc-field" *ngIf="step.answerKind === kinds.Text">
+          <span>{{ step.placeholder || 'Комментарий' }}</span>
+          <textarea rows="3" [(ngModel)]="textValue" [attr.maxlength]="step.maxLength || 500" name="calcText"></textarea>
+        </div>
+
+        <div class="calc-form__options" *ngIf="step.answerKind === kinds.Choice || step.answerKind === kinds.ChoiceMultiple">
+          <button
+            type="button"
+            class="calc-form__option"
+            *ngFor="let option of step.options; trackBy: trackOption"
+            [class.calc-form__option--on]="isSelected(option)"
+            [attr.aria-pressed]="isSelected(option)"
+            (click)="pickOption(option)">
+            <img *ngIf="showImage(optionPhoto(option))" [src]="optionPhoto(option)!" [alt]="optionPhotoAlt(option)" (error)="hideImage(optionPhoto(option))">
+            <span *ngIf="!showImage(optionPhoto(option))" class="calc-form__ph" aria-hidden="true"></span>
+            <span>
+              <strong>{{ option.label }}</strong>
+              <small *ngIf="option.description">{{ option.description }}</small>
+            </span>
+          </button>
+        </div>
+
+        <ng-container *ngIf="showRunningQuote">
+          <ng-container *ngTemplateOutlet="runningQuote"></ng-container>
+        </ng-container>
+        <p class="calc-error" *ngIf="error">{{ error }}</p>
+        <button type="button" class="calc-btn calc-btn--primary" (click)="submitStep()" [disabled]="busy">
+          {{ busy ? 'Считаем…' : 'Далее' }}
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="result">
+        <h3>{{ resultTitle }}</h3>
+        <p class="calc-result__sum" *ngIf="sumText">{{ sumText }}</p>
+        <p class="calc-form__lead" *ngIf="result.unavailableReason">{{ result.unavailableReason }}</p>
+        <p class="calc-form__lead" *ngIf="!resultIsUnavailable && result.note">{{ result.note }}</p>
+        <ul class="calc-result__rows" *ngIf="!resultIsUnavailable && result.breakdown?.length">
+          <li *ngFor="let row of result.breakdown">
+            <span>{{ row.label || row.key }}</span>
+            <strong>{{ rowAmount(row.amount) }}</strong>
+          </li>
+        </ul>
+        <div class="calc-result__measure" *ngIf="!resultIsUnavailable && measurements.length">
+          <p>{{ extrasTitle }}</p>
+          <ul *ngIf="measurements.length > 1">
+            <li *ngFor="let item of measurements">{{ item.label }}</li>
+          </ul>
+          <p class="calc-result__measure-note">{{ extrasHint }}</p>
+          <button
+            type="button"
+            class="calc-link calc-result__measure-link"
+            *ngIf="canWriteMaster"
+            (click)="openMasterMax()">
+            Написать мастеру, чтобы уточнить
+          </button>
+        </div>
+        <p class="calc-result__sent" *ngIf="leadSent">Заявка отправлена. Мастер свяжется с вами.</p>
+        <label class="calc-field" *ngIf="!leadSent && result.ctaKind === ctaKinds.Lead">
+          <span>Имя</span>
+          <input type="text" name="leadNameForm" [(ngModel)]="leadName" autocomplete="name">
+        </label>
+        <label class="calc-field" *ngIf="!leadSent && result.ctaKind === ctaKinds.Lead">
+          <span>Телефон</span>
+          <input type="tel" name="leadPhoneForm" [(ngModel)]="leadPhone" autocomplete="tel">
+        </label>
+        <label class="calc-result__consent" *ngIf="!leadSent && result.ctaKind === ctaKinds.Lead">
+          <input type="checkbox" [(ngModel)]="consentAccepted" name="consentForm">
+          <span>Согласен на обработку персональных данных, чтобы мастер получил заявку</span>
+        </label>
+        <p class="calc-error" *ngIf="error">{{ error }}</p>
+        <ng-container *ngTemplateOutlet="welcomeCouponNote"></ng-container>
+        <button
+          type="button"
+          class="calc-btn calc-btn--primary"
+          (click)="goRecord()"
+          [disabled]="busy">
+          {{ measurementCtaText }}
+        </button>
+        <p class="calc-cta-bar__sub">{{ ctaSubline }}</p>
+        <button
+          type="button"
+          class="calc-btn calc-btn--ghost"
+          *ngIf="!leadSent && result.ctaKind === ctaKinds.Lead"
+          (click)="submitLead()"
+          [disabled]="busy">
+          {{ busy ? 'Отправляем…' : 'Жду звонка мастера' }}
+        </button>
+        <ng-container *ngTemplateOutlet="writeMaster"></ng-container>
+      </ng-container>
+    </div>
+
+    <!-- После сметы нижняя зона отдаётся одному действию: запись на замер к этому мастеру. -->
+    <footer class="calc-cta-bar" *ngIf="viewMode === 'chat' && result">
+      <ng-container *ngTemplateOutlet="welcomeCouponNote"></ng-container>
+      <button
+        type="button"
+        class="calc-btn calc-btn--primary calc-cta-bar__btn"
+        (click)="goRecord()"
+        [disabled]="busy">
+        {{ measurementCtaText }}
+      </button>
+      <p class="calc-cta-bar__sub">{{ ctaSubline }}</p>
+      <ng-container *ngTemplateOutlet="writeMaster"></ng-container>
+    </footer>
+
+    <form class="calc-composer" *ngIf="viewMode === 'chat' && !result" (ngSubmit)="sendComposer()">
+      <div class="calc-composer__field">
+        <label class="visually-hidden" for="calc-composer">Ответ</label>
+        <input
+          #composerInput
+          id="calc-composer"
+          type="text"
+          name="composer"
+          [(ngModel)]="composerText"
+          [placeholder]="composerPlaceholder"
+          [attr.inputmode]="step?.answerKind === kinds.Number ? 'decimal' : 'text'"
+          [disabled]="busy || leadSent"
+          autocomplete="off">
+      </div>
+      <button type="submit" class="calc-composer__send" [disabled]="!composerEnabled" aria-label="Отправить">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M2 9h12M10 5l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </form>
+
+    <ng-template #welcomeCouponNote>
+      <p class="calc-coupon-note" *ngIf="couponNoteText">{{ couponNoteText }}</p>
+    </ng-template>
+
+    <ng-template #writeMaster>
+      <button
+        type="button"
+        class="calc-btn calc-btn--ghost calc-cta-bar__chat"
+        *ngIf="canWriteMaster"
+        (click)="openMasterMax()"
+        aria-label="Написать мастеру в MAX">
+        <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true">
+          <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"
+            d="M3.5 4.5h13v9h-7l-3.5 3v-3h-2.5z"/>
+        </svg>
+        Написать мастеру
+      </button>
+      <p class="calc-cta-bar__hint" *ngIf="maxOpened" aria-live="polite">{{ maxHintText }}</p>
+    </ng-template>
+
+    <ng-template #runningQuote>
+      <article class="calc-run-card" [class.calc-run-card--open]="runExpanded" aria-live="polite">
+        <button
+          type="button"
+          class="calc-run-card__top"
+          (click)="toggleRun()"
+          [attr.aria-expanded]="runExpanded"
+          aria-controls="calc-run-body">
+          <span class="calc-run-card__mark" aria-hidden="true">≈</span>
+          <span class="calc-run-card__head">
+            <strong>Примерный расчёт</strong>
+            <small>{{ runningCaption }}</small>
+          </span>
+          <span class="calc-run-card__sum" *ngIf="runningSumText">{{ runningSumText }}</span>
+          <span class="calc-run-card__chev" aria-hidden="true"></span>
+        </button>
+        <div class="calc-run-card__body" id="calc-run-body">
+          <ul class="calc-run-card__rows" *ngIf="runningRows.length">
+            <li *ngFor="let row of runningRows; trackBy: trackRow">
+              <span>
+                {{ row.label || row.key }}
+                <small *ngIf="rowDetail(row)">{{ rowDetail(row) }}</small>
+              </span>
+              <strong>{{ rowAmount(row.amount) }}</strong>
+            </li>
+          </ul>
+          <div class="calc-run-card__measure" *ngIf="runningMeasureItems.length">
+            <p>{{ runningExtrasTitle }}</p>
+            <ul *ngIf="runningMeasureItems.length > 1">
+              <li *ngFor="let item of runningMeasureItems">{{ item.label }}</li>
+            </ul>
+            <p class="calc-run-card__measure-note">В сумме этого нет — мастер посчитает отдельно.</p>
+          </div>
+          <p class="calc-run-card__note">Ориентир по прайсу. Точная стоимость — после замера.</p>
+        </div>
+      </article>
+    </ng-template>
+  </section>
+</div>

@@ -6,6 +6,10 @@
   Options -MultiViews
   RewriteEngine On
 
+  # Missing static files must remain 404. Rewriting an absent .js file to
+  # index.html returns text/html and causes the browser's strict MIME error.
+  RewriteRule \.(?:js|mjs|css|map|json|webmanifest|wasm|ico|png|jpe?g|gif|svg|webp|avif|woff2?|ttf|otf|eot)$ - [END,NC]
+
   # --- SPA fallback: serve index.html for all non-file/dir routes ---
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
@@ -55,4 +59,40 @@
     AddType text/javascript              js
     AddType font/woff2                   woff2
     AddType font/woff                    woff
+</IfModule>
+
+# ============================================================
+# Compression
+# ------------------------------------------------------------
+# ИЗМЕРЕНО в проде до этой правки: main.js отдавался как 3 324 180 байт
+# без Content-Encoding, styles.css — 626 006 байт. Итого ~4.1 МБ
+# несжатого трафика на первый экран по HTTP/1.1. На мобильном 4G это
+# 7-11 секунд только на скачивание — именно отсюда 14-22 с в отчёте QA.
+# gzip даёт ~5x на этих бандлах, brotli ~7x.
+#
+# Порядок важен: brotli первым (если модуль есть), deflate как фолбэк.
+# Шрифты (woff/woff2) и картинки уже сжаты — не тратим на них CPU.
+# ============================================================
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml
+    AddOutputFilterByType BROTLI_COMPRESS text/javascript application/javascript application/x-javascript
+    AddOutputFilterByType BROTLI_COMPRESS application/json application/manifest+json
+    AddOutputFilterByType BROTLI_COMPRESS image/svg+xml application/xml application/rss+xml
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+    AddOutputFilterByType DEFLATE text/javascript application/javascript application/x-javascript
+    AddOutputFilterByType DEFLATE application/json application/manifest+json
+    AddOutputFilterByType DEFLATE image/svg+xml application/xml application/rss+xml
+
+    # Древние баги Netscape/IE — сохраняем канонические исключения Apache.
+    BrowserMatch ^Mozilla/4         gzip-only-text/html
+    BrowserMatch ^Mozilla/4\.0[678] no-gzip
+    BrowserMatch \bMSIE\b           !no-gzip !gzip-only-text/html
+
+    # Прокси должны различать сжатый и несжатый ответ.
+    <IfModule mod_headers.c>
+        Header append Vary Accept-Encoding
+    </IfModule>
 </IfModule>

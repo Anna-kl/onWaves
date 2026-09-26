@@ -165,29 +165,19 @@
                     </div>
                 </div>
             </div> 
-            <!--------------------------------- Фотографии  новая ----------------------------->
-<!--            <div class="container-for-images-arenda" >-->
-<!--                <div class="txt-green-light margin-bottom10">-->
-<!--                    Добавьте фотографию-->
-<!--                </div>-->
-<!--                <div class="container-images">-->
-<!--                    <div class="green-kub" (click)="addFoto()" *ngIf="images.length<3;">-->
-<!--                        <span>-->
-<!--                            Добавить фото-->
-<!--                        </span>-->
-<!--                    </div>-->
-<!--                    <div class="image-blocks" *ngFor="let image of images">-->
-<!--                        <img class="image-taille" [src]=getImage(image.image) alt=""/>-->
-<!--                        <img class="image-icon-position" src="assets/img/ba-edit/uslugi/delete_button_desktop.svg" alt=""/>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>  -->
+            <app-service-media
+              [profileId]="profile?.id ?? null"
+              [serviceId]="service?.id ?? null"
+              (idsChange)="onMediaIds($event)">
+            </app-service-media>
             <!-- Цена -->
-            <div class="cont-vert-center-start w100" style=" padding: 50px;"
+            <div class="cont-vert-center-start w100 price-block"
             formGroupName="price"> 
                 <div class="w100 cont-horiz-start txt-green-light margin-bottom30 ">
                     Укажите стоимость услуги
                 </div>
+                <div class="price-block__row">
+                <div class="price-block__main">
                 <!-- пишем цену -->
                 <div class="cont-horiz-start w100">
                     <div class="input-line-mini cont-horiz-start" style="margin-right: 20px;"> 
@@ -210,7 +200,27 @@
                 <span class="cont-horiz-start w100" *ngIf="isErrorPrice" [style]="errors.errorLinkStyle">
                     {{errors.errorLink}}
                   </span>
-            </div> 
+                </div>
+
+                <app-service-price-unit
+                  class="price-block__units"
+                  [value]="serviceGroup.get('price')?.get('priceUnit')?.value"
+                  [implicitValue]="implicitPriceUnit"
+                  (valueChange)="setPriceUnit($event)">
+                </app-service-price-unit>
+                </div>
+            </div>
+
+            <!-- Формат оказания услуги (radio) — варианты из форматов работы профиля -->
+            <app-service-format-select
+              [profileId]="profile?.id ?? null"
+              [value]="locationType"
+              (valueChange)="locationType = $event">
+            </app-service-format-select>
+            <div class="alert-validation" *ngIf="isErrorFormat" style="color: #d46c54; margin-bottom: 12px;">
+              *Выберите формат оказания услуги
+            </div>
+
             <!-- ══════════════════════════════════════════════════════════════ -->
             <!-- КРИТИЧНО: Блокируем кнопки во время загрузки + показываем спиннер -->
             <!-- ══════════════════════════════════════════════════════════════ -->
@@ -231,12 +241,7 @@
 
                 <ng-template #savingTemplate>
                     <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <p-progressSpinner
-                            [style]="{'width':'20px','height':'20px'}"
-                            strokeWidth="4"
-                            fill="transparent"
-                            animationDuration=".5s">
-                        </p-progressSpinner>
+                        <span class="app-spinner" style="width:20px;height:20px"></span>
                         <span>Создание услуги...</span>
                     </div>
                 </ng-template>
@@ -245,15 +250,9 @@
 
             <!-- Индикатор загрузки фото -->
             <div *ngIf="isLoadingImages$ | async" class="w100 cont-horiz margin-top50" style="justify-content: center; gap: 10px;">
-                <p-progressSpinner
-                    [style]="{'width':'20px','height':'20px'}"
-                    strokeWidth="4"
-                    fill="transparent"
-                    animationDuration=".5s">
-                </p-progressSpinner>
+                <span class="app-spinner" style="width:20px;height:20px"></span>
                 <span>Загрузка изображений...</span>
             </div>
         </form>
     </div>
-    <p-toast position="bottom-center" ></p-toast>
 </div> 

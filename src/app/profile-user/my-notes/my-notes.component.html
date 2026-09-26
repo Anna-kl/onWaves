@@ -20,7 +20,7 @@
           <div class="cont-horiz">
             <!-- Аватар Юзера -->
             <div style="margin-right: 25px;">
-              <img [src]="getAvatar(record.businessProfile.avatar)" class="notes-ava-ba-ua" alt="">
+              <img [src]="getAvatar(record.businessProfile.avatarUrl)" class="notes-ava-ba-ua" alt="">
             </div>
             <!-- Имя Юзера -->
             <div>
@@ -112,7 +112,13 @@
                   d="M5.08571 8.14062C4.53255 8.14062 4.00204 8.36037 3.61089 8.75152C3.21974 9.14266 3 9.67317 3 10.2263V19.2263C3 19.7795 3.21974 20.31 3.61089 20.7012C4.00204 21.0923 4.53255 21.3121 5.08571 21.3121H17.3C17.8532 21.3121 18.3837 21.0923 18.7748 20.7012C19.166 20.31 19.3857 19.7795 19.3857 19.2263V16.8123H19.8715C20.6684 16.8123 21.3144 16.1663 21.3144 15.3695V13.4409C21.3144 12.644 20.6684 11.998 19.8715 11.998H19.3857V10.2263C19.3857 9.67317 19.166 9.14266 18.7748 8.75152C18.3837 8.36037 17.8532 8.14062 17.3 8.14062H5.08571ZM17.7857 11.998V10.2263C17.7857 10.0975 17.7345 9.97398 17.6435 9.88289C17.5524 9.7918 17.4288 9.74062 17.3 9.74062H5.08571C4.9569 9.74062 4.83335 9.7918 4.74226 9.88289C4.65117 9.97398 4.6 10.0975 4.6 10.2263V19.2263C4.6 19.3552 4.65117 19.4787 4.74226 19.5698C4.83335 19.6609 4.9569 19.7121 5.08571 19.7121H17.3C17.4288 19.7121 17.5524 19.6609 17.6435 19.5698C17.7345 19.4787 17.7857 19.3552 17.7857 19.2263V16.8123H16.6572C15.8603 16.8123 15.2144 16.1663 15.2144 15.3695V13.4409C15.2144 12.644 15.8603 11.998 16.6572 11.998H17.7857ZM18.607 15.2123C18.6 15.2121 18.5928 15.2121 18.5857 15.2121C18.5786 15.2121 18.5715 15.2121 18.5644 15.2123H16.8144V13.598H19.7144V15.2123H18.607Z"
                   fill="#67C4B2" />
               </svg>
-              <b>{{getPriceString(record.services, sale)}} руб. <!--(заглушка!)замени! --> </b>
+              <div *ngIf="record.couponSnapshot as snap; else plainPrice">
+                <b>К оплате: {{ formatAmount(snap.payableAmount, snap.amountIsFrom) }}</b>
+                <div style="font-size: 0.85rem; color: #555;">
+                  Стоимость {{ formatAmount(snap.originalAmount, snap.amountIsFrom) }}, скидка Onwaves −{{ formatRub(snap.discountAmount) }}
+                </div>
+              </div>
+              <ng-template #plainPrice><b>{{getPriceString(record.services, sale)}} руб.</b></ng-template>
             </div>
           </div>
         </div>
@@ -239,7 +245,7 @@
               </a>
               <!-- Написать ico -->
               <a href="{{'https://api.whatsapp.com/send?phone=' + record.businessProfile.whatsApp }}"
-                class="cont-vert types_of_communication_txt" *ngIf="checkWhatsApp(record.businessProfile)"
+                class="cont-vert types_of_communication_txt" *ngIf="false"
                 style="gap: 10px">
                 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none">
                   <rect width="36" height="36" fill="#67C4B2" rx="18" />
@@ -256,7 +262,7 @@
             <div class="cont-horiz-around" style="margin-bottom: 20px; width:210px">
               <!-- WhatsApp ico -->
               <a href="{{'https://api.whatsapp.com/send?phone=' + record.businessProfile.whatsApp }}"
-                class="cont-vert types_of_communication_txt" *ngIf="checkWhatsApp(record.businessProfile)"
+                class="cont-vert types_of_communication_txt" *ngIf="false"
                 style="gap: 10px">
                 <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" fill="none">
                   <path fill="#4FB229"

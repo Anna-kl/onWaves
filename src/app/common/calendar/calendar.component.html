@@ -16,6 +16,11 @@
       </div>
     </div>
 
+    <div class="calendar-state calendar-state--error" *ngIf="loadError" role="alert">
+      <span>Не удалось загрузить расписание на {{getNameMonth(month)}}</span>
+      <button type="button" class="calendar-state__retry" (click)="retryMonth()">Повторить</button>
+    </div>
+
     <div class="cont-horiz-around w100 calendar_width_m">
       <div class="day_off">пн</div>
       <div class="day_off">вт</div>

@@ -21,7 +21,10 @@
 
           </div>
           <ng-template #notService>
+            <ng-container *ngIf="restoringDraft; else emptyRecord">Восстанавливаем выбранную запись…</ng-container>
+            <ng-template #emptyRecord>
             Вы не выбрали записей
+            </ng-template>
           </ng-template>
           <div *ngIf="chooseServices.length > 0; else notService" >
             <div class="margin-top20 margin-bottom20 ">
@@ -30,7 +33,7 @@
             </div>
             <div class="margin-bottom20 cont-horiz-start" *ngIf="record">
               <div class="margin-right10" *ngIf="record?.profile">
-                <img [src]="getAvatar(record!.profile!.avatar)" style="width: 48px; height: 48px ; border-radius: 50px;" alt="">
+                <img [src]="getAvatar(record!.profile!.avatarUrl)" style="width: 48px; height: 48px ; border-radius: 50px;" alt="">
               </div>
               <div *ngIf="record.clientId">
                 <b>{{record.clientId}}</b>
@@ -43,8 +46,7 @@
                 <div style="margin-bottom: 10px;">
                   <b>{{service.name}}</b>
                 </div>
-                <!-- Дата начала услуги -->
-                <div class="txt-gray-light">
+                <div class="txt-gray-light" *ngIf="dayChoose">
                   {{dayChoose|date: 'd MMMM yyyy, HH:mm'}}
                 </div>
               </div>
@@ -65,7 +67,36 @@
             </div>
             <!-- Цена услуги -->
             <div class="txt-green-light">
-              Общая сумма: {{getPrice(chooseServices, sale)}}₽
+              <ng-container *ngIf="showDiscountedTotal; else plainTotal">
+                Общая сумма:
+                <span class="total-old">{{ formatAmount(welcomeQuote!.originalAmount, welcomeQuote!.amountIsFrom) }}</span>
+                <span class="total-new">{{ formatAmount(welcomeQuote!.payableAmount, welcomeQuote!.amountIsFrom) }}</span>
+                <span class="total-badge">{{ totalBadgeText }}</span>
+              </ng-container>
+              <ng-template #plainTotal>Общая сумма: {{getPrice(chooseServices)}}₽</ng-template>
+            </div>
+
+            <!-- Приветственная скидка: сумму и право считает сервер -->
+            <!-- Купон: говорим о праве клиента, а не о новой цене. Суммы считает сервер. -->
+            <div class="welcome-coupon margin-top20" *ngIf="!isRecordView && (welcomeOffered || welcomeHint || couponRefusal)">
+              <div class="coupon-ticket" *ngIf="welcomeOffered" [class.coupon-ticket--off]="!applyWelcome">
+                <span class="coupon-ticket__ic" aria-hidden="true">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h13A1.5 1.5 0 0 1 20 8.5v1.6a1.9 1.9 0 0 0 0 3.8v1.6a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 15.5v-1.6a1.9 1.9 0 0 0 0-3.8V8.5Z"
+                          stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                    <path d="M14.5 8.4v7.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="1.8 2.4"/>
+                  </svg>
+                </span>
+                <div class="coupon-ticket__body">
+                  <b class="coupon-ticket__title">{{ welcomeTitle }}</b>
+                  <span class="coupon-ticket__note">{{ welcomeNote }}</span>
+                  <button type="button" class="coupon-ticket__toggle" (click)="toggleWelcome()">
+                    {{ applyWelcome ? 'Не использовать купон' : 'Использовать купон' }}
+                  </button>
+                </div>
+              </div>
+              <div class="welcome-coupon__note" *ngIf="!welcomeOffered && welcomeHint">{{ welcomeHint }}</div>
+              <div class="welcome-coupon__error" *ngIf="couponRefusal">{{ couponRefusal }}</div>
             </div>
 
             <!-- Запись на услугу END -->
@@ -86,18 +117,6 @@
                   Наличными
                 </div>
              
-              </div>
-                <div class="coupon-checkbox" *ngIf="coupon$|async as coupon">
-                <input
-                  type="checkbox"
-                  id="useCoupon"
-                  class="coupon-checkbox__input"
-                  [(ngModel)]="useCoupon"  
-                  (change)="uses(coupon)"
-                />
-                <label for="useCoupon" class="coupon-checkbox__label">
-                  Использовать купон
-                </label>
               </div>
               <!-- Способ оплаты 2 -->
               <div class="cont-horiz-start type-of-pay" style="gap: 10px 10px" *ngIf="checkPaymentMethods(PaymentMethodType.CARD)">
@@ -144,12 +163,17 @@
                     {{dayChoose|date: 'd MMMM yyyy, HH:mm'}}
                   </div>
                 </div>
-                <!-- Адрес БА -->
-                <div class="cont-horiz" style="gap: 10px 10px;">
+                <!-- Адрес БА (для фиксированного места / онлайн; при выезде показываем адрес клиента ниже) -->
+                <div class="cont-horiz" style="gap: 10px 10px;" *ngIf="!isMobileBooking && !recordLocationText(record)">
                   <img src="/assets/img/ba-edit/ico_location_pc_24.svg" alt="">
                   <div *ngIf="businessProfile">
                     {{getAddressProfile(businessProfile.address!)}}
                   </div>
+                </div>
+                <!-- Адрес выезда сохранённой записи (режим редактирования, разъездная) -->
+                <div class="cont-horiz" style="gap: 10px 10px;" *ngIf="recordLocationText(record) as addr">
+                  <img src="/assets/img/ba-edit/ico_location_pc_24.svg" alt="">
+                  <div>📍 Выезд: {{ addr }}</div>
                 </div>
               </div>
               <!-- Напоминание о записи  НЕ УДАЛЯТЬ!!! после MVP добавить!
@@ -175,6 +199,14 @@
 <!--              <textarea id="story" [(ngModel)]="message" name="story" class="text-story cont-horiz-start-start" placeholder="Добавьте комментарий">-->
 <!--              </textarea>-->
 <!--            </div>--> 
+            <!-- Расчёт с калькулятора: клиент видит, что цифра не потерялась по дороге к записи. -->
+            <div class="calc-handoff" *ngIf="calculatorHandoff as calc"
+                 style="margin: 16px 0; padding: 12px 14px; border-radius: 14px; background: #eef6f6; line-height: 1.4;">
+              <b style="display: block; color: #043c48;">Ваш расчёт{{ calc.totalText ? ': ' + calc.totalText : '' }}</b>
+              <span style="display: block; margin-top: 4px; font-size: 13px;">
+                Мастер получит его вместе с записью. Точную стоимость назовёт на замере.
+              </span>
+            </div>
             <!-- Добавьте комментарий   -->
             <div class="container-textarea">
                   <textarea
@@ -188,7 +220,45 @@
                   </textarea>
                   <span class="textarea-count">{{message.length}}/150</span>
             </div> 
-            <div class="w100 cont-horiz margin-bottom50" *ngIf="!record">
+            <!-- Услуги разного характера нельзя объединять в одну запись -->
+            <div class="alert-validation" *ngIf="isErrorMixedCharacter && !record"
+                 style="color: #d46c54; margin: 16px 0;">
+              *Нельзя объединить в одной записи услуги разного характера (на месте, выезд, онлайн).
+              Оформите их отдельными записями.
+            </div>
+
+            <!-- Выездная услуга: обязательный адрес клиента (куда выехать) -->
+            <div class="client-address" *ngIf="isMobileBooking && !record">
+              <div class="cont-horiz-start" style="gap: 8px; margin: 20px 0 12px;">
+                <img src="/assets/img/ba-edit/ico_location_pc_24.svg" alt="">
+                <b>Куда выехать — адрес клиента</b>
+              </div>
+              <div class="client-address__grid">
+                <!-- Город — только из списка разъездной работы мастера -->
+                <select *ngIf="mobileCities.length" [(ngModel)]="clientLocation.city" name="ca-city">
+                  <option [ngValue]="''" disabled>Город *</option>
+                  <option *ngFor="let c of mobileCities" [ngValue]="c">{{ c }}</option>
+                </select>
+                <input *ngIf="!mobileCities.length" type="text" placeholder="Город *"
+                       [(ngModel)]="clientLocation.city" name="ca-city">
+                <input type="text" placeholder="Улица *"
+                       [(ngModel)]="clientLocation.street" name="ca-street">
+                <input type="text" placeholder="Дом / корпус *"
+                       [(ngModel)]="clientLocation.house" name="ca-house">
+                <input type="text" placeholder="Кв. / офис"
+                       [(ngModel)]="clientLocation.apartment" name="ca-apt">
+              </div>
+              <input type="text" placeholder="Комментарий (подъезд, этаж, домофон)"
+                     [(ngModel)]="clientLocation.comment" name="ca-comment"
+                     style="width:100%; border:1px solid #9196A4; padding:12px 16px; border-radius:100px; margin-top:12px;">
+              <div class="alert-validation" *ngIf="isErrorClientAddress"
+                   style="color: #d46c54; margin-top: 8px;">
+                *Укажите адрес выезда: город, улицу и дом
+              </div>
+            </div>
+
+            <div class="w100 cont-horiz margin-bottom50" *ngIf="!record"
+                 [style.margin-top.px]="isMobileBooking ? 28 : 0">
               <div
                 class="btn-green margin-left40 margin-right40"
                 [class.record-action--disabled]="saveInProgress"
@@ -220,4 +290,4 @@
     </div> <!--disp1 END-->
   </div> <!-- parent-grey-light END -->
   <!-- List END -->
-</main> 
+</main>

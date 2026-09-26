@@ -1,0 +1,27 @@
+<div class="revoke-modal">
+  <h3 class="revoke-modal__title">
+    {{bulk ? 'Отписаться от всех рассылок?' : 'Отключить ' + channelName + '?'}}
+  </h3>
+
+  <p class="revoke-modal__text" *ngIf="!bulk">
+    Отзыв согласия удалит подписку в {{channelName}}. Чтобы снова получать уведомления,
+    переключателя будет недостаточно — придётся заново открыть бот и нажать «Старт».
+  </p>
+
+  <p class="revoke-modal__text" *ngIf="bulk">
+    Будут отключены все каналы уведомлений. Подписки в Telegram, MAX и ВКонтакте при этом
+    удаляются: чтобы вернуть их, переключателя будет недостаточно — придётся заново
+    открыть бот и нажать «Старт».
+  </p>
+
+  <div class="revoke-modal__actions">
+    <button type="button" class="revoke-modal__btn revoke-modal__btn--ghost"
+            (click)="activeModal.dismiss()">
+      Отмена
+    </button>
+    <button type="button" class="revoke-modal__btn revoke-modal__btn--danger"
+            (click)="activeModal.close('revoke')">
+      {{bulk ? 'Отписаться' : 'Отключить'}}
+    </button>
+  </div>
+</div>

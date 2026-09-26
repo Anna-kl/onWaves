@@ -325,3 +325,28 @@
   border: 1px solid rgba($grey-dark, 0.25);
   background: linear-gradient(145deg, $grey-light, $grey);
 }
+
+/* Месяц не загрузился: сетка остаётся, но помечена как неактуальная */
+.calendar-state--error {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #f1d5cf;
+  border-radius: 12px;
+  color: #8a4a3c;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  text-align: center;
+  width: 100%;
+}
+
+.calendar-state__retry {
+  background: #238b6c;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 9px 24px;
+}

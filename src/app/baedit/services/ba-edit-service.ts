@@ -23,8 +23,20 @@ export class ProfileDataEditService
     this.businessProfile.next(user);
   }
 
+  /** Сигнал «список услуг устарел» — из формы услуги после успешного сохранения. */
   updateServices(){
     this.upService.next(true);
+  }
+
+  /**
+   * Гасит сигнал после того, как экран услуг его отработал.
+   *
+   * upService — BehaviorSubject: без сброса значение `true` залипало навсегда и
+   * переигрывалось каждому следующему подписчику при подписке. Сигнал одноразовый,
+   * поэтому его нужно снимать явно.
+   */
+  servicesUpdateHandled(){
+    if (this.upService.value) this.upService.next(false);
   }
 
   getCategoryService(){

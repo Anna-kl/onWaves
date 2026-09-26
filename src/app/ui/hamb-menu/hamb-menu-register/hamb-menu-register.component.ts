@@ -10,6 +10,7 @@ import {
   Renderer2,
   ViewChild
 } from '@angular/core';
+import { ToastService } from 'src/services/toast.service';
 import {BusService} from "../../../../services/busService";
 import {ProfileService} from "../../../../services/profile.service";
 import {CookieService} from "ngx-cookie-service";
@@ -35,16 +36,12 @@ import {getProfileMainClient, selectProfileMainClient} from "../../../ngrx-store
 
 import {ILinkState} from "../../../ngrx-store/links/interface/ILinkState";
 
-import { getIconAvatar } from 'src/helpers/common/avatar1';
-import {MessageService} from "primeng/api";
-
-
-
+import { getIconAvatar, resolveAvatarUrl } from 'src/helpers/common/avatar1';
 @Component({
   selector: 'app-hamb-menu-register',
   templateUrl: './hamb-menu-register.component.html',
   styleUrls: ['./hamb-menu-register.component.css'],
-  providers: [ProfileService, MessageService]
+  providers: [ProfileService]
 })
 export class HambMenuRegisterComponent implements OnInit, OnDestroy{
 
@@ -80,7 +77,7 @@ export class HambMenuRegisterComponent implements OnInit, OnDestroy{
               private store$: Store,
               private renderer: Renderer2,
               private _cookie: CookieService,
-              private messageService: MessageService,) {
+              private messageService: ToastService) {
     this.store$.pipe(select(selectTokenMainClient)).subscribe(result =>
       this.token = result
     );
@@ -233,12 +230,7 @@ this.unsubscribe$ = this._login.mainCategoriesProfile$.subscribe(
   protected readonly UserType = UserType;
 
   getAvatar(avatar: any) {
-    if (avatar) {
-      avatar = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
-    } else {
-      avatar = '/assets/img/ui/ava.svg';
-    }
-    return avatar;
+    return avatar ? resolveAvatarUrl(avatar) : '/assets/img/ui/ava.svg';
   }
     // Главное Меню юзера и бизнеса
     @Input() isAuth: boolean = false;

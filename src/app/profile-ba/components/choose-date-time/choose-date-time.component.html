@@ -1,4 +1,4 @@
- <div class="parent-grey-light main-page">
+<div class="parent-grey-light main-page">
   <div class="disp1 top170" >
     <div class="cont-horiz wrap768">
       <!--- Левая колонка --->
@@ -12,16 +12,43 @@
           <div class="btn-back" (click)="inBack()"></div>
           <h3>Дата и время</h3>
         </div> 
-          <app-calendar            
+        <div class="schedule-state" *ngIf="isLoading" aria-live="polite">
+          <div class="schedule-state__icon schedule-state__icon--loading"></div>
+          <strong>Загружаем свободные даты</strong>
+          <span>Проверяем услугу и расписание мастера</span>
+        </div>
+
+        <div class="schedule-state schedule-state--error" *ngIf="loadError" role="alert">
+          <strong>Не удалось загрузить расписание — повторить</strong>
+          <button type="button" class="schedule-state__retry" (click)="loadPage()">Повторить</button>
+        </div>
+
+        <ng-container *ngIf="!isLoading && !loadError">
+          <div class="schedule-message" *ngIf="restoreMessage" role="status">
+            Не удалось восстановить выбранную запись. Выберите дату и время ещё раз.
+          </div>
+          <!--
+            ngSkipHydration: выбранный день и время восстанавливаются из sessionStorage, которого
+            на сервере нет. Сервер и браузер рендерили здесь разное, и куски двух рендеров
+            оставались на экране одновременно (слоты + «нет доступных слотов»). Эти два блока
+            рисуем только на клиенте, SSR остальной страницы не трогаем.
+          -->
+          <app-calendar ngSkipHydration
             (onDate)="onDate($event)"
+            (clearInterval)="clearInterval($event)"
             [type]="'User'"
+            [today]="today"
+            [initialWorkDays]="workDays"
+            [serviceId]="serviceId"
             [userId]="id">
-          </app-calendar> 
-        <app-set-interval-start 
+          </app-calendar>
+          <app-set-interval-start ngSkipHydration
             [id]="id" [day]="daySetInterval"
-            [duration]="duration" 
+            [duration]="duration"
+            [start]="restoredStart"
+            (restoreFailed)="onRestoreFailed()"
             (setInterval)="setInterval($event)">
-        </app-set-interval-start>
+          </app-set-interval-start>
         <!--  <div class="calendar_alert margin-top30 margin-bottom30 cont-horiz w100">-->
         <!--    Выберите время начала-->
         <!--  </div>-->
@@ -34,13 +61,24 @@
         <!--       </div> -->
         <!--     </div>  -->
         <!--  </div>-->
-        <div class="w100 cont-horiz cta-fixed" >
+          <div class="w100 cont-horiz cta-fixed">
           <a class="next-btn-calendar" (click)="nextConfirm()"
+            [attr.role]="'button'"
+            [attr.aria-disabled]="!isChoosed"
             [ngClass]="{'btn-green': isChoosed, 'btn-gray': !isChoosed}">
             Далее
           </a>
-        </div>
+          </div>
+          <!-- Кнопка не может молчать: пока время не выбрано, объясняем, чего ждём,
+               и подсвечиваем подсказку, если по неактивной кнопке всё-таки нажали. -->
+          <p class="next-hint" *ngIf="!isChoosed"
+             [class.next-hint--alert]="showChooseHint"
+             [attr.role]="showChooseHint ? 'alert' : null">
+            {{ daySetInterval ? 'Выберите время начала — тогда кнопка «Далее» станет активной'
+                              : 'Выберите дату и время — тогда кнопка «Далее» станет активной' }}
+          </p>
+        </ng-container>
       </section>
     </div>
   </div>
-</div> 
+</div>

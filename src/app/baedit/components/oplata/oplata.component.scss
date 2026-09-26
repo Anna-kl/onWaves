@@ -9,7 +9,7 @@
 .column-left{
   display:grid;
   justify-items: center;
-  align-items: start;
+  align-items: flex-start;
 }
 .container-column-left{
   display:grid;
@@ -54,7 +54,7 @@
 .column-right{
   display:grid;
   justify-items: center;
-  align-items: start;
+  align-items: flex-start;
 }
 .container-column-right{
   display:grid;
@@ -81,7 +81,7 @@
 .oplata-box-round{
   background-color: #C0C5D5;
   border-radius: 100px;
-  align-self: end;
+  align-self: flex-end;
 } 
 /*   ---------------------  КАРТОЧКИ ОПЛАТЫ  ---------------------- */ 
 /*.box-oplata:hover, .box-oplata:active {*/

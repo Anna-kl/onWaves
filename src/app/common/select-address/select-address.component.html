@@ -1,76 +1,190 @@
-<div class="discription-column-left">
-  Укажите адрес вашей организации.
+<!-- ═══════════════ Как вы работаете? (мультивыбор) ═══════════════ -->
+<div class="worktype">
+  <h3 class="worktype__title">Как вы работаете?</h3>
+  <p class="worktype__subtitle">Выберите форматы работы. Можно выбрать несколько.</p>
+
+  <div class="format-cards">
+    <!-- Онлайн -->
+    <button type="button" class="format-card"
+            [class.format-card--active]="isOnline"
+            (click)="toggleFormat('online')">
+      <span class="format-card__check" [class.format-card__check--on]="isOnline">
+        <svg *ngIf="isOnline" viewBox="0 0 24 24" width="14" height="14" fill="none">
+          <path d="M5 12.5l4 4 10-10" stroke="#fff" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="format-card__icon">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M3 12h18M12 3c2.5 2.5 2.5 15.5 0 18M12 3c-2.5 2.5-2.5 15.5 0 18"/>
+        </svg>
+      </span>
+      <span class="format-card__name">Онлайн</span>
+      <span class="format-card__desc">Работаю удаленно</span>
+    </button>
+
+    <!-- Фиксированное место -->
+    <button type="button" class="format-card"
+            [class.format-card--active]="isFixed"
+            (click)="toggleFormat('fixed')">
+      <span class="format-card__check" [class.format-card__check--on]="isFixed">
+        <svg *ngIf="isFixed" viewBox="0 0 24 24" width="14" height="14" fill="none">
+          <path d="M5 12.5l4 4 10-10" stroke="#fff" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="format-card__icon">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/>
+          <circle cx="12" cy="10" r="2.5"/>
+        </svg>
+      </span>
+      <span class="format-card__name">Фиксированное место</span>
+      <span class="format-card__desc">Принимаю клиентов по адресу</span>
+    </button>
+
+    <!-- Разъездная -->
+    <button type="button" class="format-card"
+            [class.format-card--active]="isMobile"
+            (click)="toggleFormat('mobile')">
+      <span class="format-card__check" [class.format-card__check--on]="isMobile">
+        <svg *ngIf="isMobile" viewBox="0 0 24 24" width="14" height="14" fill="none">
+          <path d="M5 12.5l4 4 10-10" stroke="#fff" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="format-card__icon">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M3 13l2-5a2 2 0 012-1.3h10A2 2 0 0119 8l2 5v4h-2M3 17v-4M3 17h2m14 0h-2M8 17h8"/>
+          <circle cx="7" cy="17" r="1.6"/>
+          <circle cx="17" cy="17" r="1.6"/>
+        </svg>
+      </span>
+      <span class="format-card__name">Разъезжаю</span>
+      <span class="format-card__desc">Выезжаю к клиентам</span>
+    </button>
+  </div>
+
+  <!-- Подсказка при нескольких форматах -->
+  <div class="format-hint" *ngIf="selectedCount > 1">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M8 12.5l2.5 2.5L16 9" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Отлично! Вы выбрали несколько форматов работы. Клиенты увидят, как с вами удобнее взаимодействовать.</span>
+  </div>
+
+  <!-- Ничего не выбрано -->
+  <div class="format-hint format-hint--warn" *ngIf="selectedCount === 0">
+    <span>Выберите хотя бы один формат работы, чтобы продолжить.</span>
+  </div>
+
+  <!-- Форматы ещё не сохранены: то, что подсвечено выше, — только предложение -->
+  <div class="format-hint format-hint--warn"
+       *ngIf="formatsResolved && !hasSavedFormats && selectedCount > 0">
+    <span>Форматы работы ещё не сохранены — нажмите «Сохранить», иначе их нельзя будет выбрать для услуг.</span>
+  </div>
 </div>
 
-<div class="select">
-  <select [ngModel]="myCountry"
-          (ngModelChange)="myCountry = $any($event); getListRegions(myCountry)">
-    <option [ngValue]="null" disabled>Страна *</option>
-    <option *ngFor="let country of countryList$ | async" [ngValue]="country">
-      {{ country }}
-    </option>
-  </select>
-</div>
+<ng-template #locationFields>
+  <div class="geo-location-fields">
+    <div class="select">
+      <select [ngModel]="myCountry"
+              (ngModelChange)="myCountry = $any($event); getListRegions(myCountry)">
+        <option [ngValue]="null" disabled>Страна *</option>
+        <option *ngFor="let country of countryList$ | async" [ngValue]="country">
+          {{ country }}
+        </option>
+      </select>
+    </div>
 
-<div class="select">
-  <select [ngModel]="myRegion"
-          (ngModelChange)="myRegion = $any($event); change(myRegion, 'region')">
-    <option [ngValue]="null" disabled>Регион *</option>
-    <option *ngFor="let region of allRegions$ | async" [ngValue]="region">
-      {{ region }}
-    </option>
-  </select>
-</div>
+    <div class="select">
+      <select [ngModel]="myRegion"
+              (ngModelChange)="myRegion = $any($event); change(myRegion, 'region', true)">
+        <option [ngValue]="null" disabled>Регион / область *</option>
+        <option *ngFor="let region of allRegions$ | async" [ngValue]="region">
+          {{ region }}
+        </option>
+      </select>
+    </div>
+  </div>
+</ng-template>
 
-<div style="display: flex;">
-  <input type="checkbox"
-         [(ngModel)]="isAnotherCity"
-         class="custom-checkbox"
-         id="choose-another"
-         (ngModelChange)="setAnotherCity()">
-  <label class="text-first" for="choose-another">
-    Другой населенный пункт
-  </label>
-</div>
+<!-- ═══════════════ Данные по выбранным форматам ═══════════════ -->
+<div class="geo-panels" *ngIf="needsGeo">
+  <!-- ФИКСИРОВАННОЕ МЕСТО: полный адрес -->
+  <div class="geo-block geo-block--accent" *ngIf="isFixed">
+    <div class="geo-block__head">
+      <span class="geo-block__dot"></span> Адрес фиксированного места
+    </div>
 
-<div class="select" *ngIf="!isAnotherCity">
-  <select [ngModel]="myCity"
-          (ngModelChange)="myCity = $any($event); change(myCity, 'city')">
-    <option [ngValue]="null" disabled>Населенный пункт *</option>
-    <option *ngFor="let city of allCity" [ngValue]="city">
-      {{ city }}
-    </option>
-  </select>
-</div>
+    <ng-container *ngTemplateOutlet="locationFields"></ng-container>
 
-<div class="help-text" style="margin-top: -30px;">
-  обязательное поле
-</div>
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+      <input type="checkbox"
+             [(ngModel)]="isAnotherCity"
+             class="custom-checkbox"
+             id="choose-another"
+             (ngModelChange)="setAnotherCity()">
+      <label class="text-first" for="choose-another">Другой населённый пункт</label>
+    </div>
 
-<div *ngIf="isAnotherCity">
-  <input type="text"
-         placeholder="Населенный пункт *"
-         [ngModel]="address!.city"
-         (ngModelChange)="change($any($event), 'city')">
-</div>
+    <div class="select" *ngIf="!isAnotherCity">
+      <select [ngModel]="myCity"
+              (ngModelChange)="myCity = $any($event); change(myCity, 'city', true)">
+        <option [ngValue]="null" disabled>Населённый пункт *</option>
+        <option *ngFor="let city of allCity" [ngValue]="city">{{ city }}</option>
+      </select>
+    </div>
 
-<div>
-  <input type="text"
-         placeholder="Улица *"
-         [ngModel]="address!.street"
-         (ngModelChange)="change($any($event), 'street')">
-</div>
+    <div *ngIf="isAnotherCity">
+      <input type="text" placeholder="Населённый пункт *"
+             [ngModel]="address?.city"
+             (ngModelChange)="change($any($event), 'city', true)">
+    </div>
 
-<div>
-  <input type="text"
-         [ngModel]="address!.home"
-         (ngModelChange)="change($any($event), 'home')"
-         placeholder="Дом/корпус *">
-</div>
+    <input type="text" placeholder="Улица *"
+           [ngModel]="address?.street"
+           (ngModelChange)="change($any($event), 'street', true)">
 
-<div>
-  <input type="text"
-         [ngModel]="address!.apartment"
-         (ngModelChange)="change($any($event), 'apartment')"
-         placeholder="Офис/квартира *">
+    <div class="geo-row">
+      <input type="text" placeholder="Дом / корпус *"
+             [ngModel]="address?.home"
+             (ngModelChange)="change($any($event), 'home', true)">
+      <input type="text" placeholder="Офис / квартира"
+             [ngModel]="address?.apartment"
+             (ngModelChange)="change($any($event), 'apartment', true)">
+    </div>
+  </div>
+
+  <!-- РАЗЪЕЗДНАЯ: районы выезда -->
+  <div class="geo-block geo-block--accent" *ngIf="isMobile">
+    <div class="geo-block__head">
+      <span class="geo-block__dot"></span> Районы выезда
+    </div>
+    <p class="geo-block__hint">Укажите районы / города выбранной области, куда вы выезжаете.</p>
+
+    <ng-container *ngIf="!isFixed" [ngTemplateOutlet]="locationFields"></ng-container>
+
+    <div class="city-row" *ngFor="let city of cities; let i = index">
+      <div class="select select--city">
+        <select [ngModel]="cities[i]" (ngModelChange)="onCityChange(i, $any($event))">
+          <option [ngValue]="''" disabled>Район / город *</option>
+          <option *ngFor="let c of allCity" [ngValue]="c">{{ c }}</option>
+        </select>
+      </div>
+      <button type="button" class="city-row__remove"
+              *ngIf="cities.length > 1"
+              (click)="removeCity(i)" aria-label="Удалить">
+        &times;
+      </button>
+    </div>
+
+    <a href="javascript:void(0)" class="add-city-link" (click)="addCity()">
+      + добавить ещё район
+    </a>
+  </div>
+
+  <p class="geo-required">Поля, отмеченные *, обязательны для заполнения.</p>
 </div>

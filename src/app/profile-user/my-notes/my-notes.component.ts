@@ -10,12 +10,14 @@ import {ReviewsUserComponent} from "../components/reviews-user/reviews-user.comp
 import {UTCToLocale, toConstantTime} from "../../../helpers/dateUtils/dateUtils";
 import {getHours, getMinutes} from "../../../helpers/common/timeHelpers";
 import {getAddressProfile} from "../../../helpers/common/address";
+import {resolveAvatarUrl} from "../../../helpers/common/avatar1";
 import {IViewBusinessProfile} from "../../DTO/views/business/IViewBussinessProfile";
 import {PaymentMethodType} from "../../DTO/enums/paymentMethodType";
 import {Observable} from "rxjs";
 import {stringToTime} from "../../../helpers/dateUtils/dateUtils";
 
 import { getPriceService, getPriceString } from 'src/helpers/common/price.helpers';
+import { formatAmount, formatRub } from 'src/helpers/common/welcome-coupon';
 import { getColorLine, getStatusDone } from 'src/helpers/constant/notes';
 
 
@@ -103,11 +105,7 @@ export class MyNotesComponent implements OnInit {
   protected readonly getColorLine = getColorLine;
 
   getAvatar(avatar: any) {
-    if (avatar) {
-      return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
-    } else {
-      return  '/assets/img/onwaves/user.png';
-    }
+    return resolveAvatarUrl(avatar);
   }
     checkStatus(recordStatus: RecordStatus) {
         return recordStatus === RecordStatus.Success;
@@ -117,6 +115,8 @@ export class MyNotesComponent implements OnInit {
   protected readonly getMinutes = getMinutes;
   protected readonly getAddressProfile = getAddressProfile;
   protected readonly getPriceString = getPriceString;
+  protected readonly formatRub = formatRub;
+  protected readonly formatAmount = formatAmount;
   protected readonly getPriceService = getPriceService;
 
   checkPhone(businessProfile: IViewBusinessProfile) {

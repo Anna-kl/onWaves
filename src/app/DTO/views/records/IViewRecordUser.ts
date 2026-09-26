@@ -4,6 +4,7 @@ import {CurrencyType} from "../../enums/currencyType";
 import { Comment } from "../../classes/comments/Comment";
 import {IViewBusinessProfile} from "../business/IViewBussinessProfile";
 import {PaymentMethodType} from "../../enums/paymentMethodType";
+import {CouponSnapshot} from "../promo/welcome-coupon";
 
 export interface IViewRecordUser extends INote{
   id: string;
@@ -19,6 +20,8 @@ export interface IViewRecordUser extends INote{
  // comments?: Comment[];
  // isCanCancel?: boolean;
   isHasReview?: boolean;
+  /** Снимок приветственного купона на записи (сервер считает; здесь только показ). */
+  couponSnapshot?: CouponSnapshot | null;
   methodsPayment: PaymentMethodType[];
 }
 

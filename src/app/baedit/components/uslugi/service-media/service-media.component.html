@@ -1,0 +1,41 @@
+<section class="svc-media" aria-label="Фото и видео услуги">
+  <div class="svc-media__head">
+    <h3 class="svc-media__title">Фото и видео</h3>
+    <p class="svc-media__hint">До {{ max }} файлов. Загрузка идёт в хранилище, можно взять кадры из галереи.</p>
+  </div>
+
+  <div class="svc-media__status" *ngIf="loading" role="status">
+    <span class="app-spinner" style="width:20px;height:20px"></span>
+    <span>Подтягиваем связанные фото</span>
+  </div>
+
+  <div class="svc-media__grid" *ngIf="images.length">
+    <article class="svc-media__tile" *ngFor="let image of images">
+      <img
+        *ngIf="previewUrl(image) as src"
+        class="svc-media__img"
+        [src]="src"
+        [alt]="image.description || image.name || 'Медиа услуги'"
+        loading="lazy">
+      <div class="svc-media__placeholder" *ngIf="!previewUrl(image)" aria-hidden="true"></div>
+      <span class="svc-media__badge" *ngIf="isVideo(image)">Видео</span>
+      <button type="button" class="svc-media__remove" (click)="remove(image)" aria-label="Убрать из услуги">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </article>
+  </div>
+
+  <div class="svc-media__add" *ngIf="canAdd" [class.svc-media__add--empty]="!images.length">
+    <button type="button" class="svc-media__action" (click)="uploadMedia()" [disabled]="uploading">
+      <span class="svc-media__plus" aria-hidden="true">+</span>
+      <span>{{ uploading ? 'Открываем…' : 'Загрузить фото или видео' }}</span>
+    </button>
+    <button type="button" class="svc-media__action svc-media__action--ghost" (click)="pickFromGallery()">
+      Из галереи
+    </button>
+  </div>
+
+  <p class="svc-media__count">{{ count }} из {{ max }}</p>
+</section>

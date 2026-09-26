@@ -6,6 +6,7 @@ import { PostStatus } from 'src/app/DTO/enums/postStatus';
 import { TypeImage } from 'src/app/DTO/enums/typeImage';
 import { IViewPost } from 'src/app/DTO/views/posts/IViewPost';
 import { getAddressProfile } from 'src/helpers/common/address';
+import { resolveAvatarUrl } from 'src/helpers/common/avatar1';
 import { PostService } from 'src/services/posts.service';
 
 @Component({
@@ -25,11 +26,7 @@ export class CommonLentaComponent implements OnInit {
   }
 
   getAvatar(avatar: string | null) {
-    if (avatar) {
-      return this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64,${avatar}`);
-    } else {
-      return '/assets/img/onwaves/user.png';
-    }
+    return resolveAvatarUrl(avatar);
   }
 
   addAnswer(id: string, posts: IViewPost) {

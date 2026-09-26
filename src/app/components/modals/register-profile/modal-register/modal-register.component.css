@@ -39,3 +39,62 @@
   overflow-y: auto;
   margin-bottom: 1rem;
 }
+
+.zvonok {
+  margin: 16px 0 8px;
+  padding: 16px 16px 14px;
+  background: #F4F7F8;
+  border: 1px solid rgba(4, 60, 72, 0.10);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.zvonok__text {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: #043c48;
+}
+
+.zvonok__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 16px;
+  background: #FFFFFF;
+  border: 1px solid rgba(4, 60, 72, 0.14);
+  border-radius: 999px;
+  cursor: pointer;
+  color: #006174;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.2;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.zvonok__btn:hover:not(:disabled) {
+  border-color: #006174;
+  box-shadow: 0 6px 18px rgba(35, 38, 47, 0.10);
+}
+
+.zvonok__btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.zvonok__btn:focus-visible {
+  outline: 2px solid #006174;
+  outline-offset: 2px;
+}
+
+.zvonok__btn:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zvonok__btn {
+    transition: none;
+  }
+}

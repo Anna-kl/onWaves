@@ -7,8 +7,8 @@ import { PostService } from 'src/services/posts.service';
 
 @Component({
   selector: 'app-Lenta',
-  templateUrl: './Lenta.component.html',
-  styleUrls: ['./Lenta.component.scss'],
+  templateUrl: './lenta.component.html',
+  styleUrls: ['./lenta.component.scss'],
   providers: [PostService]
 })
 export class LentaComponent implements OnInit, OnDestroy {

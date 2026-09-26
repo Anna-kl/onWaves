@@ -1,9 +1,9 @@
 import {Component, Input, OnInit, ViewEncapsulation} from '@angular/core';
 import {AlbumsService} from "../../../../../services/albums.service";
 import {IAlbumWithFoto} from "../../../../DTO/views/images/IAlbumWithFoto";
-import {DomSanitizer} from "@angular/platform-browser";
 import {IChooseImage, IViewImage} from "../../../../DTO/views/images/IViewImage";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
+import { isMediaVideoType, normalizeImageMedia } from '../../../../../helpers/common/media.helpers';
 
 @Component({
   selector: 'app-choose-album',
@@ -14,11 +14,15 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 })
 export class ChooseAlbumComponent implements OnInit{
   @Input() profileId!: string;
+  /** Уже прикреплённые к услуге кадры — отмечаем в альбоме. */
+  @Input() selectedIds: string[] = [];
+  @Input() maxCount = 10;
   step= 0;
   albums: IAlbumWithFoto[] = [];
   images: IChooseImage[] = [];
+  currentAlbumId: string | null = null;
+  readonly isVideo = isMediaVideoType;
   constructor(private _apiImage: AlbumsService,
-              private sanitizer: DomSanitizer,
               private activeModal: NgbActiveModal) {
 
   }
@@ -27,24 +31,44 @@ export class ChooseAlbumComponent implements OnInit{
     this.activeModal.close(null);
   }
   ngOnInit(): void {
-    this._apiImage.getAlbums(this.profileId).subscribe(
+    this._apiImage.getAlbums(this.profileId, true).subscribe(
       result => {
         this.albums = result;
       });
   }
 
 
-  getImage(image: any) {
-    return this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${image}`);
+  /**
+   * Обложка альбома с API — публичный URL (S3), не base64.
+   * Старый getImage клеил data:image/jpg;base64 к URL, и превью в акции было пустым.
+   */
+  coverSrc(album: IAlbumWithFoto): string | null {
+    const image = album?.image;
+    if (typeof image !== 'string') return null;
+    const value = image.trim();
+    if (!value) return null;
+    if (value.startsWith('http') || value.startsWith('/') || value.startsWith('data:')) {
+      return value;
+    }
+    return `data:image/jpg;base64,${value}`;
+  }
+
+  /** Превью кадра в сетке: для ролика без обложки не подставляем mp4 в <img>. */
+  previewSrc(image: IViewImage): string {
+    return normalizeImageMedia(image).previewUrl || '';
   }
 
   setAlbum(album: IAlbumWithFoto) {
     this.step = 1;
+    this.currentAlbumId = album.id;
+    this.images = [];
     this._apiImage.getImages(album.id).subscribe(
       images => {
-        images.forEach(item => {
-          this.images.push({...item, isChoose: false});
-        })
+        const selected = new Set(this.selectedIds || []);
+        this.images = images.map(item => ({
+          ...item,
+          isChoose: selected.has(item.id)
+        }));
       });
   }
 
@@ -57,13 +81,20 @@ export class ChooseAlbumComponent implements OnInit{
   }
 
   setMain(id: string) {
-      let img = this.images.find(_ => _.id === id);
-      if (img) {
-        img.isChoose = !img.isChoose;
+      const img = this.images.find(_ => _.id === id);
+      if (!img) return;
+      if (!img.isChoose && this.chosenCount >= this.maxCount) {
+        return;
       }
+      img.isChoose = !img.isChoose;
+  }
+
+  get chosenCount(): number {
+    return this.images.filter(item => item.isChoose).length;
   }
 
   saveChanges() {
-      this.activeModal.close(this.images.filter(_ => _.isChoose).map(_ => _.id));
+      const chosen: IViewImage[] = this.images.filter(_ => _.isChoose);
+      this.activeModal.close({ albumId: this.currentAlbumId, images: chosen });
   }
 }

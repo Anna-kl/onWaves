@@ -1,17 +1,18 @@
 import { Component } from "@angular/core";
-import { MessageService, PrimeNGConfig } from "primeng/api";
+import { ToastService } from 'src/services/toast.service';
+import { PrimeNGConfig } from 'primeng/api';
 
 @Component({
 	selector: 'app-sliderot',
   templateUrl: './sliderot.component.html',
   styleUrls: ['./sliderot.component.css'],
-	providers: [MessageService]
+	providers: []
 })
 
 export class SliderotComponent {
 	tutorials!: Tutorial[];
 
-	constructor(private messageService: MessageService) {}
+	constructor(private messageService: ToastService) {}
 
 	ngOnInit() {
 		this.tutorials = [

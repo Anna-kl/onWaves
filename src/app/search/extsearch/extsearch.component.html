@@ -28,24 +28,15 @@
 				<!-- Выбор города --> 
 				<div class="margin-top-bottom20"> 
           		<!--выподающий списко кругло-овальное--> 
-					<div class="w100 wrap"> 
-						<ng-autocomplete 
-							[data]="data"
-							[searchKeyword]="keyword"
+					<div class="w100 wrap">
+						<app-city-autocomplete
+							inputId="extsearch-city"
 							placeholder="Введите город"
-							(selected)='selectEvent($event)'
-							(inputChanged)='onChangeSearch($event)'
-							(inputFocused)='onFocused($event)'
-							[itemTemplate]="itemTemplate"
-							[notFoundTemplate]="notFoundTemplate">
-						</ng-autocomplete> 
-						<ng-template #itemTemplate let-location >
-							<a [innerHTML]="location.name" ></a>
-						</ng-template> 
-						<ng-template #notFoundTemplate let-notFound>
-							<div [innerHTML]="notFound"></div>
-						</ng-template>  
-					</div> 
+							[cities]="cities"
+							[value]="address"
+							(valueChange)="onCityChange($event)">
+						</app-city-autocomplete>
+					</div>
         		</div>  
 				<!--div class="cont-horizmargin-top-bottom20" style="height: 55px; float:left">
 					<input class="custom-checkbox" type="checkbox" id="Rjadom" [(ngModel)]="isNear" (ngModelChange)="getNearLocation()">

@@ -1,6 +1,7 @@
 import {Injectable} from "@angular/core";
 import {environment} from "../enviroments/environment";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {CookieService} from "ngx-cookie-service";
 import {Record} from "../app/DTO/classes/records/record";
 import {IResponse} from "../app/DTO/classes/IResponse";
 import {BehaviorSubject, Observable, tap} from "rxjs";
@@ -12,6 +13,7 @@ import {IViewRecordData} from "../app/DTO/views/records/IViewRecordData";
 import { IViewUpdateTime } from "src/app/DTO/views/records/IViewUpdateTime";
 import { ICoupon } from "src/app/DTO/classes/promo/IPoupon";
 import { ISendPromo } from "src/app/DTO/views/promo/ISendPromo";
+import { formatDateTimeForApi } from "src/helpers/dateUtils/dateUtils";
 
 @Injectable()
 
@@ -19,7 +21,7 @@ export class RecordService {
   private url = environment.Uri + 'records/';
 
   public recordsUser$ = new BehaviorSubject<IViewRecordUser[]>([]);
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private cookies: CookieService) {
   }
 
   updateTime(userId: string, data: IViewUpdateTime){
@@ -35,7 +37,13 @@ export class RecordService {
   }
   
   saveRecord(id: string, record: Record){
-    return this.http.post<IResponse>(`${this.url}add-user/${id}`, record);
+    // Токен нужен серверу, чтобы применить приветственный купон именно к этому клиенту.
+    // Гость и мастер, создающий запись вручную, идут без изменений.
+    let headers = new HttpHeaders();
+    if (record.useWelcomeCoupon && this.cookies.check('auth-token-ocpio')) {
+      headers = headers.set('Authorization', 'Bearer ' + this.cookies.get('auth-token-ocpio'));
+    }
+    return this.http.post<IResponse>(`${this.url}add-user/${id}`, record, {headers});
   }
 
   getCoupon(id: string){
@@ -56,8 +64,9 @@ export class RecordService {
       tap(data => this.recordsUser$.next(data)));
   }
 
-  getCountRecordsForToday(id: string, date: string){
-    return this.http.get<number>(`${this.url}get-count-record-today/${id}?dateStr=${date}`);
+  getCountRecordsForToday(id: string, date: Date = new Date()){
+    const dateStr = formatDateTimeForApi(date);
+    return this.http.get<number>(`${this.url}get-count-record-today/${id}?dateStr=${encodeURIComponent(dateStr)}`);
   }
 
   getDataForRecord(recordId: string){

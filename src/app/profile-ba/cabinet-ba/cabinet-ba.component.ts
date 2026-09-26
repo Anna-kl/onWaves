@@ -8,7 +8,7 @@ import {Store} from "@ngrx/store";
 import { selectProfileMainClient} from "../../ngrx-store/mainClient/store.select";
 import {IDaysOfSchedule, IPeriod, IViewSchedule} from "../../DTO/views/schedule/IViewSchedule";
 import {ScheduleService} from "../../../services/schedule.service";
-import {generateCalendar} from "../../../helpers/dateUtils/dateUtils";
+import {generateCalendar, toBusinessCalendarDate} from "../../../helpers/dateUtils/dateUtils";
 import { IChooseDayOfCalendar } from 'src/app/DTO/views/calendar/IChooseDayOfCalendar';
 import { Observable, Subscription } from 'rxjs';
 
@@ -110,8 +110,10 @@ export class CabinetBAComponent implements OnInit, OnDestroy {
   }
 
   public getStartEnd(){
-    let startDate = new Date(this.currentDay.getTime());
-     let endDate = new Date(this.currentDay.getTime());
+    // Защита: currentDay иногда мог оказаться не-Date (ячейкой календаря) — нормализуем.
+    const base = this.currentDay instanceof Date ? this.currentDay : new Date();
+    let startDate = new Date(base.getTime());
+     let endDate = new Date(base.getTime());
      
      switch (this.period){
       case 'today': { startDate.setDate(endDate.getDate() - 1); break; }
@@ -184,14 +186,14 @@ export class CabinetBAComponent implements OnInit, OnDestroy {
 
   changeMonth(date: Date){
     this.monthDays = this.allWorksDays.filter(_ =>
-        new Date(_.daysOfWork).getMonth() === date.getMonth());
+        toBusinessCalendarDate(_.daysOfWork).getMonth() === date.getMonth());
     this.allWorksDays = this.allWorksDays.filter(_=>
-        new Date(_.daysOfWork).getMonth() !== date.getMonth());
+        toBusinessCalendarDate(_.daysOfWork).getMonth() !== date.getMonth());
     this.days.forEach(item => {
       item.forEach((sub: any) => {
         let day = this.monthDays
             .find(_=>
-                new Date(_.daysOfWork).getDate() === sub.day);
+                toBusinessCalendarDate(_.daysOfWork).getDate() === sub.day);
         if (day){
           sub.ifExist = true;
           sub.dayId = day.id;
@@ -216,7 +218,6 @@ export class CabinetBAComponent implements OnInit, OnDestroy {
 
   async chooseDays(day: any) {
     day.isToday = true;
-    this.currentDay = day;
     this.days.forEach(item => {
       item.forEach((_: { day: any; isToday: boolean; }) => {
         if (_.day !== day.day){
@@ -224,7 +225,10 @@ export class CabinetBAComponent implements OnInit, OnDestroy {
         }
       });
     });
+    // day — это ячейка календаря {day, isToday}, а не Date. currentDay должен быть Date,
+    // иначе getStartEnd() падает на currentDay.getTime().
     let date = new Date(this.today.getFullYear(), this.today.getMonth(), day.day,0,0,0)
+    this.currentDay = date;
     await this.getListClients(date);
     await this.getListRecords(date);
     await this.getProfit();

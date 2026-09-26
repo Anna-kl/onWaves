@@ -1,0 +1,110 @@
+<article
+  class="offer"
+  *ngIf="offer"
+  [class.offer--campaign]="isCampaign"
+  [class.offer--showcase]="isShowcase"
+  [class.offer--minimal]="isMinimal"
+  [class.offer--hero]="cellingsHero">
+
+  <div class="offer__cover" *ngIf="showCover">
+    <ng-container *ngIf="cover as hero">
+      <app-video-player
+        *ngIf="hero.kind === mediaKind.Video"
+        [url]="hero.url"
+        [poster]="hero.posterUrl || null"
+        [compact]="true"
+        [warmup]="false"
+        (started)="videoStart.emit(hero.url)"
+        [class.offer__frame--contain]="coverContain">
+      </app-video-player>
+      <img
+        *ngIf="hero.kind === mediaKind.Image"
+        [src]="hero.url"
+        [alt]="cellingsHero ? cellingsH1 : offer.title"
+        [class.offer__frame--contain]="coverContain"
+        (load)="onCoverLoad($event)">
+    </ng-container>
+    <span class="offer__cover-ph" *ngIf="!cover">фото работы мастера</span>
+  </div>
+
+  <div class="offer__body">
+    <div class="offer__chips" *ngIf="badge || validLabel">
+      <span class="offer__badge" *ngIf="badge">{{ badge }}</span>
+      <span class="offer__until" *ngIf="validLabel">{{ validLabel }}</span>
+    </div>
+
+    <h1 class="offer__title" *ngIf="cellingsHero">{{ cellingsH1 }}</h1>
+    <p class="offer__cities" *ngIf="cellingsHero && citiesLine">{{ citiesLine }}</p>
+
+    <h2 class="offer__title" *ngIf="!cellingsHero" [innerHTML]="formattedTitle"></h2>
+    <!-- Заявление мастера о цене идёт до лида: объявление обещает цену, первый экран её подтверждает. -->
+    <p class="offer__product" *ngIf="cellingsHero && showOfferTitle" [innerHTML]="formattedTitle"></p>
+
+    <p class="offer__lead" *ngIf="cellingsHero">{{ cellingsLead }}</p>
+
+    <p class="offer__price" *ngIf="priceText">
+      {{ priceText }}
+      <span class="offer__price-note" *ngIf="showPriceNote">{{ priceNote }}</span>
+    </p>
+
+    <p class="offer__lead" *ngIf="!cellingsHero && offer.description">{{ offer.description }}</p>
+
+    <div class="offer__actions" *ngIf="cellingsHero && actions.length">
+      <button
+        type="button"
+        *ngFor="let action of actions"
+        class="offer__btn"
+        [class.offer__btn--primary]="action.role === 0"
+        [class.offer__btn--ghost]="action.role === 1"
+        (click)="onAction(action, $event)">
+        {{ action.text }}
+      </button>
+    </div>
+
+    <div class="offer__benefits" *ngIf="offer.benefits?.length">
+      <div class="offer__benefit" *ngFor="let benefit of offer.benefits">
+        <div class="offer__benefit-title">{{ benefit.title }}</div>
+        <div class="offer__benefit-desc" *ngIf="benefit.description">{{ benefit.description }}</div>
+      </div>
+    </div>
+
+    <div class="offer__strip" *ngIf="showDiscountStrip">
+      <span class="offer__strip-ico" aria-hidden="true">%</span>
+      <span>{{ discountStrip }}</span>
+    </div>
+
+    <div class="offer__actions" *ngIf="!cellingsHero && actions.length">
+      <button
+        type="button"
+        *ngFor="let action of actions"
+        class="offer__btn"
+        [class.offer__btn--primary]="action.role === 0"
+        [class.offer__btn--ghost]="action.role === 1"
+        (click)="onAction(action, $event)">
+        {{ action.text }}
+      </button>
+    </div>
+
+    <p class="offer__note" *ngIf="footerNote && !showDiscountStrip">{{ footerNote }}</p>
+  </div>
+
+  <div class="offer__media" *ngIf="media.length">
+    <ng-container *ngFor="let item of media; let i = index">
+      <app-video-player
+        *ngIf="item.kind === mediaKind.Video"
+        [url]="item.url"
+        [poster]="item.posterUrl || null"
+        [compact]="true"
+        [warmup]="false"
+        (started)="videoStart.emit(item.url)"
+        [class.offer__frame--contain]="extraContain.has(i)">
+      </app-video-player>
+      <img
+        *ngIf="item.kind === mediaKind.Image"
+        [src]="item.url"
+        alt=""
+        [class.offer__frame--contain]="extraContain.has(i)"
+        (load)="onExtraLoad($event, i)">
+    </ng-container>
+  </div>
+</article>

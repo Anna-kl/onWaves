@@ -1,0 +1,108 @@
+@import '../../../../../assets/styles/main/color.scss';
+
+:host {
+  display: block;
+}
+
+.spu {
+  width: 100%;
+  margin-top: 22px;
+}
+
+@media (min-width: 768px) {
+  :host(.price-block__units) {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 280px;
+    margin-left: auto;
+  }
+
+  :host(.price-block__units) .spu {
+    margin-top: 0;
+  }
+
+  :host(.price-block__units) .spu__label {
+    text-align: right;
+  }
+
+  :host(.price-block__units) .spu__chips {
+    justify-content: flex-end;
+  }
+
+  :host(.price-block__units) .spu__chip {
+    flex: 0 0 auto;
+  }
+}
+
+.spu__label {
+  margin: 0 0 12px;
+  color: $green-dark;
+  font-size: 0.95em;
+  font-weight: 700;
+}
+
+.spu__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.spu__chip {
+  min-height: 44px;
+  min-width: 72px;
+  padding: 8px 14px;
+  border: 1.5px solid rgba(4, 60, 72, .12);
+  border-radius: 14px;
+  background: #fff;
+  color: $grey-dark;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+  text-align: left;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .12s ease;
+}
+
+.spu__chip:hover {
+  border-color: $green-light2;
+}
+
+.spu__chip:active {
+  transform: scale(0.98);
+}
+
+.spu__chip--on {
+  border-color: $green-basic;
+  background: #F1FBFC;
+  box-shadow: 0 4px 12px rgba(0, 97, 116, .12);
+  color: $green-basic;
+}
+
+.spu__chip-label {
+  color: $green-dark;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -.02em;
+}
+
+.spu__chip--on .spu__chip-label {
+  color: $green-basic;
+}
+
+.spu__chip-hint {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: $grey-dark;
+}
+
+@media (max-width: 480px) {
+  .spu__chip {
+    flex: 1 1 calc(33.33% - 8px);
+    min-width: 0;
+    padding: 8px 10px;
+  }
+}

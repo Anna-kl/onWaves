@@ -16,4 +16,37 @@
   animation: pulse 1.5s infinite ease-in-out;
 }
 
+/**
+ * @keyframes глобальны и не изолируются ViewEncapsulation. Раньше это правило
+ * подхватывало чужой `pulse` — из app.component.scss или из animate.css, смотря
+ * что подключилось последним. Объявляем свой, чтобы анимация не зависела от
+ * состава глобальных стилей и порядка их подключения.
+ */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.catalog-more {
+  width: 100%;
+}
+.catalog-more__inner {
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 24px;
+}
+.catalog-more__all,
+.catalog-more__next {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 

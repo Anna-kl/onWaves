@@ -74,6 +74,67 @@
     outline-offset: 2px;
 }
 
+.consent-switch input:disabled {
+    cursor: progress;
+}
+
+.consent-switch input:disabled + .consent-switch-track {
+    opacity: 0.6;
+}
+
+/* Согласие есть, но канал не работает — единственное состояние в списке,
+   требующее действия, поэтому оно оформлено как заметный янтарный чип, а не
+   мелкой подписью: раньше строку почти не замечали. */
+.consent-row-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 7px;
+    padding: 7px 12px;
+    border: 1px solid #F0B860;
+    border-radius: 10px;
+    background: #FFF4E2;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #A25600;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.consent-row-status svg {
+    flex-shrink: 0;
+}
+
+.consent-row-status__arrow {
+    font-weight: 700;
+    transition: transform .15s ease;
+}
+
+.consent-row-status:hover {
+    background: #FFE8C6;
+    border-color: #E09B2D;
+    box-shadow: 0 2px 8px rgba(200, 130, 20, 0.18);
+}
+
+.consent-row-status:hover .consent-row-status__arrow {
+    transform: translateX(3px);
+}
+
+.consent-row-status:focus-visible {
+    outline: 2px solid #A25600;
+    outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+    .consent-row-status {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
 .consent-unsubscribe-all {
     color: #C0392B;
     text-decoration: underline;

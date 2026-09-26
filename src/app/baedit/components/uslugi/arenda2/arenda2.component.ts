@@ -1,4 +1,5 @@
 import {select, Store} from "@ngrx/store";
+import { ToastService } from 'src/services/toast.service';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from "@angular/router";
 import {Location} from "@angular/common";
@@ -20,21 +21,25 @@ import {GroupService} from "../../../../../services/groupservice";
 import {Service} from "../../../../DTO/classes/services/Service";
 import { map, Subject, switchMap, takeUntil, tap, BehaviorSubject, catchError, timeout, of, forkJoin } from 'rxjs';
 import {PaymentForType} from "../../../../DTO/enums/paymentForType";
-import {MessageService} from "primeng/api";
 import {DisallowSymbolsDirective} from "src/app/disallow-symbols.directive";
 import {
   getHoursString,
   getMinutesStr,
   getTimeFromFields
 } from "../../../../../helpers/common/timeHelpers";
-import { getNameCurrency } from "src/helpers/common/price.helpers";
+import { getNameCurrency, priceUnitOf } from "src/helpers/common/price.helpers";
 import { environment } from "src/enviroments/environment";
+import { WorkLocationType } from "../../../../DTO/enums/workLocationType";
+import { serviceWorkLocationType } from "src/helpers/common/address";
+import { ServicePriceUnit } from "../../../../DTO/enums/servicePriceUnit";
 
 @Component({
   selector: 'app-arenda2',
   templateUrl: './arenda2.component.html',
   styleUrls: ['./arenda2.component.scss'],
-  providers: [AlbumsService, GroupService, MessageService, DisallowSymbolsDirective],
+  // GroupService — только корневой (`providedIn: 'root'`). Со своим экземпляром форма
+  // инвалидировала собственный кеш, а экран услуг читал чужой и не видел новую услугу.
+  providers: [AlbumsService, DisallowSymbolsDirective],
 
 })
 export class Arenda2Component implements OnInit, OnDestroy {
@@ -75,8 +80,7 @@ export class Arenda2Component implements OnInit, OnDestroy {
     Gender.Woman,
     Gender.Men,
     Gender.Children,
-    Gender.Pet,
-  ];
+    Gender.Pet];
   groupsHours: string[] = ['00','01', '02', '03', '04', '05', '06', '07' ,'08', '09', '10','11','12','13','14','15','16','17','18','19','20','21','22','23'];
 
   groupsMinutes: string[] = ['00', '15', '30', '45'];
@@ -94,6 +98,12 @@ export class Arenda2Component implements OnInit, OnDestroy {
   profile: IViewBusinessProfile|null = null;
   images: IViewImage[] = [];
   imagesId: string[] = [];
+  private mediaReady = false;
+
+  onMediaIds(ids: string[]): void {
+    this.imagesId = ids ?? [];
+    this.mediaReady = true;
+  }
   choosedGroup: Group = {name: 'Выберите группу', id: '', profileUserId: ''};
   characterCount: number = 0;
   errors = {
@@ -130,7 +140,7 @@ export class Arenda2Component implements OnInit, OnDestroy {
               private sanitizer: DomSanitizer,
               private _apiImage: AlbumsService,
               private _apiService: GroupService,
-              private messageService: MessageService,
+              private messageService: ToastService,
               private _dataService: ProfileDataEditService) {
   
     this.store.pipe(select(selectProfileMainClient)).pipe(takeUntil(this.destroy$)).subscribe(result => {
@@ -175,6 +185,13 @@ export class Arenda2Component implements OnInit, OnDestroy {
     this.messageService.add({severity:'success', summary: 'Успешно', detail: 'Услуга изменена',
       life:5000});
   }
+  /** Успех сохранения: «изменена» при редактировании, «добавлена» при создании. */
+  private notifySaved() {
+    this.service ? this.showSuccess2() : this.showSuccess();
+    // Сообщаем экрану услуг, что список устарел: он пересоберёт аккордеон, даже если
+    // остался живым (возврат через location.back() не всегда пересоздаёт компонент).
+    this._dataService.updateServices();
+  }
 
   ngOnDestroy(){
         // Эмитируем значение, чтобы завершить все потоки, подписанные через takeUntil
@@ -199,7 +216,8 @@ export class Arenda2Component implements OnInit, OnDestroy {
         isRange: false,
         startRange: null,
         endRange: null,
-        currencyType: new FormControl(this.currencies[0], Validators.required)
+        currencyType: new FormControl(this.currencies[0], Validators.required),
+        priceUnit: ServicePriceUnit.Service,
       }),
       isTimeUnlimited: false,
       durationHours: this.groupsHours[0],
@@ -208,11 +226,11 @@ export class Arenda2Component implements OnInit, OnDestroy {
     
                
          if (this.changeService ){
-          const selectedGroup =
+            this.service = this.changeService as Service;
+            const selectedGroup =
               this.service?.groupServiceId != null
                 ? (this.groups?.find(g => g.id === this.service!.groupServiceId) ?? null)
                 : (this.choosedGroup ?? null);
-            this.service = this.changeService as Service;
             this.isRubric = false;
             this.serviceGroup = this.builder.group({
               id: [this.service.id],
@@ -230,13 +248,15 @@ export class Arenda2Component implements OnInit, OnDestroy {
                 startRange: [this.service.price.startRange],
                 endRange: [this.service.price.endRange],
                 currencyType: [CurrencyType.RUB],
+                priceUnit: [priceUnitOf(this.service.price) ?? ServicePriceUnit.Service],
               }),
               durationHours: [this.service.duration ? getHoursString(this.service.duration) : this.groupsHours[0]],
               isTimeUnlimited: [this.service.isTimeUnlimited],
               durationMinutes: [this.service.duration ? getMinutesStr(this.service.duration) : this.groupsMinutes[0]],
             });
 
-              
+            // Характер услуги — для редактирования (устойчиво к регистру ключа).
+            this.locationType = serviceWorkLocationType(this.service) ?? null;
   }
           
     this.serviceGroup?.get('about')!.valueChanges.subscribe(
@@ -258,6 +278,15 @@ export class Arenda2Component implements OnInit, OnDestroy {
           }
         }
     );
+
+    // Валюту нельзя менять при диапазонной цене — состоянием disabled управляет форма
+    // (а не атрибут [disabled] в шаблоне, на который ругается Reactive Forms).
+    const currencyCtrl = this.serviceGroup?.get('price')?.get('currencyType');
+    const isRangeCtrl = this.serviceGroup?.get('price')?.get('isRange');
+    const syncCurrencyDisabled = (isRange: boolean) =>
+      isRange ? currencyCtrl?.disable({ emitEvent: false }) : currencyCtrl?.enable({ emitEvent: false });
+    syncCurrencyDisabled(!!isRangeCtrl?.value);
+    isRangeCtrl?.valueChanges.subscribe(res => syncCurrencyDisabled(!!res));
   }
   // isFormValid(): boolean {
   //   return this.serviceGroup.valid;
@@ -266,6 +295,9 @@ export class Arenda2Component implements OnInit, OnDestroy {
   isErrorPrice = false;
   isErrorName = false;
   isErrorGender = false;
+  isErrorFormat = false;
+  /** Формат оказания услуги (radio). Значение выбирается в app-service-format-select. */
+  locationType: WorkLocationType | null = null;
 
   isFormValid(): boolean {
     const priceControl = this.serviceGroup?.get('price');
@@ -291,6 +323,10 @@ export class Arenda2Component implements OnInit, OnDestroy {
           this.serviceGroup?.get('durationMinutes')?.value === '00' ){
             flag = false;
           }
+    }
+    // Формат оказания услуги обязателен.
+    if (this.locationType == null) {
+      flag = false;
     }
     if ( this.serviceGroup)
       return this.serviceGroup?.valid && flag;
@@ -347,22 +383,37 @@ export class Arenda2Component implements OnInit, OnDestroy {
     if (err?.name === 'TimeoutError') {
       return 'Сеть медленная. Пожалуйста, проверьте соединение и попробуйте снова.';
     }
+    // Текст ошибки с бэка (напр. «Укажите характер услуги…», «У вас не настроен формат работы…»).
+    const backend = this.extractBackendMessage(err);
 
     if (err?.status === 409) {
-      return 'Услуга с таким названием уже существует.';
+      return backend ?? 'Услуга с таким названием уже существует.';
     }
     if (err?.status === 400) {
-      return 'Ошибка в данных формы. Проверьте все поля.';
+      return backend ?? 'Ошибка в данных формы. Проверьте все поля.';
     }
     if (err?.status === 500) {
-      return 'Ошибка сервера. Попробуйте позже.';
+      return backend ?? 'Ошибка сервера. Попробуйте позже.';
     }
-
     if (err?.status === 0 || !err?.status) {
-      return 'Проблема с подключением. Проверьте интернет.';
+      return backend ?? 'Проблема с подключением. Проверьте интернет.';
     }
+    return backend ?? `Ошибка ${err?.status || ''}: ${err?.message || 'Неизвестная ошибка'}`;
+  }
 
-    return `Ошибка ${err?.status || ''}: ${err?.message || 'Неизвестная ошибка'}`;
+  /** Достаёт человекочитаемый текст ошибки из ответа бэка (строка/{message}/IResponse). */
+  private extractBackendMessage(err: any): string | null {
+    if (typeof err?.backendMessage === 'string' && err.backendMessage.trim()) {
+      return err.backendMessage.trim();
+    }
+    const body = err?.error;
+    if (typeof body === 'string' && body.trim()) {
+      return body.trim();
+    }
+    if (body && typeof body.message === 'string' && body.message.trim()) {
+      return body.message.trim();
+    }
+    return null;
   }
 
   save(): void {
@@ -371,6 +422,7 @@ export class Arenda2Component implements OnInit, OnDestroy {
     this.isErrorName = false;
     this.isErrorTime = false;
     this.isErrorPrice = false;
+    this.isErrorFormat = false;
     let data = this.serviceGroup?.getRawValue();
     let gender: Gender[] = [];
 
@@ -392,6 +444,10 @@ export class Arenda2Component implements OnInit, OnDestroy {
       this.isErrorName = true;
       flagValidation = false;
     }
+    if (this.locationType == null) {
+      this.isErrorFormat = true;
+      flagValidation = false;
+    }
 
     if (!flagValidation) return;
 
@@ -411,8 +467,11 @@ export class Arenda2Component implements OnInit, OnDestroy {
       data['about'],
       getTimeFromFields(data['durationHours'], data['durationMinutes']),
       data['isTimeUnlimited'],
-      this.category?.id
+      // При редактировании рубрику заново не выбирают — сохраняем существующую категорию услуги.
+      this.category?.id ?? this.service?.categoryId
     );
+    // Характер услуги (backend 2026-07-19).
+    service.workLocationType = this.locationType;
 
     // ══════════════════════════════════════════════════════════════
     // КРИТИЧНО: Передаем requestId для идемпотентности
@@ -420,19 +479,20 @@ export class Arenda2Component implements OnInit, OnDestroy {
     this._apiService.saveService(service, this.requestId).pipe(
       timeout(15000),
       tap(result => {
-        if (result.code === 201) {
+        // 201 — создание новой услуги, 200 — обновление существующей.
+        if (result.code === 201 || result.code === 200) {
           const serv = result.data as Service;
-          // Загружаем изображения если они есть
-          if (this.imagesId?.length > 0) {
+          const shouldSyncMedia = !!serv.id && (this.imagesId.length > 0 || (!!this.service && this.mediaReady));
+          if (shouldSyncMedia) {
             this.saveImages(this.imagesId, serv.id!);
           } else {
-            this.showSuccess();
+            this.notifySaved();
             this.isSaving$.next(false);
             this.location.back();
           }
         } else {
           this.isSaving$.next(false);
-          this.showErrorMessage({ status: result.code, message: 'Неудачный ответ сервера' });
+          this.showErrorMessage({ status: result.code, backendMessage: result.message });
         }
       }),
       catchError(err => {
@@ -453,13 +513,13 @@ export class Arenda2Component implements OnInit, OnDestroy {
       .pipe(
         timeout(15000),
         tap(() => {
-          this.showSuccess();
+          this.notifySaved();
           this.isSaving$.next(false);
           this.location.back();
         }),
         catchError(err => {
           this.isSaving$.next(false);
-          this.showSuccess(); // Услуга создана, только изображения не загружены
+          this.notifySaved(); // Услуга сохранена, только изображения не загружены
           console.error('Ошибка при загрузке изображений:', err);
           this.location.back();
           return of(null);
@@ -528,6 +588,12 @@ export class Arenda2Component implements OnInit, OnDestroy {
     this.isRubric = true;
     let element = document.getElementById('groupModal');
     element?.scrollIntoView(true);
+  }
+
+  readonly implicitPriceUnit = ServicePriceUnit.Service;
+
+  setPriceUnit(unit: ServicePriceUnit): void {
+    this.serviceGroup?.get('price')?.get('priceUnit')?.setValue(unit);
   }
 
   protected readonly getNameCurrency = getNameCurrency;

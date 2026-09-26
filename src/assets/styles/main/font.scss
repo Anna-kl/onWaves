@@ -1,21 +1,36 @@
 /*--------------- Шрифт -------------------*/
+/**
+ * Форматы выбраны по browserslist проекта (Safari >= 15, iOS >= 15, последние
+ * Chrome/Firefox/Edge) — там woff2 поддерживается везде без исключений.
+ *
+ * Было: eot -> woff -> ttf. eot понимает только IE (Angular 16 его не
+ * поддерживает вовсе), ttf нужен Android 4.x — ни один целевой браузер их не
+ * запрашивал, они просто лежали в деплое (1.28 МБ на четыре файла).
+ * woff2 на 34% легче woff (91 812 против 138 600 байт у Regular), а шрифт
+ * тормозит отрисовку текста — на двух начертаниях это ~94 КБ реального трафика
+ * на первом экране.
+ *
+ * woff оставлен вторым: браузер скачивает только первый поддерживаемый формат,
+ * так что фолбэк ничего не стоит.
+ *
+ * font-display: swap — текст рисуется системным шрифтом сразу, без невидимой
+ * фазы ожидания загрузки (FOIT).
+ */
 @font-face {
 	font-family: 'Montserrat';
-	src: url('/assets/Fonts/Montserrat/Montserrat-Regular.eot');
-	src: local('/assets/Fonts/Montserrat/Montserrat Regular'), local('Fonts/Montserrat/Montserrat-Regular'),
-		url('/assets/Fonts/Montserrat/Montserrat-Regular.eot?#iefix') format('embedded-opentype'),
-		url('/assets/Fonts/Montserrat/Montserrat-Regular.woff') format('woff'),
-		url('/assets/Fonts/Montserrat/Montserrat-Regular.ttf') format('truetype');
+	src: local('Montserrat Regular'), local('Montserrat-Regular'),
+		url('/assets/Fonts/Montserrat/Montserrat-Regular.woff2') format('woff2'),
+		url('/assets/Fonts/Montserrat/Montserrat-Regular.woff') format('woff');
 	font-weight: normal;
 	font-style: normal;
+	font-display: swap;
 }
 @font-face {
 	font-family: 'Montserrat';
-	src: url('/assets/Fonts/Montserrat/Montserrat-Bold.eot');
-	src: local('/assets/Fonts/Montserrat/Montserrat Bold'), local('Fonts/Montserrat/Montserrat-Bold'),
-		url('/assets/Fonts/Montserrat/Montserrat-Bold.eot?#iefix') format('embedded-opentype'),
-		url('/assets/Fonts/Montserrat/Montserrat-Bold.woff') format('woff'),
-		url('/assets/Fonts/Montserrat/Montserrat-Bold.ttf') format('truetype');
+	src: local('Montserrat Bold'), local('Montserrat-Bold'),
+		url('/assets/Fonts/Montserrat/Montserrat-Bold.woff2') format('woff2'),
+		url('/assets/Fonts/Montserrat/Montserrat-Bold.woff') format('woff');
 	font-weight: bold;
 	font-style: normal;
+	font-display: swap;
 }

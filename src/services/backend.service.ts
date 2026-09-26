@@ -59,7 +59,11 @@ export class BackendService {
   }
 
   public save_avatar(id: string, formData: any){
-    return this.http.post(`${this.url}${id}/avatar`, formData);
+    // Эндпоинт требует Bearer-токен: глобального auth-интерцептора нет, без
+    // заголовка загрузка аватара падает с 401.
+    const token = this.cookieService.get('auth-token-ocpio');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    return this.http.post(`${this.url}${id}/avatar`, formData, { headers });
   }
 
   // getPaymentMethods(): PaymentMethodType[] {

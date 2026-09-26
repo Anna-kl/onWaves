@@ -71,26 +71,7 @@
     <div *ngIf="!isCropping && hasCroppedImage && fileType === 'photo'" class="cim-preview-wrap">
       <img [src]="croppedImage" alt="Предпросмотр" class="cim-preview-img" />
 
-      <!-- Корзина — правый верхний угол, только edit mode -->
-      <ng-container *ngIf="isEditMode">
-        <button *ngIf="!confirmDelete"
-                class="cim-preview-delete" (click)="confirmDelete = true" aria-label="Удалить">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6l-1 14H6L5 6"/>
-            <path d="M10 11v6M14 11v6"/>
-            <path d="M9 6V4h6v2"/>
-          </svg>
-        </button>
-        <div *ngIf="confirmDelete" class="cim-preview-confirm">
-          <span>Удалить?</span>
-          <button class="cim-preview-confirm__yes" (click)="deletePhoto()" [disabled]="isDeleting">
-            {{ isDeleting ? '…' : 'Да' }}
-          </button>
-          <button class="cim-preview-confirm__no" (click)="confirmDelete = false">Нет</button>
-        </div>
-      </ng-container>
+      <ng-container *ngTemplateOutlet="deleteControls"></ng-container>
 
       <button class="cim-replace-btn" (click)="triggerFileInput()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -105,8 +86,10 @@
     <!-- Превью видео -->
     <div *ngIf="videoPreviewUrl && fileType === 'video'" class="cim-video-wrap">
       <video [src]="videoPreviewUrl" class="cim-video-preview"
+             [attr.poster]="videoPosterUrl || undefined"
              controls preload="metadata" playsinline></video>
-      <div class="cim-video-meta">
+      <ng-container *ngTemplateOutlet="deleteControls"></ng-container>
+      <div class="cim-video-meta" *ngIf="videoFile">
         <div class="cim-video-meta__icon">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -114,10 +97,10 @@
             <rect x="1" y="5" width="15" height="14" rx="2"/>
           </svg>
         </div>
-        <span class="cim-video-meta__name">{{ videoFile?.name }}</span>
-        <span class="cim-video-meta__size">{{ formatFileSize(videoFile?.size) }}</span>
+        <span class="cim-video-meta__name">{{ videoFile.name }}</span>
+        <span class="cim-video-meta__size">{{ formatFileSize(videoFile.size) }}</span>
       </div>
-      <button class="cim-replace-btn" (click)="triggerFileInput()">
+      <button *ngIf="!isEditMode" class="cim-replace-btn" (click)="triggerFileInput()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="1 4 1 10 7 10"/>
@@ -129,6 +112,28 @@
 
   </div>
 
+  <ng-template #deleteControls>
+    <ng-container *ngIf="isEditMode">
+      <button *ngIf="!confirmDelete"
+              class="cim-preview-delete" (click)="confirmDelete = true" aria-label="Удалить">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v6M14 11v6"/>
+          <path d="M9 6V4h6v2"/>
+        </svg>
+      </button>
+      <div *ngIf="confirmDelete" class="cim-preview-confirm">
+        <span>Удалить?</span>
+        <button class="cim-preview-confirm__yes" (click)="deletePhoto()" [disabled]="isDeleting">
+          {{ isDeleting ? '…' : 'Да' }}
+        </button>
+        <button class="cim-preview-confirm__no" (click)="confirmDelete = false">Нет</button>
+      </div>
+    </ng-container>
+  </ng-template>
+
   <!-- ── Прогресс загрузки видео ── -->
   <div class="cim-progress" *ngIf="isVideoUploading">
     <div class="cim-progress__track">
@@ -138,13 +143,17 @@
   </div>
 
   <!-- ── Обложка для видео (необязательно) ── -->
-  <div class="cim-section" *ngIf="fileType === 'video' && !isEditMode">
+  <div class="cim-section" *ngIf="fileType === 'video'">
     <div class="cim-label-row">
       <label class="cim-label">
         Обложка видео <span class="cim-optional">(необязательно)</span>
       </label>
     </div>
-    <p class="cim-field-hint">Если не выбрать — сервер возьмёт первый кадр автоматически.</p>
+    <p class="cim-field-hint">
+      {{ isEditMode
+        ? 'Картинка на превью ролика в галерее и на карточке.'
+        : 'Если не выбрать — сервер возьмёт первый кадр автоматически.' }}
+    </p>
 
     <!-- Кроппер обложки -->
     <div *ngIf="isCroppingCover" class="cim-cover-cropper-wrap">
@@ -217,7 +226,7 @@
       [(ngModel)]="description"
       [maxlength]="maxDescription"
       placeholder="Опишите фото или видео…"
-      rows="3">
+      rows="6">
     </textarea>
     <p class="cim-field-hint">Описание помогает клиентам лучше понять работу.</p>
   </div>

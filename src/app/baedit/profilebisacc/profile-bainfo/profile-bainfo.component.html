@@ -1,5 +1,6 @@
 <!-- Правая колонка БА -->
 <div class="ba-right-column-padding">
+  <app-landing-section class="landing-slot landing-slot--main" [profileId]="companyId"></app-landing-section>
   <app-albums-show [profileId]="companyId"></app-albums-show>
     <div class="cont-horiz-start-start wrap w100">
 
@@ -108,12 +109,13 @@
     <!-- 2GIS -->
     <div class="cont-vert-start-center wrap margin-top30" *ngIf="profile">
         <div class="margin-bottom40">
-            <h3>Как нас найти</h3>
-            <span>{{getAddressProfile(profile.address!)}}</span>
+            <h3>{{ isMobileWork && !fixedLoc ? 'Города работы' : 'Как нас найти' }}</h3>
+            <span *ngIf="hasAddress; else noAddress">{{ addressText }}</span>
+            <ng-template #noAddress><span class="address-empty">Адрес не указан</span></ng-template>
         </div>
         <!--Карта 2GIS start -->
-        <div class="column-right-footer" *ngIf="geoPoint$|async as geo">
-            <app-my-ycomponent [geo]="geoPoint$|async"></app-my-ycomponent>       
+        <div class="column-right-footer" *ngIf="(geoPoint$|async) || geoList.length">
+            <app-my-ycomponent [geo]="geoPoint$|async" [geoList]="geoList" [avatar]="profile.avatarUrl ?? null"></app-my-ycomponent>
         </div>
         <!--Карта 2GIS END-->
     </div>

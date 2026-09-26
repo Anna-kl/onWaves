@@ -231,13 +231,8 @@
                   </div>
                 
                   <!-- Right Column -->
-                  <div class="cont-vert-center-start contact_col_50-2 phone-view-map-content"  style="padding: 40px 0;" *ngIf="geoPoint$ | async as geo">
-                    <!-- <div class="container">
-                      <ya-map [center]="[geo.lat, geo.lng]" [zoom]="12">
-                        <ya-placemark [geometry]="[geo.lat, geo.lng]"></ya-placemark>
-                      </ya-map>
-                    </div> -->
-             <app-my-ycomponent [geo]="geoPoint$|async"></app-my-ycomponent>
+                  <div class="cont-vert-center-start contact_col_50-2 phone-view-map-content"  style="padding: 40px 0;" *ngIf="(geoPoint$ | async) || geoList.length">
+             <app-my-ycomponent [geo]="geoPoint$|async" [geoList]="geoList"></app-my-ycomponent>
 
                   </div>
                 </div>
@@ -288,12 +283,7 @@
 
                 <ng-template #loadingTemplate>
                   <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    <p-progressSpinner
-                      [style]="{'width':'20px','height':'20px'}"
-                      strokeWidth="4"
-                      fill="transparent"
-                      animationDuration=".5s">
-                    </p-progressSpinner>
+                    <span class="app-spinner" style="width:20px;height:20px"></span>
                     <span>Создание профиля...</span>
                   </div>
                 </ng-template>
@@ -304,5 +294,28 @@
     </div>
   </div>
 </div>
-<p-toast position="bottom-center" ></p-toast>
+<!-- ═══════════ Анимация сохранения: профиль создан → отправляем адреса ═══════════ -->
+<div class="save-overlay" *ngIf="isSubmitting$ | async">
+  <div class="save-overlay__card">
+    <div class="save-waves" [class.save-waves--done]="submitDone$ | async">
+      <span class="save-waves__ring"></span>
+      <span class="save-waves__ring"></span>
+      <span class="save-waves__ring"></span>
+      <div class="save-waves__core">
+        <svg *ngIf="submitDone$ | async" class="save-check" viewBox="0 0 52 52">
+          <path d="M14 27l8 8 16-18" fill="none" stroke="#fff" stroke-width="4"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span *ngIf="!(submitDone$ | async)" class="save-waves__spark"></span>
+      </div>
+    </div>
+
+    <div class="save-overlay__text">{{ submitStage$ | async }}</div>
+
+    <div class="save-overlay__dots" *ngIf="!(submitDone$ | async)">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</div>
+
 </div>

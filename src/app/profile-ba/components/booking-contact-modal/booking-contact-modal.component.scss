@@ -131,6 +131,23 @@
     font-size: .88rem;
   }
 
+  .sum-coupon {
+    display: flex;
+    // По первой строке: строка переносится на две, и по центру иконка уезжала вниз.
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 4px;
+    color: var(--g1);
+    font-size: .85rem;
+    font-weight: 600;
+    line-height: 1.35;
+
+    svg {
+      flex: 0 0 auto;
+      margin-top: 3px;
+    }
+  }
+
   .sum-edit {
     flex-shrink: 0;
     border: none;
@@ -233,6 +250,17 @@
       color: #9aabb1;
     }
   }
+}
+
+.field-error {
+  color: #b33b2e;
+  font-size: 12px;
+  line-height: 1.35;
+  margin-top: 6px;
+}
+
+input[aria-invalid="true"] {
+  border-color: #b33b2e;
 }
 
 .checks {

@@ -1,0 +1,84 @@
+<div class="promo" *ngIf="!isLoading; else loading">
+
+  <div class="promo-intro">
+    <div class="promo-hook">
+      <span class="promo-hook__mark" aria-hidden="true">%</span>
+      <div class="promo-intro__copy">
+        <p class="promo-kicker">Выделитесь среди мастеров</p>
+        <h2 class="promo-title">Привлеките к себе внимание выгодной акцией</h2>
+        <p class="promo-lead">
+          Карточка над услугами: оффер, цена, до двух кнопок — запись или расчёт.
+          Соберите её под рекламу — клиент попадает сразу в календарь.
+        </p>
+      </div>
+    </div>
+
+    <label class="promo-switch" *ngIf="landing" [class.promo-switch--on]="landing.isActive">
+      <input type="checkbox" [checked]="landing.isActive" (change)="toggleLanding()" [disabled]="isSaving">
+      <span class="promo-switch__ui" aria-hidden="true"></span>
+      <span class="promo-switch__text">
+        {{ landing.isActive ? 'Показываем на странице' : 'Скрыто с страницы' }}
+      </span>
+    </label>
+  </div>
+
+  <div class="promo-empty" *ngIf="!offers.length">
+    <div class="promo-empty__visual" aria-hidden="true">
+      <span class="promo-empty__badge">Акция</span>
+      <span class="promo-empty__line promo-empty__line--lg"></span>
+      <span class="promo-empty__line"></span>
+      <span class="promo-empty__cta"></span>
+    </div>
+    <div>
+      <h3>Ещё нет карточки</h3>
+      <p>
+        Выберите шаблон — скидка, витрина, короткий оффер или сезонный баннер —
+        и заполните тексты с фото. Карточка появится на вашей странице.
+      </p>
+      <button type="button" class="promo-primary" (click)="createPromo()">Собрать акцию</button>
+    </div>
+  </div>
+
+  <div class="promo-list" *ngIf="offers.length">
+    <article class="promo-card" *ngFor="let offer of offers" [class.promo-card--off]="!offer.isActive">
+      <div class="promo-card__cover" [class.promo-card__cover--empty]="!coverThumb(offer)">
+        <ng-container *ngIf="coverThumb(offer) as thumb; else promoCoverEmpty">
+          <img *ngIf="thumb.url" [src]="thumb.url" alt="">
+          <span *ngIf="!thumb.url">{{ thumb.label }}</span>
+        </ng-container>
+        <ng-template #promoCoverEmpty>
+          <span>Нет фото</span>
+        </ng-template>
+      </div>
+      <div class="promo-card__body">
+        <div class="promo-card__meta">
+          <span class="promo-pill">{{ templateName(offer) }}</span>
+          <span class="promo-pill" *ngIf="offer.discountPercent">−{{ offer.discountPercent }}%</span>
+          <span class="promo-pill promo-pill--mute">{{ offer.isActive ? 'На странице' : 'Скрыта' }}</span>
+          <span class="promo-pill promo-pill--mute" *ngIf="isExpired(offer)">Истекла — продлить</span>
+        </div>
+        <h3>{{ offer.title }}</h3>
+        <p>{{ offer.description }}</p>
+        <p class="promo-card__service" *ngIf="offer.serviceName">Услуга: {{ offer.serviceName }}</p>
+        <div class="promo-card__actions">
+          <button type="button" class="promo-ghost" (click)="editOffer(offer)">Редактировать</button>
+          <button type="button" class="promo-ghost" (click)="toggleOffer(offer)">
+            {{ offer.isActive ? 'Скрыть' : 'Показать' }}
+          </button>
+          <button type="button" class="promo-danger" (click)="deleteOffer(offer)">Удалить</button>
+        </div>
+      </div>
+    </article>
+
+    <button type="button" class="promo-add" (click)="createPromo()">
+      <span class="promo-add__plus" aria-hidden="true">+</span>
+      <span>Добавить ещё карточку</span>
+    </button>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="promo-loading">
+    <span class="app-spinner" style="width:40px;height:40px"></span>
+  </div>
+</ng-template>

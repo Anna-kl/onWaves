@@ -57,12 +57,12 @@
         <!-- Аватарка пользователя -->
         <div class="menu-avatar-client"  *ngIf="auth">
           <div  class="container-avatar-image">
-            <img [src]="getAvatar(auth.avatar)" class="grande-image "  alt="">
+            <img [src]="getAvatar(auth.avatarUrl)" class="grande-image "  alt="">
             <img [src]="getIconAvatar(auth.userType!, true)" class="little-image" alt="">
           </div>
           <!-- <ng-template #baImage>
             <div  class="container-avatar-image">
-              <img [src]="getAvatar(auth.avatar)" class="grande-image "  alt="">
+              <img [src]="getAvatar(auth.avatarUrl)" class="grande-image "  alt="">
               <img src="/assets/img/ui/sac-avatar-action.svg" class="little-image" alt="">
             </div>
           </ng-template> -->

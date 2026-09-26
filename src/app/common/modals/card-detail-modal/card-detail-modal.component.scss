@@ -82,6 +82,7 @@
   flex-direction: column;  // Мобилка: видео сверху
   width: 100%;
   min-height: auto;
+  position: relative;
 
   // ── Медиа-панель (сверху на мобилке, слева на ПК) ──────────────────
   &__media {
@@ -148,26 +149,67 @@
   // ── Кнопка «Закрыть» ──────────────────────
   &__close {
     position: absolute;
-    top: clamp(10px, 2vw, 18px);
-    right: clamp(10px, 2vw, 18px);
-    width: clamp(28px, 5vw, 36px);
-    height: clamp(28px, 5vw, 36px);
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: none;
-    background: transparent;
-    color: #9196A4;
+    background: #fff;
+    color: #23262F;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    transition: color .15s, background .15s;
-    z-index: 2;
     flex-shrink: 0;
+    z-index: 20;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0,0,0,0.06);
+    transition: background .15s ease, color .15s ease,
+                box-shadow .15s ease, transform .12s ease;
+
+    svg {
+      flex-shrink: 0;
+    }
 
     &:hover {
-      background: #E8F4F6;
-      color: #006174;
+      background: #006174;
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(0, 97, 116, 0.35), 0 0 0 1px rgba(0,97,116,0.15);
+      transform: scale(1.08);
+    }
+
+    &:active {
+      transform: scale(0.94);
+      box-shadow: 0 1px 6px rgba(0, 97, 116, 0.25);
+    }
+  }
+
+  &__handle {
+    display: none;
+
+    @media (max-width: 575px) {
+      display: block;
+      width: 100%;
+      height: 28px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 3;
+      cursor: grab;
+      touch-action: none;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 4px;
+        border-radius: 2px;
+        background: #DDE2ED;
+      }
     }
   }
 
@@ -196,6 +238,7 @@
     // Максимум 3 строки, потом «...»
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -300,6 +343,10 @@
 
       .cdm__svc-name { color: #fff; }
       .cdm__svc-meta { color: rgba(255, 255, 255, .65); }
+      .cdm__svc-unit {
+        background: rgba(255, 255, 255, .16);
+        color: #fff;
+      }
 
       &:hover {
         background: #0f5561;  // Немного светлее при hover
@@ -355,6 +402,19 @@
     color: #9196A4;
     margin-top: clamp(2px, 0.5vw, 4px);
     transition: color .15s;
+  }
+
+  &__svc-unit {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(0, 97, 116, .1);
+    color: #006174;
+    font-size: 11px;
+    font-weight: 700;
+    vertical-align: 1px;
   }
 
   &__svc-check {
@@ -441,7 +501,8 @@
       flex: 0 0 auto;
       width: 100%;
       height: 50svh;
-      // min-height: 280px уже установлен
+      position: relative;
+      z-index: 2;
     }
 
     &__info {
@@ -451,24 +512,12 @@
       overflow-y: auto;
       background: #fff;
       border-radius: 24px 24px 0 0;
-      margin-top: -24px;  // Наплыв поверх видео
+      margin-top: -24px;
       padding-top: 28px;
       padding-bottom: calc(22px + env(safe-area-inset-bottom));
       position: relative;
       z-index: 1;
-
-      // Drag-handle индикатор прокрутки
-      &::before {
-        content: '';
-        position: absolute;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 36px;
-        height: 4px;
-        border-radius: 2px;
-        background: #DDE2ED;
-      }
+      will-change: transform;
     }
   }
 

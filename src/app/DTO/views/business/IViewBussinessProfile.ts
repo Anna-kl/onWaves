@@ -5,6 +5,8 @@ import {PaymentMethodType} from "../../enums/paymentMethodType";
 import {IViewAddress} from "../IViewAddress";
 import {urlProfile} from "../../../../helpers/constant/commonConstant";
 import { BestProductType } from "../../enums/bestProductType";
+import { ExternalReviewSource } from "../../enums/externalReviewSource";
+import { IWorkLocation } from "../IWorkLocation";
 
 export class IViewBusinessProfile {
   id: string | null | undefined;
@@ -20,7 +22,11 @@ export class IViewBusinessProfile {
   about?: string;
   phone?:string;
   avatar?: any;
+  /** Относительный URL аватара (бэк 2026-07-18). `avatar` base64 больше не приходит. */
+  avatarUrl?: string | null;
   telegram?: string;
+  /** Контакт в мессенджере MAX: username или ссылка вида https://max.ru/u/... */
+  max?: string;
   webSite?: string;
   socialLink?: string;
   whatsApp?: string;
@@ -32,10 +38,18 @@ export class IViewBusinessProfile {
   timeZone?: number;
   userType?: UserType;
   isGetOrder?: boolean;
+  /** Промо-страница: не в каталоге, без записи, только прямая ссылка. */
+  isPromo?: boolean;
   currency?: CurrencyType[];
   paymentMethods?: PaymentMethodType[];
   countReviews?: number;
   rating?: number;
+  experienceText?: string | null;
+  externalRating?: number | null;
+  externalReviewCount?: number | null;
+  externalRatingSource?: ExternalReviewSource | null;
+  /** Форматы работы мастера (бэк 2026-07-20): по записи на формат (Fixed/Mobile/Online). */
+  workLocations?: IWorkLocation[];
   constructor() {
   }
 
@@ -45,6 +59,7 @@ export class IViewBusinessProfile {
         this.family = user.family;
         this.address = user.address;
         this.isGetOrder = user.isGetOrder;
+        this.isPromo = user.isPromo;
         this.lastModified = user.lastModified,
         this.paymentMethods = user.paymentMethods,
         this.rating = user.rating,
@@ -62,8 +77,11 @@ export class IViewBusinessProfile {
         this.lastVisit = user.lastVisit,
         this.mainCategory = user.mainCategory,
         this.telegram = user.telegram,
+        this.max = user.max,
         this.timeZone = user.timeZone,
         this.avatar = user.avatar,
+        this.avatarUrl = user.avatarUrl,
+        this.workLocations = user.workLocations,
         this.register = user.register,
         this.longitude = user.longitude,
         this.latitude = user.latitude,
@@ -75,6 +93,7 @@ export class IViewBusinessProfile {
         this.family = user.family;
         this.address = address;
         this.isGetOrder = user.isGetOrder;
+        this.isPromo = user.isPromo;
         this.lastModified = user.lastModified;
         this.paymentMethods = user.paymentMethods;
         this.rating = user.rating;
@@ -92,8 +111,11 @@ export class IViewBusinessProfile {
         this.lastVisit = user.lastVisit;
         this.mainCategory = user.mainCategory;
         this.telegram = user.telegram;
+        this.max = user.max;
         this.timeZone = user.timeZone;
         this.avatar = user.avatar;
+        this.avatarUrl = user.avatarUrl;
+        this.workLocations = user.workLocations;
         this.register = user.register;
         this.socialLink = user.socialLink;
   }

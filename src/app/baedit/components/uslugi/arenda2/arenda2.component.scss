@@ -157,3 +157,53 @@ input.ng-pristine.ng-valid.ng-touched {
   border: 1px solid #dde2ed;
   color: #9196A4;
 }
+
+.price-block {
+  padding: 24px 16px 8px;
+}
+
+.price-block__row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  align-self: stretch;
+  overflow: visible;
+}
+
+.price-block__main {
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .price-block__row {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+  }
+
+  .price-block__main {
+    flex: 1 1 0;
+    width: auto;
+  }
+}
+
+.time-colon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  margin: 0 10px;
+  color: #11142d;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+@media (max-width: 480px) {
+  .price-block {
+    padding: 20px 0 4px;
+  }
+}

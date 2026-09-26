@@ -1,4 +1,4 @@
-const CACHE_NAME = 'onwaves-cache-v2';
+const CACHE_NAME = 'onwaves-cache-v4';
 
 // Основные файлы для прекеша (чтобы работало без интернета)
 const PRECACHE_URLS = [
@@ -37,49 +37,112 @@ self.addEventListener('activate', function(event) {
 // === ЛОГИКА ОПТИМИЗАЦИИ И КЕШИРОВАНИЯ ===
 self.addEventListener('fetch', function(event) {
   const request = event.request;
+  const requestUrl = new URL(request.url);
 
   // Кешируем только базовые GET-запросы к нашему домену
-  if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) {
+  if (
+    requestUrl.hostname === 'localhost' ||
+    requestUrl.hostname === '127.0.0.1' ||
+    requestUrl.hostname === '[::1]' ||
+    request.method !== 'GET' ||
+    !request.url.startsWith(self.location.origin)
+  ) {
     return;
   }
 
   // Стратегия 1: Network First для HTML (чтобы Ангуляр всегда обновлялся)
-  if (request.mode === 'navigate' || request.headers.get('accept').includes('text/html')) {
+  if (request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html')) {
     event.respondWith(
       fetch(request)
         .then(function(networkResponse) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(request, responseClone);
-          });
+          const contentType = networkResponse.headers.get('content-type') || '';
+          if (networkResponse.ok && contentType.includes('text/html')) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then(function(cache) {
+              cache.put(request, responseClone);
+            });
+          }
           return networkResponse;
         })
         .catch(function() {
           // Если нет сети, отдаем сохраненный HTML
-          return caches.match(request);
+          return caches.match(request).then(function(cachedResponse) {
+            return cachedResponse || caches.match('/index.html');
+          });
         })
     );
     return;
   }
 
-  // Стратегия 2: Stale-While-Revalidate для JS, CSS и картинок
+  // Не кэшируем API и остальные динамические GET-запросы. В кэш попадают
+  // только статические ресурсы приложения.
+  const isStaticAsset =
+    requestUrl.pathname.startsWith('/assets/') ||
+    /\.(?:js|css|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|map)$/i.test(requestUrl.pathname);
+
+  if (!isStaticAsset) {
+    return;
+  }
+
+  function isExpectedStaticResponse(response) {
+    if (!response || !response.ok) return false;
+
+    const contentType = (response.headers.get('content-type') || '').toLowerCase();
+    const path = requestUrl.pathname.toLowerCase();
+
+    if (/\.(?:js|mjs)$/.test(path)) {
+      return contentType.includes('javascript') ||
+        contentType.includes('ecmascript') ||
+        contentType.includes('application/wasm');
+    }
+
+    if (/\.css$/.test(path)) {
+      return contentType.includes('text/css');
+    }
+
+    // A SPA fallback is never a valid response for a static resource.
+    return !contentType.includes('text/html');
+  }
+
+  function invalidStaticResponse(networkResponse) {
+    const status = networkResponse && networkResponse.status >= 400
+      ? networkResponse.status
+      : 502;
+
+    return new Response('Static asset is unavailable', {
+      status: status,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store'
+      }
+    });
+  }
+
+  // Стратегия 2: Stale-While-Revalidate для JS, CSS и картинок.
+  // Ответы с HTML вместо статического файла не используем и не кешируем.
   event.respondWith(
     caches.match(request).then(function(cachedResponse) {
       const fetchPromise = fetch(request).then(function(networkResponse) {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(request, responseToCache);
-          });
+        if (!isExpectedStaticResponse(networkResponse)) {
+          return invalidStaticResponse(networkResponse);
         }
+
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(request, responseToCache);
+        });
         return networkResponse;
       }).catch(function(error) {
         // Заглушка, чтобы не падало, если нет ни сети, ни кеша
         console.warn('Fetch failed, no cache fallback for:', request.url);
+        return new Response('Static asset is unavailable offline', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        });
       });
 
       // Мгновенно отдаем кеш, а в фоне качаем свежую версию
-      return cachedResponse || fetchPromise;
+      return isExpectedStaticResponse(cachedResponse) ? cachedResponse : fetchPromise;
     })
   );
 });

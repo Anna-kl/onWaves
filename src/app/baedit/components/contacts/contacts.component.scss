@@ -44,7 +44,7 @@ input:focus{
 .column-right{
   display:grid;
   justify-items: center;
-  align-items: start;
+  align-items: flex-start;
 }
 .container-column-right{
   display:grid; 
@@ -83,12 +83,12 @@ select {
 .column-left-footer{
   display:grid;
   justify-items: center;
-  align-items:start;
+  align-items: flex-start;
 }
 .container-column-left-footer{
   display:grid;
   justify-content: center;
-  align-items:start;
+  align-items: flex-start;
   width: 70%;
 }
 .address-text-info{
@@ -109,15 +109,20 @@ select {
 }
 .saveBtn {
   display:grid;
-  justify-self: center; 
+  justify-self: center;
   text-align:center;
   color: #fff;
   cursor: pointer;
   font-weight: bold;
   border-radius:24px;
   padding: 13px 130px;
-  margin-top:20px; 
-}   
+  margin-top:20px;
+}
+.saveBtn--disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  pointer-events: none;
+}
 @media screen and (max-width: 920px) {
   .container-column-left{
     width: 90%;

@@ -19,9 +19,9 @@ li{
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     right: 0px;
-    top: 70px;
-    max-height: calc(100vh - 70px - 60px - env(safe-area-inset-bottom, 0px));
-    max-height: calc(100svh - 70px - 60px - env(safe-area-inset-bottom, 0px));
+    top: calc(70px + env(safe-area-inset-top, 0px));
+    max-height: calc(100vh - 70px - 60px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100svh - 70px - 60px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     opacity: 0;
 	transform: translateY(-1500px);
     z-index: 1;

@@ -20,7 +20,7 @@ export class MenueditbaprofileComponent {
 
   }
   // 'Рубрики',
-  menus: string[] = ['Профиль','Контакты','График работы','Оплата', 'Услуги', 'Галерея'];
+  menus: string[] = ['Профиль','Контакты','График работы','Оплата', 'Услуги', 'Акции', 'Галерея'];
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
 
@@ -29,6 +29,7 @@ export class MenueditbaprofileComponent {
     'schedule': 'График работы',
     'oplata': 'Оплата',
     'uslugi': 'Услуги',
+    'promo': 'Акции',
     'galereya': 'Галерея'
   };
 
@@ -102,6 +103,10 @@ export class MenueditbaprofileComponent {
     this.router.navigate([`ba-edit/${this.id}/galereya`]);
   }
 
+  ToPromo() {
+    this.router.navigate([`ba-edit/${this.id}/promo`]);
+  }
+
   toMenu(menu: string) {
     this.chooseMainMenu = menu;
     switch (menu){
@@ -127,6 +132,10 @@ export class MenueditbaprofileComponent {
       }
       case 'Услуги': {
         this.ToUslugi();
+        break;
+      }
+      case 'Акции': {
+        this.ToPromo();
         break;
       }
       case 'Галерея': {

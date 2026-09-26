@@ -99,7 +99,7 @@
 .column-right{
   display:grid;
   justify-items: center;
-  align-items: start;
+  align-items: flex-start;
 }
 .container-column-right{
   display:grid;
@@ -165,4 +165,22 @@
   .textarea-ba-profile{
     height:300px;
   }
+}
+
+.block-promo {
+  margin-top: 20px;
+  max-width: 520px;
+}
+.text-block-promo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.hint-promo {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #9196A4;
+  line-height: 1.4;
 }

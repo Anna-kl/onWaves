@@ -57,6 +57,14 @@ export class CommonNotesComponent implements OnInit {
           if (recordId){
             this._events.transferRecordId(recordId);
           }
+          const dayId = p.get('dayId');
+          if (date && this.today) {
+            this._events.transferToday({
+              date: this.today,
+              dayId: dayId || undefined,
+              ifExist: true
+            });
+          }
 });
   }
 

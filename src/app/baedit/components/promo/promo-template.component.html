@@ -1,0 +1,42 @@
+<div class="pt">
+  <button type="button" class="pt-back" (click)="back()">← К акциям</button>
+
+  <p class="pt-kicker">Шаг 1 из 2</p>
+  <h2 class="pt-title">Какой будет карточка</h2>
+  <p class="pt-lead">
+    Выберите задачу карточки. Тексты, фото и две кнопки — на следующем шаге.
+    Превью сразу показывает, как это увидит клиент.
+  </p>
+
+  <div class="pt-grid">
+    <button
+      type="button"
+      class="pt-card"
+      *ngFor="let template of templates"
+      [class.pt-card--on]="isSelected(template)"
+      (click)="pick(template)">
+
+      <div [class]="shapeClass(template)" aria-hidden="true">
+        <span class="promo-mock__badge">{{ template.defaultBadge }}</span>
+        <span class="promo-mock__photo"></span>
+        <span class="promo-mock__title"></span>
+        <span class="promo-mock__line"></span>
+        <span class="promo-mock__cta"></span>
+        <span class="promo-mock__works" *ngIf="template.fields.portfolio" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </span>
+      </div>
+
+      <span class="pt-card__kicker">{{ template.kicker }}</span>
+      <span class="pt-card__name">{{ template.name }}</span>
+      <span class="pt-card__tagline">{{ template.tagline }}</span>
+      <span class="pt-card__best">{{ template.bestFor }}</span>
+    </button>
+  </div>
+
+  <div class="pt-footer">
+    <button type="button" class="pt-next" [disabled]="selected == null" (click)="continue()">
+      Дальше — тексты и фото
+    </button>
+  </div>
+</div>

@@ -1,12 +1,19 @@
 import {Injectable} from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import {BehaviorSubject, Observable, tap} from 'rxjs';
+import {BehaviorSubject, Observable, shareReplay, tap, throwError} from 'rxjs';
 import { environment } from '../enviroments/environment';
 import { IResponse } from '../app/DTO/classes/IResponse';
 import { BusService } from './busService';
 import {ICategory} from "../app/DTO/classes/ICategory";
 import {IViewBusinessProfile} from "../app/DTO/views/business/IViewBussinessProfile";
 import { ICoupon } from 'src/app/DTO/classes/promo/IPoupon';
+import {CookieService} from "ngx-cookie-service";
+import { IWorkLocation } from "../app/DTO/views/IWorkLocation";
+
+interface ReadCacheEntry {
+  expiresAt: number;
+  value$: Observable<IResponse>;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +22,50 @@ import { ICoupon } from 'src/app/DTO/classes/promo/IPoupon';
 export class ProfileService {
   private url = environment.Uri + 'profiles/';
 
-  constructor(private http: HttpClient, private busService: BusService) {
+  // Короткоживущий кеш чтения профиля и work-location: гасит повторные GET от
+  // разных компонентов страницы и при быстрой навигации туда-обратно.
+  private static readonly READ_CACHE_TTL = 30_000;
+  private readonly profileCache = new Map<string, ReadCacheEntry>();
+  private readonly workLocationCache = new Map<string, ReadCacheEntry>();
+
+  constructor(
+    private http: HttpClient,
+    private busService: BusService,
+    private cookieService: CookieService,
+  ) {
+  }
+
+  /**
+   * TTL-кеш чтения для GET, возвращающих IResponse. shareReplay держит один общий
+   * ответ на всех подписчиков (дедуп параллельных вызовов от разных компонентов)
+   * и отдаёт его повторным подписчикам в пределах TTL.
+   *
+   * Перенос данных SSR→браузер отдельно НЕ нужен: `provideClientHydration()` в этой
+   * версии Angular включает httpcache — GET-ответы, сделанные при SSR, сериализуются
+   * в ng-state и клиент не повторяет их после гидратации.
+   */
+  private cachedResponse(
+    cache: Map<string, ReadCacheEntry>,
+    id: string,
+    factory: () => Observable<IResponse>,
+  ): Observable<IResponse> {
+    const hit = cache.get(id);
+    if (hit && hit.expiresAt > Date.now()) {
+      return hit.value$;
+    }
+    const value$ = factory().pipe(
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+    cache.set(id, { expiresAt: Date.now() + ProfileService.READ_CACHE_TTL, value$ });
+    return value$;
+  }
+
+  /** Сбрасываем кеш профиля после мутаций (смена города, статуса приёма заказов и т.п.). */
+  private invalidateProfile(id: string): void {
+    this.profileCache.delete(id);
+  }
+  private invalidateWorkLocation(id: string): void {
+    this.workLocationCache.delete(id);
   }
   public listClientsCard$ = new BehaviorSubject<IResponse|null>(null);
   createProfile(profile: IViewBusinessProfile, token: string): Observable<IResponse>{
@@ -33,7 +83,38 @@ export class ProfileService {
   }
 
   changeCity(id: string, city: string){
-     return this.http.post<IResponse>(`${this.url}change-city/${id}`, {city});
+     return this.http.post<IResponse>(`${this.url}change-city/${id}`, {city}).pipe(
+       tap(() => this.invalidateProfile(id))
+     );
+  }
+
+  /** Публичный — получить локацию работы (WorkLocation) профиля. Кеш + TransferState. */
+  getWorkLocation(id: string): Observable<IResponse> {
+     return this.cachedResponse(this.workLocationCache, id,
+       () => this.http.get<IResponse>(`${this.url}${id}/work-location`));
+  }
+
+  /** Создать/обновить локацию работы (тип Mobile/Fixed, список городов для разъездной). */
+  updateWorkLocation(id: string, body: IWorkLocation){
+    let headers: HttpHeaders = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + this.cookieService.get('auth-token-ocpio'));
+    return this.http.put<IResponse>(`${this.url}${id}/work-location`, body, {headers}).pipe(
+      tap(() => this.invalidateWorkLocation(id))
+    );
+  }
+
+  /**
+   * Создать одну запись локации работы (по одному формату: Online / Fixed / Mobile).
+   * Бэк различает формат по body.locationType и отвечает кодом 201.
+   * Для мультивыбора вызывается по разу на каждый выбранный формат (см. forkJoin в вызывающем коде).
+   */
+  createWorkLocation(id: string, body: IWorkLocation, token?: string){
+    let headers: HttpHeaders = new HttpHeaders();
+    const auth = token ?? this.cookieService.get('auth-token-ocpio');
+    headers = headers.append('Authorization', 'Bearer ' + auth);
+    return this.http.post<IResponse>(`${this.url}${id}/work-location`, body, {headers}).pipe(
+      tap(() => this.invalidateWorkLocation(id))
+    );
   }
 
   hasCoupon(id: string){
@@ -53,9 +134,9 @@ export class ProfileService {
   }
 
 
-  getHistoryCards(id: string, isRecommend: boolean, skip: number){
-     return this.http.get<IViewBusinessProfile[]>(`${this.url}?id=${id}&type=1&&isRecommend=${isRecommend}&skip=${skip}`)
-  }
+  // getHistoryCards удалён: он собирал тот же URL, что и getProfileAsync,
+  // и подсовывал список рекомендаций под видом истории просмотров.
+  // История — HistoryService.getHistoryCards (GET history/{id}).
 
   // sendIfClickContact(profileId: string,  whoIs: string|null){
   //       if (whoIs)
@@ -74,6 +155,15 @@ export class ProfileService {
     
   }
 
+  /** События лендингов без профиля (например /masters). В Prod уходит в Kafka send-reference. */
+  sendLandingEvent(page: string, option: string, whoIs: string|null){
+    let urlTemp = `${this.url}get-landing-event?page=${encodeURIComponent(page)}&option=${encodeURIComponent(option)}`;
+    if (whoIs)
+      return this.http.get<IResponse>(`${urlTemp}&whoIs=${whoIs}`);
+    else
+      return this.http.get<IResponse>(urlTemp);
+  }
+
   getCoordinates(id: string){
     return this.http.get<IResponse>(
       `${this.url}get-coordinate/${id}`);
@@ -90,8 +180,14 @@ export class ProfileService {
   translateLink(link: string){
     return this.http.get<IResponse>(`${this.url}translate-link/${link}`);
   }
-  deleteProfile(id: string){
-    return this.http.delete<IResponse>(`${this.url}${id}`);
+  deleteProfile(id: string, token: string): Observable<IResponse>{
+    if (!token?.trim()) {
+      return throwError(() => new Error('Auth token is required to delete profile'));
+    }
+
+    let headers: HttpHeaders = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + token);
+    return this.http.delete<IResponse>(`${this.url}${id}`, {headers});
   }
 
 
@@ -148,11 +244,24 @@ export class ProfileService {
   }
   getBusinessProfileById(id: string): Observable<IResponse>
   {
-    return this.http.get<IResponse>(`${this.url}get-full-baprofile/${id}`);
+    return this.cachedResponse(this.profileCache, id,
+      () => this.http.get<IResponse>(`${this.url}get-full-baprofile/${id}`));
   }
 
   changeIsGetOrder(id: string, data: { isGetOrder: boolean | undefined }){
-    return this.http.put<IResponse>(`${this.url}change-IsGetOrder/${id}`, data);
+    let headers: HttpHeaders = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + this.cookieService.get('auth-token-ocpio'));
+    return this.http.put<IResponse>(`${this.url}change-IsGetOrder/${id}`, data, {headers}).pipe(
+      tap(() => this.invalidateProfile(id))
+    );
+  }
+
+  changeIsPromo(id: string, data: { isPromo: boolean | undefined }){
+    let headers: HttpHeaders = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + this.cookieService.get('auth-token-ocpio'));
+    return this.http.put<IResponse>(`${this.url}change-IsPromo/${id}`, data, {headers}).pipe(
+      tap(() => this.invalidateProfile(id))
+    );
   }
 
   getBusinessProfileForEditById(id: string): Observable<IResponse>

@@ -68,7 +68,9 @@ export class MainPageComponent implements OnInit, OnDestroy {
                     profile.latitude = position.coords.latitude;
                     this.backendService.saveProfile(profile.id!, profile).pipe(take(1))
                     .subscribe(res => {
-                      this._loginService.updateProfile(this.profile!.id!);
+                      // Именно локальная копия: поле this.profile нигде не заполняется
+                      // и всегда null — на нём падало «Cannot read properties of null».
+                      this._loginService.updateProfile(profile.id!);
                     });
                   });
                 }

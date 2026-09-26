@@ -1,6 +1,6 @@
 import {createReducer, on} from "@ngrx/store";
 import {initialState} from "./store.state";
-import {getActionStateMainProfileClient, logoutAction} from "./store.action";
+import {clearActiveProfileAction, getActionStateMainProfileClient, logoutAction} from "./store.action";
 
 export const stateReducerMainClient = createReducer(
   initialState,
@@ -8,6 +8,10 @@ export const stateReducerMainClient = createReducer(
                                        {tokenMainClient, profileMainClient}) => (
     {...state, tokenMainClient: tokenMainClient, profileMainClient: profileMainClient})  //profile- из актион идет
   ),
+  on(clearActiveProfileAction, state => ({
+    ...state,
+    profileMainClient: null,
+  })),
   on(logoutAction, ()  => ({
   ...initialState,
 })));

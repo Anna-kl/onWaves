@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import { Observable, of, shareReplay } from 'rxjs';
 import { ICountry } from '../app/DTO/classes/ICountry';
 import { environment } from '../enviroments/environment';
 import {ICategory} from "../app/DTO/classes/ICategory";
@@ -19,8 +19,26 @@ export class DictionaryService {
     return this.http.get<ICountry[]>(`${this.url}country`);
   }
 
-  getPoint(address: string):Observable<IViewCoordinates> {
-    return this.http.get<IViewCoordinates>(`${this.url}geo?address=${address}`);
+  /**
+   * Геокодирование адреса.
+   *
+   * Пустую строку не отправляем: `address` на бэке обязателен, и `geo?address=`
+   * возвращает 400. Адрес собирается по мере заполнения формы, поэтому первые
+   * эмиты из select-address приходят пустыми — это норма, а не ошибка.
+   *
+   * shareReplay нужен из-за шаблонов вида `*ngIf="(geoPoint$|async)"` +
+   * `[geo]="geoPoint$|async"`: два async-пайпа на холодном HTTP-обсервабле дают
+   * два одинаковых запроса.
+   */
+  getPoint(address: string):Observable<IViewCoordinates | null> {
+    const value = (address ?? '').trim();
+    if (!value) {
+      return of(null);
+    }
+    const params = new HttpParams().set('address', value);
+    return this.http.get<IViewCoordinates | null>(`${this.url}geo`, { params }).pipe(
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
   }
   getMainCategories(): Observable<ICategory[]>{
     return this.http.get<ICategory[]>(`/assets/category/category.json`);

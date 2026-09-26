@@ -88,7 +88,7 @@ import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import { RatingService } from "../../../services/rating.service";
 import { IViewReview } from "../../DTO/views/rating/IViewReview";
 import { DomSanitizer } from "@angular/platform-browser";
-import {Observable} from "rxjs";
+import {catchError, Observable, of} from "rxjs";
 
 @Component({
   selector: 'app-reviews-carusel',
@@ -104,7 +104,9 @@ export class ReviewsCaruselComponent implements OnChanges {
 
   ngOnChanges(): void {
     if (this.id) {
-      this.reviews$ = this._apiRating.getRatings(this.id!);
+      this.reviews$ = this._apiRating.getRatings(this.id!).pipe(
+        catchError(() => of([]))
+      );
     }
   }
 

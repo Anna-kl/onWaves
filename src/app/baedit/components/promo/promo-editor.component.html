@@ -1,0 +1,212 @@
+<div class="pe" *ngIf="!isLoading && offer && template; else loading">
+  <button type="button" class="pe-back" (click)="back()">{{ isNew ? '← К шаблонам' : '← К акциям' }}</button>
+
+  <p class="pe-kicker">Шаг 2 из 2 · {{ template.name }}</p>
+  <h2 class="pe-title">{{ isNew ? 'Тексты и фото' : 'Редактировать карточку' }}</h2>
+  <p class="pe-lead">
+    Слева — поля шаблона. Справа — как карточку увидит клиент на странице.
+  </p>
+
+  <div class="pe-layout" [class.pe-layout--campaign]="template.fields.portfolio">
+    <form class="pe-form" (ngSubmit)="save()">
+
+      <label class="pe-field" *ngIf="template.fields.badge">
+        <span>Бейдж</span>
+        <input class="pe-input" type="text" maxlength="32" [(ngModel)]="badgeText" name="badge" placeholder="Акция">
+      </label>
+
+      <label class="pe-field">
+        <span>Заголовок</span>
+        <textarea class="pe-input pe-input--title" rows="2" maxlength="80"
+                  [(ngModel)]="offer.title" name="offerTitle"
+                  placeholder="Заголовок карточки — его клиент видит первым"></textarea>
+      </label>
+
+      <label class="pe-field" *ngIf="template.fields.titleBold">
+        <span>Какое слово выделить</span>
+        <input class="pe-input" type="text" maxlength="40" [(ngModel)]="offer.titleBold" name="titleBold"
+               placeholder="фрагмент из заголовка">
+      </label>
+
+      <label class="pe-field">
+        <span>Короткий текст</span>
+        <textarea class="pe-input" rows="4" maxlength="280" [(ngModel)]="offer.description" name="description"></textarea>
+      </label>
+
+      <label class="pe-field" *ngIf="template.fields.photoCaption">
+        <span>Подпись на фото</span>
+        <input class="pe-input" type="text" maxlength="48" [(ngModel)]="offer.slogan" name="slogan"
+               placeholder="Стиль в каждой детали">
+      </label>
+
+      <label class="pe-field" *ngIf="template.fields.discount">
+        <span>Скидка, %</span>
+        <input class="pe-input" type="number" min="1" max="90" [(ngModel)]="offer.discountPercent" name="discount">
+      </label>
+
+      <div class="pe-field">
+        <span>Фото или ролик</span>
+        <p class="pe-hint">Кадр работы или короткое видео — клиент видит его первым. Ролик берётся из галереи.</p>
+        <div class="pe-drop" [ngClass]="'pe-drop--' + template.fields.imageShape">
+          <ng-container *ngIf="cover as hero">
+            <img *ngIf="hero.kind === mediaKind.Image" [src]="hero.url" alt="">
+            <video *ngIf="hero.kind === mediaKind.Video" [src]="hero.url" [poster]="hero.posterUrl || undefined" muted></video>
+          </ng-container>
+          <span *ngIf="!cover && !imageBusy">Нажмите, чтобы загрузить фото</span>
+          <span *ngIf="imageBusy">Готовим фото…</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" (change)="onCoverSelected($event)">
+        </div>
+        <div class="pe-cover-actions">
+          <button type="button" class="pe-ghost" (click)="pickCoverFromGallery()">Выбрать из галереи</button>
+          <button type="button" class="pe-text-btn" *ngIf="cover" (click)="clearCover()">Убрать</button>
+        </div>
+      </div>
+
+      <div class="pe-gallery">
+        <span>Ещё фото и ролики</span>
+        <p class="pe-hint">До {{ maxMedia }} кадров под карточкой. Можно прикрепить готовые работы, в том числе видео.</p>
+        <div class="pe-gallery__row">
+          <div class="pe-drop pe-drop--square" *ngFor="let item of extras; let i = index">
+            <img *ngIf="item.kind === mediaKind.Image" [src]="item.url" alt="">
+            <video *ngIf="item.kind === mediaKind.Video" [src]="item.url" [poster]="item.posterUrl || undefined" muted></video>
+            <button type="button" class="pe-drop__clear" (click)="clearMedia(i)">×</button>
+          </div>
+        </div>
+        <button type="button" class="pe-ghost" *ngIf="media.length < maxMedia" (click)="pickFromGallery()">
+          Выбрать из галереи
+        </button>
+      </div>
+
+      <div class="pe-field" *ngIf="template.fields.benefits">
+        <span>Выгоды</span>
+        <p class="pe-hint">Карточки в ряд, как на макете: короткий заголовок и пояснение. До {{ template.fields.benefits }} пунктов.</p>
+
+        <div class="pe-benefit" *ngFor="let benefit of offer.benefits; let i = index">
+          <div class="pe-icons">
+            <button type="button" class="pe-icon"
+                    *ngFor="let icon of icons"
+                    [class.pe-icon--on]="benefit.iconType === icon.type"
+                    [title]="icon.label"
+                    (click)="setIcon(benefit, icon.type)">{{ icon.glyph }}</button>
+          </div>
+          <input type="text" maxlength="40" [(ngModel)]="benefit.title" [name]="'bt'+i" placeholder="Заголовок">
+          <input type="text" maxlength="90" [(ngModel)]="benefit.description" [name]="'bd'+i" placeholder="Пояснение">
+          <button type="button" class="pe-text-btn" (click)="removeBenefit(i)">Убрать</button>
+        </div>
+
+        <button type="button" class="pe-ghost" *ngIf="offer.benefits.length < template.fields.benefits" (click)="addBenefit()">
+          Добавить выгоду
+        </button>
+      </div>
+
+      <div class="pe-field">
+        <span>Кнопки и срок</span>
+        <p class="pe-hint">Максимум две. Запись — на выбранную услугу. Расчёт идёт по всему прайсу, без привязки к одной позиции. Главная — залитая.</p>
+
+        <div class="pe-action" *ngFor="let action of actions; let i = index">
+          <span>{{ i === 0 ? 'Главная' : 'Вторая' }}</span>
+          <select class="pe-input" [(ngModel)]="action.kind" [name]="'kind'+i" (ngModelChange)="onKindChange(action)">
+            <option [ngValue]="kinds.Booking">Запись на услугу</option>
+            <option [ngValue]="kinds.Calculator">Калькулятор</option>
+          </select>
+          <input class="pe-input" type="text" maxlength="24" [(ngModel)]="action.text" [name]="'atext'+i"
+                 placeholder="Текст кнопки">
+          <select class="pe-input" *ngIf="action.kind === kinds.Calculator && graphs.length"
+                  [(ngModel)]="action.profileCalculatorId" [name]="'agraph'+i" (ngModelChange)="onGraphChange()">
+            <option *ngFor="let graph of graphs" [ngValue]="graph.profileCalculatorId">
+              {{ graph.name }}
+            </option>
+          </select>
+          <p class="pe-hint" *ngIf="action.kind === kinds.Calculator && !graphs.length">
+            Калькулятор берёт все услуги прайса. На профиле пока нет подключённого расчёта.
+          </p>
+          <select class="pe-input" *ngIf="action.kind === kinds.Booking"
+                  [(ngModel)]="action.serviceId" [name]="'asvc'+i" (ngModelChange)="onServiceChange(action)">
+            <option [ngValue]="null">Услуга записи</option>
+            <option *ngFor="let service of services" [ngValue]="service.id">
+              {{ service.name }}
+            </option>
+          </select>
+          <button type="button" class="pe-text-btn" *ngIf="i > 0" (click)="removeAction(i)">Убрать кнопку</button>
+        </div>
+
+        <button type="button" class="pe-ghost" *ngIf="canAddAction" (click)="addAction()">
+          Добавить вторую кнопку
+        </button>
+
+        <label class="pe-field" *ngIf="template.fields.footer">
+          <span>Полоса со скидкой или примечание</span>
+          <input class="pe-input" type="text" maxlength="120" [(ngModel)]="offer.footerNote" name="footerNote">
+        </label>
+
+        <label class="pe-field">
+          <span>{{ needsValidTo ? 'Дата окончания — обязательна' : 'Дата окончания' }}</span>
+          <input class="pe-input" type="date" [(ngModel)]="validTo" name="validTo">
+        </label>
+      </div>
+
+      <div class="pe-field" *ngIf="offer.calculator && hasCalculator && !usesGraphCalculator">
+        <span>Расчёт</span>
+        <p class="pe-hint">Ориентир по единицам, если граф расчёта ещё не подключён. Сумму считает калькулятор по всему прайсу.</p>
+        <label class="pe-field">
+          <span>Единица</span>
+          <select class="pe-input" [(ngModel)]="offer.calculator.unit" name="cunit" (ngModelChange)="onUnitChange()">
+            <option [ngValue]="units.M2">м²</option>
+            <option [ngValue]="units.Piece">шт.</option>
+            <option [ngValue]="units.Hour">час</option>
+            <option [ngValue]="units.Meter">п. м</option>
+          </select>
+        </label>
+        <label class="pe-field">
+          <span>Подпись единицы</span>
+          <input class="pe-input" type="text" maxlength="12" [(ngModel)]="offer.calculator.unitLabel" name="unitLabel">
+        </label>
+        <div class="pe-gallery__row">
+          <label class="pe-field">
+            <span>От</span>
+            <input class="pe-input" type="number" [(ngModel)]="offer.calculator.min" name="cmin">
+          </label>
+          <label class="pe-field">
+            <span>До</span>
+            <input class="pe-input" type="number" [(ngModel)]="offer.calculator.max" name="cmax">
+          </label>
+          <label class="pe-field">
+            <span>По умолчанию</span>
+            <input class="pe-input" type="number" [(ngModel)]="offer.calculator.defaultValue" name="cdef">
+          </label>
+        </div>
+      </div>
+
+      <p class="pe-hint pe-save-reason" *ngIf="saveBlockReason">{{ saveBlockReason }}</p>
+      <button type="submit" class="pe-save" [class.btn-gray]="!canSave" [class.btn-green]="canSave" [disabled]="!canSave">
+        {{ isSaving ? 'Сохраняем…' : 'Опубликовать на странице' }}
+      </button>
+    </form>
+
+    <aside class="pe-preview" [class.pe-preview--campaign]="template.fields.portfolio">
+      <p class="pe-preview__label">Так увидит клиент</p>
+      <app-landing-offer-card
+        *ngIf="offer"
+        [offer]="offer"
+        [promoBadgeText]="badgeText"
+        [templateType]="template.type"
+        [priceText]="previewPrice"
+        [preview]="true">
+      </app-landing-offer-card>
+      <ng-container *ngIf="template.fields.portfolio">
+        <app-albums-show
+          *ngIf="profile?.id as previewProfileId"
+          [profileId]="previewProfileId"
+          [isEdit]="false"
+          [canBook]="false">
+        </app-albums-show>
+      </ng-container>
+    </aside>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="pe-loading">
+    <span class="app-spinner" style="width:40px;height:40px"></span>
+  </div>
+</ng-template>

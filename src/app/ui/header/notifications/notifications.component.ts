@@ -10,6 +10,8 @@ import {selectProfileMainClient} from "../../../ngrx-store/mainClient/store.sele
 import {notificationMessages} from "../../../ngrx-store/notification/notification.selectors";
 import {IViewNotification} from "../../../DTO/views/notifications/IViewNotification";
 import {DomSanitizer} from "@angular/platform-browser";
+import {resolveAvatarUrl} from "../../../../helpers/common/avatar1";
+import {recordLocationText} from "../../../../helpers/common/address";
 import {subGroup} from "../../../DTO/views/services/IViewSubGroups";
 import {RecordStatus} from "../../../DTO/enums/recordStatus";
 import { SeenDirective } from './seen.directive'; // где лежит директива
@@ -188,14 +190,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.selectedNotification = undefined;
   }
 
-  getAvatar(avatar?: string){
-    if (avatar) {
-       return this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64,
-        ${avatar}`);
-      } else {
-       return  '/assets/img/onwaves/user.png';
-      }
-    }
+  getAvatar(avatar?: string | null){
+    return resolveAvatarUrl(avatar);
+  }
+
+  /** Адрес выезда (разъездная услуга) по объекту уведомления. */
+  protected readonly recordLocationText = recordLocationText;
 
   getNameServices(services: subGroup[]) {
     return services.map(_ => _.name).join('\n');

@@ -170,6 +170,10 @@
             <!-- {{getDays(se)getHours(serv.duration)}}ч. {{getMinutes(serv.duration)}} мин. -->
           </div>
         </div>
+        <!-- Адрес выезда (разъездная услуга) -->
+        <div class="str_uslugi_podcategory ba-my-notes" *ngIf="recordLocationText(sch) as addr">
+          <b>📍 Выезд к клиенту:</b>&nbsp;{{ addr }}
+        </div>
         <!-- ИТОГО цена и дата-время-->
         <div class="w100 cont-horiz" style="padding: 0px 1em;">
           <div class="cont-horiz margin-top-bottom20 wrap w100" style="gap: 20px;">
@@ -345,6 +349,16 @@
             <span>Ввести PIN купона</span>
           </button>
 
+              <div class="cb-main" *ngIf="sch.couponSnapshot as snap">
+                <div class="cb-title">Приветственная скидка Onwaves</div>
+                <div class="cb-sub">
+                  <span class="cb-chip">Клиент платит {{ formatAmount(snap.payableAmount, snap.amountIsFrom) }}</span>
+                  <span class="cb-dot" aria-hidden="true">•</span>
+                  <span class="cb-chip cb-amount">Вы получите {{ formatAmount(snap.originalAmount, snap.amountIsFrom) }}</span>
+                </div>
+                <div class="cb-sub">{{ couponCompensationText(sch) }}</div>
+              </div>
+
               <div class="cb-main " *ngIf="checkCouponUse(sch)" >
                 <div class="cb-title">Купон применён</div>
                 <div class="cb-sub">
@@ -358,7 +372,7 @@
             <!-- Позвонить и Написать -->
             <div class="cont-horiz-around"> <!-- style="width:210px" -->
               <!-- Позвонить ico-->
-              <a href="{{'tel:+' + sch.phone }}" class="cont-vert types_of_communication_txt" style="gap: 10px">
+              <a [href]="clientTelHref(sch)" class="cont-vert types_of_communication_txt" style="gap: 10px">
                 <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" fill="none">
                   <rect width="36" height="36" x=".5" fill="#67C4B2" rx="18" />
                   <path fill="#fff" fill-rule="evenodd"
@@ -380,22 +394,24 @@
               <!--              <div>Написать</div>-->
               <!--            </div>-->
             </div>
-            <!-- WhatsApp Telegram -->
-            <div class="cont-vert types_of_communication_txt" style="gap: 10px">
-              <a href="{{'https://api.whatsapp.com/send?phone=' + sch.phone }}"
-                class="cont-vert types_of_communication_txt" style="gap: 10px">
-                <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" fill="none">
-                  <path fill="#4FB229"
-                    d="M1.405 17.784c0 3.025.79 5.979 2.293 8.582L1.262 35.26l9.102-2.387a17.161 17.161 0 0 0 8.204 2.09h.008c9.463 0 17.165-7.7 17.17-17.165A17.058 17.058 0 0 0 30.72 5.655 17.062 17.062 0 0 0 18.575.62c-9.463 0-17.166 7.7-17.17 17.163" />
+            <!-- Мессенджеры клиента. Показываем только подключённые каналы: канал считается
+                 подключённым, если бэк прислал контакт (sch.max / sch.telegram). Достраивать
+                 канал из номера нельзя — у MAX ссылки по номеру нет, а t.me/+7… у
+                 незарегистрированного открывает пустой чат. Нет ни одного канала — SMS. -->
+            <div class="cont-vert types_of_communication_txt" style="gap: 10px;" *ngIf="clientMaxHref(sch)">
+              <a [href]="clientMaxHref(sch)" target="_blank" rel="noopener noreferrer"
+                class="cont-vert types_of_communication_txt" style="gap: 10px" aria-label="Написать в MAX">
+                <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" viewBox="0 0 37 36" fill="none">
+                  <circle cx="18.5" cy="18" r="18" fill="#2787F5" />
                   <path fill="#fff"
-                    d="M14.131 10.345c-.333-.74-.683-.755-1-.768-.259-.011-.555-.01-.851-.01-.297 0-.778.11-1.185.555-.408.445-1.556 1.52-1.556 3.707 0 2.186 1.593 4.299 1.815 4.596.222.296 3.074 4.926 7.591 6.708 3.754 1.48 4.518 1.186 5.333 1.111.815-.074 2.63-1.074 3-2.112.37-1.038.37-1.927.259-2.113-.111-.185-.408-.296-.852-.518-.445-.223-2.63-1.298-3.037-1.446-.407-.148-.703-.222-1 .223-.296.444-1.147 1.445-1.407 1.741-.259.297-.518.334-.962.112-.445-.223-1.876-.692-3.574-2.206-1.321-1.178-2.213-2.632-2.473-3.077-.259-.444-.027-.685.195-.907.2-.199.445-.519.667-.778.222-.26.296-.445.444-.741.148-.297.074-.556-.037-.779-.111-.222-.975-2.42-1.37-3.298" />
+                    d="M18.5 8C13.26 8 9 11.47 9 15.75c0 2.42 1.36 4.58 3.48 5.99-.13.96-.6 2.15-1.33 3.05-.24.3.01.74.4.63 1.78-.45 3.13-1.11 4.05-1.65.92.19 1.88.28 2.9.28 5.24 0 9.5-3.47 9.5-7.75S23.74 8 18.5 8Zm-4.75 9.25a1.35 1.35 0 1 1 0-2.7 1.35 1.35 0 0 1 0 2.7Zm4.75 0a1.35 1.35 0 1 1 0-2.7 1.35 1.35 0 0 1 0 2.7Zm4.75 0a1.35 1.35 0 1 1 0-2.7 1.35 1.35 0 0 1 0 2.7Z" />
                 </svg>
-                <div>WhatsApp</div>
+                <div>MAX</div>
               </a>
             </div>
-            <div class="cont-vert types_of_communication_txt" style="gap: 10px;">
-              <a href="{{'https://t.me/+' + sch.phone }}" class="cont-vert types_of_communication_txt"
-                style="gap: 10px">
+            <div class="cont-vert types_of_communication_txt" style="gap: 10px;" *ngIf="clientTelegramHref(sch)">
+              <a [href]="clientTelegramHref(sch)" target="_blank" rel="noopener noreferrer"
+                class="cont-vert types_of_communication_txt" style="gap: 10px" aria-label="Написать в Telegram">
                 <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" viewBox="0 0 37 36" fill="none">
                   <path
                     d="M18.5 0C13.7272 0 9.14563 1.89759 5.77344 5.27203C2.39777 8.64781 0.500935 13.226 0.5 18C0.5 22.772 2.39844 27.3535 5.77344 30.728C9.14563 34.1024 13.7272 36 18.5 36C23.2728 36 27.8544 34.1024 31.2266 30.728C34.6016 27.3535 36.5 22.772 36.5 18C36.5 13.228 34.6016 8.64647 31.2266 5.27203C27.8544 1.89759 23.2728 0 18.5 0Z"
@@ -412,7 +428,21 @@
                   </defs>
                 </svg>
                 <div>Telegram</div>
-                <!--                <div>Telegram</div>-->
+              </a>
+            </div>
+            <div class="cont-vert types_of_communication_txt" style="gap: 10px;" *ngIf="clientSmsHref(sch)">
+              <a [href]="clientSmsHref(sch)" class="cont-vert types_of_communication_txt" style="gap: 10px"
+                aria-label="Написать SMS">
+                <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" viewBox="0 0 37 36" fill="none">
+                  <circle cx="18.5" cy="18" r="18" fill="#67C4B2" />
+                  <path fill="#fff" fill-rule="evenodd"
+                    d="M14.15 24.063c.127-.032.258-.048.389-.048H25.4V10.6H11.985v12.246a1.6 1.6 0 0 1-.082.506l-.463 1.389 2.71-.678ZM9 27l1.385-4.154V10.385A1.385 1.385 0 0 1 11.769 9h13.846A1.385 1.385 0 0 1 27 10.385V24.23a1.385 1.385 0 0 1-1.385 1.384H14.54L9 27Z"
+                    clip-rule="evenodd" />
+                  <path fill="#fff" fill-rule="evenodd"
+                    d="M14.2 15a.8.8 0 0 1 .8-.8h7.385a.8.8 0 0 1 0 1.6H15a.8.8 0 0 1-.8-.8ZM14.2 19a.8.8 0 0 1 .8-.8h5a.8.8 0 0 1 0 1.6h-5a.8.8 0 0 1-.8-.8Z"
+                    clip-rule="evenodd" />
+                </svg>
+                <div>SMS</div>
               </a>
             </div>
             <!--          <div class="cont-horiz-around" style="width:210px">-->
@@ -707,7 +737,7 @@
               <!-- Позвонить и Написать -->
               <div class="cont-horiz-around"> <!-- style="width:210px" -->
                 <!-- Позвонить ico-->
-                <a href="{{'tel:+' + sch.phone }}" class="cont-vert types_of_communication_txt" style="gap: 10px">
+                <a [href]="clientTelHref(sch)" class="cont-vert types_of_communication_txt" style="gap: 10px">
                   <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" fill="none">
                     <rect width="36" height="36" x=".5" fill="#67C4B2" rx="18" />
                     <path fill="#fff" fill-rule="evenodd"
@@ -729,31 +759,30 @@
                 <!--              <div>Написать</div>-->
                 <!--            </div>-->
               </div>
-              <!-- WhatsApp Telegram -->
-              <div class="cont-vert types_of_communication_txt" style="gap: 10px">
-                <a href="{{'https://api.whatsapp.com/send?phone=' + sch.phone }}"
-                  class="cont-vert types_of_communication_txt" style="gap: 10px">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" fill="none">
-                    <path fill="#4FB229"
-                      d="M1.405 17.784c0 3.025.79 5.979 2.293 8.582L1.262 35.26l9.102-2.387a17.161 17.161 0 0 0 8.204 2.09h.008c9.463 0 17.165-7.7 17.17-17.165A17.058 17.058 0 0 0 30.72 5.655 17.062 17.062 0 0 0 18.575.62c-9.463 0-17.166 7.7-17.17 17.163" />
+              <!-- Мессенджеры клиента: только подключённые каналы, иначе SMS. См. блок выше. -->
+              <div class="cont-vert types_of_communication_txt" style="gap: 10px;" *ngIf="clientMaxHref(sch)">
+                <a [href]="clientMaxHref(sch)" target="_blank" rel="noopener noreferrer"
+                  class="cont-vert types_of_communication_txt" style="gap: 10px" aria-label="Написать в MAX">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" viewBox="0 0 37 36" fill="none">
+                    <circle cx="18.5" cy="18" r="18" fill="#2787F5" />
                     <path fill="#fff"
-                      d="M14.131 10.345c-.333-.74-.683-.755-1-.768-.259-.011-.555-.01-.851-.01-.297 0-.778.11-1.185.555-.408.445-1.556 1.52-1.556 3.707 0 2.186 1.593 4.299 1.815 4.596.222.296 3.074 4.926 7.591 6.708 3.754 1.48 4.518 1.186 5.333 1.111.815-.074 2.63-1.074 3-2.112.37-1.038.37-1.927.259-2.113-.111-.185-.408-.296-.852-.518-.445-.223-2.63-1.298-3.037-1.446-.407-.148-.703-.222-1 .223-.296.444-1.147 1.445-1.407 1.741-.259.297-.518.334-.962.112-.445-.223-1.876-.692-3.574-2.206-1.321-1.178-2.213-2.632-2.473-3.077-.259-.444-.027-.685.195-.907.2-.199.445-.519.667-.778.222-.26.296-.445.444-.741.148-.297.074-.556-.037-.779-.111-.222-.975-2.42-1.37-3.298" />
+                      d="M18.5 8C13.26 8 9 11.47 9 15.75c0 2.42 1.36 4.58 3.48 5.99-.13.96-.6 2.15-1.33 3.05-.24.3.01.74.4.63 1.78-.45 3.13-1.11 4.05-1.65.92.19 1.88.28 2.9.28 5.24 0 9.5-3.47 9.5-7.75S23.74 8 18.5 8Zm-4.75 9.25a1.35 1.35 0 1 1 0-2.7 1.35 1.35 0 0 1 0 2.7Zm4.75 0a1.35 1.35 0 1 1 0-2.7 1.35 1.35 0 0 1 0 2.7Zm4.75 0a1.35 1.35 0 1 1 0-2.7 1.35 1.35 0 0 1 0 2.7Z" />
                   </svg>
-                  <div>WhatsApp</div>
+                  <div>MAX</div>
                 </a>
               </div>
-              <div class="cont-vert types_of_communication_txt" style="gap: 10px;">
-                <a href="{{'https://t.me/+' + sch.phone }}" class="cont-vert types_of_communication_txt"
-                  style="gap: 10px">
+              <div class="cont-vert types_of_communication_txt" style="gap: 10px;" *ngIf="clientTelegramHref(sch)">
+                <a [href]="clientTelegramHref(sch)" target="_blank" rel="noopener noreferrer"
+                  class="cont-vert types_of_communication_txt" style="gap: 10px" aria-label="Написать в Telegram">
                   <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" viewBox="0 0 37 36" fill="none">
                     <path
                       d="M18.5 0C13.7272 0 9.14563 1.89759 5.77344 5.27203C2.39777 8.64781 0.500935 13.226 0.5 18C0.5 22.772 2.39844 27.3535 5.77344 30.728C9.14563 34.1024 13.7272 36 18.5 36C23.2728 36 27.8544 34.1024 31.2266 30.728C34.6016 27.3535 36.5 22.772 36.5 18C36.5 13.228 34.6016 8.64647 31.2266 5.27203C27.8544 1.89759 23.2728 0 18.5 0Z"
-                      fill="url(#paint0_linear_10945_37811)" />
+                      fill="url(#paint0_linear_tg_ba)" />
                     <path
                       d="M8.64825 17.8101C13.8964 15.5241 17.3951 14.0168 19.1445 13.2887C24.1451 11.2094 25.1829 10.8483 25.8608 10.836C26.0098 10.8337 26.3417 10.8705 26.5583 11.0456C26.7383 11.1932 26.7889 11.3929 26.8142 11.5331C26.8367 11.6732 26.8676 11.9924 26.8423 12.2416C26.5723 15.0878 25.3995 21.9948 24.8033 25.1827C24.5529 26.5316 24.0551 26.9839 23.5742 27.028C22.5279 27.1242 21.7348 26.3373 20.7223 25.6738C19.1389 24.6352 18.2445 23.9888 16.7061 22.9755C14.9286 21.8044 16.0817 21.1606 17.0942 20.1087C17.3586 19.8334 21.9654 15.6442 22.0526 15.2642C22.0639 15.2167 22.0751 15.0395 21.9683 14.9461C21.8642 14.8524 21.7095 14.8845 21.597 14.9098C21.4367 14.9458 18.9083 16.6187 14.0033 19.9282C13.2861 20.4215 12.6364 20.6619 12.0514 20.6493C11.4101 20.6355 10.1726 20.2859 9.25294 19.9872C8.12794 19.6207 7.23075 19.427 7.3095 18.8046C7.34888 18.4806 7.79607 18.149 8.64825 17.8101Z"
                       fill="white" />
                     <defs>
-                      <linearGradient id="paint0_linear_10945_37811" x1="18.5" y1="0" x2="18.5" y2="36"
+                      <linearGradient id="paint0_linear_tg_ba" x1="18.5" y1="0" x2="18.5" y2="36"
                         gradientUnits="userSpaceOnUse">
                         <stop stop-color="#2AABEE" />
                         <stop offset="1" stop-color="#229ED9" />
@@ -761,7 +790,21 @@
                     </defs>
                   </svg>
                   <div>Telegram</div>
-                  <!--                <div>Telegram</div>-->
+                </a>
+              </div>
+              <div class="cont-vert types_of_communication_txt" style="gap: 10px;" *ngIf="clientSmsHref(sch)">
+                <a [href]="clientSmsHref(sch)" class="cont-vert types_of_communication_txt" style="gap: 10px"
+                  aria-label="Написать SMS">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" viewBox="0 0 37 36" fill="none">
+                    <circle cx="18.5" cy="18" r="18" fill="#67C4B2" />
+                    <path fill="#fff" fill-rule="evenodd"
+                      d="M14.15 24.063c.127-.032.258-.048.389-.048H25.4V10.6H11.985v12.246a1.6 1.6 0 0 1-.082.506l-.463 1.389 2.71-.678ZM9 27l1.385-4.154V10.385A1.385 1.385 0 0 1 11.769 9h13.846A1.385 1.385 0 0 1 27 10.385V24.23a1.385 1.385 0 0 1-1.385 1.384H14.54L9 27Z"
+                      clip-rule="evenodd" />
+                    <path fill="#fff" fill-rule="evenodd"
+                      d="M14.2 15a.8.8 0 0 1 .8-.8h7.385a.8.8 0 0 1 0 1.6H15a.8.8 0 0 1-.8-.8ZM14.2 19a.8.8 0 0 1 .8-.8h5a.8.8 0 0 1 0 1.6h-5a.8.8 0 0 1-.8-.8Z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  <div>SMS</div>
                 </a>
               </div>
               <!--          <div class="cont-horiz-around" style="width:210px">-->
@@ -808,7 +851,7 @@
 <ng-template #loading fxLayout="row" class="width100" fxLayoutAlign="center center" flx>
   <div style="width: 100%;   display: flex;
     justify-content: center;">
-    <p-progressSpinner></p-progressSpinner>
+    <span class="app-spinner"></span>
   </div>
 
 </ng-template>

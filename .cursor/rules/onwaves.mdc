@@ -1,0 +1,16 @@
+---
+description: OnWaves — обязательные ограничения агента (агрегатор записи, SSR, SEO)
+alwaysApply: true
+---
+
+# OnWaves
+
+Полный контекст: корневой `AGENTS.md`. UI/вёрстка: скилл `onwaves-front`. Не переименовывай BA/UA/uslugi/ocpio, ключи NgRx (`modeleReducerPoint`, `checedIdClient`) и папку `src/enviroments`.
+
+- Публичный URL мастера — **slug** (`translate-link`), редактор — GUID `/ba-edit/:id`.
+- `window` / cookie-запись / scroll — только `isPlatformBrowser`. Не кешируй SSR HTML для `/choose-date` и `/confirm-record*`.
+- SEO только через `SeoService`. Профиль: `dynamicSeo` + `dynamicHit`. Canonical без query, хост всегда `environment.siteUrl`.
+- Аналитика — Яндекс.Метрика `AnalyticsService`, не gtag. `/landing` и `/masters` — разные офферы; API-промо BA (`landing/`) — третий контур.
+- Bearer клеится в методе сервиса, не глобальным interceptor. Живые роуты кабинета — в `ba-edit.module.ts`, не в легаси `ba-edit-routing.ts`.
+- Не чини техдолг из §10 `AGENTS.md` без явной задачи. UI проверяй в браузере, особенно мобильный заход на slug.
+- `/cellings` — адрес Директа, slug не менять. Оффер в первом HTML; на 390 CTA выше сгиба (`cellingsHero`). Легаси `cellings-offer` не трогать. Зелёный `curl` ≠ допуск: пакет `713764394` и РСЯ из Front не трогать.

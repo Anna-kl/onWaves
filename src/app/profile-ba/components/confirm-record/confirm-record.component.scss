@@ -122,3 +122,145 @@
     font-size: 1.1rem;
   }
 }
+
+/* Адрес клиента для разъездной услуги */
+.client-address__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.client-address__grid input {
+  width: 100%;
+  border: 1px solid #9196A4;
+  padding: 12px 16px;
+  border-radius: 100px;
+}
+.client-address__grid input:focus {
+  border-color: #00DAB3;
+  outline: none;
+}
+@media (max-width: 560px) {
+  .client-address__grid { grid-template-columns: 1fr; }
+}
+
+/* Селект города (список городов разъездной работы мастера) */
+.client-address__grid select {
+  width: 100%;
+  border: 1px solid #9196A4;
+  padding: 12px 16px;
+  border-radius: 100px;
+  background: #fff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+.client-address__grid select:focus {
+  border-color: #00DAB3;
+  outline: none;
+}
+
+.welcome-coupon {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eef6ff;
+
+  &__note {
+    margin-top: 4px;
+    font-size: 0.85rem;
+    color: #555;
+  }
+
+  &__error {
+    margin-top: 6px;
+    font-size: 0.9rem;
+    color: #b00020;
+  }
+}
+
+/* Купон на экране подтверждения: билет, а не строка в чеке.
+   Сообщаем о праве клиента и условии, по которому оно сработало,
+   и не пересчитываем сумму записи прямо здесь. */
+.coupon-ticket {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px dashed rgba(13, 148, 160, 0.55);
+  border-radius: 12px;
+  background: rgba(13, 148, 160, 0.07);
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+
+  &__ic {
+    flex: 0 0 auto;
+    display: flex;
+    margin-top: 1px;
+    color: #0d94a0;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: 1rem;
+    line-height: 1.25;
+    color: #043c48;
+  }
+
+  &__note {
+    font-size: 0.85rem;
+    line-height: 1.35;
+    color: #5b6470;
+  }
+
+  &__toggle {
+    align-self: flex-start;
+    margin-top: 2px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: 0.8rem;
+    color: #0d94a0;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* Клиент отказался от купона: карточка гаснет, но остаётся на месте — вернуть можно одним нажатием. */
+  &--off {
+    opacity: 0.55;
+    border-style: solid;
+    border-color: #DDE2ED;
+    background: #FAFAFC;
+  }
+}
+
+/* Старая цена уходит на второй план, новая остаётся акцентом.
+   Зачёркнутую сумму намеренно делаем серой и нежирной: перечёркнутый зелёный
+   читается как ошибка, а не как «было столько». */
+.total-old {
+  margin: 0 6px 0 2px;
+  color: #9196A4;
+  font-weight: 400;
+  text-decoration: line-through;
+}
+
+.total-new {
+  font-weight: 700;
+}
+
+.total-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(13, 148, 160, 0.12);
+  color: #0d94a0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: middle;
+  white-space: nowrap;
+}

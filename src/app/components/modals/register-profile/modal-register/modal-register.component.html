@@ -79,6 +79,20 @@
         Далее
       </button>
     </div>
+
+    <div class="zvonok">
+      <p class="zvonok__text">
+            Бывают проблемы со звонком — код не доходит.
+            Чтобы этого не было, авторизуйтесь через zvonok.ru.
+      </p>
+      <button type="button"
+              class="zvonok__btn"
+              [disabled]="!isFormValid() || zvonokSending"
+              (click)="nextZvonok()">
+        {{ zvonokSending ? 'Звоним…' : 'Авторизоваться через Zvonok' }}
+      </button>
+    </div>
+
      <div class="cont-horiz-around w100 margin-bottom30" style="margin-top: 7px;" > 
 
         <div class="cont-horiz-around w100 margin-bottom30"> 
@@ -252,9 +266,8 @@
 
 <b>8. Cookie‑файлы и счётчики</b><br>
 
-Сервис использует cookies (Yandex Metrica, Google Analytics* *) для сбора обезличенной статистики и сохранения пользовательских настроек. Пользователь может отказаться от cookies в настройках браузера; это может ограничить функциональность сервиса.<br>
+Сервис использует cookies (Яндекс.Метрика, Top.Mail.Ru / VK Ads) для сбора обезличенной статистики и сохранения пользовательских настроек. Пользователь может отказаться от cookies в настройках браузера; это может ограничить функциональность сервиса.<br>
 
-* Google может быть недоступен на территории РФ без VPN.<br>
 
 <b>9. Изменения Политики</b><br>
 

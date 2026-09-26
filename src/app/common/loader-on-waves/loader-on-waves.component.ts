@@ -1,4 +1,5 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, PLATFORM_ID, ViewChild } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-loader-on-waves',
@@ -9,7 +10,11 @@ export class LoaderOnWavesComponent implements AfterViewInit {
 
   @ViewChild('wavePath', { static: true }) wavePathRef!: ElementRef<SVGPathElement>;
 
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
   ngAfterViewInit(): void {
+      // requestAnimationFrame отсутствует на сервере (SSR) — анимацию запускаем только в браузере.
+      if (!isPlatformBrowser(this.platformId)) return;
       const pathEl = this.wavePathRef.nativeElement;
       let t = 0;
   

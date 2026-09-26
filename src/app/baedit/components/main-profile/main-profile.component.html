@@ -34,6 +34,19 @@
 
       </div>
 
+      <div class="block-promo" *ngIf="profile">
+        <div class="text-block-promo">
+          Промо-страница
+          <label>
+            <input type="checkbox" [(ngModel)]="profile.isPromo" (ngModelChange)="changePromo()"/>
+            <i></i>
+          </label>
+        </div>
+        <p class="hint-promo">
+          Страница не показывается на главной и в поиске. Клиент открывает её только по вашей ссылке, записаться нельзя.
+        </p>
+      </div>
+
       <!-- <div class="input-website">
         Ссылка на социальные сети
       </div> -->
@@ -68,7 +81,7 @@
   <!-- правая колонка-->
   <div class="column-right">
     <div class="container-column-right">
-      <app-avatar-cropped [id]="profile.id!" [avatar]="profile.avatar" (onSave)="onSave($event)">
+      <app-avatar-cropped [id]="profile.id!" [avatar]="profile.avatarUrl" (onSave)="onSave($event)">
       </app-avatar-cropped>
       <!-- <app-crop-image-modal [id]="profile.id" [avatar]="profile.avatar"
          (getData)="getData($event)"></app-crop-image-modal> -->
@@ -86,4 +99,3 @@
   </div>
 </div>
 <!--   всплывающее уведомление-->
-<p-toast position="bottom-center" *ngIf="isEdit"></p-toast>

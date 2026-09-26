@@ -19,3 +19,8 @@ select{
 *:focus {
   outline: none;
 }
+
+.calendar-checking {
+  pointer-events: none;
+  opacity: 0.55;
+}

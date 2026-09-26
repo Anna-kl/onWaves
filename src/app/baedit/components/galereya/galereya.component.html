@@ -99,10 +99,14 @@
 
             <!-- Видео: thumbUrl от сервера; если его нет, держим дефолтную заглушку до первого кадра -->
             <ng-container *ngIf="image.isVideo">
+              <!-- В сетке кабинета ролик не играет: карточка — это вход в редактирование.
+                   Посмотреть видео можно в самом окне, там нативные контролы. -->
               <app-video-player *ngIf="image.url"
                      [url]="image.url"
                      [poster]="image.thumbUrl ?? null"
                      [compact]="true"
+                     [interactive]="false"
+                     [warmup]="false"
                      class="gal-card__img">
               </app-video-player>
             </ng-container>
@@ -142,6 +146,15 @@
 
             <!-- Hover-оверлей с кнопками действий -->
             <div class="gal-card__actions">
+              <button class="gal-card__btn gal-card__btn--edit"
+                      (click)="openEditor($event, image)"
+                      title="Редактировать">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+                </svg>
+              </button>
               <button class="gal-card__btn gal-card__btn--main"
                       [class.gal-card__btn--active]="image.isCover"
                       (click)="setMain($event, chooseAlbum.id, image)"

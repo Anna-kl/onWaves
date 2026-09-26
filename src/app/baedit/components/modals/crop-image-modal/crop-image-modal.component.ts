@@ -2,16 +2,17 @@ import {
   Component, ElementRef, Input, NgZone,
   OnDestroy, OnInit, ViewChild, ViewEncapsulation
 } from '@angular/core';
+import { ToastService } from 'src/services/toast.service';
 import { SafeUrl } from '@angular/platform-browser';
 import { ImageCroppedEvent, LoadedImage } from 'ngx-image-cropper';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AlbumsService } from '../../../../../services/albums.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { MessageService } from 'primeng/api';
 import { GroupService } from '../../../../../services/groupservice';
 import { Service } from '../../../../DTO/classes/services/Service';
 import { IViewImage } from '../../../../DTO/views/images/IViewImage';
-import { forkJoin, from, Observable, of } from 'rxjs';
+import { FALLBACK_VIDEO_POSTER, normalizeImageMedia } from '../../../../../helpers/common/media.helpers';
+import { forkJoin, from, Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 type FileType = 'photo' | 'video' | null;
@@ -20,7 +21,7 @@ type FileType = 'photo' | 'video' | null;
   selector: 'app-crop-image-modal',
   templateUrl: './crop-image-modal.component.html',
   styleUrls: ['./crop-image-modal.component.scss'],
-  providers: [AlbumsService, MessageService],
+  providers: [AlbumsService],
   encapsulation: ViewEncapsulation.None
 })
 export class CropImageModalComponent implements OnInit, OnDestroy {
@@ -28,6 +29,8 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
   @Input() albumId: string = '';
   @Input() profileId: string = '';
   @Input() editImage?: IViewImage;
+  /** Предвыбор услуг при загрузке из карточки услуги. */
+  @Input() selectedServiceIds: string[] = [];
 
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('coverFileInput') coverFileInputRef!: ElementRef<HTMLInputElement>;
@@ -45,6 +48,7 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
   // video
   videoFile: File | null = null;
   videoPreviewUrl: SafeUrl | null = null;
+  videoPosterUrl: string | null = null;
   private rawVideoUrl: string | null = null;
   uploadProgress = 0;
   isVideoUploading = false;
@@ -55,14 +59,19 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
   coverImageChangedEvent: any = null;
   croppedCoverImage: any = '';
   coverFormData: FormData | null = null;
+  /** В правке ролика: пользователь снял текущую обложку. */
+  coverRemoved = false;
 
   // ── meta ──
   description = '';
-  readonly maxDescription = 300;
+  /**
+   * Держать синхронно с бэком: [MaxLength] в UploadImageRequest и VideoCompleteRequest.
+   * Колонка Images.Description в БД — text, ограничения по длине там нет.
+   */
+  readonly maxDescription = 1500;
 
   // ── services ──
   services: Service[] = [];
-  selectedServiceIds: string[] = [];
   showAllServices = false;
   readonly visibleServicesCount = 5;
 
@@ -74,22 +83,15 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
   constructor(
     private _apiImage: AlbumsService,
     private activeModal: NgbActiveModal,
-    private messageService: MessageService,
+    private messageService: ToastService,
     private sanitizer: DomSanitizer,
     private groupService: GroupService,
-    private ngZone: NgZone,
-  ) {}
+    private ngZone: NgZone) {}
 
   // ── lifecycle ──
 
   ngOnInit(): void {
-    if (this.isEditMode) {
-      this.croppedImage = this.editImage!.url;
-      this.hasCroppedImage = true;
-      this.fileType = 'photo';
-      this.description = this.editImage!.description ?? '';
-      this.selectedServiceIds = [...(this.editImage!.serviceIds ?? [])];
-    }
+    if (this.isEditMode) this.applyEditMedia();
     if (this.profileId) this.loadServices();
   }
 
@@ -101,8 +103,40 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
 
   get isEditMode(): boolean { return !!this.editImage; }
 
+  /**
+   * Редактирование открывает ту же модалку и для фото, и для видео.
+   * Раньше любой editImage считался фото: url ролика попадал в <img>,
+   * заголовок был «Редактировать фото», сохранить шло как UploadImage
+   * с битым превью — мастер не мог поправить описание и услуги.
+   */
+  private applyEditMedia(): void {
+    const image = this.editImage!;
+    const media = normalizeImageMedia(image);
+    this.description = image.description ?? '';
+    this.selectedServiceIds = [...(image.serviceIds ?? [])];
+
+    if (media.isVideo) {
+      this.fileType = 'video';
+      this.videoPosterUrl = media.thumbUrl || FALLBACK_VIDEO_POSTER;
+      if (media.mediaUrl) {
+        this.videoPreviewUrl = this.sanitizer.bypassSecurityTrustUrl(media.mediaUrl);
+      }
+      if (media.thumbUrl) {
+        this.hasCoverImage = true;
+        this.croppedCoverImage = media.thumbUrl;
+      }
+      return;
+    }
+
+    this.fileType = 'photo';
+    this.croppedImage = media.previewUrl || image.url;
+    this.hasCroppedImage = true;
+  }
+
   get title(): string {
-    if (this.isEditMode) return 'Редактировать фото';
+    if (this.isEditMode) {
+      return this.fileType === 'video' ? 'Редактировать видео' : 'Редактировать фото';
+    }
     if (this.fileType === 'video') return 'Добавить видео';
     return 'Добавить фото / видео';
   }
@@ -110,8 +144,9 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
   get saveLabel(): string {
     if (this.isVideoUploading) return `Загрузка ${this.uploadProgress}%`;
     if (this.isSaving) return 'Сохранение…';
+    if (this.isEditMode) return 'Сохранить';
     if (this.fileType === 'video') return 'Добавить видео';
-    return this.isEditMode ? 'Сохранить' : 'Добавить фото';
+    return 'Добавить фото';
   }
 
   get canSave(): boolean {
@@ -128,6 +163,9 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
   }
 
   get mediaHint(): string {
+    if (this.isEditMode && this.fileType === 'video') {
+      return 'Можно изменить обложку, описание и привязку к услугам.';
+    }
     if (this.fileType === 'video') return 'Поддерживаются MP4, MOV. Максимальный размер — 500 МБ.';
     if (this.fileType === 'photo') return 'Поддерживаются JPG, PNG. Максимальный размер — 10 МБ.';
     return 'Фото (JPG, PNG) или видео (MP4, MOV).';
@@ -188,6 +226,7 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
       this.videoFile = file;
       this.rawVideoUrl = URL.createObjectURL(file);
       this.videoPreviewUrl = this.sanitizer.bypassSecurityTrustUrl(this.rawVideoUrl);
+      this.videoPosterUrl = null;
       this.isCropping = false;
       this.hasCroppedImage = false;
       this.imageChangedEvent = null;
@@ -245,10 +284,12 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
     this.hasCoverImage = false;
     this.croppedCoverImage = '';
     this.coverFormData = null;
+    this.coverRemoved = false;
   }
 
   coverImageCropped(event: ImageCroppedEvent): void {
     this.croppedCoverImage = this.sanitizer.bypassSecurityTrustUrl(event.objectUrl!);
+    if (event.objectUrl) this.videoPosterUrl = event.objectUrl;
     const file = (this.coverImageChangedEvent.target as HTMLInputElement).files![0];
     const blob = this.blobToFile(event.blob!, file.name);
     if (blob) {
@@ -260,6 +301,7 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
   confirmCoverCrop(): void {
     this.isCroppingCover = false;
     this.hasCoverImage = true;
+    this.coverRemoved = false;
   }
 
   removeCover(): void {
@@ -268,6 +310,8 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
     this.croppedCoverImage = '';
     this.coverFormData = null;
     this.coverImageChangedEvent = null;
+    this.coverRemoved = this.isEditMode;
+    this.videoPosterUrl = FALLBACK_VIDEO_POSTER;
   }
 
   // ── save ──
@@ -283,20 +327,56 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
 
   private savePhoto(): void {
     this.isSaving = true;
-    const fd: FormData = this.formData ? this.formData : new FormData();
-    if (this.description.trim()) fd.append('description', this.description.trim());
-    this.selectedServiceIds.forEach(id => fd.append('serviceIds', id));
-    if (this.isEditMode) fd.append('imageId', this.editImage!.id);
-
     const albumId = this.isEditMode ? (this.editImage!.albumId ?? this.albumId) : this.albumId;
+    const cover$ = this.coverFormData
+      ? this.uploadCoverAndGetKey()
+      : of(null as string | null);
 
-    this._apiImage.saveImage(fd, albumId).subscribe({
+    cover$.pipe(
+      switchMap(coverKey => {
+        if (this.coverFormData && !coverKey) {
+          return throwError(() => ({ error: { message: 'Не удалось загрузить обложку' } }));
+        }
+        const fd: FormData = this.formData ? this.formData : new FormData();
+        if (this.description.trim()) fd.append('description', this.description.trim());
+        this.selectedServiceIds.forEach(id => fd.append('serviceIds', id));
+        if (this.isEditMode) fd.append('imageId', this.editImage!.id);
+        if (coverKey) fd.append('coverKey', coverKey);
+        if (this.coverRemoved && !coverKey) fd.append('clearCover', 'true');
+        return this._apiImage.saveImage(fd, albumId);
+      })
+    ).subscribe({
       next: result => { if (result) this.activeModal.close(true); },
-      error: () => {
+      error: err => {
         this.isSaving = false;
-        this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось сохранить фото', life: 5000 });
+        this.messageService.add({
+          severity: 'error', summary: 'Ошибка',
+          detail: this.describeError(err, 'Не удалось сохранить'), life: 7000
+        });
       }
     });
+  }
+
+  /**
+   * Достаёт человекочитаемую причину из ответа API.
+   *
+   * Контроллер помечен [ApiController], поэтому на невалидную модель ASP.NET сам
+   * отдаёт 400 с ValidationProblemDetails: {title, status, errors: {Поле: [текст]}}.
+   * Раньше обработчик игнорировал тело и показывал «Не удалось сохранить фото» —
+   * настоящая причина (например, превышение MaxLength у описания) не доходила ни до
+   * пользователя, ни в консоль.
+   */
+  private describeError(err: any, fallback: string): string {
+    const body = err?.error;
+    if (typeof body === 'string' && body.trim()) return body;
+
+    const errors = body?.errors;
+    if (errors && typeof errors === 'object') {
+      const first = Object.values(errors).flat().filter(Boolean)[0];
+      if (typeof first === 'string') return first;
+    }
+
+    return body?.message || body?.title || fallback;
   }
 
   private saveVideo(): void {
@@ -381,12 +461,12 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
       ))
     ).subscribe({
       next: () => this.activeModal.close(true),
-      error: () => {
+      error: err => {
         this.isSaving = false;
         this.isVideoUploading = false;
         this.messageService.add({
           severity: 'error', summary: 'Ошибка',
-          detail: 'Видео загружено, но не удалось сохранить', life: 5000
+          detail: this.describeError(err, 'Видео загружено, но не удалось сохранить'), life: 7000
         });
       }
     });
@@ -395,8 +475,9 @@ export class CropImageModalComponent implements OnInit, OnDestroy {
   private uploadCoverAndGetKey(): Observable<string | null> {
     const coverFile = this.coverFormData!.get('cover') as File;
     if (!coverFile) return of(null);
+    const albumId = this.isEditMode ? (this.editImage!.albumId ?? this.albumId) : this.albumId;
 
-    return this._apiImage.getCoverUploadUrl(this.albumId, coverFile.name, coverFile.type).pipe(
+    return this._apiImage.getCoverUploadUrl(albumId, coverFile.name, coverFile.type).pipe(
       switchMap(({ key, uploadUrl }) =>
         from(fetch(uploadUrl, {
           method: 'PUT',

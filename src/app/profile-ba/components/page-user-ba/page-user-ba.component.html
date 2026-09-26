@@ -1,15 +1,30 @@
-<app-albums-show [isEdit]=false [profileId]="id"></app-albums-show>
+<app-albums-show [isEdit]=false [profileId]="id" [canBook]="canBook"></app-albums-show>
+<app-coupon-new-user *ngIf="showWelcomeModal && welcomeCampaign"
+    [campaign]="welcomeCampaign" (choose)="onWelcomeChoose()" (closed)="onWelcomeModalClosed()"></app-coupon-new-user>
+<div class="welcome-offer" *ngIf="welcomeCampaign">
+    <b>Скидка на первую запись через Onwaves</b>
+    <span class="welcome-offer__tiers">
+        <span *ngFor="let tier of welcomeTiers">{{ tier.text }}</span>
+    </span>
+    <details (toggle)="onWelcomeTermsToggle($event)">
+        <summary>Условия</summary>
+        Одна скидка на первую запись у одного мастера; применяется только наибольшая, скидки не суммируются.
+        Итоговая сумма показывается при оформлении записи.
+    </details>
+</div>
+<div #servicesAnchor></div>
 <app-accordion [isUpdate] = false [canSetService]="false" [profileId]="id" (setServices)="setServices($event)">
 </app-accordion>
-<div class="cont-vert-start-center wrap margin-top30" *ngIf="profile">
+<div class="cont-vert-start-center wrap margin-top30" *ngIf="profile" #mapAnchor>
     <div class="margin-bottom40">
-        <h3>Как нас найти</h3>
-        <span>{{getAddressProfile(profile.address!)}}</span>
+        <h3>{{ isMobileWork ? 'Города работы' : 'Как нас найти' }}</h3>
+        <span *ngIf="hasAddress; else noAddress">{{ addressText }}</span>
+        <ng-template #noAddress><span class="address-empty">Адрес не указан</span></ng-template>
     </div>
-    <!--Карта 2GIS start -->
-          <div class="column-right-footer" *ngIf="geoPoint$|async as geo">
-            <app-my-ycomponent [geo]="geo"></app-my-ycomponent>       
+    <!--Карта start (ленивая: SDK и геокод грузятся при попадании во вьюпорт) -->
+          <div class="column-right-footer" *ngIf="mapVisible && ((geoPoint$|async) || geoList.length)">
+            <app-my-ycomponent [geo]="geoPoint$|async" [geoList]="geoList" [avatar]="profile.avatarUrl ?? null"></app-my-ycomponent>
         </div>
-    <!--Карта 2GIS END-->
+    <!--Карта END-->
 </div>
 <app-reviews-carusel [id]="id"></app-reviews-carusel>

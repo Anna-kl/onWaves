@@ -21,12 +21,11 @@
         <a [href]="'tel:' + phoneNumber" style="font-size: 21px;">{{ phoneNumber }}</a>
       </p>
       </ng-template> 
-     <a class="btn-green" href="{{'https://wa.me/'+ phoneNumber}}" *ngIf="isMobile && click === 'click_message'">
+     <a class="btn-green" href="{{'https://wa.me/'+ phoneNumber}}" *ngIf="false">
         Написать WhatsApp
       </a>
       <p class="modal__coupon">
-        Купон на <span class="modal__coupon-amount">500 ₽</span>
-        за первую онлайн запись при регистрации
+        Скидка на первую запись через Onwaves
       </p>
          <button class="btn-white" (click)="registration()">
                 Регистрация

@@ -2,6 +2,7 @@ import {subGroup} from "../services/IViewSubGroups";
 import {IViewBusinessProfile} from "../business/IViewBussinessProfile";
 import {IOptionsRecord} from "../../classes/records/optionsRecord";
 import { RecordStatus } from "../../enums/recordStatus";
+import { IRecordLocation } from "../../classes/records/recordLocation";
 
 export interface IViewRecordData {
     id: string;
@@ -16,4 +17,6 @@ export interface IViewRecordData {
     options: IOptionsRecord;
     serverTime: string;
     status: RecordStatus;
+    /** Локация брони (RecordLocationView). Для разъездной — адрес выезда клиента. */
+    location?: IRecordLocation | null;
 }

@@ -44,6 +44,47 @@
   }
 }
 
+.slot-state {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid $grey;
+  background-color: $grey-light;
+  font-size: 14px;
+  color: $grey-dark;
+
+  &--empty {
+    color: $color-error;
+    border-color: rgba($color-error, 0.35);
+    background-color: rgba($color-error, 0.05);
+  }
+
+  &--error {
+    justify-content: space-between;
+    color: $black;
+  }
+
+  &__retry {
+    border: 1px solid $green-basic;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 13px;
+    background-color: transparent;
+    color: $green-basic;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background-color: $green-basic;
+      color: $white;
+    }
+  }
+}
+
 .slot-chip {
   border-radius: 999px;
   border: 1px solid $grey;

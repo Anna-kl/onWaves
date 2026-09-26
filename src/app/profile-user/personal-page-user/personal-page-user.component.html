@@ -8,7 +8,7 @@
         <div class="cont-horiz-start w100">
           <!-- Аватар пользователя -->
           <div class="avatarMain">
-            <img [src]="getAvatar(mainProfileCleint.avatar)" class="avatar-ba" alt="">
+            <img [src]="getAvatar(mainProfileCleint.avatarUrl)" class="avatar-ba" alt="">
             <!-- Тип профиля ico-user -->
             <div class="cont-horiz ico_type_user">
               <img  src="/assets/img/ui/ico_UA_pc2_24.svg" alt="" >
@@ -244,24 +244,15 @@
                   <!-- CITY -->
                    <div class="margin-top-bottom20"> 
           		<!--выподающий списко кругло-овальное--> 
-                      <div class="w100 wrap"> 
-                        <ng-autocomplete 
-                          [data]="data"
-                          [(ngModel)]="address"
-                           [searchKeyword]="keyword"
+                      <div class="w100 wrap">
+                        <app-city-autocomplete
+                          inputId="personal-page-city"
                           placeholder="Введите город"
-                          (selected)='selectEvent($event)'
-                          (inputChanged)='onChangeSearch($event)'
-                          [itemTemplate]="itemTemplate"
-                          [notFoundTemplate]="notFoundTemplate">
-                        </ng-autocomplete> 
-                        <ng-template #itemTemplate let-location >
-                          <a [innerHTML]="location.name" ></a>
-                        </ng-template> 
-                        <ng-template #notFoundTemplate let-notFound>
-                          <div [innerHTML]="notFound"></div>
-                        </ng-template>  
-                      </div> 
+                          [cities]="cities"
+                          [value]="address"
+                          (valueChange)="onCityChange($event)">
+                        </app-city-autocomplete>
+                      </div>
                         </div>  
                         <button class="btn-green button-text cont-vert" *ngIf="addCity" (click)="addCities()">
                       Подтвердить
@@ -269,17 +260,37 @@
                 </div>
                     
             </section>
-    <!-- Баннер купона -->
-            <!-- <div class="coupon-banner" *ngIf="hasCoupon$|async as coupon">
+    <!-- Мой купон: приветственная скидка за первую запись через Onwaves -->
+            <section class="coupon-banner" *ngIf="welcomeMe && welcomeMe.status !== 'none'">
               <div class="coupon-banner__text">
-                🎉 У вас есть активный купон — скидка {{ coupon.balance }} ₽!
-                  <p>Чтобы использовать купон, при записи к мастеру, кликните по чек-боксу "Использовать купон"</p>
+                <ng-container [ngSwitch]="welcomeMe.status">
+                  <ng-container *ngSwitchCase="'available'">
+                    Скидка на первую запись через Onwaves — доступна
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'reserved'">
+                    Скидка закреплена за вашей записью{{ welcomeMe.discount ? ': ' + formatRub(welcomeMe.discount) : '' }}
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'redeemed'">
+                    Скидка использована{{ welcomeMe.discount ? ': ' + formatRub(welcomeMe.discount) : '' }}
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'expired'">Срок действия скидки истёк</ng-container>
+                  <ng-container *ngSwitchDefault>Скидка сейчас недоступна</ng-container>
+                </ng-container>
+                <p *ngIf="welcomeMe.campaign">
+                  <ng-container *ngFor="let tier of welcomeTierList(welcomeMe.campaign); let last = last">{{ tier.text }}{{ last ? '.' : '; ' }}</ng-container>
+                  Одна скидка на первую запись у одного мастера; итоговая сумма показывается при оформлении.
+                </p>
+                <p *ngIf="welcomeMe.status === 'available' && welcomeMe.expiresAt">
+                  Действует до {{ welcomeMe.expiresAt | date: 'd MMMM yyyy' }}.
+                </p>
+                <p *ngIf="welcomeMe.status === 'expired' && welcomeMe.expiresAt">
+                  Действовала до {{ welcomeMe.expiresAt | date: 'd MMMM yyyy' }}.
+                </p>
               </div>
-               
-              <button class="coupon-banner__btn">
-                Использовать купон
-              </button> 
-            </div> -->
+              <a class="coupon-banner__btn" routerLink="/masters" *ngIf="welcomeMe.status === 'available'">
+                Найти мастера
+              </a>
+            </section>
 
             <!-- Основной контент кабинета -->
             

@@ -179,6 +179,15 @@ input[type="file"] {
   color: #fff;
 }
 
+/* ── Кнопка «Редактировать» — основное действие карточки ── */
+.gal-card__btn--edit {
+  background: rgba(255,255,255,0.72);
+  color: #006174;
+}
+.gal-card__btn--edit:hover {
+  background: #fff;
+}
+
 /* ── Кнопка удаления — всегда яркая ── */
 .gal-card__btn--delete {
   background: rgba(226, 68, 20, 0.82);

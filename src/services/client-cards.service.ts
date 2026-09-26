@@ -1,37 +1,22 @@
 import {IViewBusinessProfile} from "../app/DTO/views/business/IViewBussinessProfile";
 import {Injectable} from "@angular/core";
 import {ProfileService} from "./profile.service";
-import {DomSanitizer} from "@angular/platform-browser";
-import {BehaviorSubject, map} from "rxjs";
-import {IResponse} from "../app/DTO/classes/IResponse";
-import {HistoryService} from "./history.service";
+import {BehaviorSubject} from "rxjs";
 
 
 @Injectable()
 
 export class CardsProfileService {
-  historyCards$ = new BehaviorSubject<IViewBusinessProfile[]>([]);
   error$ = new BehaviorSubject<boolean>(false);
-  constructor(private _apiProfile: ProfileService,
-              private _apiHistory: HistoryService) {
+  constructor(private _apiProfile: ProfileService) {
   }
 
   public readonly listClientsCard$ = this._apiProfile.listClientsCard$;
-  public readonly historyList$ = this._apiHistory.listHistoryCard$;
   public cards$: IViewBusinessProfile[]|null = null;
   public isListCardExpand$ = new BehaviorSubject<boolean>(false);
 
-  async getListHistories(profileId: string) {
-      (this._apiHistory.getHistoryCards(profileId))
-        .subscribe(_ => {
-             this.historyCards$.next(_.map(item => (item.businessProfile)).map(
-               i => {
-                 return i;
-               }
-             ));
-        });
-
-    }
+  // Обёртка над историей просмотров здесь не жила ни в одном вызове —
+  // компоненты ходят прямо в HistoryService.getHistoryCards.
 
   async getAllClientCardList(skip: number, isRecommend: boolean,
      id?: string) {

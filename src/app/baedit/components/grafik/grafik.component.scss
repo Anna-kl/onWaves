@@ -27,6 +27,12 @@
 }
 .block-toggle label{
   margin-left: 10px;
+}
+.hint-promo {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: #9196A4;
+  max-width: 520px;
 } 
 /*------------------  block-card  ------------------*/
 .container-card {
@@ -154,9 +160,58 @@ transition: all 0.7s;
   margin-right: 10px;
   text-align: center;
   transition: all 0.7s; 
+}
+.time-colon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  margin: 0 10px;
+  color: #11142d;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+.gap-after-title {
+  margin-top: 16px;
+}
+.gap-after-hint {
+  margin: 4px 0 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #9196A4;
+  line-height: 1.35;
 } 
+.grafik-card-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
 .blockBntCalandier {
   margin:20px auto 0 auto;
+}
+.grafik-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: #d46c54;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.grafik-delete:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.grafik-delete:active:not(:disabled) {
+  transform: scale(0.98);
 }
 .bntCalandier{
   padding-left:8px;

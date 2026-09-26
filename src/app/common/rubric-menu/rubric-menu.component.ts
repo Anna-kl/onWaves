@@ -37,9 +37,34 @@ export class RubricMenuComponent implements OnChanges{
          if (this.isOption !== PaymentForType.Default) {
            this.allCategories = getServiceForType(this.allCategories, this.isOption);
          }
+         // Меню всегда открывается «чистым»: isChoose — это состояние показа, а не данные
+         // категории, и тащить его из прошлого выбора нельзя.
+         this.clearChoice(this.allCategories);
          this.mainCategories = this.allCategories.filter(_ => _.parentId == null && _.id !== null);
       }
     );
+  }
+
+  /** Снимает подсветку со списка пунктов меню. */
+  private clearChoice(items: ICategory[]): void {
+    items.forEach(item => item.isChoose = false);
+  }
+
+  /**
+   * Полный сброс состояния меню: подсветка на всех уровнях и защёлки isBlocked*.
+   * Уровни 2 и 3 — это отфильтрованные проекции одного и того же массива
+   * allCategories, поэтому объекты между показами переиспользуются: без сброса
+   * пункты, выбранные в прошлый раз, снова приходят подсвеченными.
+   */
+  private resetMenuState(): void {
+    this.clearChoice(this.allCategories);
+    this.clearChoice(this.mainCategories);
+    this.clearChoice(this.menu2Level);
+    this.clearChoice(this.menu3Level);
+    this.isBlockedMain = false;
+    this.isBlocked2Level = false;
+    this.isBlocked3Level = false;
+    this.items = [];
   }
   @Input() isOpen = false;
   @Input() isOption = PaymentForType.Default;
@@ -58,6 +83,10 @@ export class RubricMenuComponent implements OnChanges{
       });
       this.isShow3Level = false;
       this.menu2Level = this.allCategories.filter(_ => _.parentId === item.id);
+      // Те же объекты уже могли быть подсвечены в прошлый заход в эту рубрику.
+      this.clearChoice(this.menu2Level);
+      this.clearChoice(this.menu3Level);
+      this.menu3Level = [];
       this.items = [{label: item.name, separator: false, id: '0'}];
       if (this.screenWidth < 550) {
         this.isOpen = false;
@@ -98,6 +127,7 @@ export class RubricMenuComponent implements OnChanges{
       this.items = [];
       this.items = tempItems;
       this.menu3Level = this.allCategories.filter(_ => _.parentId === item.id);
+      this.clearChoice(this.menu3Level);
       if (this.menu3Level.length > 0) {
         if (this.screenWidth < 550) {
           this.isShow2Level = false;
@@ -145,16 +175,12 @@ export class RubricMenuComponent implements OnChanges{
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-
-    if (this.isOpen ) {
-      this.isOpen = true;
-      this.isShow3Level = false;
-      this.isShow2Level = false;
-    } else {
-      this.isOpen = false;
-      this.isShow3Level = false;
-      this.isShow2Level = false;
-    }
+    // Меню возвращают на первый уровень — значит и подсветку с защёлками нужно снять,
+    // иначе пункт, выбранный в прошлый раз, остаётся активным, а клики по соседним
+    // пунктам молча игнорируются (isBlocked*).
+    this.resetMenuState();
+    this.isShow3Level = false;
+    this.isShow2Level = false;
   }
 
   chooseLevel2(item: ICategory) {
@@ -173,6 +199,9 @@ export class RubricMenuComponent implements OnChanges{
   }
 
   chooseLevel3(item: ICategory) {
+    // Выбор одиночный: снимаем подсветку с соседей, иначе после нескольких кликов
+    // подряд подсвеченными остаются все выбранные ранее пункты.
+    this.clearChoice(this.menu3Level);
     item.isChoose = true;
     this.isBlocked3Level = item.isChoose;
     let ch = this.menu2Level.find(_ => _.id === item.id);

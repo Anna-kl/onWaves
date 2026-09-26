@@ -1,141 +1,111 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {IViewBusinessProfile} from "../../DTO/views/business/IViewBussinessProfile";
-import {CardsProfileService} from "../../../services/client-cards.service";
 import {select, Store} from "@ngrx/store";
 import {selectProfileMainClient} from "../../ngrx-store/mainClient/store.select";
-import { BehaviorSubject, concatMap, filter, Observable, scan, shareReplay, startWith, Subject, switchMap, tap } from 'rxjs';
-import { ProfileService } from 'src/services/profile.service';
+import {BehaviorSubject, concatMap, filter, map, Observable, scan, shareReplay, startWith, Subject, switchMap, tap} from 'rxjs';
+import {ProfileService} from 'src/services/profile.service';
+import {HistoryService} from 'src/services/history.service';
 
 @Component({
   selector: 'app-uaafter-register',
   templateUrl: './uaafter-register.component.html',
   styleUrls: ['./uaafter-register.component.scss'],
-  providers: [CardsProfileService]
 })
 export class UAAfterRegisterComponent implements OnInit {
 
-  isLoading = true;
-  mainCards$: Observable<IViewBusinessProfile[]>|null = null;
-  user$: Observable<IViewBusinessProfile>|null = null;
-  page$: Observable<number>|null = null;
-  pageData$: any;
+  user$: Observable<IViewBusinessProfile> | null = null;
 
-  async changeCards(flag: boolean) {
-    this.skip = 0;
-    this.isRecommend = flag;
-    this._apiCards.cards$ = null;
-    await this._apiCards.getAllClientCardList(this.skip, this.isRecommend, 
-      this.auth?.id!);
-  }
+  /** «Последние посещения» — история просмотров пользователя (GET history/{id}). */
+  public historyCards$: Observable<IViewBusinessProfile[]> | null = null;
 
- 
+  /** Карточки активного таба; накапливаются по «Смотреть еще». */
+  public cards$: Observable<IViewBusinessProfile[]> | null = null;
 
   auth: IViewBusinessProfile | null = null;
-  isRecommend: boolean = false;
-  // public readonly historyList$ = this._history.listHistoryCard$;
 
-  constructor(public _apiCards: CardsProfileService,
-    private _profileService: ProfileService,
-              private store$: Store,
-             ) {
-   
-  }
-  private readonly loadMore$ = new Subject<void>();
-  skip: number = 0;
-  public isListCardExpand$ = this._apiCards.isListCardExpand$;
-  public cards$: Observable<IViewBusinessProfile[]>|null = null;
-  public historyCards$: Observable<IViewBusinessProfile[]>|null = null;
+  /** Активный таб: false — «Рекомендуем», true — «Рядом». Уходит в isRecommend бэка. */
+  public readonly mode$ = new BehaviorSubject<boolean>(false);
+  private readonly loadMoreClick$ = new Subject<void>();
+  private readonly loading$ = new BehaviorSubject(false);
+  public readonly hasMore$ = new BehaviorSubject(true);
 
-  
-  // private async getAllClientCardList()
-  // {
-  //   (await this._serviceClientCardList.getProfileSkillsAsync(this.skip))
-  //     .subscribe(_ => {
-  //       //this.cards = this.listClientsCard$.value.data as ICardBusinessView[];
-  //       this.cards.push(...this.listClientsCard$.value!.data as IViewBusinessProfile[]);
-  //       this.isListCardExpand = this.listClientsCard$.value!.code !== 200;
-  //       this.cards.forEach(item => {
-  //         if (item.avatar) {
-  //           item.avatar = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${item.avatar}`);
-  //         } else {
-  //           item.avatar = '/assets/img/AvatarBig.png';
-  //         }
-  //       });
-  //     });
-  // }
+  /** Сколько карточек уже показано — оно же skip (смещение) для следующей страницы. */
+  private loadedCount = 0;
+  /** Размер страницы бэк не сообщает — берём длину первой пачки текущего таба. */
+  private pageSize: number | null = null;
 
-  async loadCards() {
-    this.skip += 12;
-    await this._apiCards.getAllClientCardList(this.skip,
-       this.isRecommend, this.auth?.id!);
+  constructor(private _profileService: ProfileService,
+              private _history: HistoryService,
+              private store$: Store) {
   }
 
-    loadMore(): void {
+  ngOnInit(): void {
+    /* «Кто я» — профиль из стора; для анонима поток не эмитит. */
+    this.user$ = this.store$.pipe(
+      select(selectProfileMainClient),
+      filter(Boolean),
+      shareReplay({bufferSize: 1, refCount: true})
+    );
+
+    // История просмотров лежит в отдельном сервисе (GET history/{id}).
+    // Раньше сюда ходил ProfileService.getHistoryCards — копия getProfileAsync
+    // с побайтово тем же URL, поэтому «Последние посещения» и «Рекомендуем»
+    // показывали один и тот же список карточек.
+    this.historyCards$ = this.user$.pipe(
+      tap(user => this.auth = user),
+      switchMap(user => this._history.getHistoryCards(user.id!)),
+      map(list => list.map(item => item.businessProfile).filter(Boolean)),
+      shareReplay({bufferSize: 1, refCount: true})
+    );
+
+    // Список таба: mode$ задаёт выборку и сбрасывает пагинацию,
+    // loadMoreClick$ — подгрузка следующей страницы в тот же массив.
+    // Запрос без id профиля: главная должна работать и для анонима.
+    this.cards$ = this.mode$.pipe(
+      tap(() => this.resetPaging()),
+      switchMap(isRecommend => this.loadMoreClick$.pipe(
+        startWith(null),                                   // первая страница
+        concatMap(() => this.fetchPage(isRecommend)),
+        scan((all: IViewBusinessProfile[], batch: IViewBusinessProfile[]) => [...all, ...batch],
+          [] as IViewBusinessProfile[])
+      )),
+      shareReplay({bufferSize: 1, refCount: true})
+    );
+  }
+
+  /** Переключение табов «Рекомендуем» / «Рядом». */
+  changeCards(isRecommend: boolean): void {
+    if (this.mode$.value !== isRecommend) {
+      this.mode$.next(isRecommend);
+    }
+  }
+
+  loadMore(): void {
     /** не посылаем сигнал, если уже грузим или карточек больше нет */
     if (!this.loading$.value && this.hasMore$.value) {
       this.loadMoreClick$.next();
     }
   }
 
-  async ngOnInit(): Promise<void> {
-    // this.historyCards$ = this.store$.pipe(select(selectProfileMainClient)).pipe(
-    //    filter((user): user is IViewBusinessProfile => user != null),
-    //    tap(res => 
-    //     {this.auth = res}
-    //   ),
-    //   tap(_ => {
-    //     this._profileService.getProfileAsync(0, false, this.auth?.id!).subscribe(res => {
-    //       if (!this.cards$){
-    //         this.cards$ = new Subject<IViewBusinessProfile[]>();
-    //       }
-    //       this.cards$.next(res);
-    //     });
-    //   }),
-    //    switchMap(result => this._profileService.getHistoryCards(this.auth?.id!, false, 0))
-    // );
-
-  /* 1) «Кто я» – Behaviour-подобный поток с профилем */
-  this.user$ = this.store$.pipe(
-    select(selectProfileMainClient),
-    filter(Boolean),                         // user !== null
-    shareReplay({ bufferSize: 1, refCount: true })
-  );
-
-
-  this.historyCards$ = this.user$.pipe(
-    tap(us => this.auth = us),
-    switchMap(user =>
-      this._profileService.getHistoryCards(user?.id!, false, 0)
-    )
-  );
-
-
-  this.cards$ = 
-          this.loadMoreClick$.pipe(
-            // 0 → 1 → 2 …
-            startWith(null),                           // начальная загрузка
-            scan(page => page + 1, -1),                // -1+1 = 0 первая страница
-            concatMap(page => this.fetchPage(page))
-          )
-        
-        // аккумулируем все пачки
-        scan<IViewBusinessProfile[], IViewBusinessProfile[]>((all, batch) => [...all, ...batch], [])
-    
-
-
+  private resetPaging(): void {
+    this.loadedCount = 0;
+    this.pageSize = null;
+    this.hasMore$.next(true);
   }
 
-  private loadMoreClick$ = new Subject<void>();      // клики
-  private loading$       = new BehaviorSubject(false);
-  public hasMore$       = new BehaviorSubject(true);
-
-   private fetchPage(page: number, userId?: string|null): Observable<IViewBusinessProfile[]> {
+  private fetchPage(isRecommend: boolean): Observable<IViewBusinessProfile[]> {
     this.loading$.next(true);
-    return this._profileService.getProfileAsync(page, false, userId).pipe(
+    // skip — смещение в выдаче, поэтому считаем его от числа уже показанных карточек,
+    // а не от номера страницы: размер пачки задаёт бэк.
+    return this._profileService.getProfileAsync(this.loadedCount, isRecommend).pipe(
       tap(batch => {
         this.loading$.next(false);
-        // если пришло меньше чем pageSize, считаем, что карточки кончились
-        if (batch.length < 10) {
+        this.loadedCount += batch.length;
+        if (this.pageSize === null) {
+          this.pageSize = batch.length;
+        }
+        // Пришло пусто или меньше страницы — карточки кончились.
+        if (batch.length === 0 || batch.length < this.pageSize) {
           this.hasMore$.next(false);
         }
       })

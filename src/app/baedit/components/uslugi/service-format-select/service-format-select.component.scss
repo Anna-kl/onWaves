@@ -1,0 +1,93 @@
+@import '../../../../../assets/styles/main/color.scss';
+
+.fmt {
+  margin: 8px 0 20px;
+}
+.fmt__title {
+  font-size: 1.02em;
+  font-weight: 700;
+  color: $green-dark;
+  margin: 0 0 12px;
+}
+.fmt__hint {
+  font-size: 0.86em;
+  color: $grey-dark;
+  margin: 0;
+}
+.fmt__hint--warn {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #FDF3EF;
+  color: $color-error;
+}
+
+/* Карточки формата (radio) — единый стиль с экранами локаций */
+.fmt-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.fmt-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 18px 16px 16px;
+  border: 2px solid $grey;
+  border-radius: 16px;
+  background: $white;
+  color: $grey-dark;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .12s ease;
+}
+.fmt-card:hover { border-color: $green-light2; }
+.fmt-card:active { transform: translateY(1px); }
+.fmt-card--active {
+  border-color: $green-basic;
+  background: #F1FBFC;
+  box-shadow: 0 4px 14px rgba(0, 97, 116, .12);
+  color: $green-basic;
+}
+.fmt-card__icon { color: inherit; }
+.fmt-card--active .fmt-card__icon { color: $green-basic; }
+.fmt-card__name {
+  font-weight: 700;
+  font-size: 0.96em;
+  color: $green-dark;
+  line-height: 1.2;
+}
+.fmt-card--active .fmt-card__name { color: $green-basic; }
+.fmt-card__desc {
+  font-size: 0.8em;
+  color: $grey-dark;
+  line-height: 1.25;
+}
+
+/* Радио-индикатор (круглый — в отличие от чекбокса на экранах локаций) */
+.fmt-card__radio {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid $grey-dark;
+  background: $white;
+  transition: border-color .15s ease;
+}
+.fmt-card__radio--on {
+  border-color: $green-basic;
+}
+.fmt-card__radio--on::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: $green-basic;
+  transform: translate(-50%, -50%);
+}

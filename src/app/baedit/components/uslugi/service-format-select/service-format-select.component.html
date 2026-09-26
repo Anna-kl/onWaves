@@ -1,0 +1,63 @@
+<div class="fmt">
+  <h4 class="fmt__title">Как оказывается услуга?</h4>
+
+  <p class="fmt__hint fmt__hint--warn" *ngIf="!loading && loadFailed">
+    Не удалось загрузить форматы работы. Обновите страницу и попробуйте ещё раз.
+  </p>
+
+  <p class="fmt__hint fmt__hint--warn" *ngIf="!loading && !loadFailed && available.length === 0">
+    Сначала укажите форматы работы в профиле (раздел «Контакты») — тогда их можно будет
+    выбрать для услуги.
+  </p>
+
+  <div class="fmt-cards" *ngIf="available.length">
+    <!-- Фиксированное место -->
+    <button type="button" class="fmt-card"
+            *ngIf="available.includes(WorkLocationType.Fixed)"
+            [class.fmt-card--active]="value === WorkLocationType.Fixed"
+            (click)="select(WorkLocationType.Fixed)">
+      <span class="fmt-card__radio" [class.fmt-card__radio--on]="value === WorkLocationType.Fixed"></span>
+      <span class="fmt-card__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/>
+          <circle cx="12" cy="10" r="2.5"/>
+        </svg>
+      </span>
+      <span class="fmt-card__name">Фиксированное место</span>
+      <span class="fmt-card__desc">Принимаю у себя по адресу</span>
+    </button>
+
+    <!-- Разъездная -->
+    <button type="button" class="fmt-card"
+            *ngIf="available.includes(WorkLocationType.Mobile)"
+            [class.fmt-card--active]="value === WorkLocationType.Mobile"
+            (click)="select(WorkLocationType.Mobile)">
+      <span class="fmt-card__radio" [class.fmt-card__radio--on]="value === WorkLocationType.Mobile"></span>
+      <span class="fmt-card__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M3 13l2-5a2 2 0 012-1.3h10A2 2 0 0119 8l2 5v4h-2M3 17v-4M3 17h2m14 0h-2M8 17h8"/>
+          <circle cx="7" cy="17" r="1.6"/>
+          <circle cx="17" cy="17" r="1.6"/>
+        </svg>
+      </span>
+      <span class="fmt-card__name">Разъездная</span>
+      <span class="fmt-card__desc">Выезжаю к клиенту</span>
+    </button>
+
+    <!-- Онлайн -->
+    <button type="button" class="fmt-card"
+            *ngIf="available.includes(WorkLocationType.Online)"
+            [class.fmt-card--active]="value === WorkLocationType.Online"
+            (click)="select(WorkLocationType.Online)">
+      <span class="fmt-card__radio" [class.fmt-card__radio--on]="value === WorkLocationType.Online"></span>
+      <span class="fmt-card__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M3 12h18M12 3c2.5 2.5 2.5 15.5 0 18M12 3c-2.5 2.5-2.5 15.5 0 18"/>
+        </svg>
+      </span>
+      <span class="fmt-card__name">Онлайн</span>
+      <span class="fmt-card__desc">Оказываю дистанционно</span>
+    </button>
+  </div>
+</div>

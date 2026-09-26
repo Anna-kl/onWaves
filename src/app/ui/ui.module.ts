@@ -2,10 +2,10 @@ import {NgModule} from "@angular/core";
 import {HambMenuNoRegisterComponent} from "./hamb-menu/hamb-menu-no-register/hamb-menu-no-register.component";
 
 import {HambMenuRegisterComponent} from "./hamb-menu/hamb-menu-register/hamb-menu-register.component";
+import { RouterModule } from '@angular/router';
 import {CommonModule, NgOptimizedImage} from "@angular/common";
 import {MenuModule} from "primeng/menu";
 import {ButtonModule} from "primeng/button";
-import {ToastModule} from "primeng/toast";
 import { NgbCollapse, NgbPanelTitle } from "@ng-bootstrap/ng-bootstrap";
 import {FooterComponent} from "./footer/footer.component";
 import {ProfileBAModule} from "../profile-ba/profile-ba.module";
@@ -29,8 +29,9 @@ import { CommonComponentsModule } from "src/app/common/common.module";
         SeenDirective
     ],
     imports: [
-    CommonModule, NgOptimizedImage, MenuModule, ButtonModule, ToastModule, NgbCollapse, CarouselModule,
+    CommonModule, NgOptimizedImage, MenuModule, ButtonModule, NgbCollapse, CarouselModule,
     NgbPanelTitle,
+    RouterModule,
     CommonComponentsModule
 ],
     exports: [

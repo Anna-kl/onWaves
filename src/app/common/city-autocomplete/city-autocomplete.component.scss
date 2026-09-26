@@ -1,0 +1,103 @@
+.city-ac {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+}
+
+.city-ac__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 36px 13px 20px;
+  font-size: 1rem;
+  color: #212121;
+  border: 1px solid #9196A4;
+  border-radius: 24px;
+  outline: none;
+  background: #fff;
+
+  &::placeholder {
+    color: #9196A4;
+  }
+
+  &:focus {
+    border-color: #50BDA7;
+  }
+}
+
+.city-ac--open .city-ac__input {
+  border-radius: 24px 24px 0 0;
+  border-bottom-color: transparent;
+}
+
+.city-ac__clear {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+  color: #9196A4;
+  background: none;
+  border: 0;
+  cursor: pointer;
+
+  &:hover {
+    color: #212121;
+  }
+}
+
+.city-ac__list {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 250px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #9196A4;
+  border-radius: 0 0 24px 24px;
+}
+
+.city-ac__option {
+  padding: 12px 20px;
+  font-size: 1rem;
+  line-height: 1.4;
+  cursor: pointer;
+
+  & + .city-ac__option {
+    border-top: 1px solid #EDEEF2;
+  }
+}
+
+.city-ac__option--active {
+  background-color: #00DAB3;
+  color: #fff;
+}
+
+.city-ac__empty {
+  padding: 12px 20px;
+  font-size: 1rem;
+  color: #9196A4;
+}
+
+/* Скроллбар списка — как у остальных выпадающих списков проекта */
+.city-ac__list::-webkit-scrollbar {
+  width: 12px;
+}
+
+.city-ac__list::-webkit-scrollbar-track {
+  outline: 1px solid #9196A4;
+}
+
+.city-ac__list::-webkit-scrollbar-thumb {
+  background-color: #50BDA7;
+  border-radius: 8px;
+  border: 4px solid #fff;
+}

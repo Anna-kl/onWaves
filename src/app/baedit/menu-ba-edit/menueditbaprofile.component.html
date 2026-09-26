@@ -1,9 +1,12 @@
 <div class="ba-menu-profile-container">
   <div class="ba-menu-profile"  *ngFor="let menu of menus">
     <ul>
-      <li [style.background-color]="chooseMainMenu === menu ? 
-      '#006174' : 'white'"  [style.color]="chooseMainMenu === menu ? 
-      'white' : 'black'" (click)="toMenu(menu)">
+      <li
+        [class.ba-menu-promo]="menu === 'Акции'"
+        [class.ba-menu-promo--on]="menu === 'Акции' && chooseMainMenu === menu"
+        [style.background-color]="menu === 'Акции' ? null : (chooseMainMenu === menu ? '#006174' : 'white')"
+        [style.color]="menu === 'Акции' ? null : (chooseMainMenu === menu ? 'white' : 'black')"
+        (click)="toMenu(menu)">
         {{menu}}
       </li>
     </ul>

@@ -76,3 +76,49 @@
     width: 90%;
   } 
 } 
+/* Баннер «укажите тип услуги» (услуги без workLocationType) */
+.services-need-type {
+  border: 1px solid #F0C36D;
+  background: #FFF9EC;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin: 8px 0 20px;
+}
+.services-need-type__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #B8860B;
+  margin-bottom: 8px;
+}
+.services-need-type__text {
+  margin: 0 0 12px;
+  color: #6b5a2e;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+.services-need-type__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.services-need-type__item {
+  border: 1px solid #E0C078;
+  background: #fff;
+  border-radius: 100px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 0.88em;
+  color: #23262F;
+  transition: border-color .15s ease, background .15s ease;
+}
+.services-need-type__item:hover {
+  border-color: #006174;
+  background: #F1FBFC;
+}
+.services-need-type__item span {
+  color: #006174;
+  font-weight: 600;
+  margin-left: 6px;
+  white-space: nowrap;
+}

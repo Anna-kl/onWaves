@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
+import { ToastService } from 'src/services/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BackendService } from '../../../../services/backend.service';
 import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessProfile";
 import {CurrencyType} from "../../../DTO/enums/currencyType";
 import {PaymentMethodType} from "../../../DTO/enums/paymentMethodType";
-import {ProfileDataEditService} from "../../services/ba-edit-service";
-import {MessageService} from "primeng/api";
-import {LoginService} from "../../../auth/login.service";
+import {ProfileDataEditService} from "../../services/ba-edit-service";import {LoginService} from "../../../auth/login.service";
 import {select, Store} from "@ngrx/store";
 import {selectProfileMainClient} from "../../../ngrx-store/mainClient/store.select";
 
@@ -14,7 +13,7 @@ import {selectProfileMainClient} from "../../../ngrx-store/mainClient/store.sele
   selector: 'app-oplata',
   templateUrl: './oplata.component.html',
   styleUrls: ['./oplata.component.scss'],
-  providers: [MessageService]
+  providers: []
 })
 export class OplataComponent {
   id: string | null = null;
@@ -27,8 +26,7 @@ export class OplataComponent {
     private _loginService: LoginService,
     private store$: Store,
     private backendService: BackendService,
-    private messageService: MessageService,
-  ) {
+    private messageService: ToastService) {
     this.store$.pipe(select(selectProfileMainClient)).subscribe(result => {
       if (result) {
         this.profile = new IViewBusinessProfile();

@@ -17,6 +17,9 @@ import {ArendaComponent} from "./components/uslugi/arenda/arenda.component";
 import {Arenda2Component} from "./components/uslugi/arenda2/arenda2.component";
 import { LentaComponent } from "../common/profile/lenta/lenta.component";
 import { AddPostComponent } from "../common/profile/addPost/addPost.component";
+import { PromoComponent } from "./components/promo/promo.component";
+import { PromoTemplateComponent } from "./components/promo/promo-template.component";
+import { PromoEditorComponent } from "./components/promo/promo-editor.component";
 
 const routes: Routes = [
   // Без guard'а страница редактирования бизнес-профиля была доступна неавторизованным
@@ -26,6 +29,10 @@ const routes: Routes = [
 
       {path: 'galereya', component: GalereyaComponent},
       {path: 'uslugi', component: UslugiComponent},
+      {path: 'promo', component: PromoComponent},
+      {path: 'promo/template', component: PromoTemplateComponent},
+      {path: 'promo/edit', component: PromoEditorComponent},
+      {path: 'promo/edit/:offerId', component: PromoEditorComponent},
       {path: 'contacts', component: ContactsComponent},
       {path: 'rubric',  component: RubricComponent},
       {path: 'schedule',  component: GrafikComponent},

@@ -1,50 +1,52 @@
-/* ════════════════════════════════════════════
-   Портфолио мастера
-   Палитра: $green-basic #006174 · $green-dark #043c48
-            $green-light #0d94a0 · $green-light2 #5ecdd7
-            $grey #DDE2ED · $grey-dark #9196A4 · $black #23262F
-            $color-label #1D3C48 (новый — ярлыки поверх фото)
-   ════════════════════════════════════════════ */
-
-.portfolio {
-  padding: 0 16px 8px;
+/* Портфолио мастера — плитка по 2 работы в ряд. */
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-/* ── Шапка ── */
+.portfolio {
+  padding: 12px 0 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .portfolio__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 16px;
 }
 
 .portfolio__title {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   color: #11142D;
   margin: 0;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.4px;
 }
 
 .portfolio__see-all {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
+  min-height: 44px;
   background: none;
   border: none;
-  color: #006174;           /* $green-basic */
+  color: #006174;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   padding: 0;
-  transition: color 0.15s;
+  white-space: nowrap;
 }
 
 .portfolio__see-all:hover {
-  color: #0d94a0;           /* $green-light */
+  color: #0d94a0;
 }
 
-/* ── Табы ── */
 .portfolio__tabs {
   display: flex;
   gap: 8px;
@@ -62,136 +64,74 @@
 .portfolio__tab {
   flex-shrink: 0;
   white-space: nowrap;
-  padding: 7px 18px;
+  min-height: 36px;
+  padding: 7px 16px;
   border-radius: 100px;
-  border: 1.5px solid #DDE2ED;  /* $grey */
+  border: 1.5px solid #DDE2ED;
   background: #ffffff;
-  color: #9196A4;               /* $grey-dark */
+  color: #9196A4;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.18s, border-color 0.18s, color 0.18s;
-}
-
-.portfolio__tab:hover:not(.portfolio__tab--active) {
-  border-color: #0d94a0;        /* $green-light */
-  color: #006174;               /* $green-basic */
 }
 
 .portfolio__tab--active {
-  background: #006174;          /* $green-basic */
-  border-color: #006174;
+  background: #043c48;
+  border-color: #043c48;
   color: #ffffff;
 }
 
-/* ── Сетка ── */
 .portfolio__grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-@media (min-width: 600px) {
-  .portfolio__grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-/* ── Карточка ── */
 .portfolio__card {
   position: relative;
-  border-radius: 14px;
+  min-width: 0;
+  border-radius: 18px;
   overflow: hidden;
   aspect-ratio: 3 / 4;
   cursor: pointer;
-  background: #FAFAFC;          /* $grey-light */
+  background: #EAF3F5;
   outline: none;
 }
 
-.portfolio__card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  transition: background 0.2s;
+.portfolio__card:active {
+  transform: scale(0.98);
 }
 
-.portfolio__card:hover::after,
-.portfolio__card:focus::after {
-  background: rgba(4, 60, 72, 0.1);  /* $green-dark tint */
-}
-
-/* ── Медиа ── */
 .portfolio__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.35s ease;
 }
 
-.portfolio__card:hover .portfolio__img {
-  transform: scale(1.05);
-}
-
-/* ── Плейсхолдер ── */
-.portfolio__placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #FAFAFC;          /* $grey-light */
-}
-
-/* ── Кнопка Play ── */
 .portfolio__play {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 48px;
-  height: 48px;
   z-index: 2;
   pointer-events: none;
+  filter: drop-shadow(0 6px 12px rgba(4, 60, 72, .28));
 }
 
-/* ── Бейдж услуги ── */
-.portfolio__svc-badge {
-  position: absolute;
-  top: 9px;
-  left: 9px;
-  z-index: 3;
-  max-width: calc(100% - 18px);
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #006174;                              /* $green-basic */
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  padding: 3px 9px;
-  border-radius: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ── Нижний оверлей ── */
 .portfolio__overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 2;
-  /* Градиент в цвете $green-dark — смотрится дорого и в стиле */
   background: linear-gradient(
     to top,
-    rgba(4, 60, 72, 0.80) 0%,
-    rgba(4, 60, 72, 0.20) 60%,
+    rgba(4, 60, 72, 0.82) 0%,
+    rgba(4, 60, 72, 0.18) 62%,
     transparent 100%
   );
-  padding: 32px 10px 10px;
+  padding: 28px 10px 10px;
   pointer-events: none;
 }
 
@@ -204,19 +144,12 @@
   font-size: 12px;
   font-weight: 600;
   line-height: 1.35;
-  letter-spacing: 0.1px;
 }
 
-/* ── Скелетон ── */
 .portfolio__skeleton {
-  border-radius: 14px;
+  border-radius: 18px;
   aspect-ratio: 3 / 4;
-  background: linear-gradient(
-    90deg,
-    #FAFAFC 25%,   /* $grey-light */
-    #DDE2ED 50%,   /* $grey */
-    #FAFAFC 75%
-  );
+  background: linear-gradient(90deg, #FAFAFC 25%, #DDE2ED 50%, #FAFAFC 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.4s infinite;
 }
@@ -224,4 +157,32 @@
 @keyframes skeleton-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+@media (min-width: 640px) {
+  .portfolio__title {
+    font-size: 24px;
+  }
+
+  .portfolio__grid {
+    gap: 12px;
+  }
+
+  .portfolio__card:hover .portfolio__img {
+    transform: scale(1.04);
+  }
+
+  .portfolio__img {
+    transition: transform 0.35s ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio__card:active,
+  .portfolio__img,
+  .portfolio__skeleton {
+    transform: none;
+    transition: none;
+    animation: none;
+  }
 }

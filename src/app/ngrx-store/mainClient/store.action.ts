@@ -9,3 +9,7 @@ export const logoutAction = createAction(
   ActionTypes.LOGOUT,
 )
 
+export const clearActiveProfileAction = createAction(
+  '[Main client] Clear active profile',
+)
+

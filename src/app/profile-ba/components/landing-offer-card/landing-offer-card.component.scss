@@ -1,0 +1,424 @@
+@import '../../../../assets/styles/main/color';
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.offer {
+  display: grid;
+  gap: 0;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 10px 32px rgba(4, 60, 72, .08);
+}
+
+.offer__cover {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+  justify-self: stretch;
+  box-sizing: border-box;
+  background: #e7f4f4;
+  min-height: 148px;
+  aspect-ratio: 16 / 7;
+  max-height: 220px;
+}
+
+.offer__cover img,
+.offer__cover app-video-player {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.offer__cover img.offer__frame--contain,
+.offer__cover app-video-player.offer__frame--contain {
+  object-fit: contain;
+}
+
+.offer--showcase .offer__cover {
+  min-height: 220px;
+  aspect-ratio: 3 / 4;
+  max-height: 320px;
+}
+
+.offer--campaign .offer__cover {
+  min-height: 200px;
+  aspect-ratio: 16 / 9;
+  max-height: 280px;
+}
+
+.offer__cover-ph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(4, 60, 72, .35);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.offer__body {
+  position: relative;
+  z-index: 1;
+  padding: 18px 16px 20px;
+}
+
+.offer__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.offer__badge,
+.offer__until {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.offer__badge {
+  background: $green-light;
+  color: #fff;
+}
+
+.offer__until {
+  background: #e8f6f1;
+  color: $green-basic;
+}
+
+.offer__title {
+  margin: 10px 0 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: $green-basic;
+
+  strong {
+    font-weight: 700;
+    color: $green-dark;
+  }
+}
+
+.offer__cities {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: $green-dark;
+}
+
+.offer__product {
+  margin: 10px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: $green-dark;
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+/*
+ * Первый экран /cellings. Строка мастера — единственное заявление о цене у оффера
+ * с графовым калькулятором: offerPriceText() для него возвращает null, и .offer__price
+ * не рисуется. Поэтому вес цены получает .offer__product, а не выдуманное поле.
+ */
+.offer--hero .offer__product {
+  font-size: 20px;
+  line-height: 1.3;
+  color: $green-basic;
+}
+
+/*
+ * Порядок первого экрана на узкой ширине: гость с рекламы должен увидеть h1, цену
+ * и кнопку без прокрутки, а обложку — после них. Порядок задаётся order в том же
+ * grid-контейнере, второго экземпляра карточки не вводим.
+ */
+@media (max-width: 767px) {
+  .offer--hero .offer__body {
+    order: 1;
+  }
+
+  .offer--hero .offer__cover {
+    order: 2;
+  }
+
+  .offer--hero .offer__media {
+    order: 3;
+  }
+}
+
+.offer__price {
+  margin: 10px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: $green-basic;
+}
+
+.offer__price-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 400;
+  color: $grey-dark;
+  line-height: 1.35;
+}
+
+.offer__lead {
+  margin: 10px 0 0;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #4f5568;
+}
+
+.offer__benefits {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.offer__benefit {
+  min-width: 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #eef7f4;
+}
+
+.offer__benefit-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: $green-dark;
+}
+
+.offer__benefit-desc {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #4f5568;
+}
+
+.offer__strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #e7f6ef;
+  color: $green-dark;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.offer__strip-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: $green-light;
+  color: #fff;
+  font-size: 13px;
+}
+
+.offer__actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.offer__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.offer__btn:active {
+  transform: scale(0.98);
+}
+
+.offer__btn--primary {
+  border: 0;
+  background: $green-basic;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(0, 97, 116, .22);
+}
+
+.offer__btn--ghost {
+  background: #fff;
+  color: $green-basic;
+  border: 1.5px solid rgba(4, 60, 72, .14);
+}
+
+.offer__note {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.4;
+  color: $grey-dark;
+}
+
+.offer__media {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+
+.offer__media img,
+.offer__media app-video-player {
+  display: block;
+  width: 100%;
+  height: 96px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #e7f4f4;
+}
+
+.offer__media img.offer__frame--contain,
+.offer__media app-video-player.offer__frame--contain {
+  object-fit: contain;
+}
+
+@media (min-width: 768px) {
+  .offer {
+    border-radius: 28px;
+  }
+
+  .offer__cover {
+    min-height: 180px;
+    max-height: 260px;
+  }
+
+  .offer__body {
+    padding: 22px 28px 26px;
+  }
+
+  .offer__title {
+    font-size: 28px;
+  }
+
+  h1.offer__title {
+    font-size: 30px;
+  }
+
+  .offer__price-note {
+    display: inline;
+    margin-left: 8px;
+  }
+
+  .offer__benefits {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 148px), 1fr));
+  }
+
+  .offer--showcase .offer__benefits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .offer--minimal .offer__benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .offer__benefit {
+    padding: 16px 18px;
+  }
+
+  .offer__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .offer__btn {
+    width: auto;
+    min-width: 220px;
+    flex: 0 1 auto;
+  }
+
+  .offer__media {
+    padding: 0 28px 24px;
+  }
+
+  .offer--campaign .offer__cover {
+    min-height: 280px;
+    max-height: 420px;
+  }
+
+  /*
+   * Первый экран /cellings на десктопе. Замер прода 18.09 при 1280×800: обложка
+   * 108–528 (420 px), кнопка «Рассчитать стоимость» 726–778 — в 800 влезает с
+   * запасом 22 px, а на типичном окне ноутбука (700–760 CSS px после хрома
+   * браузера) уходит за сгиб. Ограничиваем высоту обложки только у hero-карточки:
+   * min-height Campaign не трогаем, остальные акции без изменений.
+   */
+  .offer--hero .offer__cover {
+    min-height: 220px;
+    max-height: 300px;
+  }
+
+  .offer--showcase .offer__cover {
+    max-height: 420px;
+  }
+
+  .offer--showcase .offer__media {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .offer--showcase .offer__media img,
+  .offer--showcase .offer__media app-video-player {
+    height: 120px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offer__btn {
+    transition: none;
+  }
+}

@@ -33,3 +33,65 @@
 	font-weight: normal;
 	line-height: 130%;
 }
+
+@media screen and (max-width: 767px) {
+    .cellings-offer-page {
+        padding-bottom: 88px;
+    }
+}
+
+/* Один экземпляр акции: на мобилке шапка → акция → «О мастере»,
+   на десктопе две колонки. display:contents на обёртках — без второй копии. */
+.ba-profile-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+}
+
+.ba-profile-layout__left,
+.ba-profile-layout__right {
+    display: contents;
+}
+
+.ba-profile-layout__promo {
+    order: 2;
+    width: 100%;
+}
+
+.ba-profile-layout__main {
+    order: 4;
+    width: 100%;
+    min-width: 0;
+}
+
+@media screen and (min-width: 769px) {
+    .ba-profile-layout {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .ba-profile-layout__left {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 360px;
+        padding: 20px 20px 40px;
+        background-color: #fff;
+        box-sizing: border-box;
+    }
+
+    .ba-profile-layout__right {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+        width: 70%;
+    }
+
+    .ba-profile-layout__promo,
+    .ba-profile-layout__main {
+        order: unset;
+        margin: 0;
+    }
+}

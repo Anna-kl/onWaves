@@ -6,6 +6,7 @@ import {blobToFile} from "../../../helpers/common/image.helper";
 import {DomSanitizer} from "@angular/platform-browser";
 
 import {BackendService} from "../../../services/backend.service";
+import {resolveAvatarUrl} from "../../../helpers/common/avatar1";
 
 @Component({
   selector: 'app-avatar-cropped',
@@ -42,15 +43,11 @@ isSetAvatar: boolean = false;
     }
 
   getAvatar(avatar: any) {
-    if (avatar) {
-      if (avatar.includes('blob')){
-        return false;
-      }
-      return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
-
-    } else {
-      return  '/assets/img/onwaves/user.png';
+    // Во время кроппинга приходит blob-URL — его показывает сам ngx-image-cropper, скрываем превью.
+    if (typeof avatar === 'string' && avatar.includes('blob')) {
+      return false;
     }
+    return resolveAvatarUrl(avatar);
   }
   newAvatar: any|null = null;
   @Output() onSave = new EventEmitter<boolean>();
@@ -89,14 +86,12 @@ isSetAvatar: boolean = false;
  
     if (this.id) {
       this._apiServiceProfile.save_avatar(this.id!, this.formData)
-        .subscribe(result => {
-            console.error('Ошибка при загрузке фотографии:', '');
-            this.onSave.emit(true);
-          },
-          (error) => {
-            console.error('Ошибка при загрузке фотографии:', error);
-          }
-        );
+        .subscribe({
+          // Здесь стоял console.error('Ошибка при загрузке фотографии:', '') —
+          // в ветке успеха. В логах он выглядел как настоящий сбой загрузки.
+          next: () => this.onSave.emit(true),
+          error: error => console.error('Ошибка при загрузке фотографии:', error)
+        });
     } else {
       console.log(this.formData);
       this.onSave.emit(this.formData);

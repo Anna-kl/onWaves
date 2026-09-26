@@ -13,6 +13,10 @@ import {selectProfileMainClient} from "../../../ngrx-store/mainClient/store.sele
 import {LoginService} from "../../../auth/login.service";
 import {combineLatest, map, Observable, Subscription} from "rxjs";
 import {UserType} from "../../../DTO/classes/profiles/profile-user.model";
+import { ExternalReviewSource } from '../../../DTO/enums/externalReviewSource';
+import { resolveAvatarUrl } from '../../../../helpers/common/avatar1';
+import { formatWorkLocations } from '../../../../helpers/common/address';
+import { isOwnWebsite as urlIsOwnWebsite } from '../../../../helpers/common/website';
 @Component({
   selector: 'app-column-ba-edit-profile',
   templateUrl: './column-baprofile.component.html',
@@ -20,6 +24,7 @@ import {UserType} from "../../../DTO/classes/profiles/profile-user.model";
   providers: [ScheduleService]
 })
 export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
+  protected readonly ExternalReviewSource = ExternalReviewSource;
   @Input() id: string | null = null;
   @Input() isEdit = false;
   @Output() onAddress = new EventEmitter<IViewAddress>();
@@ -68,11 +73,13 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
       });
   }
   getAvatar(avatar: any) {
-    if (avatar) {
-      return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
-    } else {
-      return  '/assets/img/onwaves/user.png';
-    }
+    return resolveAvatarUrl(avatar);
+  }
+
+  /** Плоский адрес по форматам работы (через запятую); фолбэк — address.city от бэка. */
+  get addressText(): string {
+    return formatWorkLocations(this.businessProfile?.workLocations)
+      || (this.businessProfile?.address?.city ?? '');
   }
 
   ngOnDestroy(): void {
@@ -80,7 +87,11 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
   }
 
   onEdit(){
-    this._dataService.transferBusinessProfile(this.businessProfile!);
+    // businessProfile берётся из allProfiles$ через find() и бывает undefined
+    // (например, свежесозданный БА ещё не попал в список профилей). Раньше это
+    // undefined уезжало в BehaviorSubject и роняло вью редактора услуг.
+    if (!this.businessProfile?.id) return;
+    this._dataService.transferBusinessProfile(this.businessProfile);
     this._router.navigate(['ba-edit', this.id]);
   }
 
@@ -135,6 +146,8 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
     isInstagram(url: string | undefined): boolean {
       return !!url && url.toLowerCase().includes('instagram');
     }
+
+    readonly isOwnWebsite = urlIsOwnWebsite;
 
     getInstagramName(url: string | undefined): string {
       if (!url) return '';

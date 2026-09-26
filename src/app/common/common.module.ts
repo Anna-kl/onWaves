@@ -3,7 +3,6 @@ import {CalendarComponent} from "./calendar/calendar.component";
 import {CommonModule, DatePipe, NgForOf, NgIf} from "@angular/common";
 import { RubricMenuComponent } from './rubric-menu/rubric-menu.component';
 import {AccordionComponent} from "./accordion/accordion.component";
-import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
 import {BreadcrumbModule} from "primeng/breadcrumb";
 import { ShowFotoComponent } from './modals/galereya/show-foto/show-foto.component';
@@ -20,7 +19,6 @@ import { ConfirmWithoutTimeComponent } from './accordion/modals/confirm-without-
 import { SelectAddressComponent } from "./select-address/select-address.component";
 import { AddPostComponent } from "./profile/addPost/addPost.component";
 import { CommonLentaComponent } from "./profile/commonLenta/commonLenta.component";
-import { ProgressSpinnerModule } from "primeng/progressspinner";
 import { CreateAccordionComponent } from './accordion/create-accordion/create-accordion.component';
 import { MyYComponentComponent } from './maps/my-ycomponent/my-ycomponent.component';
 import { YMapComponent, YMapDefaultFeaturesLayerDirective, YMapDefaultMarkerDirective, YMapDefaultSchemeLayerDirective, YMapFeatureDirective, YMapMarkerDirective } from "angular-yandex-maps-v3";
@@ -28,6 +26,18 @@ import { LoaderOnWavesComponent } from './loader-on-waves/loader-on-waves.compon
 import { InstallBannerComponent } from './banner/install-banner/install-banner.component';
 import { CardDetailModalComponent } from './modals/card-detail-modal/card-detail-modal.component';
 import { VideoPlayerComponent } from './video-player/video-player.component';
+// Эти четыре лежат в папке baedit, но используются и на публичных страницах:
+// app-rubric — в pages/main-menu и search/extsearch, app-modal и app-modalalbum —
+// в components/phone/album-phone, app-category-tree — внутри app-rubric.
+// Поэтому они объявлены здесь (жадный общий модуль), а не в ленивом BaEditModule.
+import { ModalComponent } from '../baedit/components/uslugi/modal/modal.component';
+import { ModalAlbumComponent } from '../baedit/profilebisacc/modalalbum/modalalbum.component';
+import { RubricComponent } from '../baedit/components/rubric/rubric.component';
+import { CategoryTreeComponent } from './category-tree/category-tree.component';
+// Лента открывается и с публичного профиля (':id/lenta'), и из profilebisacc,
+// поэтому объявлена в жадном общем модуле, а не в ленивом BaEditModule.
+import { LentaComponent } from './profile/lenta/lenta.component';
+import { CityAutocompleteComponent } from './city-autocomplete/city-autocomplete.component';
 
 
 @NgModule({
@@ -51,7 +61,12 @@ import { VideoPlayerComponent } from './video-player/video-player.component';
       InstallBannerComponent,
       CardDetailModalComponent,
       VideoPlayerComponent,
-  ],
+      ModalComponent,
+      ModalAlbumComponent,
+      RubricComponent,
+      CategoryTreeComponent,
+      LentaComponent,
+      CityAutocompleteComponent],
   imports: [
     YMapComponent, YMapDefaultSchemeLayerDirective, YMapMarkerDirective, YMapFeatureDirective, YMapDefaultMarkerDirective,
     YMapDefaultFeaturesLayerDirective,
@@ -59,16 +74,13 @@ import { VideoPlayerComponent } from './video-player/video-player.component';
     NgForOf,
     DatePipe,
     NgIf,
-    ToastModule,
     FormsModule,
     BreadcrumbModule,
     CarouselModule,
     TagModule,
     ButtonModule,
     ImageCropperModule,
-    ProgressSpinnerModule,
-    CommonModule,
-],
+    CommonModule],
     exports: [
         CalendarComponent,
         RubricMenuComponent,
@@ -83,7 +95,12 @@ import { VideoPlayerComponent } from './video-player/video-player.component';
         InstallBannerComponent,
         VideoPlayerComponent,
         SafePipe,
-    ]
+        ModalComponent,
+        ModalAlbumComponent,
+        RubricComponent,
+        CategoryTreeComponent,
+        LentaComponent,
+        CityAutocompleteComponent]
 })
 
 export class CommonComponentsModule {}

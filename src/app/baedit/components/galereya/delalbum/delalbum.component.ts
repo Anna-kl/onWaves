@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { ToastService } from 'src/services/toast.service';
 import {NgbActiveModal, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import { IViewImage } from 'src/app/DTO/views/images/IViewImage';
 import { ElementRef, Renderer2} from '@angular/core';
@@ -10,15 +11,13 @@ import {BusService} from "../../../../../services/busService";
 import {AlbumsService} from "../../../../../services/albums.service";
 import {IAlbumWithFoto} from "../../../../DTO/views/images/IAlbumWithFoto";
 import {CropImageModalComponent} from "../../modals/crop-image-modal/crop-image-modal.component";
-import {DomSanitizer} from "@angular/platform-browser";
-import {MessageService} from "primeng/api";
-import {ShowFotoComponent} from "../../../../common/modals/galereya/show-foto/show-foto.component";
+import {DomSanitizer} from "@angular/platform-browser";import {ShowFotoComponent} from "../../../../common/modals/galereya/show-foto/show-foto.component";
 
 @Component({
   selector: 'app-delalbum',
   templateUrl: './delalbum.component.html',
   styleUrls: ['./delalbum.component.css'],
-  providers: [AlbumsService, MessageService]
+  providers: [AlbumsService]
 })
 export class DelalbumComponent {
   id: string | null = null;
@@ -35,8 +34,8 @@ export class DelalbumComponent {
     private _apiImage: AlbumsService,
     private sanitizer: DomSanitizer,
     private backendService: BackendService,
-    private messageService: MessageService,
-    private modalService: NgbModal,) {
+    private messageService: ToastService,
+    private modalService: NgbModal) {
       this._events.choosedProfile.subscribe(
         result => {
           this.profile = result;

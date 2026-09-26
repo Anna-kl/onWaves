@@ -16,8 +16,8 @@
       До 50 символов
     </div> 
     <div  class="btn-uslugi-modalka" >
-      <div class="saveBtn" (click)="saveGroup()">
-        Создать
+      <div class="saveBtn" [class.disabled]="isSaving || !groupName.trim()" (click)="saveGroup()">
+        {{ isSaving ? 'Сохраняем…' : (group ? 'Сохранить' : 'Создать') }}
       </div>
     </div> 
   </div>

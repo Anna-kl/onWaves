@@ -1,5 +1,56 @@
 :root { --tabbar-h: 44px; }
 
+.schedule-state {
+  align-items: center;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(33, 52, 48, .08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px;
+  min-height: 220px;
+  justify-content: center;
+  padding: 32px 20px;
+  text-align: center;
+}
+
+.schedule-state span { color: #7b8582; }
+
+.schedule-message {
+  background: #fff4df;
+  border-radius: 12px;
+  color: #75521c;
+  margin: 0 20px 16px;
+  padding: 12px 16px;
+}
+
+.schedule-state__icon--loading {
+  animation: schedule-pulse 1.2s ease-in-out infinite;
+  background: linear-gradient(90deg, #edf1f0 25%, #f8faf9 50%, #edf1f0 75%);
+  background-size: 200% 100%;
+  border-radius: 12px;
+  height: 72px;
+  width: min(100%, 360px);
+}
+
+.schedule-state--error { border: 1px solid #f1d5cf; }
+
+.schedule-state__retry {
+  background: #238b6c;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 11px 28px;
+}
+
+@keyframes schedule-pulse {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
 .free-time-table{
 
   max-width: 645PX;  
@@ -74,4 +125,22 @@
     height: 90px;
 
   }
+}
+
+/* Неактивная «Далее» должна читаться как неактивная, а не как обычная кнопка. */
+.next-btn-calendar.btn-gray {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.next-hint {
+  margin: 8px 40px 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: #6b7280;
+}
+
+.next-hint--alert {
+  color: #b00020;
+  font-weight: 600;
 }

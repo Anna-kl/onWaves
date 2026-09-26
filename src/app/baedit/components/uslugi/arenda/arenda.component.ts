@@ -1,4 +1,5 @@
 import {select, Store} from "@ngrx/store";
+import { ToastService } from 'src/services/toast.service';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from "@angular/router";
 import { Location } from '@angular/common'
@@ -20,16 +21,19 @@ import {PaymentForType} from "../../../../DTO/enums/paymentForType";
 import {Service} from "../../../../DTO/classes/services/Service";
 import {ServiceStatus} from "../../../../DTO/enums/serviceStatus";
 import {GroupService} from "../../../../../services/groupservice";
-import {MessageService} from "primeng/api";
-import { getNameCurrency } from "src/helpers/common/price.helpers";
+import { getNameCurrency, priceUnitOf } from "src/helpers/common/price.helpers";
 import { BehaviorSubject, Subject, takeUntil, tap, catchError, timeout, switchMap, of, forkJoin } from "rxjs";
 import { environment } from "src/enviroments/environment";
+import { WorkLocationType } from "../../../../DTO/enums/workLocationType";
+import { serviceWorkLocationType } from "src/helpers/common/address";
+import { ServicePriceUnit } from "../../../../DTO/enums/servicePriceUnit";
 
 @Component({
   selector: 'app-arenda',
   templateUrl: './arenda.component.html',
   styleUrls: ['./arenda.component.scss'],
-  providers: [AlbumsService, GroupService, MessageService, NgbActiveModal ]
+  // GroupService — только корневой (`providedIn: 'root'`), см. комментарий в Arenda2Component.
+  providers: [AlbumsService, NgbActiveModal ]
 })
 
 export class ArendaComponent implements OnInit, OnDestroy {
@@ -39,8 +43,7 @@ export class ArendaComponent implements OnInit, OnDestroy {
     Gender.Woman,
     Gender.Men,
     Gender.Children,
-    Gender.Pet,
-  ];
+    Gender.Pet];
   images: IViewImage[] = [];
   currencies: CurrencyType[] = [CurrencyType.RUB];
   genders: Gender[] = [];
@@ -52,7 +55,13 @@ export class ArendaComponent implements OnInit, OnDestroy {
   groups: Group[] = [];
   service: Service|null = null;
   profile: IViewBusinessProfile|null = null;
-  private imagesId: any;
+  imagesId: string[] = [];
+  private mediaReady = false;
+
+  onMediaIds(ids: string[]): void {
+    this.imagesId = ids ?? [];
+    this.mediaReady = true;
+  }
   choosedGroup: Group = {name: 'Выберите группу', id: '', profileUserId: ''};
   characterCount: number = 0;
   private destroy$ = new Subject<void>();
@@ -60,6 +69,9 @@ export class ArendaComponent implements OnInit, OnDestroy {
   isErrorPrice = false;
   isErrorName = false;
   isErrorGender = false;
+  isErrorFormat = false;
+  /** Формат оказания услуги (radio). */
+  locationType: WorkLocationType | null = null;
 
   // ══════════════════════════════════════════════════════════════
   // КРИТИЧНО: Флаги состояния загрузки и идемпотентность
@@ -103,7 +115,7 @@ export class ArendaComponent implements OnInit, OnDestroy {
               private sanitizer: DomSanitizer,
               private _apiImage: AlbumsService,
               private _apiService: GroupService,
-              private messageService: MessageService,
+              private messageService: ToastService,
               private location: Location,
               private _dataService: ProfileDataEditService) {
     const temp = this.router.getCurrentNavigation()?.extras.state;
@@ -188,38 +200,12 @@ export class ArendaComponent implements OnInit, OnDestroy {
                 startRange: [this.service.price.startRange],
                 endRange: [this.service.price.endRange],
                 currencyType: [CurrencyType.RUB],
+                priceUnit: [priceUnitOf(this.service.price) ?? ServicePriceUnit.Hour],
               })
             });
 
-      // this.serviceGroup = this.builder.group({
-      //   name:  [this.service.name, Validators.required], 
-      //   about: this.service.about,
-      //   group: this.service.groupServiceId,
-      //   isAll: this.service.gender.find(_ => _ === Gender.All),
-      //   isWoman: this.service.gender.find(_ => _ === Gender.Woman),
-      //   isMen: this.service.gender.find(_ => _ === Gender.Men),
-      //   isChildren: this.service.gender.find(_ => _ === Gender.Children),
-      //   isPet: this.service.gender.find(_ => _ === Gender.Pet),
-      //   price: this.builder.group({
-      //     price: this.service.price.price,
-      //     isRange: this.service.price.isRange,
-      //     startRange: this.service.price.startRange,
-      //     endRange: this.service.price.endRange,
-      //     currencyType: CurrencyType.RUB
-      //   }),
-
-      this._apiImage.getImagesFromService(this.service.id!)
-        .pipe(
-          timeout(10000),
-          catchError(err => {
-            console.error('Ошибка загрузки изображений услуги:', err);
-            return of([]);
-          }),
-          takeUntil(this.destroy$)
-        )
-        .subscribe(result_images => {
-          this.images = result_images || [];
-        });
+      // Характер услуги — для редактирования (устойчиво к регистру ключа).
+      this.locationType = serviceWorkLocationType(this.service) ?? null;
     } else {
       this.serviceGroup = this.builder.group({
         name: ['', [Validators.required, Validators.minLength(3)]],
@@ -235,13 +221,20 @@ export class ArendaComponent implements OnInit, OnDestroy {
           isRange: false,
           startRange: null,
           endRange: null,
-          currencyType: CurrencyType.RUB
+          currencyType: CurrencyType.RUB,
+          priceUnit: ServicePriceUnit.Hour,
         }),
       });
     }
   }
 
   protected readonly getNameCurrency = getNameCurrency;
+
+  readonly implicitPriceUnit = ServicePriceUnit.Hour;
+
+  setPriceUnit(unit: ServicePriceUnit): void {
+    this.serviceGroup?.get('price')?.get('priceUnit')?.setValue(unit);
+  }
 
   isFormValid(): boolean {
      const priceControl = this.serviceGroup.get('price');
@@ -252,7 +245,8 @@ export class ArendaComponent implements OnInit, OnDestroy {
      let a = (this.serviceGroup.valid && price?.value >= 0
      && (this.serviceGroup.get('isWoman')?.value || this.serviceGroup.get('isMen')?.value
     || this.serviceGroup.get('isPet')?.value || this.serviceGroup.get('isChildren')?.value));
-     return a;
+     // Формат оказания услуги обязателен.
+     return !!a && this.locationType != null;
   }
 
   getGender(gender: Gender){
@@ -278,6 +272,12 @@ export class ArendaComponent implements OnInit, OnDestroy {
   showSuccess2() {
     this.messageService.add({severity:'success', summary: 'Успешно', detail: 'Услуга изменена',
       life:5000});
+  }
+  /** Успех сохранения: «изменена» при редактировании, «добавлена» при создании. */
+  private notifySaved() {
+    this.service ? this.showSuccess2() : this.showSuccess();
+    // Сообщаем экрану услуг, что список устарел (см. комментарий в Arenda2Component).
+    this._dataService.updateServices();
   }
 
   /**
@@ -312,22 +312,37 @@ export class ArendaComponent implements OnInit, OnDestroy {
     if (err?.name === 'TimeoutError') {
       return 'Сеть медленная. Пожалуйста, проверьте соединение и попробуйте снова.';
     }
+    // Текст ошибки с бэка (напр. «Укажите характер услуги…», «У вас не настроен формат работы…»).
+    const backend = this.extractBackendMessage(err);
 
     if (err?.status === 409) {
-      return 'Услуга с таким названием уже существует.';
+      return backend ?? 'Услуга с таким названием уже существует.';
     }
     if (err?.status === 400) {
-      return 'Ошибка в данных формы. Проверьте все поля.';
+      return backend ?? 'Ошибка в данных формы. Проверьте все поля.';
     }
     if (err?.status === 500) {
-      return 'Ошибка сервера. Попробуйте позже.';
+      return backend ?? 'Ошибка сервера. Попробуйте позже.';
     }
-
     if (err?.status === 0 || !err?.status) {
-      return 'Проблема с подключением. Проверьте интернет.';
+      return backend ?? 'Проблема с подключением. Проверьте интернет.';
     }
+    return backend ?? `Ошибка ${err?.status || ''}: ${err?.message || 'Неизвестная ошибка'}`;
+  }
 
-    return `Ошибка ${err?.status || ''}: ${err?.message || 'Неизвестная ошибка'}`;
+  /** Достаёт человекочитаемый текст ошибки из ответа бэка (строка/{message}/IResponse). */
+  private extractBackendMessage(err: any): string | null {
+    if (typeof err?.backendMessage === 'string' && err.backendMessage.trim()) {
+      return err.backendMessage.trim();
+    }
+    const body = err?.error;
+    if (typeof body === 'string' && body.trim()) {
+      return body.trim();
+    }
+    if (body && typeof body.message === 'string' && body.message.trim()) {
+      return body.message.trim();
+    }
+    return null;
   }
 
   save(): void {
@@ -335,6 +350,7 @@ export class ArendaComponent implements OnInit, OnDestroy {
     this.isErrorGender = false;
     this.isErrorName = false;
     this.isErrorPrice = false;
+    this.isErrorFormat = false;
     let data = this.serviceGroup.getRawValue();
     let gender: Gender[] = [];
 
@@ -357,6 +373,10 @@ export class ArendaComponent implements OnInit, OnDestroy {
       this.isErrorName = true;
       flagValidation = false;
     }
+    if (this.locationType == null) {
+      this.isErrorFormat = true;
+      flagValidation = false;
+    }
 
     if (!flagValidation) return;
 
@@ -376,8 +396,11 @@ export class ArendaComponent implements OnInit, OnDestroy {
       data['about'],
       data['duration'],
       false,
-      this.category?.id
+      // При редактировании рубрику заново не выбирают — сохраняем существующую категорию услуги.
+      this.category?.id ?? this.service?.categoryId
     );
+    // Характер услуги (backend 2026-07-19).
+    service.workLocationType = this.locationType;
 
     // ══════════════════════════════════════════════════════════════
     // КРИТИЧНО: Передаем requestId для идемпотентности
@@ -385,19 +408,20 @@ export class ArendaComponent implements OnInit, OnDestroy {
     this._apiService.saveService(service, this.requestId).pipe(
       timeout(15000),  // таймаут 15 сек
       tap(result => {
-        if (result.code === 201) {
+        // 201 — создание новой услуги, 200 — обновление существующей.
+        if (result.code === 201 || result.code === 200) {
           const serv = result.data as Service;
-          // Загружаем изображения если они есть
-          if (this.imagesId?.length > 0) {
+          const shouldSyncMedia = !!serv.id && (this.imagesId.length > 0 || (!!this.service && this.mediaReady));
+          if (shouldSyncMedia) {
             this.saveImages(this.imagesId, serv.id!);
           } else {
-            this.showSuccess();
+            this.notifySaved();
             this.isSaving$.next(false);
             this.location.back();
           }
         } else {
           this.isSaving$.next(false);
-          this.showErrorMessage({ status: result.code, message: 'Неудачный ответ сервера' });
+          this.showErrorMessage({ status: result.code, backendMessage: result.message });
         }
       }),
       catchError(err => {
@@ -418,13 +442,13 @@ export class ArendaComponent implements OnInit, OnDestroy {
       .pipe(
         timeout(15000),
         tap(() => {
-          this.showSuccess();
+          this.notifySaved();
           this.isSaving$.next(false);
           this.location.back();
         }),
         catchError(err => {
           this.isSaving$.next(false);
-          this.showSuccess(); // Услуга создана, только изображения не загружены
+          this.notifySaved(); // Услуга сохранена, только изображения не загружены
           console.error('Ошибка при загрузке изображений:', err);
           this.location.back();
           return of(null);

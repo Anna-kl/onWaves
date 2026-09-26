@@ -1,5 +1,17 @@
 @import '../../../assets/styles/main/color.scss';
 
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+.worktype,
+.geo-panels {
+  width: 100%;
+  max-width: 100%;
+}
+
 .container-contacts {
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(277px, 1fr)); 
@@ -44,7 +56,7 @@ input:focus{
 .column-right{
   display:grid;
   justify-items: center;
-  align-items: start;
+  align-items: flex-start;
 }
 .container-column-right{
   display:grid; 
@@ -84,12 +96,12 @@ select {
 .column-left-footer{
   display:grid;
   justify-items: center;
-  align-items:start;
+  align-items: flex-start;
 }
 .container-column-left-footer{
   display:grid;
   justify-content: center;
-  align-items:start;
+  align-items: flex-start;
   width: 70%;
 }
 .address-text-info{
@@ -157,4 +169,233 @@ select {
   margin-top: 0.25rem;
   margin-bottom: 30px;
   margin-left: 20px;
+}
+
+/* ═══════════ Мультивыбор форматов работы ═══════════ */
+.worktype__title {
+  font-size: 1.15em;
+  font-weight: 700;
+  color: $green-dark;
+  margin: 0 0 4px;
+}
+.worktype__subtitle {
+  color: $grey-dark;
+  font-size: 0.9em;
+  margin: 0 0 18px;
+}
+
+/* Карточки: авто-сетка — 3 в ряд, сами переносятся при нехватке места */
+.format-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.format-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 18px 16px 16px;
+  border: 2px solid $grey;
+  border-radius: 16px;
+  background: $white;
+  color: $grey-dark;
+  cursor: pointer;
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .12s ease;
+}
+.format-card:hover {
+  border-color: $green-light2;
+}
+.format-card:active {
+  transform: translateY(1px);
+}
+.format-card--active {
+  border-color: $green-basic;
+  background: #F1FBFC;
+  box-shadow: 0 4px 14px rgba(0, 97, 116, .12);
+  color: $green-basic;
+}
+.format-card__icon {
+  color: inherit;
+}
+.format-card--active .format-card__icon {
+  color: $green-basic;
+}
+.format-card__name {
+  font-weight: 700;
+  font-size: 0.98em;
+  color: $green-dark;
+  line-height: 1.2;
+}
+.format-card--active .format-card__name {
+  color: $green-basic;
+}
+.format-card__desc {
+  font-size: 0.82em;
+  color: $grey-dark;
+  line-height: 1.25;
+}
+.format-card__check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid $grey-dark;
+  background: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s ease, border-color .15s ease;
+}
+.format-card__check--on {
+  background: $green-basic;
+  border-color: $green-basic;
+}
+
+/* Подсказка о мультивыборе */
+.format-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #EAF7F9;
+  color: $green-basic;
+  font-size: 0.86em;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+.format-hint svg { flex-shrink: 0; margin-top: 1px; }
+.format-hint--warn {
+  background: #FDF3EF;
+  color: $color-error;
+}
+
+/* ═══════════ Панели данных по форматам ═══════════ */
+.geo-panels {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.geo-block {
+  border: 1px solid $grey;
+  border-radius: 16px;
+  padding: 18px 18px 4px;
+  width: 100%;
+  max-width: 100%;
+}
+.geo-block--accent {
+  border-color: rgba(0, 97, 116, .25);
+  background: #FAFDFE;
+}
+.geo-location-fields {
+  display: contents;
+}
+.geo-block__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: $green-dark;
+  margin-bottom: 16px;
+}
+.geo-block__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $green-basic;
+  flex-shrink: 0;
+}
+.geo-block__hint {
+  font-size: 0.85em;
+  color: #409B89;
+  margin: -6px 0 14px;
+}
+/* Дом/корпус + квартира в одну строку */
+.geo-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.geo-required {
+  font-size: 0.8em;
+  color: $grey-dark;
+  margin: 0 0 4px;
+}
+/* Список городов для разъездной работы */
+.help-text-cities {
+  font-size: 0.85rem;
+  color: #409B89;
+  margin-bottom: 16px;
+}
+.city-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.city-row .select--city {
+  flex: 1;
+}
+.city-row__remove {
+  flex-shrink: 0;
+  width: 44px;
+  height: 50px;
+  border: 1px solid #9196A4;
+  border-radius: 100px;
+  background: #fff;
+  color: $color-error;
+  font-size: 1.4em;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.city-row__remove:hover {
+  border-color: $color-error;
+}
+.add-city-link {
+  display: inline-block;
+  color: $green-basic;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 24px;
+  cursor: pointer;
+}
+.add-city-link:hover {
+  color: $green-light;
+}
+
+@media screen and (max-width: 640px) {
+  :host {
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+    margin-left: calc((100% - (100vw - 32px)) / 2);
+    margin-right: calc((100% - (100vw - 32px)) / 2);
+  }
+
+  .format-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .format-card {
+    min-height: 110px;
+  }
+
+  .geo-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-width: 0;
+  }
 }

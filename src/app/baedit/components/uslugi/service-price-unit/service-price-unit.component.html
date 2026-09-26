@@ -1,0 +1,15 @@
+<div class="spu">
+  <div class="spu__label">Цена указана за</div>
+  <div class="spu__chips" role="radiogroup" aria-label="Единица измерения цены">
+    <button type="button"
+            class="spu__chip"
+            *ngFor="let unit of units"
+            role="radio"
+            [attr.aria-checked]="value === unit.value"
+            [class.spu__chip--on]="value === unit.value"
+            (click)="select(unit.value)">
+      <span class="spu__chip-label">{{ unit.label }}</span>
+      <span class="spu__chip-hint">{{ unit.hint }}</span>
+    </button>
+  </div>
+</div>

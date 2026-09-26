@@ -1,0 +1,61 @@
+<div class="landing-skel" *ngIf="showLandingSkeleton" aria-hidden="true">
+  <span class="landing-skel__line landing-skel__line--badge"></span>
+  <span class="landing-skel__line landing-skel__line--title"></span>
+  <span class="landing-skel__line"></span>
+  <span class="landing-skel__line landing-skel__line--btn"></span>
+</div>
+
+<section class="landing-section" *ngIf="visibleOffers.length"
+         [class.landing-section--campaign]="isCampaign || isCellingsProfile">
+  <app-landing-offer-card
+    *ngFor="let offer of visibleOffers; let first = first"
+    [offer]="offer"
+    [promoBadgeText]="offer.badge || offer.slogan || landing?.promoBadgeText"
+    [templateType]="templateFor(offer)"
+    [priceText]="priceFor(offer)"
+    [cellingsHero]="isCellingsProfile && first"
+    [citiesLine]="isCellingsProfile && first ? citiesLine : null"
+    (actionClick)="onAction(offer, $event)"
+    (videoStart)="onVideoStart($event)">
+  </app-landing-offer-card>
+</section>
+
+<!-- Видно без клика: робот читает первый HTML, плеер калькулятора в SSR не сериализуется. -->
+<section class="calc-seo" *ngIf="isCellingsProfile && visibleOffers.length" aria-labelledby="calc-seo-title">
+  <h2 class="calc-seo__title" id="calc-seo-title">{{ calcSeoTitle }}</h2>
+  <p class="calc-seo__lead">{{ calcSeoLead }}</p>
+  <dl class="calc-seo__faq">
+    <ng-container *ngFor="let item of calcSeoFaq">
+      <dt>{{ item.q }}</dt>
+      <dd>{{ item.a }}</dd>
+    </ng-container>
+  </dl>
+</section>
+
+<app-calculator-player
+  *ngIf="calcOpen && graphConnection && profileId"
+  [profileId]="profileId"
+  [connection]="graphConnection"
+  [offerId]="calcOffer?.id ?? null"
+  [masterName]="masterName"
+  [masterMaxUrl]="masterMaxUrl"
+  [animateIn]="!pendingShown"
+  (bookMeasurement)="onGraphBooking($event)"
+  (started)="onCalcStarted()"
+  (finished)="onCalcFinished()"
+  (writeMaster)="onWriteMaster()"
+  (closed)="onCalcClosed()">
+</app-calculator-player>
+
+<div class="calc-pending" *ngIf="calcPending" #calcPendingRoot role="dialog" aria-modal="true" aria-labelledby="calc-pending-title">
+  <section class="calc-pending__panel">
+    <header class="calc-pending__head">
+      <h2 class="calc-pending__title" id="calc-pending-title">Расчёт стоимости</h2>
+      <button type="button" class="calc-pending__close" (click)="$event.stopPropagation(); onCalcClosed()" aria-label="Закрыть">×</button>
+    </header>
+      <p class="calc-pending__lead" *ngIf="!calcLoadError && !calcMissing">Загружаю вопросы…</p>
+      <p class="calc-pending__lead" *ngIf="calcLoadError">Не удалось открыть расчёт. Нажмите «Повторить».</p>
+      <p class="calc-pending__lead" *ngIf="calcMissing">Расчёт по схеме сейчас недоступен — мастер ещё не подключил калькулятор.</p>
+      <button type="button" class="calc-pending__retry" *ngIf="calcLoadError" (click)="retryCalculator()">Повторить</button>
+  </section>
+</div>

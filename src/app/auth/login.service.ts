@@ -10,7 +10,7 @@ import {IViewBusinessProfile} from "../DTO/views/business/IViewBussinessProfile"
 
 import {ProfileService} from "../../services/profile.service";
 import { Store, select } from "@ngrx/store";
-import { getActionStateMainProfileClient, logoutAction } from "../ngrx-store/mainClient/store.action";
+import { clearActiveProfileAction, getActionStateMainProfileClient, logoutAction } from "../ngrx-store/mainClient/store.action";
 import { UserType } from "../DTO/classes/profiles/profile-user.model";
 import { selectLink } from "../ngrx-store/links/link.selector";
 import { clearLinkAction } from "../ngrx-store/links/link.action";
@@ -83,7 +83,17 @@ export class LoginService {
                 tap(data => {
                     if (data.code === 200) {
                         this.isLoad$.next(true);
-                        this._push.subscribe(data.message);
+                        // Только тихая пересинхронизация уже выданной подписки:
+                        // subscribe() запросил бы разрешение вне пользовательского
+                        // жеста — на iOS это молча ничего не даёт, в Chrome дало бы
+                        // системное окно на голой загрузке страницы.
+                        // data.message — sessionId; subscribe/{id} ждёт profileId,
+                        // иначе бэк пишет FK на несуществующий профиль и отвечает 500.
+                        const profileId = data.data?.profile?.id as string | undefined;
+                        if (profileId) {
+                            this._push.syncExistingSubscription(profileId)
+                                .catch(error => console.warn('Push sync failed', error));
+                        }
                         this.checkRequestAccount(data);
                     } else {
                         this.isAutentificate$.next(false);
@@ -148,19 +158,21 @@ export class LoginService {
       this.isLoad$.next(true);
       let profile = data.data.profile;
       let view: IViewBusinessProfile[] = [];
-      view.push(profile);
+      if (profile) {
+        view.push(profile);
+      }
       let profileId = this.isProfileId();
       this.getAllBusinessProfile(profile?.id!, data.data.token!,
           profile?.userType!).subscribe(
           result => {
 
             if (result.code !== 404 && Array.isArray(result.data)) {
-              view.push(...result.data);
+              view.push(...result.data.filter((_: IViewBusinessProfile) => !!_));
             }
 
             if (profileId){
                 this.allProfiles$.next(view);
-                let tempProfile =  view.find((_:IViewBusinessProfile) => _.id === profileId);
+                let tempProfile =  view.find((_:IViewBusinessProfile) => _?.id === profileId);
                 if (tempProfile){
                     this.store$.dispatch(getActionStateMainProfileClient(
                         { tokenMainClient: data.data.token,
@@ -195,6 +207,77 @@ export class LoginService {
             if (data.code === 200) {
               this.checkRequestAccount(data);
     }});
+  }
+
+  /**
+   * Синхронно удаляет профиль из клиентского состояния после успешного DELETE.
+   * Повторная загрузка с сервера выполняется отдельно через updateProfileUA().
+   */
+  removeDeletedProfileFromClientState(
+    deletedProfileId: string,
+    preferredProfileId?: string,
+  ): IViewBusinessProfile | null {
+      const remainingProfiles = this.allProfiles$.value.filter(
+          profile => profile.id !== deletedProfileId,
+      );
+      this.allProfiles$.next(remainingProfiles);
+
+      const nextProfile =
+          remainingProfiles.find(profile => profile.id === preferredProfileId) ??
+          remainingProfiles.find(profile => profile.userType === UserType.User) ??
+          remainingProfiles[0] ??
+          null;
+
+      if (nextProfile?.id) {
+          const expiry = new Date();
+          expiry.setDate(expiry.getDate() + 365);
+          const token = this.cookieService.get('auth-token-ocpio');
+
+          this.cookieService.set('profileId-ocpio', nextProfile.id, expiry, '/');
+          this.mainCategoriesProfile$.next({profile: nextProfile, token});
+          this.store$.dispatch(getActionStateMainProfileClient({
+              tokenMainClient: token,
+              profileMainClient: nextProfile,
+          }));
+          this.store$.dispatch(requestAction({request: nextProfile.id}));
+      } else if (preferredProfileId) {
+          const expiry = new Date();
+          expiry.setDate(expiry.getDate() + 365);
+          this.cookieService.set('profileId-ocpio', preferredProfileId, expiry, '/');
+          this.mainCategoriesProfile$.next(null);
+          this.store$.dispatch(clearActiveProfileAction());
+      } else {
+          this.cookieService.delete('profileId-ocpio', '/');
+          this.cookieService.delete('profileId-ocpio');
+          this.mainCategoriesProfile$.next(null);
+          this.store$.dispatch(clearActiveProfileAction());
+      }
+
+      void this.clearApplicationCacheAfterProfileDeletion(deletedProfileId);
+      return nextProfile;
+  }
+
+  private async clearApplicationCacheAfterProfileDeletion(deletedProfileId: string): Promise<void> {
+      try {
+          if (typeof window !== 'undefined') {
+              for (const storage of [localStorage, sessionStorage]) {
+                  Object.keys(storage)
+                      .filter(key => key.includes(deletedProfileId))
+                      .forEach(key => storage.removeItem(key));
+              }
+          }
+      } catch {}
+
+      try {
+          if (typeof window !== 'undefined' && 'caches' in window) {
+              const cacheNames = await caches.keys();
+              await Promise.all(
+                  cacheNames
+                      .filter(cacheName => cacheName.startsWith('onwaves-cache-'))
+                      .map(cacheName => caches.delete(cacheName)),
+              );
+          }
+      } catch {}
   }
 
   /** После входа с лэндинга (URL `/landing`) уводим на основной экран приложения. */
@@ -235,12 +318,14 @@ export class LoginService {
           }
       } catch {}
 
-      try {
-          if ('serviceWorker' in navigator) {
-              const regs = await navigator.serviceWorker.getRegistrations();
-              await Promise.all(regs.map(reg => reg.unregister()));
-          }
-      } catch {}
+      // Service worker здесь НЕ разрегистрируется намеренно. Вместе с
+      // регистрацией браузер аннулирует push-подписку origin'а: endpoint в
+      // push_subscriptions становится мёртвым, отписаться от него бэкенд узнает
+      // только по 410 Gone, а UI до тех пор показывает канал подключённым
+      // (IsSubscribed = согласие AND строка в БД). Подписка привязана к
+      // устройству, а не к сессии: она переживает логаут, а при входе другого
+      // профиля upsert по endpoint на бэкенде перепривяжет её к нему.
+      // Кеши выше почищены — на push они не влияют.
   }
 
 }

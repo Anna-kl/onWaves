@@ -9,6 +9,8 @@ export interface IViewSchedule {
   isShowBreak?: boolean;
   isName?: boolean;
   period: number;
+  /** Пауза между заказами, минуты. 0 или нет поля — встык. */
+  gapAfterMinutes?: number;
 }
 
 export interface IPeriod{

@@ -2,50 +2,56 @@
   <!-- List start -->
   <div class="parent-grey-light">
     <div class="disp1 top170" >
-      <div class="cont-horiz-start-start wrap768"> 
+      <div class="cont-horiz-start-start wrap768">
         <!--- Левая колонка --->
         <section class="left-ba-profile">
         <app-column-baprofile [id]="businessProfile?.id!" ></app-column-baprofile>
-        </section> 
+        </section>
         <!-- Правая колонка start-->
-        <section class="w100"> 
-          <!-- Выбрать дату -->
-          <section  class="container-group-service margin-bottom10">
-            <article class="cont-horiz padding-top10 padding-bottom10 wrap768" style="gap: 10px 10px;">
-              <div class="cont-horiz" style="gap: 10px 10px;">
-                <!-- Счетчик услуг -->
-                <div class="count-uslugi-number">
-                  {{countService}}
-                </div>                
-                <div class="cont-horiz-start count-uslugi-shoose">
-                  услуги&nbsp;выбрано
-                </div> 
-              </div> 
-              <!-- Стоимость услуг -->
-              <div class="cont-horiz total-price-uslugi" >
-                {{getPriceString(chooseServices)}}₽
-              </div> 
-              <!-- Кнопка выбрать дату -->
-              <button (click)="chooseDate()" class="btn-uslugi-shoose-botton ">
-                <div class="btn-uslugi-shoose-data">
-                  {{getTextBtn()}}
+        <section class="w100">
+          <section #pickBar class="pick-bar" aria-live="polite">
+            <div class="pick-bar__row">
+              <div class="pick-bar__info">
+                <div class="pick-bar__count">
+                  <span class="pick-bar__badge" aria-hidden="true">{{ countService }}</span>
+                  <span class="pick-bar__count-text">{{ servicesWord }}</span>
                 </div>
-                <img src="/assets/img/ba-edit/ico-calendar-white.png" alt="">
+                <div class="pick-bar__meta">
+                  <span class="pick-bar__price" *ngIf="countService > 0">{{ selectionPrice }}</span>
+                  <span class="pick-bar__time" *ngIf="durationLabel">
+                    <svg class="pick-bar__time-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                      <circle cx="12" cy="12" r="8"/>
+                      <path d="M12 8v5l3 2" stroke-linecap="round"/>
+                    </svg>
+                    {{ durationLabel }}
+                  </span>
+                </div>
+              </div>
+              <button type="button"
+                      (click)="chooseDate()"
+                      class="pick-bar__cta"
+                      [disabled]="countService === 0"
+                      *ngIf="!businessProfile?.isPromo">
+                <span>{{ getTextBtn() }}</span>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <rect x="4" y="5" width="16" height="16" rx="3"/>
+                  <path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/>
+                </svg>
               </button>
-            </article>
-          </section>  
-          <!-- Список услуг -->
-          <section class="margin-top10 " style="margin-top: 140px;" *ngIf="businessProfile">
+            </div>
+          </section>
+          <section class="service-list-section" *ngIf="businessProfile">
             <article>
-              <app-accordion 
-                [isUpdate] = false 
+              <app-accordion
+                [isUpdate] = false
                 [profileId]="businessProfile.id!"
+                [serviceId]="preSelectedServiceId"
                 (setServices)="setService($event)">
               </app-accordion>
             </article>
           </section>
-        </section> 
+        </section>
       </div>
     </div> <!--disp1 END-->
-  </div> <!-- parent-grey-light END --> 
-</main>  
+  </div> <!-- parent-grey-light END -->
+</main>

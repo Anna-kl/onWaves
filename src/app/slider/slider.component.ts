@@ -159,6 +159,10 @@ export class SliderComponent {
   }
 
   getImageStyles(): { [key: string]: string } {
+    // На сервере (SSR) window отсутствует — отдаём десктопные стили по умолчанию.
+    if (typeof window === 'undefined') {
+      return {width: '250px', height: '250px', 'aspect-ratio': '1 / 1'};
+    }
     // Calculate image styles dynamically based on the screen width
     const width = window.innerWidth;
     if (width <= 640) {
@@ -171,6 +175,10 @@ export class SliderComponent {
   }
 
   getFontStyles(): { [key: string]: string } {
+    // На сервере (SSR) window отсутствует — шрифт по умолчанию (десктоп).
+    if (typeof window === 'undefined') {
+      return {};
+    }
     // Calculate font size dynamically based on the screen width
     const width = window.innerWidth;
     if (width <= 640) {

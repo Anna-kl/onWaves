@@ -1,35 +1,7 @@
-.autocomplete-container{ 
-  border-radius: 20px;
-}  
-.autocomplete-container, 
-.autocomplete-container .input-container input,
-.autocomplete-container .suggestions-container ul li  {
-  max-width: 320px;
-}
-.autocomplete-container .input-container input{
-  border-radius: 20px; 
-}
-.autocomplete-container.active .input-container input {
-  border-radius: 20px 20px 0px 0px; 
-}
-/*Select варинат круг*/
-li.item.ng-star-inserted {
-  /*height: 30px;*/
-} 
-.autocomplete-container .suggestions-container ul li {
-  position: relative;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  height: auto; 
-}
-li{
-  height: auto!important;
-}
-.item{
-  height: auto!important;
-}
+/* Стили ng-autocomplete удалены вместе с библиотекой: город выбирается
+   через app-city-autocomplete со своими (инкапсулированными) стилями.
+   Компонент рендерится с ViewEncapsulation.None, поэтому глобальные li{}
+   и .item{} тоже убраны — они текли на всю страницу. */
 .spisokListContainerR{
   display:grid;
   position: relative;
@@ -93,9 +65,6 @@ li{
   /*margin-left: 20px;
   margin-right: 20px; - 40px*/
   max-width: calc(100% );
-}
-.autocomplete-container .suggestions-container{
-  box-shadow:none;
 }
 .types-of-auditory, .type-sort{
   display: flex;

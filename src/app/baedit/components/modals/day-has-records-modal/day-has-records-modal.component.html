@@ -1,0 +1,35 @@
+<div class="w100 cont-horiz modal_540 day-has-records">
+  <div class="cont-vert-start-start day-has-records__box">
+    <h2 class="margin-bottom20">Этот день нельзя убрать</h2>
+    <div class="txt-green-light w100 margin-bottom20">
+      На {{ dateLabel }} уже есть записи. Сначала отмените их в журнале — иначе клиент останется без слота.
+    </div>
+
+    <div class="day-has-records__list w100 margin-bottom20" *ngIf="records.length; else noRecords">
+      <button
+        type="button"
+        class="day-has-records__row"
+        *ngFor="let sch of records"
+        (click)="goToRecord(sch)">
+        <div class="day-has-records__time">{{ recordTime(sch) }}</div>
+        <div class="day-has-records__body">
+          <b>{{ sch.name || 'Клиент' }}</b>
+          <span *ngIf="recordServices(sch)">{{ recordServices(sch) }}</span>
+        </div>
+        <span class="day-has-records__go">Отменить</span>
+      </button>
+    </div>
+    <ng-template #noRecords>
+      <div class="txt-green-light w100 margin-bottom20">
+        Откройте журнал и отмените записи за этот день.
+      </div>
+    </ng-template>
+
+    <div class="btn-green w100 cont-vert margin-bottom20" (click)="goToRecord()">
+      Перейти к записям
+    </div>
+    <div class="btn-white w100 cont-vert" (click)="stay()">
+      Понятно
+    </div>
+  </div>
+</div>

@@ -1,0 +1,95 @@
+@import 'src/assets/styles/main/color.scss';
+
+.day-has-records {
+  padding: 8px 4px 16px;
+}
+
+.day-has-records__box {
+  width: 100%;
+  max-width: 360px;
+}
+
+.day-has-records h2 {
+  color: $green-dark;
+  font-size: 22px;
+  line-height: 130%;
+}
+
+.day-has-records__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.day-has-records__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 16px;
+  background: $grey-light;
+  color: $black;
+  text-align: left;
+  cursor: pointer;
+}
+
+.day-has-records__row:active {
+  transform: scale(0.98);
+}
+
+.day-has-records__time {
+  flex: 0 0 auto;
+  min-width: 52px;
+  font-weight: 700;
+  color: $green-basic;
+}
+
+.day-has-records__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+
+  b,
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    color: $grey-dark;
+    font-size: 13px;
+  }
+}
+
+.day-has-records__go {
+  flex: 0 0 auto;
+  color: $green-light;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.btn-green,
+.btn-white {
+  cursor: pointer;
+  min-height: 50px;
+}
+
+@media (min-width: 768px) {
+  .day-has-records__row:hover {
+    box-shadow: 0 6px 16px rgba(4, 60, 72, 0.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day-has-records__row:active {
+    transform: none;
+  }
+}

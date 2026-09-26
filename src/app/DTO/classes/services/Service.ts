@@ -4,6 +4,7 @@ import {ServiceStatus} from "../../enums/serviceStatus";
 import {subGroup} from "../../views/services/IViewSubGroups";
 import {IViewImage} from "../../views/images/IViewImage";
 import { IPrice } from "../../views/services/IPrice";
+import { WorkLocationType } from "../../enums/workLocationType";
 
 export class Service implements subGroup{
   name: string;
@@ -23,6 +24,8 @@ export class Service implements subGroup{
   isChecked?: boolean;
   images?: IViewImage[];
   isTimeUnlimited?: boolean;
+  /** Характер услуги (backend 2026-07-19): один из форматов работы профиля. */
+  workLocationType?: WorkLocationType | null;
   constructor(id: string|null, name: string, gender: Gender[],profileUserId: string, price: IPrice,
               paymentForType: PaymentForType,groupServiceId: string|null,
               about?: string,  duration?: number, isTimeUnlimited?: boolean, categoryId?: number, isChecked?: boolean  ) {

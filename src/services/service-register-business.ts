@@ -1,6 +1,7 @@
 import {Injectable} from "@angular/core";
 import {BehaviorSubject, Observable, tap} from "rxjs";
-import {HttpClient, HttpEvent} from "@angular/common/http";
+import {HttpClient, HttpEvent, HttpHeaders} from "@angular/common/http";
+import {CookieService} from "ngx-cookie-service";
 import {environment} from "../enviroments/environment";
 import {IResponse} from "../app/DTO/classes/IResponse";
 
@@ -14,7 +15,8 @@ export class ServiceRegisterBusinessProfile {
   public getAllStreet$ = new BehaviorSubject<string[]>([]);
   public getAllCity$ = new BehaviorSubject<string[]>([]);
 
-  constructor(private  readonly http: HttpClient) {}
+  constructor(private  readonly http: HttpClient,
+              private readonly cookieService: CookieService) {}
 
   // страна
   public async getAllCountry(){
@@ -45,8 +47,16 @@ export class ServiceRegisterBusinessProfile {
       tap(res => this.getAllStreet$.next(res)));
   }
 
-  public save_avatar(id:string, formData: any): Observable<HttpEvent<IResponse>> {
+  /**
+   * Загрузка аватара профиля. Эндпоинт закрыт авторизацией, а глобального
+   * auth-интерцептора в проекте нет — токен обязателен, иначе бэк отвечает 401.
+   * При регистрации БА токен приходит из стора (профиль ещё не в куках).
+   */
+  public save_avatar(id:string, formData: any, token?: string): Observable<HttpEvent<IResponse>> {
+    const auth = token ?? this.cookieService.get('auth-token-ocpio');
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + auth);
     return this.http.post<IResponse>(`${this.uri}profiles/${id}/avatar`, formData, {
+      headers,
       reportProgress: true,
       observe: 'events',
     });

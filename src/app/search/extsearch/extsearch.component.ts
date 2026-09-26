@@ -40,6 +40,8 @@ export class ExtsearchComponent implements OnInit {
     private _build: FormBuilder,
     private _route: ActivatedRoute) {
     this.search = this._route.snapshot.queryParamMap.get('search');
+    // Возврат на страницу фильтров — город не теряется.
+    this.address = this._route.snapshot.queryParamMap.get('address') ?? '';
   }
 
   async ngOnInit() {
@@ -97,7 +99,7 @@ export class ExtsearchComponent implements OnInit {
         // сложные объекты можно сериализовать:
         gender: gender,
          geo: this.isNear ? this.geo : null,
-         address: this.address,
+         address: this.address ? this.address : null,
       }
     });
     }
@@ -119,16 +121,13 @@ export class ExtsearchComponent implements OnInit {
     }
   }
 
-  keyword = 'name';
-  data: any[] = [];
+  /** Справочник городов целиком; фильтрацию и рендер подсказок делает app-city-autocomplete. */
+  cities: string[] = [];
 
   public async getListCities(){
     (await this._serviceRegisterBusinessProfile.getCities())
-      .subscribe(_=> {
-        let index = this.data.length + 1;
-        _.forEach(item => {
-          this.data.push({id: index, name: item, type: 'city'});
-        });
+      .subscribe(list => {
+        this.cities = list ?? [];
       });
   }
 
@@ -155,26 +154,9 @@ export class ExtsearchComponent implements OnInit {
   //     });
   // }
 
-  async selectEvent(item: any) {
-    this.address = item.name;
-
-  }
-
-  onChangeSearch(val: string) {
-    if (val.length > 0) {
-      if (this.data.find(_ => _.name.includes(val))) {
-        this._location.getAddress(val).subscribe(
-            result => {
-              let address = result;
-            }
-        );
-      }
-
-    }
-  }
-
-  onFocused(e: any){
-    // do something when input is focused
+  /** Город выбран (или очищен) в комбобоксе — держим его в фильтре до применения. */
+  onCityChange(city: string | null) {
+    this.address = city ?? '';
   }
 
   changeAll() {

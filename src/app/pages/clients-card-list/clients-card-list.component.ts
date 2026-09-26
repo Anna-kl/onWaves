@@ -1,11 +1,12 @@
 import {Component, ElementRef, Input, OnChanges, ViewChild} from '@angular/core';
+import { ToastService } from 'src/services/toast.service';
 
 
 import {IViewBusinessProfile} from "../../DTO/views/business/IViewBussinessProfile";
 
 import { Router } from '@angular/router';
 import {ProfileService} from "../../../services/profile.service";
-import {getAddressProfile, getAddressProfileStreet, prepareAddressProfile} from "../../../helpers/common/address";
+import {getAddressProfile, getAddressProfileStreet, prepareAddressProfile, formatWorkLocations} from "../../../helpers/common/address";
 import { addBreakOpportunitiesAfterPunctuation } from "../../../helpers/common/text-break.helpers";
 import {IViewAddress} from "../../DTO/views/IViewAddress";
 import {HistoryService} from "../../../services/history.service";
@@ -16,15 +17,17 @@ import {select, Store} from "@ngrx/store";
 import {selectProfileMainClient} from "../../ngrx-store/mainClient/store.select";
 import { FormControl } from '@angular/forms';
 import { ConfirmPopup } from 'primeng/confirmpopup';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { BestProductType } from 'src/app/DTO/enums/bestProductType';
+import { ExternalReviewSource } from 'src/app/DTO/enums/externalReviewSource';
+import { resolveAvatarUrl } from 'src/helpers/common/avatar1';
 
 
 @Component({
   selector: 'app-clients-card-list',
   templateUrl: './clients-card-list.component.html',
   styleUrls: ['./clients-card-list.component.css'],
-  providers:[ProfileService, HistoryService, ConfirmationService, MessageService]
+  providers:[ProfileService, HistoryService, ConfirmationService]
 })
 export class ClientsCardListComponent implements OnChanges {
 
@@ -94,7 +97,9 @@ export class ClientsCardListComponent implements OnChanges {
     }
   }
 
-  confirm(event: any, type: BestProductType|undefined) {
+  confirm(event: MouseEvent, type: BestProductType|undefined) {
+    event.preventDefault();
+    event.stopPropagation();
     let message = type == null ? 'Лучший' : this.getNameofBest(type);
     
     this.positionPopup[0] = `${event.pageY}px`;
@@ -108,20 +113,31 @@ export class ClientsCardListComponent implements OnChanges {
     });
   }
 
-
-  /** Функция получает список левого меню. */
-
-
-    goToProfile(business: IViewBusinessProfile) {
-    if (this.auth) {
-      this._history.saveViewCard(this.auth?.id!, business.id!).subscribe(
-          res => {
-          }
-      );
+    /**
+     * Команды routerLink для карточки мастера.
+     * В SSR это становится href="/slug" — то, что Google считает внутренней ссылкой.
+     */
+    profileCommands(business: IViewBusinessProfile): string[] {
+      return ['/', this.profileSegment(business)];
     }
-      this.router.navigate(['/', business.link ? business.link : business.id]);
-     //this.router.navigate(['profileba']);
-   }
+
+    /**
+     * Сегмент публичного URL: сохранённый `link`, иначе id.
+     * Полные URL и мусор в `link` отбрасываем — каноникал страницы профиля
+     * тоже берёт только «чистый» сегмент без / ? # : и пробелов.
+     */
+    private profileSegment(business: IViewBusinessProfile): string {
+      const stored = (business.link ?? '').trim();
+      const isPlainSegment = !!stored && !/[\/:?#\s]/.test(stored);
+      return isPlainSegment ? stored : (business.id ?? '');
+    }
+
+    /** История просмотра — навигацию даёт href/routerLink, не этот обработчик. */
+    onProfileNavigate(business: IViewBusinessProfile): void {
+      if (this.auth?.id && business.id) {
+        this._history.saveViewCard(this.auth.id, business.id).subscribe();
+      }
+    }
       goToProfileBA(business: IViewBusinessProfile) {
         this.router.navigate(['/profilebisacc', business.id]);
       //this.router.navigate(['profileba']);
@@ -147,14 +163,26 @@ export class ClientsCardListComponent implements OnChanges {
   //   return mainCategory[0];
   // }
 
-  getAvatar(avatar: any) {
-      if (avatar) {
-        return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
-      } else {
-        return  '/assets/img/onwaves/user.png';
-      }
+  getAvatar(avatarUrl: string | null | undefined) {
+    return resolveAvatarUrl(avatarUrl);
   }
 
     protected readonly getAddressProfileStreet = getAddressProfileStreet;
     protected readonly BestProductType = BestProductType;
+    protected readonly ExternalReviewSource = ExternalReviewSource;
+
+    /** Есть ли у профиля собственные отзывы/рейтинг на платформе. */
+    hasOwnReviews(business: IViewBusinessProfile): boolean {
+      return !!business.rating || !!business.countReviews;
+    }
+
+    /** Показывать ли внешний рейтинг (свой отсутствует, но есть внешний). */
+    hasExternalReviews(business: IViewBusinessProfile): boolean {
+      return !this.hasOwnReviews(business) && business.externalRating != null;
+    }
+
+    /** Плоский адрес по форматам работы (через запятую); фолбэк — address.city от бэка. */
+    addressText(business: IViewBusinessProfile): string {
+      return formatWorkLocations(business.workLocations) || (business.address?.city ?? '');
+    }
 }

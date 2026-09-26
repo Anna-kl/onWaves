@@ -1,0 +1,43 @@
+<div class="city-ac" [class.city-ac--open]="isOpen">
+  <input class="city-ac__input"
+         type="text"
+         autocomplete="off"
+         role="combobox"
+         aria-autocomplete="list"
+         [id]="inputId"
+         [attr.aria-expanded]="isOpen"
+         [attr.aria-controls]="listboxId"
+         [attr.aria-activedescendant]="isOpen && activeIndex >= 0 ? optionId(activeIndex) : null"
+         [placeholder]="placeholder"
+         [value]="query"
+         (input)="onInput($any($event.target).value)"
+         (keydown)="onKeydown($event)"
+         (blur)="onBlur()">
+
+  <!-- mousedown.preventDefault, иначе blur закроет список раньше click -->
+  <button type="button"
+          class="city-ac__clear"
+          *ngIf="query"
+          aria-label="Очистить город"
+          (mousedown)="$event.preventDefault()"
+          (click)="clear()">&times;</button>
+
+  <ul class="city-ac__list"
+      *ngIf="isOpen"
+      #listbox
+      role="listbox"
+      [id]="listboxId"
+      [attr.aria-label]="placeholder">
+    <li *ngFor="let city of suggestions; let i = index; trackBy: trackByCity"
+        class="city-ac__option"
+        role="option"
+        [id]="optionId(i)"
+        [class.city-ac__option--active]="i === activeIndex"
+        [attr.aria-selected]="i === activeIndex"
+        (mousedown)="$event.preventDefault()"
+        (mouseenter)="activeIndex = i"
+        (click)="select(city)">{{ city }}</li>
+
+    <li class="city-ac__empty" role="presentation" *ngIf="notFound">Города не найдены</li>
+  </ul>
+</div>

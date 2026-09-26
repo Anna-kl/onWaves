@@ -1,14 +1,17 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { CookieService } from 'ngx-cookie-service';
 import { finalize, Observable, switchMap, throwError } from 'rxjs';
 import { Record } from '../../../DTO/classes/records/record';
 import { IResponse } from '../../../DTO/classes/IResponse';
 import { IViewAuthProfile } from '../../../DTO/views/profile/IViewAuthProfile';
 import { AuthServices } from '../../../components/modals/services/auth.service';
 import { RecordService } from '../../../../services/record.service';
-import { ConsentService } from '../../../../services/consent.service';
-import { LoginService } from '../../../auth/login.service';
+import { QuickSessionService } from '../../../../services/quick-session.service';
+import { AnalyticsService } from '../../../../services/analytics.service';
+import { WelcomeCouponService } from '../../../../services/welcome-coupon.service';
+import { formatAmount, formatRub, welcomeReasonText } from '../../../../helpers/common/welcome-coupon';
+import { WelcomeQuote } from '../../../DTO/views/promo/welcome-coupon';
+import { quoteDraftComment, readCellingsQuoteDraft } from '../../helpers/cellings-offer';
 
 /**
  * Финальный шаг записи для неавторизованного гостя: имя + телефон, лёгкая
@@ -20,7 +23,7 @@ import { LoginService } from '../../../auth/login.service';
   styleUrls: ['./booking-contact-modal.component.scss'],
   providers: [AuthServices, RecordService],
 })
-export class BookingContactModalComponent {
+export class BookingContactModalComponent implements OnInit {
   /** Id профиля мастера (БА) для POST records/add-user/{id}. */
   @Input() masterId!: string;
   /** Запись без clientId — проставляется после лёгкой регистрации. */
@@ -29,6 +32,22 @@ export class BookingContactModalComponent {
   @Input() summaryTitle = '';
   /** Текст блока «Ваш выбор»: дата и время записи. */
   @Input() summaryWhen = '';
+  /** Расчёт купона с экрана подтверждения; null — купон не применяется. */
+  @Input() couponQuote: WelcomeQuote | null = null;
+
+  /** Строка про купон в сводке. Суммы пришли с сервера, здесь только показ. */
+  get couponLine(): string | null {
+    const quote = this.couponQuote;
+    if (!quote) {
+      return null;
+    }
+    const discount = quote.couponStatus === 'available' ? quote.discountAmount : quote.potentialDiscount;
+    if (discount <= 0) {
+      return null;
+    }
+    return `Купон будет применён: −${formatRub(discount)} · к оплате `
+      + formatAmount(quote.payableAmount, quote.amountIsFrom);
+  }
 
   step: 'form' | 'done' = 'form';
   submitting = false;
@@ -37,30 +56,59 @@ export class BookingContactModalComponent {
 
   name = '';
   phone = '';
+  nameTouched = false;
+  phoneTouched = false;
+  submitAttempted = false;
   agree = true;
   notifyConsent = true;
-
-  private consentTextVersion = '';
 
   constructor(
     public activeModal: NgbActiveModal,
     private _auth: AuthServices,
     private _records: RecordService,
-    private _consent: ConsentService,
-    private _cookie: CookieService,
-    private _login: LoginService,
-  ) {
-    this._consent.getTextVersions().subscribe(versions => {
-      this.consentTextVersion = versions?.[0] ?? '';
-    });
+    private _session: QuickSessionService,
+    private _analytics: AnalyticsService,
+    private _welcome: WelcomeCouponService,
+  ) {}
+
+  ngOnInit(): void {
+    const draft = readCellingsQuoteDraft();
+    if (!draft) {
+      return;
+    }
+    if (draft.name) {
+      this.name = draft.name;
+    }
+    if (draft.phone) {
+      this.phone = draft.phone;
+    }
+    const extra = quoteDraftComment(draft);
+    if (extra && this.record) {
+      this.record.comment = [this.record.comment, extra].filter(Boolean).join('\n');
+    }
   }
 
   get isFormValid(): boolean {
-    const digits = this.phone.replace(/\D/g, '');
-    return this.name.trim().length >= 2 && digits.length === 10 && this.agree;
+    return !this.nameError && !this.phoneError && this.agree;
+  }
+
+  get nameError(): string | null {
+    const value = this.name.trim();
+    const letters = value.match(/[A-Za-zА-Яа-яЁё]/g)?.length ?? 0;
+    const validCharactersAndSeparators = /^[A-Za-zА-Яа-яЁё]+(?:[ -][A-Za-zА-Яа-яЁё]+)*$/.test(value);
+    return letters >= 2 && validCharactersAndSeparators
+      ? null
+      : 'Введите минимум две буквы. Допустимы пробел и дефис.';
+  }
+
+  get phoneError(): string | null {
+    return QuickSessionService.normalizePhone(this.phone)
+      ? null
+      : 'Введите корректный российский номер телефона.';
   }
 
   submit(): void {
+    this.submitAttempted = true;
     if (!this.isFormValid || this.submitting) {
       return;
     }
@@ -75,6 +123,14 @@ export class BookingContactModalComponent {
       next: result => {
         if (result.code === 201 || result.code === 202) {
           this.step = 'done';
+          // Конверсия: услуга заказана (гость). Цель Метрики add_record.
+          this._analytics.trackEvent('booking', 'add_record', this.masterId);
+          const applied = result.data?.coupon as WelcomeQuote | null | undefined;
+          if (applied) {
+            this._welcome.track('booked', applied.campaignCode, applied.discountAmount);
+          }
+        } else if (result.code === 409 && result.data?.couponReason) {
+          this.onCouponRefused(result);
         } else {
           this.setError();
         }
@@ -91,16 +147,21 @@ export class BookingContactModalComponent {
     this.activeModal.dismiss();
   }
 
+  /**
+   * «Изменить»: закрываем форму и просим opener вернуть гостя к календарю,
+   * сохранив текущий выбор (услуга + дата/время). Отличаем от простого закрытия
+   * причиной 'edit' в reject-хендлере modalRef.result.
+   */
+  edit(): void {
+    this.activeModal.dismiss('edit');
+  }
+
   finish(): void {
     this.activeModal.close();
   }
 
   private registerAndSaveRecord(): Observable<IResponse> {
-    let digits = this.phone.replace(/\D/g, '');
-    if (digits.length === 11 && (digits[0] === '7' || digits[0] === '8')) {
-      digits = digits.substring(1);
-    }
-    const phone = `7${digits}`;
+    const phone = QuickSessionService.normalizePhone(this.phone)!;
     return this._auth.quickRegister({ phone, name: this.name.trim() }).pipe(
       switchMap(result => {
         if (result.code !== 200 && result.code !== 201) {
@@ -113,29 +174,34 @@ export class BookingContactModalComponent {
     );
   }
 
-  /** Кладём куки сессии и подтягиваем профиль/стор — как при входе через ModalEnterDataComponent. */
+  /** Сессия гостя — как при входе через ModalEnterDataComponent; запись получает clientId. */
   private applyAuth(auth: IViewAuthProfile, phone: string): void {
-    const expiry = new Date();
-    expiry.setDate(expiry.getDate() + 365);
-    this._cookie.set('auth-token-ocpio', auth.token, expiry, '/');
+    this._session.apply(auth.token, auth.profileUserId, phone, this.notifyConsent);
     if (auth.profileUserId) {
-      this._cookie.set('profileId-ocpio', auth.profileUserId, expiry, '/');
       this.record.clientId = auth.profileUserId;
     }
+  }
 
-    if (this.notifyConsent && this.consentTextVersion) {
-      this._consent.sendConsentBulk({
-        profileUserId: auth.profileUserId ?? null,
-        phone,
-        channels: null,
-        isGranted: true,
-        consentTextVersion: this.consentTextVersion,
-        source: 'registration',
-      }).subscribe();
+  /**
+   * Сервер не применил купон и запись не создал. Ничего не гадаем: показываем причину сервера
+   * и по «Повторить» отправляем запись без скидки (или с новой суммой, если она изменилась).
+   */
+  private onCouponRefused(result: IResponse): void {
+    const reason = result.data?.couponReason as string;
+    const quote = result.data?.quote as WelcomeQuote | null | undefined;
+    this._welcome.track('refused', quote?.campaignCode);
+    if (reason === 'amount_changed' && quote) {
+      this.record.expectedCouponDiscount = quote.discountAmount;
+      // Сводка должна показать новую сумму, а не ту, что клиент видел до отказа.
+      this.couponQuote = quote;
+      this.errorMessage = `Сумма скидки изменилась: теперь ${formatRub(quote.discountAmount)}. Нажмите «Повторить», чтобы подтвердить запись.`;
+      return;
     }
-
-    this._login.isAutentificate$.next(true);
-    this._login.updateProfileUA();
+    this.record.useWelcomeCoupon = false;
+    this.record.expectedCouponDiscount = null;
+    // Купон не применится — убираем обещание из сводки, иначе оно спорит с текстом ошибки.
+    this.couponQuote = null;
+    this.errorMessage = `${welcomeReasonText(reason)} Нажмите «Повторить», чтобы записаться без скидки.`;
   }
 
   private setError(): void {

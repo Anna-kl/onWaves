@@ -146,11 +146,24 @@ export function generateCalendar(year: number, month: number){
   return days;
 }
 
-export function comparisonDate(date:string|Date, year: number, month: number, day: number){
-  date = new Date(date);
+/**
+ * Бэк размечает календарный день как полночь бизнес-таймзоны (Europe/Moscow), но
+ * отдаёт это абсолютным инстантом с offset-нотацией (`...T03:00:00+03:00`, он же
+ * `...T00:00:00Z`). Локальные геттеры Date (getFullYear/getMonth/getDate) читают
+ * календарный день в таймзоне БРАУЗЕРА — у клиента западнее UTC (например UTC−4)
+ * тот же инстант оказывается предыдущим днём. UTC-компоненты инстанта совпадают
+ * с намерением бэка независимо от таймзоны клиента — их и нужно читать.
+ */
+export function toBusinessCalendarDate(value: string | Date): Date {
+  const d = value instanceof Date ? value : new Date(value);
+  return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0);
+}
 
-  return !(date.getFullYear() === year && date.getMonth() === month
-      && date.getDate() === day);
+export function comparisonDate(date:string|Date, year: number, month: number, day: number){
+  const d = toBusinessCalendarDate(date);
+
+  return !(d.getFullYear() === year && d.getMonth() === month
+      && d.getDate() === day);
 
 }
 
@@ -260,4 +273,12 @@ export function formatDateToString(date: Date): string {
   const year = date.getFullYear();                            // 2025
 
   return `${day}.${month}.${year}`;
+}
+
+/** Формат, который RecordsController парсит ParseExact: "dd.MM.yyyy, HH:mm:ss". */
+export function formatDateTimeForApi(date: Date = new Date()): string {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${formatDateToString(date)}, ${hours}:${minutes}:${seconds}`;
 }

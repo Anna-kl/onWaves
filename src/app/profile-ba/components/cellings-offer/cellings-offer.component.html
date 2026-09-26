@@ -1,0 +1,116 @@
+<section class="co" aria-label="Натяжные потолки">
+  <div class="co-card">
+    <div class="co-visual" *ngIf="coverUrl">
+      <img
+        class="co-cover"
+        [src]="coverUrl"
+        width="800"
+        height="520"
+        alt="Натяжной потолок — работа мастера"
+        [attr.fetchpriority]="'high'"
+        (error)="onCoverError()">
+    </div>
+
+    <div class="co-body">
+      <h1 class="co-title">Натяжные потолки</h1>
+      <p class="co-geo" *ngIf="citiesLine">{{ citiesLine }}</p>
+      <p class="co-lead">Считаем потолок вместе с освещением до начала работ.</p>
+
+      <p class="co-price" *ngIf="priceText">{{ priceText }}</p>
+      <p class="co-price-note">
+        <ng-container *ngIf="priceText">Ориентир по прайсу. </ng-container>
+        Точная стоимость — после замера. Замер и расчёт бесплатно.
+      </p>
+
+      <div class="co-master" *ngIf="profile">
+        <img
+          class="co-master__avatar"
+          [src]="avatarUrl"
+          width="56"
+          height="56"
+          [alt]="masterName"
+          (error)="onAvatarError($event)">
+        <div class="co-master__text">
+          <div class="co-master__name">{{ masterName }}</div>
+          <div class="co-master__meta">
+            <span *ngIf="rating">★ {{ rating }}</span>
+            <span *ngIf="reviewsCount">{{ reviewsCount }} отзывов</span>
+            <span *ngIf="experienceText">{{ experienceText }}</span>
+          </div>
+          <div class="co-master__badge">Профиль на Onwaves</div>
+        </div>
+      </div>
+
+      <div class="co-actions">
+        <a class="co-btn co-btn--primary" href="#quote" (click)="onQuoteStart($event)">Получить расчёт</a>
+        <a
+          class="co-btn co-btn--ghost"
+          href="#"
+          (click)="onMeasurementStart($event)">Записаться на замер</a>
+      </div>
+      <p class="co-note">Расчёт бесплатно · без обязательств</p>
+    </div>
+  </div>
+
+  <form class="co-form" id="quote" (ngSubmit)="submitQuote()" novalidate>
+    <h2 class="co-form__title">Получить расчёт</h2>
+    <p class="co-form__lead">Имя, телефон и город — мастер перезвонит и посчитает.</p>
+
+    <label class="co-field">
+      <span>Имя</span>
+      <input
+        type="text"
+        name="quoteName"
+        autocomplete="given-name"
+        placeholder="Как к вам обращаться"
+        [(ngModel)]="name"
+        (blur)="nameTouched = true">
+      <em *ngIf="(nameTouched || submitAttempted) && nameError">{{ nameError }}</em>
+    </label>
+
+    <label class="co-field">
+      <span>Телефон</span>
+      <span class="co-phone">
+        <span class="co-phone__cc">+7</span>
+        <input
+          class="co-phone__input"
+          type="tel"
+          name="quotePhone"
+          inputmode="numeric"
+          autocomplete="tel"
+          placeholder="(___) ___-__-__"
+          mask="(000) 000-00-00"
+          [(ngModel)]="phone"
+          (blur)="phoneTouched = true">
+      </span>
+      <em *ngIf="(phoneTouched || submitAttempted) && phoneError">{{ phoneError }}</em>
+    </label>
+
+    <fieldset class="co-field">
+      <legend>Город</legend>
+      <div class="co-cities">
+        <button
+          type="button"
+          class="co-chip"
+          *ngFor="let item of cities"
+          [class.co-chip--on]="city === item"
+          (click)="selectCity(item)">{{ item }}</button>
+      </div>
+      <em *ngIf="(cityTouched || submitAttempted) && cityError">{{ cityError }}</em>
+    </fieldset>
+
+    <label class="co-field">
+      <span>Площадь, м² <i>(необязательно)</i></span>
+      <input
+        type="text"
+        name="quoteArea"
+        inputmode="decimal"
+        placeholder="Например, 18"
+        [(ngModel)]="area">
+    </label>
+
+    <button class="co-btn co-btn--primary co-form__submit" type="submit">Отправить заявку</button>
+  </form>
+</section>
+
+<a class="co-sticky" *ngIf="showSticky" href="#quote" (click)="onQuoteStart($event)">Получить расчёт</a>

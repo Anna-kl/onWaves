@@ -1,0 +1,64 @@
+/**
+ * Модульная сборка Bootstrap 5.3 вместо готового bootstrap.min.css.
+ *
+ * Полный dist-файл — 232 803 байта (30 777 gzip) и определяет 2031 класс.
+ * Скан всех шаблонов и .ts (class="", [class.x], [ngClass], classList.*) дал
+ * 67 реально используемых. Остальное вырезано, но НЕ по одному лишь скану:
+ * ng-bootstrap рисует разметку в рантайме, поэтому модули, которые он может
+ * породить, оставлены независимо от результатов скана.
+ *
+ * Что подключено из @ng-bootstrap и что из-за этого обязано остаться:
+ *   NgbModal            -> modal
+ *   NgbDropdown         -> dropdown
+ *   NgbCollapse         -> transitions (.collapse / .collapsing живут там)
+ *
+ * Вырезанные модули и почему это безопасно:
+ *   tables, navbar, images, button-group, placeholders — ноль совпадений
+ *       в шаблонах, у ng-bootstrap таких компонентов нет;
+ *   carousel, spinners, toasts, breadcrumb — эти роли закрывает PrimeNG
+ *       (p-carousel, p-progressSpinner, p-toast, p-breadcrumb);
+ *   accordion — в проекте свои аккордеоны (assets/styles/main/accordion*.scss),
+ *       ngbPanelTitle нигде в разметке не встречается;
+ *   tooltip, popover — NgbTooltip/NgbPopover не импортируются, а класс
+ *       .tooltip описан своим файлом assets/styles/main/tooltip.scss;
+ *   alert, progress, list-group, pagination, offcanvas, close — ни одного
+ *       совпадения ни в шаблонах, ни среди импортов ng-bootstrap.
+ *
+ * ВАЖНО: reboot оставлен. Это базовый сброс, на который опираются все стили
+ * проекта, — его удаление поехало бы по типографике на каждой странице.
+ */
+
+// --- инфраструктура: переменные, функции, миксины (сама по себе ничего не печатает)
+@import "../node_modules/bootstrap/scss/functions";
+@import "../node_modules/bootstrap/scss/variables";
+@import "../node_modules/bootstrap/scss/variables-dark";
+@import "../node_modules/bootstrap/scss/maps";
+@import "../node_modules/bootstrap/scss/mixins";
+@import "../node_modules/bootstrap/scss/utilities";
+
+// --- база
+@import "../node_modules/bootstrap/scss/root";     // CSS-переменные --bs-*, нужны всему остальному
+@import "../node_modules/bootstrap/scss/reboot";   // базовый сброс
+@import "../node_modules/bootstrap/scss/type";     // .lead, .small
+
+// --- раскладка
+@import "../node_modules/bootstrap/scss/containers";  // .container, .container-fluid
+@import "../node_modules/bootstrap/scss/grid";        // .row, .col-*
+
+// --- компоненты, которые реально используются
+@import "../node_modules/bootstrap/scss/forms";       // .form-control, .form-check*, .form-label, .form-range
+@import "../node_modules/bootstrap/scss/buttons";     // .btn, .btn-primary/-secondary/-danger/-outline-danger
+@import "../node_modules/bootstrap/scss/transitions"; // .fade, .collapse, .collapsing  <- NgbCollapse
+@import "../node_modules/bootstrap/scss/dropdown";    // <- NgbDropdown
+@import "../node_modules/bootstrap/scss/nav";         // .nav-item
+@import "../node_modules/bootstrap/scss/card";        // .card, .card-header, .card-img
+@import "../node_modules/bootstrap/scss/badge";       // .badge
+@import "../node_modules/bootstrap/scss/modal";       // <- NgbModal
+
+// --- хелперы и утилиты
+// helpers держим целиком: там .visually-hidden, на который опирается
+// доступность ng-bootstrap, и .text-truncate; файл небольшой.
+@import "../node_modules/bootstrap/scss/helpers";
+// utilities/api генерирует .d-flex, .justify-content-*, .m-*, .p-*, .text-*,
+// .border*, .w-100 и прочее — из них в проекте используется 31 класс.
+@import "../node_modules/bootstrap/scss/utilities/api";

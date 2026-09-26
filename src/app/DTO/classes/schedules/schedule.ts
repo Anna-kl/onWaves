@@ -6,4 +6,6 @@ export interface Schedule {
   scheduleId: string;
   canAdd?: boolean;
   countNew?: number;
+  /** Сколько слотов вернёт ручка слотов на этот день. Приходит только когда в запрос передана услуга. */
+  freeSlotsCount?: number | null;
 }

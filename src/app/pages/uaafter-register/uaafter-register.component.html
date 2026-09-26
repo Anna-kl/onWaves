@@ -114,18 +114,21 @@
       </a>
     </div-->
     <!-- Последние посещения Start  -->
-     <div *ngIf="historyCards$|async as cardsH">
-    <div class="cont-horiz-start wrap padding-top80 margin-bottom30" >
-      <h3>Последние посещения</h3>
-    </div>
-  
-    <div class="cont-horiz-start-start wrap w100"> 
-      <app-clients-card-list [card-business]="cardsH"
-       class="list-align-start disp1 cont-horiz-start-start wrap" style="gap: 10px 4px;">
-      </app-clients-card-list>
-    </div>
+    <!-- Пустую историю не показываем: без проверки length заголовок висел
+         над пустым рядом у пользователей, которые ещё никого не смотрели. -->
+    <ng-container *ngIf="historyCards$|async as cardsH">
+      <div *ngIf="cardsH.length">
+        <div class="cont-horiz-start wrap padding-top80 margin-bottom30" >
+          <h3>Последние посещения</h3>
+        </div>
 
-     </div>
+        <div class="cont-horiz-start-start wrap w100">
+          <app-clients-card-list [card-business]="cardsH"
+           class="list-align-start disp1 cont-horiz-start-start wrap" style="gap: 10px 4px;">
+          </app-clients-card-list>
+        </div>
+      </div>
+    </ng-container>
     <!-- Последние посещения END  -->
       
     <!-- Популярное -->
@@ -135,50 +138,42 @@
 
     
     <!--Переключатель-->
-    <!-- partial:index.partial.html  display: flex;    justify-content: center;     align-items: center; -->
-    <div class="tabs padding-top40 padding-bottom40">      
+    <!-- Табы только переключают выборку (mode$ → isRecommend), список под ними
+         один. Раньше под каждый таб лежал свой #content-N: в первом список,
+         во втором — закомментированный, поэтому «Рядом» открывался пустым. -->
+    <div class="tabs padding-top40 padding-bottom40">
       <input type="radio" name="tab-btn" id="tab-btn-1" value="" checked>
       <label for="tab-btn-1" class="tab50" style="overflow: hidden;"
       (click)="changeCards(false)" >
         Рекомендуем
-      </label>      
+      </label>
       <input type="radio" name="tab-btn" id="tab-btn-2" value="">
       <label for="tab-btn-2" class="tab50" style=" margin-left: -60px;"
-      (click)="changeCards(false)">
+      (click)="changeCards(true)">
         Рядом
       </label>
-    
-      <div id="content-1">
-        <div class="cont-horiz-around wrap" *ngIf="cards$|async as cards; else loader1">
-          <!--Карточка 1 Start   <div class="parent-grey-light" > class="disp1 margin-left10 margin-right10 cont-horiz-start-start wrap"  style="gap: 10px 4px;" </div>--> 
-          <app-clients-card-list   [card-business]="cards" class="w100">
-          </app-clients-card-list> 
-          <div class="parent-grey-light cont-horiz" *ngIf="isListCardExpand$|async">
-            <div class="" style="max-width: 1200px; width: 100%; ">
-              <div class="txt-green-light" style="text-decoration: underline; text-align: right; cursor: pointer;" (click)="loadCards()">
-                Смотреть еще
-              </div>
-            </div>
-          </div> 
-        </div><!-- Популярное END left-right20 margin-bottom: 50px;-->
-         <ng-template #loader1>
-            <app-loader-on-waves></app-loader-on-waves>
-     </ng-template>
+    </div>
+
+    <div class="cont-horiz-around wrap margin-top50 padding-bottom40"
+         *ngIf="cards$|async as cards; else loader1">
+      <app-clients-card-list [card-business]="cards" class="w100">
+      </app-clients-card-list>
+      <div class="parent-grey-light cont-horiz catalog-more" *ngIf="hasMore$|async">
+        <div class="catalog-more__inner">
+          <div class="txt-green-light catalog-more__next" (click)="loadMore()">
+            Смотреть еще
+          </div>
+        </div>
       </div>
-      <div id="content-2">
-        <div class="cont-horiz-around wrap">
-          <!--Карточка 1 Start   <div class="parent-grey-light" > class="disp1 margin-left10 margin-right10 cont-horiz-start-start wrap"  style="gap: 10px 4px;" </div>--> 
-          <!-- <app-clients-card-list [card-business]="_apiCards.cards$" *ngIf="!isRecommend"
-           class="w100">
-          </app-clients-card-list>  -->
-          <div class="parent-grey-light cont-horiz" *ngIf="hasMore$|async">
-            <div class="" style="max-width: 1200px; width: 100%; ">
-              <div class="txt-green-light" style="text-decoration: underline; text-align: right; cursor: pointer;" (click)="loadMore()">
-                Смотреть еще
-              </div>
-            </div>
-          </div> 
-        </div><!-- Популярное END left-right20 margin-bottom: 50px;-->
+    </div><!-- Популярное END left-right20 margin-bottom: 50px;-->
+    <ng-template #loader1>
+      <app-loader-on-waves></app-loader-on-waves>
+    </ng-template>
+    <!-- Всегда в HTML, даже если пачка карточек ещё не пришла: это второй
+         уровень ссылок с главной, по которому робот находит все профили. -->
+    <div class="catalog-more padding-bottom40">
+      <div class="catalog-more__inner">
+        <a href="/catalog" class="txt-green-light catalog-more__all">Все мастера</a>
       </div>
     </div>
   </div><!-- partial -->

@@ -10,6 +10,7 @@ import { AppSignalRService } from './services/app-signalr.service';
 import { Store, select } from '@ngrx/store';
 import { selectProfileMainClient } from 'src/app/ngrx-store/mainClient/store.select';
 import { toLocaleTime } from 'src/helpers/dateUtils/dateUtils';
+import { resolveAvatarUrl } from 'src/helpers/common/avatar1';
 import { IMessage } from './views/IMessage';
 import { ISendMessage } from './views/ISendMessage';
 
@@ -68,12 +69,7 @@ export class ChatMainComponent implements OnInit, OnDestroy {
   }
 
   getAvatarMessage(message: ISendMessage) {
-    if (message.avatar) {
-      return  this.sanitizer
-      .bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${message.avatar}`);
-    } else {
-      return  '/assets/img/onwaves/user.png';
-    }
+    return resolveAvatarUrl(message.avatar);
   }
 
   messages$: Observable<ISendMessage[]> = new Observable();
@@ -181,12 +177,8 @@ export class ChatMainComponent implements OnInit, OnDestroy {
     if (chat.receiverId === this.receiverId && flag){
       this.isNewChat = false;
     }
-   
-    if (chat.avatar) {
-      return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${chat.avatar}`);
-    } else {
-      return  '/assets/img/onwaves/user.png';
-    }
+
+    return resolveAvatarUrl(chat.avatar);
   }
 
 }

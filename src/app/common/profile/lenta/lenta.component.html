@@ -11,7 +11,7 @@
   </p>
 
 <div class="cont-horiz" style="height: 100vh;" *ngIf="!posts">
-  <p-progressSpinner ></p-progressSpinner>
+  <span class="app-spinner"></span>
 </div>
 <app-commonLenta [posts]="posts!" *ngIf="posts" [id]="id"></app-commonLenta>
    <!-- <div class="w100 cont-vert border2px" *ngFor="let post of posts"

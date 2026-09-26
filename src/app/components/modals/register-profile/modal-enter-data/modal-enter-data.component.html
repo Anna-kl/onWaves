@@ -7,10 +7,10 @@
       <div class="cont-vert">
         <div *ngIf="phone.length > 0">
           <h3 class="margin-bottom10" style="text-align: center; font-size: 1.25rem;">
-            Введите 4 {{ smsSent ? 'цифры' : 'последние цифры номера' }}
+            {{ codeTitle }}
           </h3>
           <div class="margin-bottom30">
-            {{ smsSent ? 'которые мы отправили вам в SMS' : 'с которого сейчас поступил звонок' }}
+            {{ codeSubtitle }}
           </div>
         </div>
         <div *ngIf="email.length > 0">
@@ -26,39 +26,126 @@
         </div-->
         <!-- Прислать код повторно события -->
         <div class="cont-horiz margin-bottom25" >
-          <input class="sms" id="sms1" type="number"  maxlength="1" placeholder="0" formControlName="a1" (input)="setCell(0); validateInput($event, 0)" [disabled]="!flagError" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
-          <input class="sms" id="sms2" type="number"  maxlength="1" placeholder="0" formControlName="a2" (input)="setCell(1); validateInput($event, 1)" [disabled]="!flagError" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
-          <input class="sms" id="sms3" type="number"  maxlength="1" placeholder="0" formControlName="a3" (input)="setCell(2); validateInput($event, 2)" [disabled]="!flagError" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
-          <input class="sms" id="sms4" type="number"  maxlength="1" placeholder="0" formControlName="a4" (input)="setCell(3); validateInput($event, 3)" [disabled]="!flagError" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
+          <input class="sms" id="sms1" type="number"  maxlength="1" placeholder="0" formControlName="a1" (input)="setCell(0); validateInput($event, 0)" [disabled]="isMaxWaiting" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
+          <input class="sms" id="sms2" type="number"  maxlength="1" placeholder="0" formControlName="a2" (input)="setCell(1); validateInput($event, 1)" [disabled]="isMaxWaiting" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
+          <input class="sms" id="sms3" type="number"  maxlength="1" placeholder="0" formControlName="a3" (input)="setCell(2); validateInput($event, 2)" [disabled]="isMaxWaiting" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
+          <input class="sms" id="sms4" type="number"  maxlength="1" placeholder="0" formControlName="a4" (input)="setCell(3); validateInput($event, 3)" [disabled]="isMaxWaiting" [style.box-shadow]="flagError ? '2px 2px 10px 2px rgba(209, 55, 3, 0.5)' : ''" [style.color]="flagError ? '#E24414' : ''">
         </div>
         <small id="passwordHelp" class="cont-horiz text-danger margin-bottom25" *ngIf="flagError" style="color: #E24414" >
           {{textError}}
         </small>
-        <div class="cont-horiz-around w100 margin-bottom30" *ngIf="phone.length > 0"> 
-          <div>Нет звонка? </div>
-          <a class="margin-bottom40" (click)="enterEmail()" class="txt-green-light" style="text-decoration: underline;"> 
-            Войти, используя почту
-          </a>
-        </div> 
-        <div class="cont-horiz-around w100 margin-bottom30" *ngIf="email.length > 0"> 
+        <div class="cont-horiz-around w100 margin-bottom30" *ngIf="email.length > 0">
           <div>Не приходит код? </div>
-          <a class="margin-bottom40" (click)="enterEmail()" class="txt-green-light" style="text-decoration: underline;"> 
+          <a class="margin-bottom40" (click)="enterEmail()" class="txt-green-light" style="text-decoration: underline;">
             Войти с помощью телефона
           </a>
-        </div> 
-        <div class="cont-horiz-around w100 margin-bottom30"  *ngIf="phone.length > 0">
-          <div *ngIf="secondsLeft != 1">Получить SMS через: {{secondsLeft}}</div>
-          <a *ngIf="secondsLeft === 1" (click)="sendSms()" class="txt-green-light" style="text-decoration: underline;">
-            Отправить SMS с кодом
-          </a>
         </div>
+
         <button
-          class="button-text cont-vert margin-bottom40"
+          class="button-text cont-vert margin-bottom25"
           [ngClass]="checkCode ? 'btn-green' : 'btn-gray'"
           (click)="next()"
-          [disabled]="!checkCode">
+          [disabled]="!checkCode || isMaxWaiting">
           Подтвердить
         </button>
+
+        <!-- Запасной flash-call: Plusofon часто рапортует успех, а звонок не доходит. -->
+        <div class="zvonok w100" *ngIf="phone.length > 0">
+          <p class="zvonok__text">
+            Бывают проблемы со звонком — код не доходит.
+            Чтобы этого не было, авторизуйтесь через zvonok.ru.
+          </p>
+          <button type="button"
+                  class="zvonok__btn"
+                  [class.is-done]="zvonokSent"
+                  [disabled]="zvonokSending"
+                  (click)="sendZvonok()">
+            <span class="zvonok__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M8.2 4.8h2.1l.9 2.3-1.3 1.3a12.4 12.4 0 0 0 5.7 5.7l1.3-1.3 2.3.9v2.1a1.8 1.8 0 0 1-1.9 1.8C10.4 17.4 6.6 13.6 6.4 6.7A1.8 1.8 0 0 1 8.2 4.8Z"
+                      stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="zvonok__label">{{ zvonokHint }}</span>
+          </button>
+        </div>
+
+        <!-- Запасные каналы получения кода: MAX / SMS / Email -->
+        <div class="channels w100" *ngIf="phone.length > 0">
+          <div class="channels__head">
+            <span class="channels__rule"></span>
+            <span class="channels__title">Код не пришёл?</span>
+            <span class="channels__rule"></span>
+          </div>
+
+          <div class="channels__grid">
+            <!-- MAX: без привязки открывает бота, кнопку не выключаем -->
+            <button type="button"
+                    class="channel channel--max"
+                    [class.is-done]="maxSent"
+                    [class.is-wait]="isMaxWaiting"
+                    [disabled]="maxSending"
+                    (click)="sendToMax()">
+              <span class="channel__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 3.4c-4.85 0-8.8 3.25-8.8 7.25 0 2.32 1.33 4.39 3.4 5.72v3.36l3.3-1.77c.68.1 1.38.16 2.1.16 4.85 0 8.8-3.25 8.8-7.47S16.85 3.4 12 3.4Z"
+                        stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                  <path d="M8.6 13.7V9l3.4 2.9L15.4 9v4.7"
+                        stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="channel__name">MAX</span>
+              <span class="channel__hint">{{ maxHint }}</span>
+            </button>
+
+            <!-- SMS -->
+            <button type="button"
+                    class="channel channel--sms"
+                    [class.is-done]="smsSent"
+                    [disabled]="secondsLeft > 0 || smsSending"
+                    (click)="sendSms()">
+              <span class="channel__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4.8 4.5h14.4a2.3 2.3 0 0 1 2.3 2.3v7.4a2.3 2.3 0 0 1-2.3 2.3H11l-4.2 3v-3H4.8a2.3 2.3 0 0 1-2.3-2.3V6.8a2.3 2.3 0 0 1 2.3-2.3Z"
+                        stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                  <circle cx="8.3" cy="10.5" r="1.15" fill="currentColor"/>
+                  <circle cx="12" cy="10.5" r="1.15" fill="currentColor"/>
+                  <circle cx="15.7" cy="10.5" r="1.15" fill="currentColor"/>
+                </svg>
+              </span>
+              <span class="channel__name">SMS</span>
+              <span class="channel__hint">{{ smsHint }}</span>
+            </button>
+
+            <!-- Email -->
+            <button type="button"
+                    class="channel channel--email"
+                    (click)="enterEmail()">
+              <span class="channel__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="2.8" y="5" width="18.4" height="14" rx="3.2"
+                        stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M4.9 8.3l5.9 4.2c.72.52 1.68.52 2.4 0l5.9-4.2"
+                        stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="channel__name">Почта</span>
+              <span class="channel__hint">Войти по email</span>
+            </button>
+          </div>
+
+          <div class="channels__notice"
+               [class.is-error]="channelError"
+               *ngIf="channelNotice || (maxBotLink && isMaxWaiting)">
+            <span *ngIf="channelNotice">{{ channelNotice }}</span>
+            <button type="button"
+                    class="channels__link"
+                    *ngIf="maxBotLink && isMaxWaiting"
+                    (click)="copyMaxLink()">
+              {{ maxLinkCopied ? 'Ссылка скопирована' : 'Скопировать ссылку на бота' }}
+            </button>
+          </div>
+        </div>
       </div>
     </form>
   </div>

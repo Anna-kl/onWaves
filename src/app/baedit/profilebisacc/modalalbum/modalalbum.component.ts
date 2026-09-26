@@ -1,5 +1,6 @@
 
 // import {Component, Input, OnInit, ViewEncapsulation} from '@angular/core';
+import { ToastService } from 'src/services/toast.service';
 // import {AlbumsService} from "../../../../services/albums.service";
 // import {IAlbumWithFoto} from "../../../DTO/views/images/IAlbumWithFoto";
 // import {DomSanitizer} from "@angular/platform-browser";
@@ -78,9 +79,7 @@ import {IAlbumWithFoto} from "../../../DTO/views/images/IAlbumWithFoto";
 
 import {CropImageModalComponent} from "src/app/baedit/components/modals/crop-image-modal/crop-image-modal.component";
 import {IViewImage} from "../../../DTO/views/images/IViewImage";
-import {DomSanitizer} from "@angular/platform-browser";
-import {MessageService} from "primeng/api";
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
+import {DomSanitizer} from "@angular/platform-browser";import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 import {ShowFotoComponent} from "../../../common/modals/galereya/show-foto/show-foto.component";
 
@@ -89,7 +88,7 @@ import {ShowFotoComponent} from "../../../common/modals/galereya/show-foto/show-
      templateUrl: './modalalbum.component.html',
      styleUrls: ['./modalalbum.component.scss'],
      encapsulation: ViewEncapsulation.None,
-     providers: [AlbumsService, MessageService]
+     providers: [AlbumsService]
    })
 export class ModalAlbumComponent {
   @Input() albumId: string|null = null;
@@ -111,7 +110,7 @@ export class ModalAlbumComponent {
     private _apiImage: AlbumsService,
     private sanitizer: DomSanitizer,
     private backendService: BackendService,
-    private messageService: MessageService,
+    private messageService: ToastService,
     private modalService: NgbModal,
     private activeModal: NgbActiveModal
   ) {

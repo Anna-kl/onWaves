@@ -2,18 +2,21 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
+  Inject,
   Input,
   NgZone,
   OnChanges,
   OnDestroy,
+  Output,
+  PLATFORM_ID,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 import { FALLBACK_VIDEO_POSTER } from '../../../helpers/common/media.helpers';
-import { VideoPreloadService, VideoPreloadState, VideoPreloadStatus } from './video-preload.service';
 
-type PlayerState = VideoPreloadStatus | 'loading';
+type PlayerState = 'idle' | 'warming' | 'metadata' | 'ready' | 'loading' | 'playing' | 'error';
 
 @Component({
   selector: 'app-video-player',
@@ -27,242 +30,355 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
   @Input() warmup = true;
   @Input() autoplay = false;
   @Input() eager = false;
+  /** Клик по играющему ролику (не по нативным контролам) — открыть крупнее. */
+  @Input() expandable = false;
+  /**
+   * false — превью без воспроизведения: клик проходит насквозь, решение принимает карточка.
+   * Нужно там, где ролик не смотрят, а выбирают — например в сетке галереи кабинета.
+   */
+  @Input() interactive = true;
+  @Output() expand = new EventEmitter<void>();
+  /** Первый успешный старт ролика. Один раз на источник — повтор и пауза не считаются. */
+  @Output() started = new EventEmitter<void>();
 
-  @ViewChild('hostEl') private hostElRef!: ElementRef<HTMLElement>;
-  @ViewChild('videoEl') private videoRef!: ElementRef<HTMLVideoElement>;
+  @ViewChild('hostEl') private hostElRef?: ElementRef<HTMLElement>;
+  @ViewChild('videoEl') private videoRef?: ElementRef<HTMLVideoElement>;
 
   state: PlayerState = 'idle';
   hasFirstFrame = false;
+  /** Доля загруженного ролика в процентах; null — пока длительность неизвестна. */
+  loadedPercent: number | null = null;
 
+  private readonly isBrowser: boolean;
+  private browserInitialized = false;
+  private destroyed = false;
   private hasSource = false;
-  private viewReady = false;
   private pendingPlay = false;
+  private startReported = false;
+  private operationId = 0;
   private playAttempt?: Promise<void>;
   private warmupObserver?: IntersectionObserver;
-  private preloadSubscription?: Subscription;
-
-  private get v(): HTMLVideoElement {
-    return this.videoRef.nativeElement;
-  }
 
   get visiblePoster(): string | null {
     if (this.poster?.trim()) return this.poster.trim();
     return this.hasFirstFrame ? null : FALLBACK_VIDEO_POSTER;
   }
 
+  /** Текст под спиннером: с процентом, когда его можно посчитать. */
+  get loadingLabel(): string {
+    return this.loadedPercent === null
+      ? 'Видео загружается…'
+      : `Видео загружается… ${this.loadedPercent}%`;
+  }
+
+  get playLabel(): string {
+    if (!this.interactive) return 'Открыть видео';
+    if (this.state === 'error') return 'Повторить загрузку видео';
+    if (this.state === 'playing' && this.expandable) return 'Открыть видео';
+    return 'Воспроизвести видео';
+  }
+
   constructor(
-    private ngZone: NgZone,
-    private videoPreload: VideoPreloadService
-  ) {}
+    @Inject(PLATFORM_ID) platformId: object,
+    private ngZone: NgZone
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if ('url' in changes) {
-      if (this.viewReady) {
-        this.resetElementForNewUrl();
-      }
+      this.operationId++;
+      this.pendingPlay = false;
+      this.playAttempt = undefined;
+      this.hasFirstFrame = false;
+      this.loadedPercent = null;
+      // Сброс только здесь: повтор после ошибки — тот же ролик, второе событие не нужно.
+      this.startReported = false;
+      this.state = 'idle';
 
-      this.bindPreloadState();
-
-      if (this.viewReady) {
+      if (this.browserInitialized) {
+        this.resetMediaElement();
         this.observeForWarmup();
       }
+      return;
     }
 
-    if (this.viewReady && ('eager' in changes || 'warmup' in changes || 'autoplay' in changes)) {
+    if (this.browserInitialized && ('eager' in changes || 'warmup' in changes || 'autoplay' in changes)) {
       this.observeForWarmup();
     }
   }
 
   ngAfterViewInit(): void {
-    this.viewReady = true;
-    this.v.addEventListener('loadedmetadata', this.onLoadedMetadata);
-    this.v.addEventListener('loadeddata', this.onFrameAvailable);
-    this.v.addEventListener('canplay', this.onCanPlay);
-    this.v.addEventListener('error', this.onError);
+    // Angular Universal creates a DOM-like video node, but it is not an
+    // HTMLMediaElement. Media APIs must never be called during SSR.
+    if (!this.isBrowser || this.destroyed || !this.videoRef) return;
 
-    this.bindPreloadState();
+    this.browserInitialized = true;
+    const video = this.videoRef.nativeElement;
+    video.addEventListener('loadedmetadata', this.onLoadedMetadata);
+    video.addEventListener('loadeddata', this.onFrameAvailable);
+    video.addEventListener('canplay', this.onCanPlay);
+    video.addEventListener('playing', this.onPlaying);
+    video.addEventListener('pause', this.onPause);
+    video.addEventListener('error', this.onError);
+    video.addEventListener('progress', this.onProgress);
+    video.addEventListener('durationchange', this.onProgress);
+    video.addEventListener('timeupdate', this.onProgress);
+
     this.observeForWarmup();
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
+    this.operationId++;
     this.pendingPlay = false;
-    this.preloadSubscription?.unsubscribe();
-    this.warmupObserver?.disconnect();
-    if (!this.videoRef) return;
+    this.playAttempt = undefined;
+    this.disconnectObserver();
 
-    this.v.removeEventListener('loadedmetadata', this.onLoadedMetadata);
-    this.v.removeEventListener('loadeddata', this.onFrameAvailable);
-    this.v.removeEventListener('canplay', this.onCanPlay);
-    this.v.removeEventListener('error', this.onError);
+    if (!this.browserInitialized || !this.videoRef) return;
 
-    this.v.pause();
-    this.v.removeAttribute('src');
-    this.v.load();
+    const video = this.videoRef.nativeElement;
+    video.removeEventListener('loadedmetadata', this.onLoadedMetadata);
+    video.removeEventListener('loadeddata', this.onFrameAvailable);
+    video.removeEventListener('canplay', this.onCanPlay);
+    video.removeEventListener('playing', this.onPlaying);
+    video.removeEventListener('pause', this.onPause);
+    video.removeEventListener('error', this.onError);
+    video.removeEventListener('progress', this.onProgress);
+    video.removeEventListener('durationchange', this.onProgress);
+    video.removeEventListener('timeupdate', this.onProgress);
+    this.releaseMediaElement(video);
+    this.browserInitialized = false;
   }
 
   onPlayClick(event: Event): void {
+    // Превью без воспроизведения: событие не гасим, пусть его обработает карточка снаружи.
+    if (!this.interactive) return;
+
     event.preventDefault();
     event.stopPropagation();
-    if (this.state === 'loading' || this.state === 'playing') return;
-    if (!this.url?.trim()) return;
 
-    if (this.state === 'error') {
-      this.prepareRetry();
+    if (!this.browserInitialized || this.destroyed) return;
+
+    if (this.state === 'playing' && this.expandable) {
+      this.pausePlayback();
+      this.expand.emit();
+      return;
     }
 
-    if (!this.startWarmup()) {
-      this.state = 'error';
-      return;
+    if (this.state === 'loading' || this.state === 'playing') return;
+    if (!this.normalizedUrl) return;
+
+    if (this.state === 'error') {
+      this.resetMediaElement();
     }
 
     this.pendingPlay = true;
     this.state = 'loading';
+    if (!this.ensureSource(true)) {
+      this.fail('video-load-failed');
+      return;
+    }
+
     this.tryPlay();
   }
 
-  private bindPreloadState(): void {
-    this.preloadSubscription?.unsubscribe();
-    if (!this.url?.trim()) return;
-
-    this.preloadSubscription = this.videoPreload.getState(this.url).subscribe(state => {
-      this.ngZone.run(() => this.applyPreloadState(state));
-    });
+  pausePlayback(): void {
+    this.pendingPlay = false;
+    this.playAttempt = undefined;
+    const video = this.video;
+    if (video) {
+      try {
+        if (typeof video.pause === 'function') video.pause();
+      } catch {
+      }
+      video.controls = false;
+    }
+    if (this.state === 'playing' || this.state === 'loading') {
+      this.state = this.hasSource ? 'ready' : 'idle';
+    }
   }
 
-  private applyPreloadState(state: VideoPreloadState): void {
-    if (state.status === 'error') return;
+  private get normalizedUrl(): string {
+    return this.url?.trim() ?? '';
+  }
 
-    if (this.state !== 'loading' && this.state !== 'playing') {
-      this.state = state.status === 'playing' ? 'ready' : state.status;
-    }
+  private get video(): HTMLVideoElement | null {
+    return this.browserInitialized && this.videoRef ? this.videoRef.nativeElement : null;
   }
 
   private observeForWarmup(): void {
-    this.warmupObserver?.disconnect();
-    if (!this.viewReady || !this.url?.trim() || !this.warmup) return;
+    this.disconnectObserver();
+    if (!this.browserInitialized || this.destroyed || !this.normalizedUrl || !this.warmup) return;
 
     if (this.autoplay || this.eager) {
-      this.startWarmup();
+      this.ensureSource(this.autoplay || this.eager);
       return;
     }
 
-    if (!('IntersectionObserver' in window)) {
-      this.startWarmup();
+    if (typeof IntersectionObserver === 'undefined' || !this.hostElRef) {
+      this.ensureSource(false);
       return;
     }
 
-    this.warmupObserver = new IntersectionObserver(entries => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
+    this.ngZone.runOutsideAngular(() => {
+      this.warmupObserver = new IntersectionObserver(entries => {
+        if (!entries.some(entry => entry.isIntersecting)) return;
 
-      this.ngZone.run(() => this.startWarmup());
-      this.warmupObserver?.disconnect();
-    }, {
-      root: null,
-      rootMargin: '360px 0px',
-      threshold: 0.01
+        this.ngZone.run(() => this.ensureSource(false));
+        this.disconnectObserver();
+      }, {
+        root: null,
+        rootMargin: '240px 0px',
+        threshold: 0.01
+      });
+
+      this.warmupObserver.observe(this.hostElRef!.nativeElement);
     });
-
-    this.warmupObserver.observe(this.hostElRef.nativeElement);
   }
 
-  private startWarmup(): boolean {
-    if (!this.url?.trim()) return false;
-    if (this.hasSource) return true;
+  private disconnectObserver(): void {
+    this.warmupObserver?.disconnect();
+    this.warmupObserver = undefined;
+  }
 
-    this.hasSource = true;
-    this.v.preload = 'auto';
+  private ensureSource(forPlayback: boolean): boolean {
+    const video = this.video;
+    const url = this.normalizedUrl;
+    if (!video || !url || this.destroyed) return false;
 
-    if (this.v.getAttribute('src') !== this.url) {
-      this.v.src = this.url;
+    if (this.hasSource && video.getAttribute('src') === url) {
+      if (forPlayback) video.preload = 'auto';
+      return true;
     }
 
-    this.videoPreload.markWarming(this.url);
+    this.hasSource = true;
+    this.state = this.pendingPlay ? 'loading' : 'warming';
+    video.preload = forPlayback ? 'auto' : 'metadata';
 
     try {
-      this.v.load();
+      video.src = url;
+      this.safeLoad(video);
       return true;
     } catch {
       this.hasSource = false;
-      this.videoPreload.markError(this.url, 'video-load-failed');
       return false;
     }
   }
 
-  private prepareRetry(): void {
-    this.warmupObserver?.disconnect();
-    this.hasSource = false;
+  private resetMediaElement(): void {
+    this.operationId++;
+    this.disconnectObserver();
     this.pendingPlay = false;
     this.playAttempt = undefined;
-    this.state = 'idle';
-    this.v.controls = false;
-    this.v.pause();
-    this.v.removeAttribute('src');
-    this.v.load();
-  }
-
-  private resetElementForNewUrl(): void {
-    this.warmupObserver?.disconnect();
     this.hasSource = false;
     this.hasFirstFrame = false;
-    this.pendingPlay = false;
-    this.playAttempt = undefined;
+    this.loadedPercent = null;
     this.state = 'idle';
-    this.v.controls = false;
-    this.v.pause();
-    this.v.removeAttribute('src');
-    this.v.load();
+
+    const video = this.video;
+    if (!video) return;
+
+    video.controls = false;
+    this.releaseMediaElement(video);
+  }
+
+  private releaseMediaElement(video: HTMLVideoElement): void {
+    // Cleanup is deliberately tolerant: browsers and DOM emulators expose
+    // different subsets of HTMLMediaElement methods.
+    try {
+      if (typeof video.pause === 'function') video.pause();
+    } catch {
+    }
+
+    video.removeAttribute('src');
+    this.safeLoad(video);
+  }
+
+  private safeLoad(video: HTMLVideoElement): void {
+    try {
+      if (typeof video.load === 'function') video.load();
+    } catch {
+    }
   }
 
   private onLoadedMetadata = (): void => {
-    if (!this.url?.trim()) return;
-    this.videoPreload.markMetadata(this.url);
+    if (this.destroyed || !this.normalizedUrl) return;
+    if (!this.pendingPlay && this.state !== 'playing') this.state = 'metadata';
     this.playPendingIfNeeded();
-
-    if (this.poster?.trim()) return;
-    if (this.pendingPlay) return;
-
-    const video = this.v;
-    if (video.readyState >= video.HAVE_CURRENT_DATA) {
-      this.onFrameAvailable();
-      return;
-    }
-
-    if (Number.isFinite(video.duration) && video.duration > 0 && video.currentTime === 0) {
-      try {
-        video.currentTime = Math.min(0.001, video.duration / 2);
-      } catch {
-      }
-    }
   };
 
   private onFrameAvailable = (): void => {
-    if (!this.url?.trim()) return;
+    if (this.destroyed || !this.normalizedUrl) return;
     this.hasFirstFrame = true;
-    this.videoPreload.markFirstFrame(this.url);
+    if (!this.pendingPlay && this.state !== 'playing') this.state = 'ready';
     this.playPendingIfNeeded();
   };
 
   private onCanPlay = (): void => {
-    if (!this.url?.trim()) return;
+    if (this.destroyed || !this.normalizedUrl) return;
     this.hasFirstFrame = true;
-    this.videoPreload.markReady(this.url);
-    this.playPendingIfNeeded();
+    if (!this.pendingPlay && this.state !== 'playing') this.state = 'ready';
 
     if (this.autoplay && this.state !== 'playing') {
-      this.v.play().catch(() => {});
+      this.pendingPlay = true;
+      this.state = 'loading';
+    }
+    this.playPendingIfNeeded();
+  };
+
+  private onPlaying = (): void => {
+    if (this.destroyed) return;
+    this.pendingPlay = false;
+    this.state = 'playing';
+    const video = this.video;
+    if (video) video.controls = true;
+
+    if (!this.startReported) {
+      this.startReported = true;
+      this.started.emit();
     }
   };
 
-  private onError = (): void => {
-    if (!this.url?.trim()) return;
+  private onPause = (): void => {
+    if (this.destroyed || !this.hasSource || this.pendingPlay) return;
+    if (this.state === 'playing') this.state = 'ready';
+  };
 
-    this.ngZone.run(() => {
-      this.state = 'error';
-      this.hasSource = false;
-      this.pendingPlay = false;
-      this.playAttempt = undefined;
-      this.videoPreload.markError(this.url, this.describeMediaError());
-    });
+  /**
+   * Прогресс загрузки: сколько секунд ролика уже в буфере от текущей позиции.
+   * Это единственный измеримый признак «грузится, а не сломалось» — без него
+   * ожидание в 10+ секунд на медленной сети читается как отказ.
+   */
+  private onProgress = (): void => {
+    if (this.destroyed) return;
+    const percent = this.bufferedPercent();
+    if (percent === this.loadedPercent) return;
+    this.loadedPercent = percent;
+  };
+
+  private bufferedPercent(): number | null {
+    const video = this.video;
+    if (!video) return null;
+
+    const duration = video.duration;
+    if (!Number.isFinite(duration) || duration <= 0) return null;
+
+    const buffered = video.buffered;
+    if (!buffered || buffered.length === 0) return 0;
+
+    const position = video.currentTime;
+    let end = 0;
+    for (let i = 0; i < buffered.length; i++) {
+      if (buffered.start(i) <= position + 0.25) end = Math.max(end, buffered.end(i));
+    }
+
+    return Math.min(100, Math.max(0, Math.round((end / duration) * 100)));
+  }
+
+  private onError = (): void => {
+    if (this.destroyed || !this.normalizedUrl) return;
+    this.ngZone.run(() => this.fail(this.describeMediaError()));
   };
 
   private playPendingIfNeeded(): void {
@@ -271,35 +387,37 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   private tryPlay(): void {
-    if (!this.pendingPlay || this.playAttempt || !this.url?.trim()) return;
+    const video = this.video;
+    if (!video || !this.pendingPlay || this.playAttempt || !this.normalizedUrl) return;
 
-    this.playAttempt = this.v.play();
+    const operationId = this.operationId;
+    let playAttempt: Promise<void>;
+    try {
+      playAttempt = Promise.resolve(video.play());
+      this.playAttempt = playAttempt;
+    } catch {
+      this.fail('video-play-failed');
+      return;
+    }
 
-    this.playAttempt
+    playAttempt
       .then(() => {
-        this.ngZone.run(() => {
-          this.pendingPlay = false;
-          this.playAttempt = undefined;
-          this.state = 'playing';
-          this.v.controls = true;
-          this.videoPreload.markPlaying(this.url);
-        });
+        if (!this.isCurrentOperation(operationId)) return;
+        this.ngZone.run(() => this.onPlaying());
       })
-      .catch(error => {
+      .catch((error: unknown) => {
+        if (!this.isCurrentOperation(operationId)) return;
+
         this.ngZone.run(() => {
-          this.playAttempt = undefined;
+          const currentVideo = this.video;
+          if (!currentVideo || !this.pendingPlay) return;
 
-          if (!this.pendingPlay) return;
-
-          if (this.v.error) {
-            this.pendingPlay = false;
-            this.state = 'error';
-            this.hasSource = false;
-            this.videoPreload.markError(this.url, this.describeMediaError());
+          if (currentVideo.error) {
+            this.fail(this.describeMediaError());
             return;
           }
 
-          if (this.shouldWaitForPlayableData(error)) {
+          if (this.shouldWaitForPlayableData(error, currentVideo)) {
             this.state = 'loading';
             return;
           }
@@ -307,31 +425,39 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
           this.pendingPlay = false;
           this.state = this.hasSource ? 'ready' : 'idle';
         });
+      })
+      .finally(() => {
+        if (this.isCurrentOperation(operationId)) this.playAttempt = undefined;
       });
   }
 
-  private shouldWaitForPlayableData(error: unknown): boolean {
+  private isCurrentOperation(operationId: number): boolean {
+    return !this.destroyed && operationId === this.operationId;
+  }
+
+  private fail(_reason: string): void {
+    this.pendingPlay = false;
+    this.playAttempt = undefined;
+    this.hasSource = false;
+    this.loadedPercent = null;
+    this.state = 'error';
+  }
+
+  private shouldWaitForPlayableData(error: unknown, video: HTMLVideoElement): boolean {
     const name = error instanceof DOMException ? error.name : '';
     if (name === 'NotAllowedError' || name === 'NotSupportedError') return false;
-    if (this.v.readyState < this.v.HAVE_FUTURE_DATA) return true;
-
+    if (video.readyState < video.HAVE_FUTURE_DATA) return true;
     return name === 'AbortError';
   }
 
   private describeMediaError(): string {
-    const code = this.v.error?.code;
-
+    const code = this.video?.error?.code;
     switch (code) {
-      case MediaError.MEDIA_ERR_ABORTED:
-        return 'video-load-aborted';
-      case MediaError.MEDIA_ERR_NETWORK:
-        return 'video-network-error';
-      case MediaError.MEDIA_ERR_DECODE:
-        return 'video-decode-error';
-      case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-        return 'video-source-not-supported';
-      default:
-        return 'video-load-error';
+      case 1: return 'video-load-aborted';
+      case 2: return 'video-network-error';
+      case 3: return 'video-decode-error';
+      case 4: return 'video-source-not-supported';
+      default: return 'video-load-error';
     }
   }
 }

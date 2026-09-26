@@ -5,6 +5,7 @@ import {IGroupWithSubGroups} from "../../DTO/views/services/IGroupWithSubGroup";
 import {subGroup} from "../../DTO/views/services/IViewSubGroups";
 import {IViewAddress} from "../../DTO/views/IViewAddress";
 import {IViewBusinessProfile} from "../../DTO/views/business/IViewBussinessProfile";
+import {IWorkLocation} from "../../DTO/views/IWorkLocation";
 
 @Injectable()
 export class ProfileDataService {
@@ -15,6 +16,9 @@ export class ProfileDataService {
   private profileBA = new BehaviorSubject<IViewBusinessProfile|null>(null);
   private chooseService = new BehaviorSubject<subGroup[]>([]);
   private address = new BehaviorSubject<IViewAddress|null>(null);
+  private bookingAvailable = new BehaviorSubject<boolean>(false);
+  // Бэк отдаёт GET /work-location массивом (по одной записи на формат) — храним массив.
+  private workLocation = new BehaviorSubject<IWorkLocation[]>([]);
 
   sendId= this.id.asObservable();
   servicesProfile = this.service.asObservable();
@@ -23,6 +27,12 @@ export class ProfileDataService {
   sendAddress = this.address.asObservable();
   sendProfileBA = this.profileBA.asObservable();
   sendChooseServices = this.chooseService.asObservable();
+  canBook$ = this.bookingAvailable.asObservable();
+  sendWorkLocation = this.workLocation.asObservable();
+
+  transferWorkLocation(workLocations: IWorkLocation[] | null): void {
+    this.workLocation.next(workLocations ?? []);
+  }
   
   transferId(id: string): void{
     this.id.next(id);
@@ -52,6 +62,10 @@ export class ProfileDataService {
     this.chooseService.next(services);
   }
 
+  transferCanBook(canBook: boolean){
+    this.bookingAvailable.next(canBook);
+  }
+
   /** Сброс данных черновика записи (внутренняя «шина» между экранами выбора). */
   clearBookingState(): void {
     this.id.next(null);
@@ -61,5 +75,6 @@ export class ProfileDataService {
     this.profileBA.next(null);
     this.chooseService.next([]);
     this.address.next(null);
+    this.bookingAvailable.next(false);
   }
 }

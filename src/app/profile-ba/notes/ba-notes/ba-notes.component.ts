@@ -1,8 +1,11 @@
 import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import { ToastService } from 'src/services/toast.service';
 
 import {Router} from "@angular/router";
 
 import {DomSanitizer} from "@angular/platform-browser";
+import {resolveAvatarUrl} from "../../../../helpers/common/avatar1";
+import {recordLocationText} from "../../../../helpers/common/address";
 import {ScheduleService} from "../../../../services/schedule.service";
 import {RecordService} from "../../../../services/record.service";
 import {IViewScheduleBA} from "../../../DTO/views/schedule/IViewScheduleBA";
@@ -25,10 +28,11 @@ import { getColorLine, getStatusDone } from 'src/helpers/constant/notes';
 import { Renderer2 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { MessageService } from 'primeng/api';
+import { formatAmount, formatRub } from 'src/helpers/common/welcome-coupon';
 import { InsertPinCodeComponent } from 'src/app/components/modals/insert-pin-code/insert-pin-code.component';
 import { MessageNotificationService } from 'src/services/notification.service';
 import { StatusNotification } from 'src/app/DTO/enums/statusNotification';
+import { getMaxUrl, getSmsUrl, getTelUrl, getTelegramUrl } from 'src/helpers/common/messenger';
 
 
 
@@ -36,10 +40,47 @@ import { StatusNotification } from 'src/app/DTO/enums/statusNotification';
   selector: 'app-my-notes',
   templateUrl: './ba-notes.component.html',
   styleUrls: ['./ba-notes.component.scss'],
-  providers: [ScheduleService, RecordService, MessageService]
+  providers: [ScheduleService, RecordService]
 })
 export class BANotesComponent implements OnInit, OnDestroy {
   recordId: string|null = null;
+
+  // --- Связь с клиентом ---------------------------------------------------
+  // Мессенджер показываем, только если канал реально подключён, т.е. бэк прислал
+  // контакт клиента. Достраивать канал из номера нельзя: у MAX ссылки по номеру нет
+  // вовсе, а t.me/+7… у незарегистрированного открывает пустой чат — мастер решит,
+  // что написал, а сообщение никто не получит. Когда мессенджеров нет — SMS.
+
+  clientTelHref(sch: IViewScheduleBA): string {
+    return getTelUrl(sch.phone);
+  }
+
+  clientMaxHref(sch: IViewScheduleBA): string {
+    return getMaxUrl(sch.max);
+  }
+
+  clientTelegramHref(sch: IViewScheduleBA): string {
+    return getTelegramUrl(sch.telegram);
+  }
+
+  /** Фолбэк: показываем только когда не подключён ни один мессенджер. */
+  clientSmsHref(sch: IViewScheduleBA): string {
+    if (this.clientMaxHref(sch) || this.clientTelegramHref(sch)) return '';
+    return getSmsUrl(sch.phone);
+  }
+  protected readonly formatRub = formatRub;
+  protected readonly formatAmount = formatAmount;
+
+  /** Подпись про компенсацию: до выполнения — «после выполнения», после — «начислено». */
+  couponCompensationText(sch: IViewScheduleBA): string {
+    const snap = sch.couponSnapshot;
+    if (!snap) return '';
+    if (snap.status === 'redeemed') {
+      return `Onwaves компенсирует ${formatRub(snap.discountAmount)} — обязательство начислено`;
+    }
+    return `Onwaves компенсирует ${formatRub(snap.discountAmount)} после того, как вы отметите услугу выполненной`;
+  }
+
   checkCouponUse(_t9: IViewScheduleBA): any {
   if (_t9.status == RecordStatus.Success){
         if (!!_t9.couponId && _t9.couponId !== 'notUse' ){
@@ -85,8 +126,7 @@ export class BANotesComponent implements OnInit, OnDestroy {
     this._apiRecord.getCoupon(id).pipe(
       map(res => !!res),
       catchError(() => of(false)),
-      take(1),
-    )
+      take(1))
   );
 }
 
@@ -174,7 +214,7 @@ getAllTimeWorking(time: number) {
   constructor(private _apiSchedule: ScheduleService,
               private _events: NotesService,
               private router: Router,
-              private messageService: MessageService,
+              private messageService: ToastService,
               private store$: Store,
               private location: Location,
               private sanitizer: DomSanitizer,
@@ -341,6 +381,8 @@ getAllTimeWorking(time: number) {
   protected readonly getHoursString = getHoursString;
   protected readonly getMinutes = getMinutes;
   protected readonly getColorLine = getColorLine;
+  /** Адрес выезда (разъездная услуга) по объекту записи расписания. */
+  protected readonly recordLocationText = recordLocationText;
   protected readonly getStatusDone = getStatusDone;
 
   protected readonly getHours = getHours;
@@ -358,11 +400,7 @@ getAllTimeWorking(time: number) {
   }
 
   getAvatar(avatar: any) {
-    if (avatar) {
-      return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
-    } else {
-      return  '/assets/img/onwaves/user.png';
-    }
+    return resolveAvatarUrl(avatar);
   }
 
   getStatusStart(sch: IViewScheduleBA) {

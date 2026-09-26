@@ -2,11 +2,12 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { AppModule } from './app/app.module';
 import { getDeviceCompat } from './utils/device-compat';
 
-window.addEventListener('pageshow', (event) => {
-  if (event.persisted) {
-    window.location.reload();
-  }
-});
+// ВНИМАНИЕ: здесь раньше стоял `pageshow` -> `event.persisted` -> location.reload().
+// Он полностью отключал bfcache: любой «Назад» превращался в холодную загрузку
+// всего бандла (3.3 МБ) и повторный прогон всех API-запросов. Именно это давало
+// 15-20 с на сценарии «reload / возврат к восстановленной записи» в отчёте QA.
+// Восстановление состояния при возврате из bfcache должно решаться точечно
+// (перечитать конкретные данные в компоненте), а не перезагрузкой документа.
 
 async function bootstrap(): Promise<void> {
   const compat = getDeviceCompat();

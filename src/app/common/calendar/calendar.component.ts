@@ -1,4 +1,5 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges} from '@angular/core';
+import {Subscription} from 'rxjs';
 import {ScheduleService} from "../../../services/schedule.service";
 import {generateCalendar, getNameMonth, setDayInMonth, setMonth} from "../../../helpers/dateUtils/dateUtils";
 import {BusService} from "../../../services/busService";
@@ -13,7 +14,7 @@ import {IViewBusinessProfile} from "../../DTO/views/business/IViewBussinessProfi
   styleUrls: ['./calendar.component.scss'],
   providers: [ScheduleService]
 })
-export class CalendarComponent implements OnChanges {
+export class CalendarComponent implements OnChanges, OnDestroy {
 
   days: IViewCalendar[][] = [];
   @Input() today: Date|null = new Date();
@@ -22,27 +23,61 @@ export class CalendarComponent implements OnChanges {
   @Output() onDate = new EventEmitter<IChooseDayOfCalendar>();
   @Output() clearInterval = new EventEmitter<boolean>();
   @Input('userId') userId: string|null = null;
+  /** Услуга, под которую считать занятость дня. Без неё бэк отдаёт `canAdd` по старой эвристике. */
+  @Input() serviceId: string|null = null;
+  @Input() initialWorkDays: Schedule[] | null = null;
   @Input() period?: string;
   @Input() isCabinet:boolean = false;
   @Input() type:string = 'BA';
   @Input() isUpdate?: string;
   workDays: Schedule[] = [];
+  /** Месяц не загрузился. Показываем «Повторить» вместо разметки прошлого месяца. */
+  loadError = false;
+  private scheduleSubscription?: Subscription;
+  private scheduleRequestId = 0;
+  /** Родитель сам грузит расписание и передаёт его входом — свой запрос не дублируем. */
+  private parentOwnsWorkDays = false;
   year = new Date().getFullYear();
   month = new Date().getMonth();
   constructor(private  _api: ScheduleService) {
 
   }
-  async ngOnChanges(): Promise<void> {
+  ngOnChanges(changes: SimpleChanges): void {
     // if(this.type !== 'User' && this.userId && this.today){
     //   this._api.readCalendar(this.userId, this.today).subscribe(result => {
     //       console.log(result);
     //   });
     // }
-    if (this.userId) {
-      await this.getSchedule(this.userId!, this.year, this.month);
+    if (changes['initialWorkDays']) {
+      this.parentOwnsWorkDays = true;
     }
-    if (this.isUpdate){
-      await this.getSchedule(this.userId!, this.year, this.month);
+
+    // Месяц синхронизируем с `today` только когда родитель его реально поменял. Раньше это
+    // делалось на каждый ngOnChanges и сбрасывало месяц, выбранный стрелками.
+    if (changes['today'] && this.today && !isNaN(this.today.getTime())) {
+      this.year = this.today.getFullYear();
+      this.month = this.today.getMonth();
+    }
+
+    // Применяем данные родителя только в момент их прихода. Любой другой ngOnChanges после
+    // перелистывания месяца накладывал бы разметку чужого месяца на текущую сетку: все
+    // пометки доступности пропадали, а `dayId` выбранного дня становился undefined.
+    if (changes['initialWorkDays'] && this.initialWorkDays !== null) {
+      this.scheduleSubscription?.unsubscribe();
+      this.loadError = false;
+      this.workDays = this.initialWorkDays;
+      this.changeToday(this.year, this.month, this.today?.getDate());
+      if (this.choosedDay) this.onDate.emit(this.choosedDay);
+      return;
+    }
+
+    // Родитель ещё грузит расписание — ждём его, а не шлём второй days-in-month.
+    if (this.parentOwnsWorkDays && this.initialWorkDays === null) {
+      return;
+    }
+
+    if (this.userId && (changes['userId'] || changes['isUpdate'] || changes['serviceId'])) {
+      this.getSchedule(this.userId, this.year, this.month);
     }
 
   }
@@ -65,21 +100,45 @@ export class CalendarComponent implements OnChanges {
      return false;
   }
 
-  async getSchedule(id: string, year: number, month: number) {
-    (await this._api.getWorkDaysInMonth(id, year, month+1))
-      .subscribe(async _ => {
-        this.workDays = this._api.getWorkDayInMonth$.value;
-        await this.changeToday(year, month, this.today ? this.today.getDate() : undefined);
-        if(this.type !== 'User' && this.userId && this.choosedDay?.date){
-            this._api.readCalendar(this.userId, this.choosedDay?.date).subscribe(result => {
-                console.log(result);
-            });
+  getSchedule(id: string, year: number, month: number): void {
+    const requestId = ++this.scheduleRequestId;
+    this.scheduleSubscription?.unsubscribe();
+    this.loadError = false;
+    this.scheduleSubscription = this._api.getWorkDaysInMonth(id, year, month + 1, this.serviceId)
+      .subscribe({
+        next: workDays => {
+          if (requestId !== this.scheduleRequestId || year !== this.year || month !== this.month) return;
+          this.workDays = workDays;
+          this.changeToday(year, month, this.today ? this.today.getDate() : undefined);
+          if(this.type !== 'User' && this.userId && this.choosedDay?.date){
+              this._api.readCalendar(this.userId, this.choosedDay?.date).subscribe({
+                  next: result => console.log(result),
+                  error: () => {}
+              });
+          }
+          if (this.choosedDay) {
+            this.onDate.emit(this.choosedDay);
+          }
+        },
+        // Без обработчика ошибка уходила в глобальный ErrorHandler («ERROR …» в консоли),
+        // а на экране оставалась разметка предыдущего месяца: дни выглядели свободными,
+        // но их `dayId` относился к другому месяцу.
+        error: () => {
+          if (requestId !== this.scheduleRequestId) return;
+          this.loadError = true;
+          this.workDays = [];
+          this.changeToday(year, month, this.today ? this.today.getDate() : undefined);
         }
-        this.onDate.emit(this.choosedDay);
       });
   }
 
-  async backMonth() {
+  /** Повторная загрузка месяца после сетевой ошибки. */
+  retryMonth(): void {
+    if (this.userId) this.getSchedule(this.userId, this.year, this.month);
+  }
+
+  backMonth(): void {
+    this.resetMonthSelection();
     let month = this.month - 1;
     if (month === -1) {
       this.month = 11;
@@ -88,7 +147,7 @@ export class CalendarComponent implements OnChanges {
       this.month = month;
     }
     // this.checkIsToday();
-    await this.getSchedule(this.userId!, this.year, this.month);
+    if (this.userId) this.getSchedule(this.userId, this.year, this.month);
   }
 
   checkIsToday(){
@@ -99,7 +158,8 @@ export class CalendarComponent implements OnChanges {
     }
   }
 
-  async nextMonth() {
+  nextMonth(): void {
+    this.resetMonthSelection();
     let month = this.month + 1;
     if (month === 12) {
       this.month = 0;
@@ -108,7 +168,18 @@ export class CalendarComponent implements OnChanges {
       this.month = month;
     }
     // this.checkIsToday();
-    await this.getSchedule(this.userId!, this.year, this.month);
+    if (this.userId) this.getSchedule(this.userId, this.year, this.month);
+  }
+
+  private resetMonthSelection(): void {
+    this.today = null;
+    this.choosedDay = undefined;
+    this.clearInterval.emit(true);
+  }
+
+  ngOnDestroy(): void {
+    this.scheduleRequestId++;
+    this.scheduleSubscription?.unsubscribe();
   }
 
   /** Расписание на конкретную дату ячейки (год/месяц сетки + число). Без этого «сегодня» могло не совпасть с workDays при сравнении только по getDate(). */
@@ -124,10 +195,10 @@ export class CalendarComponent implements OnChanges {
 
   changeToday(year: number, month: number, day?: number){
     this.days = generateCalendar(year, month);
-    this.choosedDay = {
+    this.choosedDay = day == null ? undefined : {
       ifExist: false,
       dayId: undefined,
-      date: new Date(year, month, day ?? 1, 0, 0,0)
+      date: new Date(year, month, day, 0, 0, 0)
     };
     this.days.forEach(item => {
       item.forEach((sub: any) => {
@@ -202,12 +273,11 @@ export class CalendarComponent implements OnChanges {
   }
 
   chooseDay(d: IViewCalendar) {
-      if (!d.day || this.cellIsPast(d)) {
+      // При ошибке загрузки месяца разметки нет: клик дал бы день без `dayId`,
+      // и блок времени молча остался бы пустым.
+      if (!d.day || this.cellIsPast(d) || this.loadError) {
         return;
       }
-        this.days = this.days.map(week => 
-        week.map(x => x.dayId === d.dayId ? { ...x, countNew: 0 } : x)
-      );
       this.today = new Date(this.year, this.month, d.day, 0,0,0);
       this.changeToday(this.year, this.month);
       this.choosedDay = {
@@ -219,8 +289,9 @@ export class CalendarComponent implements OnChanges {
         countNew: d.countNew,
       };
        if(this.type !== 'User' && this.userId && this.choosedDay?.date){
-            this._api.readCalendar(this.userId, this.choosedDay?.date).subscribe(result => {
-                console.log(result);
+            this._api.readCalendar(this.userId, this.choosedDay?.date).subscribe({
+                next: result => console.log(result),
+                error: () => {}
             });
         }
       this.onDate.emit(this.choosedDay);

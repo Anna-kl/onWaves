@@ -1,4 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component,  ElementRef,  HostListener,  NgZone,  OnInit, OnDestroy, ViewChild} from '@angular/core';
+import { ToastService } from 'src/services/toast.service';
 
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import { customEmailValidator } from '../../../../helpers/validators/email.validator';
@@ -9,6 +10,9 @@ import {IViewCategoryTree} from "../../../DTO/views/categories/IViewCategoryTree
 import {ProfileService} from "../../../../services/profile.service";
 import {AuthStatus} from "../../../DTO/enums/authStatus";
 import {IViewAddress} from "../../../DTO/views/IViewAddress";
+import {WorkLocationType} from "../../../DTO/enums/workLocationType";
+import {IWorkLocation} from "../../../DTO/views/IWorkLocation";
+import {IWorkFormats, IWorkLocationChange} from "../../../DTO/views/IWorkFormats";
 
 import {NgbActiveModal, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {IViewAuthProfile} from "../../../DTO/views/profile/IViewAuthProfile";
@@ -20,20 +24,18 @@ import {StoreService} from "../../../ngrx-store/mainClient/store.service";
 import {select, Store} from "@ngrx/store";
 import {selectProfileMainClient, selectTokenMainClient} from "../../../ngrx-store/mainClient/store.select";
 import {urlProfile} from "../../../../helpers/constant/commonConstant";
-import {BehaviorSubject, catchError, EMPTY, filter, map, Observable, of, Subject, switchMap, takeUntil, tap, throwError, timeout} from "rxjs";
+import {BehaviorSubject, catchError, EMPTY, filter, forkJoin, map, Observable, of, Subject, switchMap, takeUntil, tap, throwError, timeout} from "rxjs";
 import {IViewCoordinates} from "../../../DTO/views/profile/IViewCoordinates";
 import { LoginService } from 'src/app/auth/login.service';
 import { environment } from 'src/enviroments/environment';
 import { ViewportScroller } from '@angular/common';
-import { Router } from 'express';
-import { MessageService } from 'primeng/api';
-
+import { HttpEventType } from '@angular/common/http';
 declare const ymaps: any;
 @Component({
   selector: 'app-register-business-profile',
   templateUrl: './register-business-profile.component.html',
   styleUrls: ['./register-business-profile.component.scss'],
-  providers: [DictionaryService, ProfileService, MessageService]
+  providers: [DictionaryService, ProfileService]
 })
 export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   strAddress: string = '';
@@ -43,14 +45,56 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, 
   // КРИТИЧНО: Флаги загрузки и состояния
   // ══════════════════════════════════════════════════════════════
   isSubmitting$ = new BehaviorSubject<boolean>(false);
+  /** Текст текущей фазы сохранения — показывается в анимированном оверлее. */
+  submitStage$ = new BehaviorSubject<string>('');
+  /** Флаг «всё готово» — включает финальную галочку в анимации перед закрытием. */
+  submitDone$ = new BehaviorSubject<boolean>(false);
   private destroy$ = new Subject<void>();
   private readonly requestId = this.generateRequestId();
 
-  changeAddress($event: {strAddress: string,
-    viewAddress: IViewAddress}) {
+  changeAddress($event: IWorkLocationChange) {
       this.address = $event.viewAddress;
       this.strAddress = $event.strAddress;
-      this.geoPoint$ = this._dictionaries.getPoint(this.strAddress);
+      this.formats = $event.formats;
+      this.cities = $event.cities ?? [];
+
+      // Карта: точка для фиксированного места + маркеры районов для разъездной.
+      this.geoPoint$ = this.formats.fixed
+        ? this._dictionaries.getPoint(this.fixedAddressStr())
+        : of(null);
+      if (this.formats.mobile) {
+        this.updateCityMarkers();
+      } else {
+        this.geoList = [];
+      }
+  }
+
+  /** Строка полного адреса фиксированного места (для геокодирования точки). */
+  private fixedAddressStr(): string {
+    const a = this.address;
+    if (!a) return '';
+    return [a.country, a.region, a.city, a.street, a.home]
+      .filter(v => !!v && `${v}`.trim().length > 0)
+      .join(', ');
+  }
+
+  /** Геокодируем каждый выбранный район/город и показываем маркер на карте. */
+  private updateCityMarkers(): void {
+    const validCities = this.cities.filter(c => !!c && c.trim().length > 0);
+    if (!validCities.length) {
+      this.geoList = [];
+      return;
+    }
+    const region = this.address?.region ?? '';
+    const country = this.address?.country ?? '';
+    const requests = validCities.map(city =>
+      this._dictionaries.getPoint(`${country}, ${region}, ${city}`).pipe(
+        catchError(() => of(null))
+      )
+    );
+    forkJoin(requests).subscribe(results => {
+      this.geoList = results.filter((r): r is IViewCoordinates => !!r);
+    });
   }
 
 
@@ -85,13 +129,16 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, 
   remainingText:any = 0;
   exceptWords: string[] = [];
   address: IViewAddress|null = null;
+  formats: IWorkFormats = { online: false, fixed: true, mobile: false };
+  cities: string[] = [];
+  geoList: IViewCoordinates[] = [];
   geoPoint$: Observable<IViewCoordinates|null> = new Observable<IViewCoordinates | null>();
   constructor( private _serviceRegisterBusinessProfile: ServiceRegisterBusinessProfile,
                public activeModal: NgbActiveModal,
                private _dictionaries: DictionaryService,
                private _api: ProfileService,
                private zone: NgZone,
-                private messageService: MessageService,
+                private messageService: ToastService,
                private _store: Store,
                private _login: LoginService,private cdr: ChangeDetectorRef,
                private _storeService: StoreService) {
@@ -190,6 +237,8 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, 
       // КРИТИЧНО: Блокируем UI во время отправки
       // ══════════════════════════════════════════════════════════════
       this.isSubmitting$.next(true);
+      this.submitDone$.next(false);
+      this.submitStage$.next('Создаём ваш профиль…');
 
       const data = this.registrationForm.getRawValue();
       console.log(this.phone);
@@ -219,11 +268,19 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, 
         // Таймаут 15 секунд
         timeout(15000),
 
-        // берём только успешный ответ с кодом 201
-        filter(result => result.code === 201),
-
-        // получаем user-объект
-        map(result => result.data as IViewAuthProfile),
+        // Бэк отвечает 200 OK с кодом ошибки в теле. Раньше здесь стоял filter:
+        // неуспешный ответ просто гасился — поток завершался без next и без error,
+        // оверлей «Создаём ваш профиль…» висел вечно, а кнопка оставалась
+        // заблокированной. Теперь любой не-201 превращаем в ошибку с текстом.
+        switchMap(result => {
+          if (result.code !== 201) {
+            return throwError(() => ({
+              status: result.code,
+              message: result.message || 'Не удалось создать профиль'
+            }));
+          }
+          return of(result.data as IViewAuthProfile);
+        }),
 
         // увеличиваем страницу
         tap(() => this.numberStreetPage++),
@@ -231,15 +288,33 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, 
         // если есть formData — качаем аватар, иначе сразу «резолвим» true
         switchMap(user => {
           if (this.formData) {
+            this.submitStage$.next('Загружаем фото профиля…');
             return this._serviceRegisterBusinessProfile
-              .save_avatar(user.profileUserId!, this.formData)
+              // токен обязателен: эндпоинт аватара закрыт авторизацией
+              .save_avatar(user.profileUserId!, this.formData, this.mainToken)
               .pipe(
-                filter(res => Boolean(res)),   // ждём «truthy» результата
-                map(() => user.profileUserId)                // прокидываем флаг OK
+                // observe:'events' отдаёт Sent/UploadProgress/Response — ждём именно
+                // финальный ответ, иначе switchMap ниже перезапускается на каждом
+                // событии и отменяет уже начатые POST work-location.
+                filter(res => res.type === HttpEventType.Response),
+                map(() => user.profileUserId),
+                // Профиль уже создан — упавший аватар не должен рушить регистрацию,
+                // фото можно догрузить в редакторе профиля.
+                catchError(err => {
+                  console.error('Не удалось загрузить аватар:', err);
+                  return of(user.profileUserId);
+                })
               );
           } else {
             return of(user.profileUserId);
           }
+        }),
+
+        // Сохраняем выбранные форматы работы (по одному POST) и ждём завершения всех.
+        switchMap(id => {
+          if (!id) return of(id);
+          this.submitStage$.next('Сохраняем форматы работы…');
+          return this.saveWorkLocations$(id).pipe(map(() => id));
         }),
 
         // Обработка ошибок
@@ -255,13 +330,19 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, 
         // единая подписка и единый dismiss
         .subscribe({
           next: (res) => {
-            this.isSubmitting$.next(false);
-            this.activeModal.dismiss();
-            if (res)
-              this._login.updateProfile(res);
+            // Финальный аккорд: показываем галочку «Готово!» ~1с, затем закрываем.
+            this.submitStage$.next('Готово!');
+            this.submitDone$.next(true);
+            setTimeout(() => {
+              this.isSubmitting$.next(false);
+              this.activeModal.dismiss();
+              if (res)
+                this._login.updateProfile(res);
+            }, 1000);
           },
           error: err => {
             this.isSubmitting$.next(false);
+            this.submitDone$.next(false);
             console.error('Ошибка при создании профиля:', err);
           }
         });
@@ -271,6 +352,78 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, 
 
   }
 
+
+  /**
+   * Формируем по одной записи WorkLocation на каждый выбранный формат.
+   * Бэк различает их по locationType.
+   */
+  private buildWorkLocationBodies(): IWorkLocation[] {
+    const bodies: IWorkLocation[] = [];
+    const a = this.address;
+    if (this.formats.online) {
+      bodies.push({ locationType: WorkLocationType.Online });
+    }
+    if (this.formats.fixed) {
+      bodies.push({
+        locationType: WorkLocationType.Fixed,
+        country: a?.country ?? null,
+        region: a?.region ?? null,
+        city: a?.city ?? null,
+        street: a?.street ?? null,
+        house: a?.home ?? null,
+        apartment: a?.apartment ?? null,
+        longitude: null,
+        latitude: null
+      });
+    }
+    if (this.formats.mobile) {
+      bodies.push({
+        locationType: WorkLocationType.Mobile,
+        country: a?.country ?? null,
+        region: a?.region ?? null,
+        cities: this.cities.filter(c => !!c && c.trim().length > 0),
+        longitude: null,
+        latitude: null
+      });
+    }
+    return bodies;
+  }
+
+  /**
+   * Отправляем все выбранные форматы (POST по одному). Ждём завершения всех через forkJoin.
+   * Ошибку отдельного POST глушим — профиль уже создан, форматы можно дозаполнить в редакторе.
+   */
+  private saveWorkLocations$(id: string): Observable<any> {
+    const bodies = this.buildWorkLocationBodies();
+    if (!bodies.length) {
+      return of(null);
+    }
+    return forkJoin(
+      bodies.map(body =>
+        this._api.createWorkLocation(id, body, this.mainToken).pipe(
+          catchError(err => {
+            console.error('Failed to save work location:', err);
+            return of(null);
+          })
+        )
+      )
+    );
+  }
+
+  /** Валиден ли выбор форматов и связанных данных (для кнопки «Далее» на шаге 2). */
+  isWorkSelectionValid(): boolean {
+    const f = this.formats;
+    if (!f.online && !f.fixed && !f.mobile) {
+      return false;
+    }
+    if (f.fixed && !(this.address?.city && this.address?.street && this.address?.home)) {
+      return false;
+    }
+    if (f.mobile && this.cities.filter(c => !!c && c.trim().length > 0).length === 0) {
+      return false;
+    }
+    return true;
+  }
 
   decrement () {this.numberStreetPage--; }
 
@@ -440,7 +593,7 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, 
         return this.registrationForm?.get('name')!.value.length <= 0;
       }
       case 2: {
-        return this.address === null;
+        return !this.isWorkSelectionValid();
       }
 
     }

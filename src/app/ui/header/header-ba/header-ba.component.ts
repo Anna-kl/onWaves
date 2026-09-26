@@ -16,7 +16,7 @@ import {filter, first, firstValueFrom, Observable, skipWhile, Subscription, take
 import { selectProfileMainClient, selectTokenMainClient} from "../../../ngrx-store/mainClient/store.select";
 
 import {ILinkState} from "../../../ngrx-store/links/interface/ILinkState";
-import { getIconAvatar } from 'src/helpers/common/avatar1';
+import { getIconAvatar, resolveAvatarUrl } from 'src/helpers/common/avatar1';
 import { OrderSignalrService } from 'src/services/notification.signal';
 import { requestAction } from 'src/app/ngrx-store/notification/notification.action';
 
@@ -84,7 +84,7 @@ export class HeaderBAComponent implements OnInit, OnDestroy {
       
       this.auth = result;
       this.notificationCount$ = this._apiNotification.getCountNotifications(result?.id!);
-        this._apiRecord.getCountRecordsForToday(result?.id!, new Date().toLocaleString()).subscribe(
+        this._apiRecord.getCountRecordsForToday(result?.id!).subscribe(
           resultCount => {
             this.countRecord = resultCount;
           });  
@@ -138,12 +138,8 @@ export class HeaderBAComponent implements OnInit, OnDestroy {
   this._router.navigate(['static/notifications'])
  }
 
-  getAvatar(avatar: string|null): string|SafeResourceUrl {
-    if (avatar !== null) {
-      let result = this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64, ${avatar}`);
-      return result;
-    }
-      return  '/assets/img/ui/ava.svg';
+  getAvatar(avatar: string|null|undefined): string|SafeResourceUrl {
+    return avatar ? resolveAvatarUrl(avatar) : '/assets/img/ui/ava.svg';
   }
 
   protected readonly getIconAvatar = getIconAvatar;

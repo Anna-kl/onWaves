@@ -1,4 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
+import { ToastService } from 'src/services/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BackendService } from '../../../../services/backend.service';
 import { IViewBusinessProfile } from "../../../DTO/views/business/IViewBussinessProfile";
@@ -8,7 +9,6 @@ import { AlbumsService } from "../../../../services/albums.service";
 import { IAlbumWithFoto } from "../../../DTO/views/images/IAlbumWithFoto";
 import { CropImageModalComponent } from "../modals/crop-image-modal/crop-image-modal.component";
 import { IViewImage } from "../../../DTO/views/images/IViewImage";
-import { MessageService } from "primeng/api";
 import { DelalbumComponent } from './delalbum/delalbum.component';
 import { DeleteAlbumComponent } from "../modals/delete-album/delete-album.component";
 import { select, Store } from "@ngrx/store";
@@ -17,7 +17,7 @@ import { Subject, forkJoin, of, takeUntil } from "rxjs";
 import { map, switchMap } from 'rxjs/operators';
 import { isUpdateRequest } from 'src/app/ngrx-store/update/update.action';
 import { GroupService } from '../../../../services/groupservice';
-import { isMediaVideoType, normalizeImageMedia, NormalizedMedia } from '../../../../helpers/common/media.helpers';
+import { getMediaTitle, isGeneratedMediaName, isMediaVideoType, normalizeImageMedia, NormalizedMedia } from '../../../../helpers/common/media.helpers';
 
 type GalleryImage = IViewImage & NormalizedMedia;
 
@@ -25,7 +25,7 @@ type GalleryImage = IViewImage & NormalizedMedia;
   selector: 'app-galereya',
   templateUrl: './galereya.component.html',
   styleUrls: ['./galereya.component.css'],
-  providers: [AlbumsService, MessageService]
+  providers: [AlbumsService]
 })
 export class GalereyaComponent implements OnDestroy {
   // @Input() deleteYes : number | undefined;
@@ -49,7 +49,7 @@ export class GalereyaComponent implements OnDestroy {
     private store$: Store,
     private _apiImage: AlbumsService,
     private backendService: BackendService,
-    private messageService: MessageService,
+    private messageService: ToastService,
     private modalService: NgbModal,
     private groupService: GroupService
   ) {
@@ -79,25 +79,26 @@ export class GalereyaComponent implements OnDestroy {
 
   }
 
-  choosedAlbum(albumId: string) {
+  /** @param force после загрузки/удаления медиа — читать строго с сервера, мимо кешей. */
+  choosedAlbum(albumId: string, force = false) {
     this.chooseAlbum = this.albums.find(_ => _.id == albumId);
     if (this.chooseAlbum) {
-      this._apiImage.getImages(this.chooseAlbum.id).subscribe(
+      this._apiImage.getImages(this.chooseAlbum.id, force).subscribe(
         images => {
           this.images = images.map(image => this.toGalleryImage(image));
         });
     }
   }
 
-  loadAlbum() {
-    this._apiImage.getAlbums(this.profile?.id!).subscribe(
+  loadAlbum(force = false) {
+    this._apiImage.getAlbums(this.profile?.id!, force).subscribe(
       result => {
         this.albums = result;
         if (this.chooseAlbum) {
-          this.choosedAlbum(this.chooseAlbum.id);
+          this.choosedAlbum(this.chooseAlbum.id, force);
         }
         else if (this.albums.length > 0) {
-          this.choosedAlbum(this.albums[0].id);
+          this.choosedAlbum(this.albums[0].id, force);
         }
       });
   }
@@ -129,15 +130,12 @@ export class GalereyaComponent implements OnDestroy {
   }
 
   isUUID(text?: string): boolean {
-    if (!text) return false;
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\.(png|jpg|jpeg|gif|mp4|webm))?$/i;
-    return uuidRegex.test(text);
+    return isGeneratedMediaName(text);
   }
 
   getImageDescription(image: IViewImage): string | null {
     if (image.description) return image.description;
-    if (image.name && !this.isUUID(image.name)) return image.name;
-    return null;
+    return getMediaTitle(image.name);
   }
 
   isVideo(image: IViewImage): boolean {
@@ -200,27 +198,28 @@ export class GalereyaComponent implements OnDestroy {
   createAlbum() {
     this.modalRef  = this.modalService.open(CreateAlbumComponent);
     this.modalRef .componentInstance.profileUserId = this.profile?.id ?? this.id;
-    this.modalRef .result.then((result:any) => {
-      if (result) {
-        this.loadAlbum();
-      }
-    });
+    this.modalRef .result.then(
+      (result:any) => { if (result) this.loadAlbum(true); },
+      () => { }
+    );
   }
 
   saveImage() {
-    let album = this.albums.find(_ => _.id === this.chooseAlbum?.id);
     const modalRef = this.modalService.open(CropImageModalComponent,
       { modalDialogClass: 'my-crop', scrollable: true });
     modalRef.componentInstance.albumId = this.chooseAlbum?.id;
     modalRef.componentInstance.profileId = this.profile?.id ?? this.id ?? '';
-    modalRef.result.then(result => {
-      if (result) {
-        if (album) {
-          album.countImages = album.countImages + 1;
-        }
-        this.choosedAlbum(this.chooseAlbum?.id!);
-      }
-    });
+    modalRef.result.then(
+      result => {
+        if (!result) return;
+        // Счётчик countImages больше не накручиваем руками: перечитываем альбомы
+        // с сервера и берём настоящее значение — иначе после видео или ошибки
+        // на бэке счётчик уезжал относительно реального содержимого альбома.
+        this.loadAlbum(true);
+      },
+      // dismiss (Esc/клик по фону) — гасим Unhandled Promise Rejection.
+      () => { }
+    );
   }
 
 
@@ -241,12 +240,23 @@ export class GalereyaComponent implements OnDestroy {
     this.messageService.add({ severity: 'success', summary: 'Успешно', detail: 'Изменения сохранены', life: 5000 });
   }
 
+  /** Явная кнопка «Редактировать» на карточке: тот же экран, что и по клику по карточке. */
+  openEditor(event: Event, image: IViewImage) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showGalery(image);
+  }
+
   showGalery(image: IViewImage) {
-    const modalRef = this.modalService.open(CropImageModalComponent, { modalDialogClass: 'my-crop' });
+    const modalRef = this.modalService.open(CropImageModalComponent, {
+      modalDialogClass: 'my-crop',
+      scrollable: true,
+    });
     modalRef.componentInstance.editImage = image;
     modalRef.componentInstance.profileId = this.profile?.id ?? this.id;
+    modalRef.componentInstance.albumId = image.albumId ?? this.chooseAlbum?.id;
     modalRef.result
-      .then(result => { if (result) this.choosedAlbum(this.chooseAlbum!.id); })
+      .then(result => { if (result) this.loadAlbum(true); })
       .catch(() => {});
   }
 
@@ -275,7 +285,7 @@ export class GalereyaComponent implements OnDestroy {
     modalRef.componentInstance.deleted.subscribe(
       (res: any) => {
         if (res == 1) {
-          this.loadAlbum();
+          this.loadAlbum(true);
         }
       });
   }
@@ -333,7 +343,7 @@ export class GalereyaComponent implements OnDestroy {
         result => {
           if (result.code === 200) {
             this.closeContextMenu();
-            this.loadAlbum();
+            this.loadAlbum(true);
             this.images.forEach(item => {
               item.isCover = item.id === product.id;
             });
@@ -347,7 +357,7 @@ export class GalereyaComponent implements OnDestroy {
     this._apiImage.deleteImage(product.id).subscribe(result => {
       if (result.code === 200){
         this.closeContextMenu();
-        this.loadAlbum();
+        this.loadAlbum(true);
         this.images = this.images.filter(_ => _.id !== product.id);
         if (this.images.length === 0){
         }

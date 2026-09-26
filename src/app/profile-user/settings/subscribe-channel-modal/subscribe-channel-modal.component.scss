@@ -1,0 +1,232 @@
+@import "../../../../assets/styles/main/color.scss";
+
+.subscribe-modal {
+  padding: 32px 28px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.subscribe-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  color: $grey-dark;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba($black, 0.05);
+  }
+}
+
+.subscribe-modal__icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.subscribe-modal__title {
+  font-size: 20px;
+  font-weight: 600;
+  color: $black;
+  margin: 0 0 8px;
+}
+
+.subscribe-modal__desc {
+  font-size: 14px;
+  line-height: 1.55;
+  color: $grey-dark;
+  margin: 0 0 24px;
+  max-width: 320px;
+}
+
+.subscribe-modal__steps {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.subscribe-modal__step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  font-size: 14px;
+  color: $black;
+}
+
+.subscribe-modal__step-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: $green-basic;
+  color: $white;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subscribe-modal__ios-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba($green-basic, 0.08);
+  color: $black;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+.subscribe-modal__input-group {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.subscribe-modal__input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid $grey;
+  border-radius: 12px;
+  font-size: 16px;
+  color: $black;
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: $grey-dark;
+  }
+
+  &:focus {
+    border-color: $green-basic;
+  }
+}
+
+.subscribe-modal__btn {
+  width: 100%;
+  max-width: 300px;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 14px;
+  background: $green-basic;
+  color: $white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 50px;
+
+  &:hover:not(:disabled) {
+    background: $green-dark;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.subscribe-modal__spinner {
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid rgba($white, 0.3);
+  border-top-color: $white;
+  border-radius: 50%;
+  animation: subscribe-spin 0.7s linear infinite;
+}
+
+@keyframes subscribe-spin {
+  to { transform: rotate(360deg); }
+}
+
+.subscribe-modal__error {
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba($color-error, 0.08);
+  color: #c0392b;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+  width: 100%;
+}
+
+.subscribe-modal__diag-toggle {
+  margin-top: 10px;
+  padding: 4px 0;
+  border: none;
+  background: transparent;
+  color: $grey-dark;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.subscribe-modal__diag {
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba($black, 0.04);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+  color: $grey-dark;
+
+  > div {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+
+  dt {
+    flex-shrink: 0;
+    min-width: 118px;
+    font-weight: 600;
+    color: $black;
+  }
+
+  dd {
+    margin: 0;
+    word-break: break-all;
+  }
+}

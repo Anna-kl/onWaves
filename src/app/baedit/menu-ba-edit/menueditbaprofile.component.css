@@ -2,7 +2,7 @@
 .ba-menu-profile-container{
   display:flex;
   /*justify-content: space-evenly;*/
-  justify-content: start;
+  justify-content: flex-start;
   gap:10px;
   flex-wrap: wrap;
   margin-bottom:20px;
@@ -13,6 +13,11 @@
   max-width:195px;
   flex:1 1 auto;
 }
+.ba-menu-profile ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 .ba-menu-profile li{
   border:1px solid #9196A4;
   border-radius:100px;
@@ -20,6 +25,21 @@
 }
 li:hover{
   cursor: pointer;
+}
+
+.ba-menu-promo {
+  position: relative;
+  background: linear-gradient(135deg, #ff5a3d 0%, #ff8a1f 52%, #ffc53d 100%) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 20px rgba(255, 90, 61, 0.32);
+}
+
+.ba-menu-promo--on {
+  background: linear-gradient(135deg, #00c4a0 0%, #009e86 100%) !important;
+  box-shadow: 0 8px 20px rgba(0, 158, 134, 0.32);
 }
 /*******************************************************/
 @media screen and (max-width: 640px){
