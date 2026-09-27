@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(cd \"d:/Project/Front/front\" && ls node_modules | grep -iE \"^\\(puppeteer|playwright\\)\" ; ls \"C:/Users/klimo/AppData/Local/ms-playwright\" 2>/dev/null | head)",
+      "Read(//c/Users/klimo/AppData/Local/ms-playwright/**)",
+      "Bash(npm ls *)",
+      "Read(//c/Users/klimo/AppData/Roaming/npm/**)",
+      "Bash(npm init *)",
+      "Bash(npm i *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(node -e \"const a=require\\('./angular.json'\\);console.log\\(a.projects[Object.keys\\(a.projects\\)[0]].architect.build.options.outputPath\\)\")",
+      "Bash(node shot.js)",
+      "Bash(node shot-case.js)",
+      "Bash(node shot-full.js)",
+      "Bash(node shot-slices.js)",
+      "Bash(grep -n \"^\\\\.ml-phone\\\\|^\\\\.ml-tile\\\\|^\\\\.ml-hero__works\\\\|^/\\\\* \" src/app/pages/masters-landing/masters-landing.component.scss)",
+      "Bash(node shot-hero.js)",
+      "Bash(grep -iA22 \"max\")",
+      "Bash(grep -rn \"h1, h2, h3\\\\|^h1,\\\\|h2 {\" node_modules/primeng/resources/themes/saga-blue/theme.css src/styles-bootstrap.scss)",
+      "Bash(node shot-cta.js)",
+      "Bash(curl -sSL --max-time 25 https://onwaves.online/ -o site.html -w \"http=%{http_code} size=%{size_download}\\\\n\")",
+      "Bash(curl -sSL --max-time 30 -A \"Mozilla/5.0\" https://onwaves.online/cellings -o site2.html -w \"http=%{http_code} size=%{size_download}\\\\n\")",
+      "Bash(cd \"C:/Users/klimo\" && find . -maxdepth 4 \\\\\\( -iname \"*.png\" -o -iname \"*.jpg\" -o -iname \"*.jpeg\" -o -iname \"*.webp\" \\\\\\) -newermt \"2026-08-11 10:50\" 2>/dev/null | head -20)",
+      "Read(//c/Users/klimo/**)",
+      "PowerShell(node node_modules/typescript/bin/tsc -p tsconfig.app.json --noEmit)",
+      "PowerShell(Set-Location 'd:\\\\Project\\\\Front\\\\front'; \\(Get-Content package.json -Raw | ConvertFrom-Json\\).scripts | Format-List)"
+    ]
+  }
+}

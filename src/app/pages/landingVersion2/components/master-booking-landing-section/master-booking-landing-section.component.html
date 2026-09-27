@@ -1,150 +1,289 @@
-<section class="landing-section">
-  <div class="hero">
-    <div class="hero__content">
-      <p class="hero__eyebrow">Платформа для мастеров</p>
-      <h1>Набирайте клиентов через онлайн-запись без лишних расходов</h1>
-      <p class="hero__description">
-        Подключайтесь бесплатно, принимайте записи 24/7 и управляйте услугами и
-        расписанием в одном кабинете.
+<section class="ld">
+  <section class="ld-hero" id="hero">
+    <div class="ld-hero__copy">
+      <p class="ld-kicker">Платформа для мастеров</p>
+      <h1 class="ld-hero__title">Принимайте записи <em>24/7</em> — бесплатно и без комиссий</h1>
+      <p class="ld-hero__sub">
+        Онлайн-запись, график и витрина работ в одном кабинете. Клиент бронирует сам,
+        без звонка. ИИ-агенты для расписания — в разработке, запись работает с первого дня.
       </p>
-
-      <div class="hero__categories">
-        <span class="hero__category" *ngFor="let category of categories">{{ category }}</span>
+      <div class="ld-badges">
+        <span class="ld-badge" *ngFor="let badge of heroBadges">{{ badge }}</span>
       </div>
+      <div class="ld-hero__actions">
+        <button type="button" class="ld-btn ld-btn--primary" (click)="openBecomeMasterInfo()">
+          Стать мастером бесплатно
+        </button>
+        <button type="button" class="ld-btn ld-btn--ghost" (click)="scrollTo('video')">
+          Смотреть, как это работает
+        </button>
+      </div>
+      <p class="ld-hero__note">Без карты и абонплаты. Никаких списаний за записи.</p>
+    </div>
 
-      <button type="button" class="hero__button" (click)="openBecomeMasterInfo()">
+    <div class="ld-hero__visual">
+      <div class="ld-chip ld-chip--a">
+        <b>0%</b>
+        <span>комиссий</span>
+      </div>
+      <div class="ld-chip ld-chip--b">
+        <b>24/7</b>
+        <span>запись без звонка</span>
+      </div>
+      <div class="ld-phone">
+        <span class="ld-phone__notch"></span>
+        <img
+          class="ld-phone__shot"
+          src="/assets/img/masters/calendar-month.png"
+          width="410"
+          height="820"
+          alt="Календарь записей мастера: свободные окна и брони на месяц" />
+      </div>
+    </div>
+  </section>
+
+  <section class="ld-cats" aria-label="Категории мастеров">
+    <div class="ld-cats__row">
+      <span class="ld-pill" *ngFor="let category of categories">{{ category }}</span>
+    </div>
+    <p class="ld-cats__note">Рады мастеру <b>любой профессии</b> — от ногтевого сервиса до ремонта и IT.</p>
+  </section>
+
+  <section class="ld-sec ld-ai" id="ai">
+    <div class="ld-sec__head ld-sec__head--center">
+      <span class="ld-live">В разработке · подключится к кабинету</span>
+      <h2>ИИ-агенты, которые возьмут рутину на себя</h2>
+      <p>
+        Направление, над которым мы работаем. Агенты подключатся, когда узнают ваш график,
+        услуги и клиентов — чтобы помогать по делу, а не «в целом».
+      </p>
+    </div>
+    <div class="ld-ai__grid">
+      <article class="ld-ai-card" *ngFor="let card of aiCards">
+        <h3>{{ card.title }}</h3>
+        <p>{{ card.text }}</p>
+        <div class="ld-ai-ex">
+          <span>Скоро</span>
+          {{ card.example }}
+        </div>
+      </article>
+    </div>
+    <p class="ld-ai__foot">
+      Запись, расписание и витрина работают <b>бесплатно с первого дня</b>. Агенты — следующим слоем.
+    </p>
+  </section>
+
+  <section class="ld-sec" id="features">
+    <div class="ld-sec__head">
+      <p class="ld-kicker">Почему мастера выбирают нас</p>
+      <h2>Всё для стабильной записи — в одном кабинете</h2>
+      <p>Без таблиц, переписок в пяти мессенджерах и упущенных окон. Клиент видит слот и записывается.</p>
+    </div>
+    <div class="ld-feat">
+      <article class="ld-feat__card" *ngFor="let item of features">
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.text }}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="ld-sec" id="how">
+    <div class="ld-sec__head ld-sec__head--center">
+      <p class="ld-kicker">Как это работает</p>
+      <h2>От регистрации до первой записи — за один вечер</h2>
+    </div>
+    <ol class="ld-steps">
+      <li class="ld-step" *ngFor="let step of steps; let i = index">
+        <span class="ld-step__n">{{ i + 1 }}</span>
+        <h3>{{ step.title }}</h3>
+        <p>{{ step.text }}</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="ld-sec ld-promo" id="promo">
+    <div class="ld-promo__text">
+      <p class="ld-kicker">Продвижение внутри платформы</p>
+      <h2>Не только запись — поток новых клиентов</h2>
+      <p>
+        Покажите работы, и страница попадёт к людям, которые ищут вашу услугу рядом.
+        Это витрина OnWaves, не рекламный кабинет Директа.
+      </p>
+      <ul class="ld-check">
+        <li *ngFor="let point of promoPoints">{{ point }}</li>
+      </ul>
+      <button type="button" class="ld-btn ld-btn--primary" (click)="openBecomeMasterInfo()">
+        Создать профиль мастера
+      </button>
+    </div>
+    <div class="ld-gal" aria-hidden="true">
+      <div class="ld-gal__head">Галерея · мои работы</div>
+      <div class="ld-gal__grid">
+        <figure class="ld-gal__item" *ngFor="let shot of gallery">
+          <img [src]="shot.src" [alt]="shot.alt" width="220" height="220" />
+          <span class="ld-gal__tag" *ngIf="shot.tag">{{ shot.tag }}</span>
+          <span class="ld-gal__play" *ngIf="shot.play"></span>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="ld-sec ld-founder" id="founder">
+    <div class="ld-founder__inner">
+      <p class="ld-kicker">Стартап, который слышит</p>
+      <h2>Сервис растёт вместе с мастерами, которые им пользуются</h2>
+      <p class="ld-founder__lead">
+        OnWaves развивает основатель лично. Нет колл-центра и шаблонных ответов:
+        не хватает функции — напишите, разберём и доработаем под ваш процесс.
+      </p>
+      <div class="ld-stats">
+        <div>
+          <b>0 ₽</b>
+          <span>за подключение и записи</span>
+        </div>
+        <div>
+          <b>1:1</b>
+          <span>ответ основателя, не бот</span>
+        </div>
+        <div>
+          <b>24/7</b>
+          <span>клиент записывается сам</span>
+        </div>
+      </div>
+      <a class="ld-btn ld-btn--ghost" [href]="founderMail">Предложить функцию</a>
+    </div>
+  </section>
+
+  <section class="ld-sec" id="compare">
+    <div class="ld-sec__head ld-sec__head--center">
+      <p class="ld-kicker">Честное сравнение</p>
+      <h2>Что обычно платят мастера — и что у вас на OnWaves</h2>
+    </div>
+    <div class="ld-cmp">
+      <article class="ld-cmp__col ld-cmp__col--them">
+        <h3>Обычные сервисы записи</h3>
+        <p>Привычная модель большинства платформ</p>
+        <ul>
+          <li *ngFor="let point of themPoints">{{ point }}</li>
+        </ul>
+      </article>
+      <article class="ld-cmp__col ld-cmp__col--us">
+        <h3>OnWaves</h3>
+        <p>Бесплатно и прозрачно — для мастеров</p>
+        <ul>
+          <li *ngFor="let point of usPoints">{{ point }}</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="ld-sec" id="video">
+    <div class="ld-sec__head ld-sec__head--center">
+      <p class="ld-kicker">OnWaves в деле</p>
+      <h2>Посмотрите, как устроены запись и кабинет</h2>
+    </div>
+    <div class="ld-vid" *ngIf="!videoUrl" role="button" tabindex="0"
+         (click)="playVideo()" (keydown.enter)="playVideo()">
+      <img
+        class="ld-vid__poster"
+        src="https://i.ytimg.com/vi/muGywqkVs70/hqdefault.jpg"
+        width="1280"
+        height="720"
+        alt="Видео: знакомство с OnWaves" />
+      <span class="ld-vid__play" aria-hidden="true"></span>
+      <span class="ld-vid__label">Знакомство с OnWaves</span>
+    </div>
+    <div class="ld-vid" *ngIf="videoUrl">
+      <iframe
+        [src]="videoUrl"
+        title="Знакомство с OnWaves"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <section class="ld-sec" id="pwa">
+    <div class="ld-pwa">
+      <div>
+        <p class="ld-kicker ld-kicker--light">Установка PWA</p>
+        <h2>Поставьте OnWaves на смартфон — как обычное приложение</h2>
+        <p>Скачивать из сторов не нужно. Записи, уведомления и график — в одно касание с домашнего экрана.</p>
+        <div class="ld-pwa__actions">
+          <button type="button" class="ld-btn ld-btn--light" (click)="onInstallInstructionClick('iOS')">
+            Инструкция для iPhone
+          </button>
+          <button type="button" class="ld-btn ld-btn--light" (click)="onInstallInstructionClick('Android')">
+            Инструкция для Android
+          </button>
+        </div>
+      </div>
+      <img
+        class="ld-pwa__icon"
+        src="/assets/icons/icon-192x192.png"
+        width="192"
+        height="192"
+        alt="Иконка приложения OnWaves" />
+    </div>
+
+    <div class="ld-os" *ngIf="isIosInstructionOpen">
+      <h3>Как установить на iPhone</h3>
+      <ol>
+        <li>Откройте OnWaves в Safari.</li>
+        <li>Нажмите «Поделиться» — квадрат со стрелкой вверх.</li>
+        <li>Выберите «На экран Домой» и подтвердите.</li>
+      </ol>
+      <p>На iOS установка работает через Safari. В Chrome пункта может не быть.</p>
+    </div>
+    <div class="ld-os" *ngIf="isAndroidInstructionOpen">
+      <h3>Как установить на Android</h3>
+      <ol>
+        <li>Откройте сайт в Chrome.</li>
+        <li>Дождитесь окна снизу «Установить приложение» или откройте меню браузера.</li>
+        <li>Нажмите «Установить» и запускайте ярлык с главного экрана.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="ld-sec" id="faq">
+    <div class="ld-sec__head ld-sec__head--center">
+      <p class="ld-kicker">Частые вопросы</p>
+      <h2>Коротко о главном</h2>
+    </div>
+    <div class="ld-faq">
+      <details class="ld-qa" *ngFor="let item of faqs; let i = index" [attr.open]="i === 0 ? '' : null">
+        <summary>{{ item.q }}</summary>
+        <p>{{ item.a }}</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="ld-sec" id="cta">
+    <div class="ld-final">
+      <h2>Станьте одним из первых мастеров OnWaves</h2>
+      <p>Подключение за 10 минут. Без карты. 0% комиссий с записей.</p>
+      <button type="button" class="ld-btn ld-btn--white" (click)="openBecomeMasterInfo()">
         Стать мастером бесплатно
       </button>
     </div>
-
-    <div class="hero__visual">
-      <img src="/assets/landing/landing.jpg" alt="Платформа для записи к мастерам" />
-      <div class="hero__badge">0% скрытых комиссий</div>
-    </div>
-  </div>
-
-  <div class="process">
-    <div class="process__header">
-      <p class="process__subtitle">Почему мастера выбирают нас</p>
-      <h2>Все, что нужно для стабильной записи клиентов в одном сервисе</h2>
-    </div>
-
-    <div class="process__cards">
-      <article class="process-card" *ngFor="let step of processSteps; let idx = index">
-        <span class="process-card__index">0{{ idx + 1 }}</span>
-        <h3>{{ step.title }}</h3>
-        <p>{{ step.description }}</p>
-      </article>
-    </div>
-  </div>
-
-  <div class="install">
-    <div class="install__header">
-      <p class="install__subtitle">Установка PWA</p>
-      <h2>Поставьте сервис на смартфон и управляйте записями как в приложении</h2>
-      <p class="install__description">
-        Для мастеров это быстрее, чем работать в браузере: записи, уведомления и расписание всегда под рукой.
-      </p>
-    </div>
-
-    <div class="install__cards">
-      <article class="install-card" *ngFor="let card of installCards">
-        <div class="install-card__top">
-          <span class="install-card__platform">{{ card.platform }}</span>
-          <h3>{{ card.title }}</h3>
-          <p>{{ card.description }}</p>
-        </div>
-
-        <ol class="install-card__steps">
-          <li *ngFor="let step of card.steps">{{ step }}</li>
-        </ol>
-
-        <button
-          type="button"
-          class="install-card__button"
-          (click)="onInstallInstructionClick(card.platform)"
-        >
-          {{ card.cta }}
-        </button>
-      </article>
-    </div>
-
-    <div class="ios-instruction" *ngIf="isIosInstructionOpen">
-      <div class="ios-instruction__header">
-        <p class="ios-instruction__subtitle">Инструкция iOS</p>
-        <h3>Как установить приложение на iPhone</h3>
-      </div>
-
-      <ol class="ios-instruction__steps">
-        <li>Откройте платформу в браузере Safari.</li>
-        <li>Нажмите на кнопку Поделиться (квадрат со стрелкой вверх).</li>
-        <li>Прокрутите меню и выберите На экран Домой.</li>
-        <li>Переименуйте ярлык при необходимости и нажмите Добавить.</li>
-        <li>Запускайте сервис с главного экрана как обычное приложение.</li>
-      </ol>
-
-      <p class="ios-instruction__tip">
-        Важно: установка PWA на iOS работает через Safari. В Chrome и других браузерах этот пункт может не отображаться.
-      </p>
-    </div>
-
-    <div class="android-instruction" *ngIf="isAndroidInstructionOpen">
-      <div class="android-instruction__header">
-        <p class="android-instruction__subtitle">Инструкция Android</p>
-        <h3>Как установить приложение на Android</h3>
-      </div>
-
-      <ol class="android-instruction__steps">
-        <li>Откройте сайт на Android в браузере Chrome.</li>
-        <li>При входе снизу появится окно с предложением установки.</li>
-        <li>Нажмите Установить и следуйте инструкциям на экране.</li>
-        <li>Подтвердите добавление приложения на главный экран.</li>
-        <li>После установки открывайте сервис как обычное приложение.</li>
-      </ol>
-
-      <p class="android-instruction__tip">
-        Если окно не появилось автоматически, откройте меню браузера и выберите пункт Установить приложение.
-      </p>
-    </div>
-
-    <div class="install__note">
-      Если страница не открывается сразу, в отдельных регионах может понадобиться VPN для первого входа.
-    </div>
-  </div>
-
-  <div class="founder-note">
-    <p class="founder-note__subtitle">Живая поддержка</p>
-    <h3>Развиваю сервис лично и внимательно отношусь к каждому мастеру</h3>
-    <p class="founder-note__text">
-      Вы общаетесь напрямую со мной без долгих цепочек поддержки. Помогу с запуском, отвечу на вопросы и
-      возьму в приоритет полезные доработки под реальные рабочие процессы.
-    </p>
-    <p class="founder-note__caption">
-      Спокойный старт, быстрый контакт и сервис, который растет вместе с вашими задачами.
-    </p>
-  </div>
+  </section>
 </section>
 
-<div class="master-info-modal" *ngIf="isBecomeMasterInfoOpen" (click)="closeBecomeMasterInfo()">
-  <div class="master-info-modal__content" (click)="$event.stopPropagation()">
-    <p class="master-info-modal__subtitle">Как начать</p>
-    <h3>Чтобы стать мастером, нужно пройти 2 шага</h3>
-    <ol class="master-info-modal__steps">
+<div class="ld-modal" *ngIf="isBecomeMasterInfoOpen" (click)="closeBecomeMasterInfo()">
+  <div class="ld-modal__box" (click)="$event.stopPropagation()">
+    <p class="ld-kicker">Как начать</p>
+    <h3>Чтобы стать мастером, нужно два шага</h3>
+    <ol>
       <li>
-        <span class="master-info-modal__step-title">Создайте пользовательский аккаунт.</span>
-        <span class="master-info-modal__step-text">Это базовый шаг для входа в систему.</span>
+        <b>Создайте аккаунт.</b>
+        <span>Это вход в сервис: телефон или почта.</span>
       </li>
       <li>
-        <span class="master-info-modal__step-title">Откройте меню в правом верхнем углу.</span>
-        <span class="master-info-modal__step-text">
-          После создания пользовательского профиля вы можете создать бизнес профиль мастера.
-        </span>
+        <b>В меню справа сверху создайте профиль мастера.</b>
+        <span>После пользовательского аккаунта открывается бизнес-профиль.</span>
       </li>
     </ol>
-    <p class="master-info-modal__note">
-      Если нужно, помогу пройти эти шаги и быстро настроить профиль.
-    </p>
-    <button type="button" class="master-info-modal__button" (click)="registerFromInfoModal()">
+    <p class="ld-modal__note">Если нужно — помогу пройти эти шаги и быстро настроить страницу.</p>
+    <button type="button" class="ld-btn ld-btn--primary" (click)="registerFromInfoModal()">
       Зарегистрироваться
     </button>
   </div>

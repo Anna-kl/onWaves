@@ -1,0 +1,219 @@
+/** @TerenceNdime **/
+#outerdiv{
+	display:flex;
+	margin:auto;
+	width: 100%;
+    color: #fff;
+	font-weight: bold;
+	/*background: #aaa;*/
+	padding: 20px 0px ;
+    /*height: calc(100vh - 186px);*/
+}
+#outerdiv:active{
+	color: #fff;
+}
+.innerdiv1{flex:1;}
+.innerdiv2{
+	/*height: calc(100vh - 186px);*/
+	overflow: auto; 
+	/*background:#f4caca; */
+	flex:4;
+	margin: 10px 20px 10px 20px;
+	padding: 20px 0px;
+	width: 100%;
+	max-width: calc(100% - 40px);
+	min-width: 250px; /* 270px ширина под pixel 4 менять острожно*/
+	z-index:5; 
+} 
+.list{
+	/*padding: 9px 10px; 
+	background:#fff; */
+	color: #000;
+	font-weight: normal;
+	border-bottom: thin solid #ffffff1a;
+} 
+.list:last-child{ border-bottom: none}
+.list:nth-child(even){
+	/*background: #fff;*/
+}
+.innerdiv1>.list:hover{
+	background: $green-basic;
+	/*border-radius: 0px 100px 100px 0px; */
+	}
+.innerdiv1>.list:hover span {
+    /*color: #fff;*/
+    /*font-weight: bold;*/
+}
+.list.active{
+	background: $green-basic;
+	/*border-radius: 0px 100px 100px 0px; */}
+/*ромб на активном пункте*/
+/*.list.active::after{
+	content:""; 
+	width:20px; 
+	height:20px; 
+	background:#336372; 
+	position:absolute;
+	display:block; 
+	transform:rotate(45deg);
+	margin: -20px 0 0 210px
+}*/
+
+.panel{ 
+	background:transparent; 
+	color:#000; 
+	/*padding: 0px 30px;*/
+	}
+.panelshow{display:block}
+.panelhide{display:none;}
+.pan-col{
+	display: flex;
+	flex-flow: row wrap;
+	/*align-items: flex-start;
+	align-content: flex-start;  
+	justify-content: space-around;
+	justify-content:flex-start;*/
+} 
+@media only screen and (max-width: 1024px){
+	#outerdiv{
+		flex-direction: column;
+	} 
+	.list {
+		text-align:center;
+		background:#dadada;
+		border: 2px solid #fff;
+	}	
+	.list:hover {
+    background: $green-basic;
+	border-radius: 0px ;
+	}
+	.list:hover span { 
+    font-weight: bold;
+	}
+	.list.active { 
+    border-radius: 0px;
+}
+    .innerdiv1{
+	  display:flex; 
+	  justify-content:space-evenly;
+	  flex-flow: wrap;
+	}
+    .list{
+		flex:1
+	}
+	#outerdiv{
+		width: 100%;  
+	}
+    .list.active::after{
+    display:none;
+	}
+	.list{
+		padding: 0px 15px;
+		min-width: 230px;/*175*/
+		min-height: 37px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		align-content: center;
+	}
+  .list:last-child{ border-bottom: thin solid #ffffff1a}
+  /*
+  .list.active::after{
+	  content:""; 
+	  width:20px; 
+	  height:20px; 
+	  background:#336372; 
+	  position:absolute;
+	  display:block; 
+	  transform:rotate(45deg);
+	  margin: 20px 0 0 30px
+	}*/
+}
+
+@media only screen and (max-width: 767px){ 
+  /*.list.active::after{
+    display:none;
+  }*/
+} 
+@media only screen and (max-width: 767px){ 
+    /*.list.active::after{
+    display:none;
+  }*/
+} 
+@media only screen and (max-width: 542px){
+  /*span{
+    display:none;
+  }*/
+  
+  /*  .list.active::after{
+    display:none;
+  }*/
+}
+
+.list-modal{
+	padding: 0px 15px;
+	/*width: 200px;*/
+	width: 250px; 
+	/*min-width: 121px;*/
+	min-width: 210px;
+	min-height: 40px;
+	height: 86px;
+	font-weight: 400;
+	text-align: center;
+	background:#fff;
+	border: 2px solid #dadada;
+	border-radius: 6px;
+	margin: 5px;
+	flex:1; 
+    color: #11142D;
+}
+.list-modal:hover {
+    background: #fff;
+	border-radius: 6px ;
+	color: #11142D;
+	border: 2px solid #00DAB3;
+	padding: 0px 15px;
+	}
+@media screen and (max-width: 640px) {
+	.list-modal{
+		height: 30px;
+	}
+}
+.min-width-block{ 
+	min-width: 240px!important; 
+}
+
+.list-modal:hover span { 
+    /*font-weight: bold;*/
+	font-weight: 400;
+	
+	}
+.list-modal.active { 
+    border-radius: 6px;
+	border: 2px solid $green-basic;
+	color: #fff;
+} 
+#outerdiv{
+	width: 100%;  
+	}
+.list-modal.active::after{
+    display:none;
+	} 
+.list-modal:last-child{ border-bottom: thin solid #ffffff1a}
+.innerdiv-modal{
+	display: flex;
+    justify-content: space-evenly;
+	flex-flow: wrap;
+	margin: 20px;/* отступ на мобиле*/
+}
+.outerdiv-modal-ba-edit-pofile{
+	max-width:1200px;
+	min-width: 310px;
+	flex-direction: column;
+}
+.outerdiv-modal{
+	/*max-width:768px;*/
+	min-width: 250px;
+	/*min-width: 310px;*/
+	flex-direction: column;
+}

@@ -1,0 +1,19 @@
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Generating browser application bundles (phase: setup)...
+√ Browser application bundle generation complete.
+√ Browser application bundle generation complete.
+- Copying assets...
+√ Copying assets complete.
+- Generating index html...
+√ Index html generation complete.
+
+Initial Chunk Files | Names         |  Raw Size
+vendor.js           | vendor        |   3.13 MB |
+styles.css          | styles        | 656.42 kB |
+polyfills.js        | polyfills     | 159.64 kB |
+main.js             | main          |  92.02 kB |
+runtime.js          | runtime       |   6.35 kB |
+
+| Initial Total |   4.02 MB
+
+Build at: 2026-09-13T10:44:49.663Z - Hash: 15382c97f89fbfb0 - Time: 8868ms

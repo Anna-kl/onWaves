@@ -1,0 +1,48 @@
+# robots.txt для onwaves.online
+#
+# ВАЖНО ПРО Disallow НИЖЕ: запрет обхода мешает роботу прочитать meta robots
+# noindex на той же странице. Разделы ниже приватные и в индекс попасть не
+# успели, поэтому дешевле не тратить на них обход. Если Вебмастер покажет
+# какой-то из этих URL уже в индексе — временно снимите для него Disallow,
+# чтобы робот увидел noindex (он проставляется роутером, см. app-routing.module.ts),
+# и верните строку после выпадения страницы из индекса.
+#
+# Стейджинг (ssr.onwaves.online) закрывается не здесь: robots.txt действует на
+# хост, поэтому для него server.ts отдаёт отдельный ответ с Disallow: /.
+
+User-agent: *
+
+# Кабинеты и личные разделы — публичной ценности нет.
+Disallow: /ba-edit/
+Disallow: /profilebisacc/
+Disallow: /cabinet-ba
+Disallow: /profile-user/
+Disallow: /page-user/
+Disallow: /notification/
+Disallow: /clients/
+Disallow: /chat-page/
+Disallow: /confirm-url/
+Disallow: /common/
+Disallow: /profile-ba/
+
+# Выдача поиска: бесконечное число URL с одними и теми же карточками.
+# Сама форма расширенного поиска (/search/extsearch) остаётся открытой.
+Disallow: /search/result
+Disallow: /search/extsearch/
+
+# Шаги воронки записи — содержимое зависит от живых слотов.
+Disallow: /*/choose-service
+Disallow: /*/choose-date
+Disallow: /*/confirm-record
+Disallow: /*/confirm-record2
+
+Allow: /assets/
+
+# Clean-param (только Яндекс) склеивает рекламные метки и параметр модалки
+# регистрации с чистым URL, чтобы один документ не дробился на десятки адресов.
+# Директива намеренно лежит в группе «*», а не в отдельной «User-agent: Yandex»:
+# при наличии своей группы Яндекс читает ТОЛЬКО её и все Disallow выше для него
+# перестали бы действовать. Остальные роботы неизвестную директиву игнорируют.
+Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid&action
+
+Sitemap: https://onwaves.online/sitemap.xml

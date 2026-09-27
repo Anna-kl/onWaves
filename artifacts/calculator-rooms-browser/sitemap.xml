@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Статическая карта витрины — для варианта раздачи через Apache (src/.htaccess),
+  где Node не участвует и динамический маршрут недоступен. Без этого файла
+  Apache отдал бы на /sitemap.xml главную страницу с кодом 200, и объявленный
+  в robots.txt sitemap считался бы битым.
+
+  На Node-хосте тот же адрес обслуживает server.ts (buildSitemap) — маршрут
+  зарегистрирован выше статики и перекрывает этот файл. Содержимое обязано
+  совпадать: правите здесь — правьте SITEMAP_ROUTES в server.ts.
+
+  Карточек мастеров тут нет: это фолбэк для Apache. На Node-хосте
+  /sitemap.xml собирает server.ts из API профилей + этих же статических URL.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://onwaves.online/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://onwaves.online/landing</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://onwaves.online/masters</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://onwaves.online/search/extsearch</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://onwaves.online/catalog</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://onwaves.online/static/oservice</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://onwaves.online/static/help</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>

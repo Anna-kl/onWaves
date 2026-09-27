@@ -17,9 +17,11 @@ style="margin-top: 50px; width: 100%;">
          экране две карусели. Со skip серверная разметка выбрасывается целиком и
          карусель строится на клиенте один раз (в HTML для поисковиков она есть). -->
     <app-slider ngSkipHydration></app-slider>
-    <!-- Рекламный блок о сервисе -->
-    <!-- Популярное рядом с Вами -->
-    <!-- <app-landingVersion2 *ngIf="!isAuth" ></app-landingVersion2> -->
+    <a class="main-page__masters" routerLink="/landing" *ngIf="!isAuth">
+      <span class="main-page__masters-kicker">Мастерам</span>
+      <span class="main-page__masters-title">Принимайте записи 24/7 — бесплатно и без комиссий</span>
+      <span class="main-page__masters-cta">Стать мастером</span>
+    </a>
     <app-uaafter-register  ></app-uaafter-register>
   </div>
 </div> 

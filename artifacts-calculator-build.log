@@ -1,0 +1,33 @@
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Generating browser application bundles (phase: setup)...
+√ Browser application bundle generation complete.
+√ Browser application bundle generation complete.
+- Copying assets...
+√ Copying assets complete.
+- Generating index html...
+√ Index html generation complete.
+
+Initial Chunk Files                                                         | Names                                                         |  Raw Size
+vendor.js                                                                   | vendor                                                        |   5.69 MB |
+main.js                                                                     | main                                                          |   4.82 MB |
+styles.css                                                                  | styles                                                        | 656.42 kB |
+polyfills.js                                                                | polyfills                                                     | 159.65 kB |
+runtime.js                                                                  | runtime                                                       |  13.97 kB |
+
+| Initial Total                                                 |  11.32 MB
+
+Lazy Chunk Files                                                            | Names                                                         |  Raw Size
+default-src_app_baedit_ba-edit-shared_module_ts.js                          | baedit-ba-edit-module                                         |   1.10 MB |
+src_app_static_static_module_ts.js                                          | static-static-module                                          | 934.27 kB |
+default-node_modules_primeng_fesm2022_primeng-calendar_mjs.js               | baedit-ba-edit-module                                         | 258.39 kB |
+src_app_profile-user_personal-page_module_ts.js                             | profile-user-personal-page-module                             |  88.63 kB |
+node_modules_hammerjs_hammer_js.js                                          | hammerjs                                                      |  71.29 kB |
+src_app_profile-user_my-notes_module_ts.js                                  | profile-user-my-notes-module                                  |  66.24 kB |
+src_app_pages_chat-main_chat_module_ts.js                                   | pages-chat-main-chat-module                                   |  41.07 kB |
+src_app_maks_clients_module_ts.js                                           | maks-clients-module                                           |  30.32 kB |
+common.js                                                                   | common                                                        |  11.84 kB |
+src_app_components_mesages_notification-page_notification-page_module_ts.js | components-mesages-notification-page-notification-page-module |   7.13 kB |
+src_app_baedit_ba-edit_module_ts.js                                         | baedit-ba-edit-module                                         |   6.42 kB |
+src_app_baedit_profilebisacc_module_ts.js                                   | baedit-profilebisacc-module                                   |   4.04 kB |
+
+Build at: 2026-09-13T10:41:28.443Z - Hash: dede1c2de6ec0ffb - Time: 24596ms

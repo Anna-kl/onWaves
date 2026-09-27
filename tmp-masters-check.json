@@ -1,0 +1,68 @@
+{
+  "mobile": {
+    "metrics": {
+      "overflowX": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "heroBtnVisible": true,
+      "heroBtnTop": 587.46875,
+      "h1": "Набираю 5 мастеров для совместного запуска на Onwaves",
+      "title": "Пилот OnWaves: 5 мастеров для совместного запуска",
+      "hrefs": {
+        "telegram": [
+          "https://t.me/ANUTTA_K",
+          "https://t.me/OnlineServicesOnWaves_bot"
+        ],
+        "max": [
+          "https://max.ru/u/f9LHodD0cOIAS7JFuf5nfiFvyvNq7d181qWuJ2w9neyiyv8m4oHbvAmnlsQ"
+        ],
+        "example": [
+          "https://onwaves.online/cellings",
+          "https://onwaves.online/cellings",
+          "https://onwaves.online/cellings",
+          "https://onwaves.online/cellings"
+        ]
+      },
+      "hasOldCopy": false,
+      "bodyLen": 3120
+    },
+    "after_click": {
+      "top": 672,
+      "inView": true,
+      "y": 6681
+    }
+  },
+  "desktop": {
+    "metrics": {
+      "overflowX": false,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "heroBtnVisible": true,
+      "heroBtnTop": 788.046875,
+      "h1": "Набираю 5 мастеров для совместного запуска на Onwaves",
+      "title": "Пилот OnWaves: 5 мастеров для совместного запуска",
+      "hrefs": {
+        "telegram": [
+          "https://t.me/ANUTTA_K",
+          "https://t.me/OnlineServicesOnWaves_bot"
+        ],
+        "max": [
+          "https://max.ru/u/f9LHodD0cOIAS7JFuf5nfiFvyvNq7d181qWuJ2w9neyiyv8m4oHbvAmnlsQ"
+        ],
+        "example": [
+          "https://onwaves.online/cellings",
+          "https://onwaves.online/cellings",
+          "https://onwaves.online/cellings",
+          "https://onwaves.online/cellings"
+        ]
+      },
+      "hasOldCopy": false,
+      "bodyLen": 3333
+    },
+    "after_click": {
+      "top": 224,
+      "inView": true,
+      "y": 5029
+    }
+  }
+}

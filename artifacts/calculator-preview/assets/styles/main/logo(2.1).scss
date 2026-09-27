@@ -1,0 +1,50 @@
+.logo-first{  
+	width:33vw;
+	max-width: 445px;
+	min-width: 200px;
+}  
+/* Progress Style */
+.progress-title{
+ font-size: 18px;
+ font-weight: 700;
+ color: #000;
+ margin: 0 0 20px;
+}
+.progress{
+ height: 3px;
+ background: #8e44ad;
+ border-radius: 0;
+ margin-bottom: 30px;
+ overflow: visible;
+ box-shadow: none;
+ position: relative;
+}
+.progress-bar{
+	/*width:100%; */
+	background: $green-basic;
+}
+.progress .progress-bar{
+ height:8px;
+ position: relative;
+ top: -3px;
+ box-shadow: none;
+ animation: animate-positive 2s;
+}
+.progress .progress-value{
+ display: block;
+ font-size: 18px;
+ font-weight: bold;
+ color: #000;
+ position: absolute;
+ top: -30px;
+ right: 5px;
+}
+.progress.pink{
+ background: #DDE2ED;
+} 
+@-webkit-keyframes animate-positive{
+ 0% { width: 0%; }
+}
+@keyframes animate-positive{
+ 0% { width: 0%; }
+}

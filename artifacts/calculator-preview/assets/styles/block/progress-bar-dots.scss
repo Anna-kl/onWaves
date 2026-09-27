@@ -1,0 +1,54 @@
+.wrapper {
+  width: 100%;
+  margin: 0 auto;
+  position: relative; 
+  z-index: 2;
+} 
+.progress-step {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+} 
+.step {
+  background: #DDE2ED;
+  width: 8px;
+  height: 8px;
+  border-radius: 100%;
+  text-align: center;
+  line-height: 40px;
+  color: #11142D;
+  border: 0px solid #fff;
+  transition: 300ms ease;
+  cursor: pointer;
+  margin-top: 17px;
+} 
+.step:hover {
+  background: $green-basic;
+} 
+.step.active {
+  background: $green-basic;
+} 
+.progress-bar,
+.progress-complited {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #DDE2ED;
+  z-index: -1;
+} 
+.progress-complited {
+  background: $green-basic;
+  width: 0;
+  transition: 300ms ease width;
+} 
+.tab {
+  text-align: center;
+  padding: 10px 20px;
+  display: none;
+  color: white;
+} 
+.tab.active {
+  display: block;
+}
