@@ -28,8 +28,8 @@ export class RubricMenuComponent implements OnChanges{
   private isBlocked2Level: boolean = false;
   home: { icon: string } = { icon: 'pi pi-home' };
   constructor(private _dictionary: DictionaryService){
-    this.screenWidth = window.innerWidth;
-    this.screenHeight = window.innerHeight;
+    // На SSR window нет: без этой проверки форма поиска падает и в HTML
+    // остаётся оболочка без noindex.
     this.getScreenSize();
     this._dictionary.getMainCategories().subscribe(
       async response => {
@@ -112,9 +112,11 @@ export class RubricMenuComponent implements OnChanges{
   @HostListener('window:resize', ['$event'])
   @HostListener('window')
   getScreenSize() {
+    if (typeof window === 'undefined') {
+      return;
+    }
     this.screenHeight = window.innerHeight;
     this.screenWidth = window.innerWidth;
-
   }
   set3Level(item: any) {
     if (!this.isBlocked2Level) {
