@@ -36,12 +36,20 @@ const routes: Routes = [
   {
     path: 'helpQuestion',
     component: HelpQuestionComponent,
-    data: { title: 'Помощь — вопрос | OnWaves' },
+    data: {
+      title: 'Помощь — вопрос | OnWaves',
+      // Шаг центра помощи, не отдельный документ. Disallow не ставим:
+      // страница может уже быть в индексе, робот должен увидеть noindex.
+      noindex: true,
+    },
   },
   {
     path: 'helpQuestionAnswer',
     component: HelpQuestionsAnswerComponent,
-    data: { title: 'Помощь — ответ | OnWaves' },
+    data: {
+      title: 'Помощь — ответ | OnWaves',
+      noindex: true,
+    },
   },
   {
     path: 'oservice',
@@ -55,7 +63,11 @@ const routes: Routes = [
   {
     path: 'pravila',
     component: PravilaComponent,
-    data: { title: 'Правила сервиса | OnWaves' },
+    data: {
+      title: 'Правила сервиса | OnWaves',
+      description: 'Политика конфиденциальности OnWaves: какие персональные данные ' +
+        'собираются при онлайн-записи, зачем они нужны и как сервис их защищает.',
+    },
   },
   { path: 'stranica', component: StranicaComponent, data: { noindex: true } },
   { path: 'notifications', component: NotificationsComponent, data: { noindex: true } },

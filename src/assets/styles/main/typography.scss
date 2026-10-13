@@ -56,7 +56,17 @@ h4{ font-size: 1.25rem;}
 }
 
 /* H1 */
-h1{ font-size: 1.5rem; } 
+h1{ font-size: 1.5rem; }
+/* Крошка «Помощь»: тот же вид, что у h1, но не заголовок страницы. */
+.help-crumb {
+	font-style: normal;
+	line-height: 130%;
+	color: #11142D;
+	font-weight: 700;
+	text-align: left;
+	margin: 0;
+	font-size: 1.5rem;
+} 
 /* H2 */ 
 h2{ font-size: 1.25rem;}
 /* H3   */
