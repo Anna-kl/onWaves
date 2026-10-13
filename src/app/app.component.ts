@@ -11,6 +11,7 @@ import {IResponse} from "./DTO/classes/IResponse";
 import { AnalyticsService } from 'src/services/analytics.service';
 import { SeoService, SeoPageData } from 'src/services/seo.service';
 import { isNoindexProfileSlug } from 'src/app/profile-ba/helpers/noindex-profiles';
+import { buildHomeJsonLd } from 'src/app/pages/home-jsonld';
 import {  PushDebugService } from 'src/services/push-notification.service';
 import { getDeviceCompat } from 'src/utils/device-compat';
 import { environment } from 'src/enviroments/environment';
@@ -288,6 +289,11 @@ export class AppComponent implements OnInit, AfterViewInit  {
       );
     } else {
       this.seo.update(url, seoData);
+      // update() сбрасывает JSON-LD. Главная ставит свой блок сразу после,
+      // иначе NavigationEnd сотрёт разметку до сериализации SSR.
+      if (this.isHomeUrl(url)) {
+        this.seo.setJsonLd(buildHomeJsonLd(environment.siteUrl));
+      }
     }
   }
 
@@ -296,6 +302,11 @@ export class AppComponent implements OnInit, AfterViewInit  {
     const path = (url.split('#')[0] ?? '').split('?')[0] ?? '';
     const slug = path.split('/').filter(Boolean)[0];
     return isNoindexProfileSlug(slug);
+  }
+
+  private isHomeUrl(url: string): boolean {
+    const path = (url.split('#')[0] ?? '').split('?')[0] ?? '';
+    return path === '' || path === '/';
   }
 
   /** «Назад» в браузере — не сбрасываем скролл, чтобы вернуться к списку. */
