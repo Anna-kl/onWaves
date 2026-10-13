@@ -17,6 +17,7 @@ import {DictionaryService} from "../../../services/dictionary.service";
 import {ProfileDataService} from "../services/profile-data.service";
 import { PublicProfileResolved } from '../public-profile.resolver';
 import { publicProfileSeoFrom } from '../helpers/public-profile-seo';
+import { noindexFollowMeta } from '../helpers/noindex-profiles';
 import { IViewLanding } from '../../DTO/views/landing/IViewLanding';
 import { IWorkLocation } from '../../DTO/views/IWorkLocation';
 import { LandingState, resolveLandingState } from '../helpers/landing-state';
@@ -239,6 +240,7 @@ export class ProfileBAComponent implements OnInit, OnDestroy {
         image: profile.avatarUrl && profile.id
           ? resolveAvatarUrl(profile.avatarUrl)
           : undefined,
+        ...noindexFollowMeta(profile.link),
       });
     }
 

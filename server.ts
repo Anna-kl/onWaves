@@ -9,6 +9,7 @@ import { request as httpsRequest } from 'node:https';
 import { basename, join } from 'node:path';
 import { URL } from 'node:url';
 import { AppServerModule } from './src/main.server';
+import { isIndexableProfileLink } from './src/app/profile-ba/helpers/noindex-profiles';
 
 /**
  * Кеш готового HTML для SSR-рендера.
@@ -39,6 +40,8 @@ const RESERVED_PROFILE_SLUGS = new Set([
   'catalog', 'landing', 'masters', 'search', 'static', 'ba-edit',
   'profilebisacc', 'cabinet-ba', 'sitemap.xml', 'robots.txt',
 ]);
+// Демо-slug (developer, user-example, bussiness) — в NOINDEX_PROFILE_SLUGS.
+// Тот же модуль читает карточка для meta robots. Список временный, до isTest на бэке.
 
 function ssrPathname(url: string): string {
   const path = (url.split('#')[0] ?? '').split('?')[0] || '/';
@@ -213,8 +216,7 @@ function normalizeLastmod(value: string | null | undefined): string | null {
  * такие адреса не открываются через translate-link.
  */
 function isPlainProfileLink(link: string): boolean {
-  if (!link || link.length > 120 || /[\/:?#\s]/.test(link)) return false;
-  return !RESERVED_PROFILE_SLUGS.has(link.toLowerCase());
+  return isIndexableProfileLink(link, RESERVED_PROFILE_SLUGS);
 }
 
 function extractSitemapItems(body: any): { items: any[]; totalCount: number | null } {

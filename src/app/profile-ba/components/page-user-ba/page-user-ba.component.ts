@@ -20,6 +20,7 @@ import { AnalyticsService } from 'src/services/analytics.service';
 import { SeoService } from 'src/services/seo.service';
 import { Router } from '@angular/router';
 import { isPublicCellingsProfile, postalLocality, publicProfileCanonicalPath, publicProfileSeoFrom } from '../../helpers/public-profile-seo';
+import { noindexFollowMeta } from '../../helpers/noindex-profiles';
 import { cellingsCalculatorFaq, citiesFromWorkLocations, displayOfferCities } from '../../helpers/cellings-offer';
 import { select, Store } from '@ngrx/store';
 import { selectProfileMainClient } from '../../../ngrx-store/mainClient/store.select';
@@ -272,6 +273,7 @@ export class PageUserBAComponent implements OnInit, OnDestroy {
               image: this.profile.avatarUrl && this.profile.id
                 ? resolveAvatarUrl(this.profile.avatarUrl)
                 : undefined,
+              ...noindexFollowMeta(this.profile.link),
             });
             this._seo.setJsonLd(this.buildProfileJsonLd(name, pageDesc, canonicalPath));
             // Title выставлен из асинхронных данных — только теперь шлём хит в Метрику,

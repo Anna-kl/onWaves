@@ -11,6 +11,7 @@ import { LandingService } from 'src/services/landing.service';
 import { SeoService } from 'src/services/seo.service';
 import { resolveAvatarUrl } from '../../helpers/common/avatar1';
 import { publicProfileSeoFrom } from './helpers/public-profile-seo';
+import { noindexFollowMeta } from './helpers/noindex-profiles';
 import { LandingLoadResult } from './helpers/landing-state';
 
 export interface PublicProfileResolved {
@@ -135,6 +136,7 @@ export class PublicProfileResolver implements Resolve<PublicProfileResolved> {
       image: resolved.profile.avatarUrl && resolved.profile.id
         ? resolveAvatarUrl(resolved.profile.avatarUrl)
         : undefined,
+      ...noindexFollowMeta(resolved.profile.link),
     });
   }
 }

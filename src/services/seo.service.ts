@@ -17,6 +17,11 @@ export interface SeoPageData {
   image?: string;
   /** true — страница не должна попадать в индекс (личные кабинеты, служебные экраны). */
   noindex?: boolean;
+  /**
+   * Вместе с noindex оставить follow. Демо-карточки уже могут быть в индексе:
+   * робот должен прочитать страницу. Кабинеты по-прежнему noindex, nofollow.
+   */
+  follow?: boolean;
   /** Тип og:type; для карточек бизнеса имеет смысл 'profile'. */
   ogType?: string;
 }
@@ -75,7 +80,7 @@ export class SeoService {
     this.writeMeta('name', 'twitter:image', image);
 
     this.setCanonical(canonical);
-    this.setRobots(data.noindex === true);
+    this.setRobots(data.noindex === true, data.follow === true);
     // Разметка описывает конкретную сущность. Оставить её на следующей странице
     // хуже, чем не иметь вовсе: поисковик увидит структурированные данные,
     // которых нет в контенте. Страница, которой разметка нужна, ставит её сама
@@ -92,11 +97,11 @@ export class SeoService {
    * затёр бы уже правильные теги дефолтными. Каноникал же от данных не зависит —
    * его безопасно (и нужно) поставить сразу.
    */
-  public updateNavigationOnly(url: string, noindex = false): void {
+  public updateNavigationOnly(url: string, noindex = false, follow = false): void {
     const canonical = this.buildCanonical(url);
     this.meta.updateTag({ property: 'og:url', content: canonical });
     this.setCanonical(canonical);
-    this.setRobots(noindex);
+    this.setRobots(noindex, follow);
     // JSON-LD не трогаем: NavigationEnd приходит ПОСЛЕ ngOnInit карточки,
     // которая уже поставила разметку. Сброс здесь выкидывал бы её из SSR HTML.
     // Уход на обычную страницу чистит блок через update().
@@ -214,10 +219,13 @@ export class SeoService {
    * из кабинета на публичную страницу оставшийся noindex выкинул бы из индекса
    * именно ту страницу, ради которой всё делается.
    */
-  private setRobots(noindex: boolean): void {
-    this.meta.updateTag({
-      name: 'robots',
-      content: noindex ? 'noindex, nofollow' : 'index, follow',
-    });
+  private setRobots(noindex: boolean, follow = false): void {
+    const content = noindex
+      ? (follow ? 'noindex, follow' : 'noindex, nofollow')
+      : 'index, follow';
+    this.meta.updateTag({ name: 'robots', content });
+    // Как у title: Domino не всегда синхронизирует узел, который сериализует SSR.
+    const nodes = this.doc.head?.querySelectorAll('meta[name="robots"]');
+    nodes?.forEach(node => node.setAttribute('content', content));
   }
 }

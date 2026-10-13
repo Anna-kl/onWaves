@@ -10,6 +10,7 @@ import {LoginService} from "./auth/login.service";
 import {IResponse} from "./DTO/classes/IResponse";
 import { AnalyticsService } from 'src/services/analytics.service';
 import { SeoService, SeoPageData } from 'src/services/seo.service';
+import { isNoindexProfileSlug } from 'src/app/profile-ba/helpers/noindex-profiles';
 import {  PushDebugService } from 'src/services/push-notification.service';
 import { getDeviceCompat } from 'src/utils/device-compat';
 import { environment } from 'src/enviroments/environment';
@@ -278,10 +279,23 @@ export class AppComponent implements OnInit, AfterViewInit  {
     if (dynamicSeo) {
       // Заголовок и описание такой страницы ставит сам компонент из данных
       // бэка — здесь только каноникал и robots, они выводятся из URL.
-      this.seo.updateNavigationOnly(url, seoData.noindex === true);
+      // NavigationEnd приходит после update() карточки и затирал бы noindex.
+      const testProfile = this.isTestProfileUrl(url);
+      this.seo.updateNavigationOnly(
+        url,
+        seoData.noindex === true || testProfile,
+        testProfile,
+      );
     } else {
       this.seo.update(url, seoData);
     }
+  }
+
+  /** Демо-slug и его подстраницы: noindex, follow. Живые карточки не затрагивает. */
+  private isTestProfileUrl(url: string): boolean {
+    const path = (url.split('#')[0] ?? '').split('?')[0] ?? '';
+    const slug = path.split('/').filter(Boolean)[0];
+    return isNoindexProfileSlug(slug);
   }
 
   /** «Назад» в браузере — не сбрасываем скролл, чтобы вернуться к списку. */
