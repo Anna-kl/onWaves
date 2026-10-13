@@ -136,6 +136,9 @@ const routes: Routes = [
     path: 'search/extsearch',
     component: ExtsearchComponent,
     data: {
+      // Форма без h1 и без своего текста. Disallow в robots.txt не ставим:
+      // если адрес уже в индексе, робот должен прочитать noindex.
+      noindex: true,
       title: 'Расширенный поиск мастеров и салонов | OnWaves',
       description: 'Подберите мастера по услуге, городу и удобному времени — ' +
         'и запишитесь онлайн без звонков.',

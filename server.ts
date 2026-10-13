@@ -152,12 +152,22 @@ const SITE_URL = 'https://onwaves.online';
 /** Хосты, которые отвечают тем же приложением, но индексироваться не должны. */
 const NOINDEX_HOSTS = ['ssr.onwaves.online'];
 
-/** Публичные статические маршруты витрины для sitemap. */
+/**
+ * Дата содержимого статических страниц карты.
+ * Не `new Date()` и не дата процесса: ежедневный lastmod без правки текста
+ * обесценивает поле. Менять, когда меняется текст этих маршрутов.
+ */
+const SITEMAP_STATIC_LASTMOD = '2026-10-13';
+
+/**
+ * Публичные статические маршруты витрины для sitemap.
+ * `/search/extsearch` нет: в первом HTML нет h1 и своего текста.
+ * `/landing` остаётся, пока владелец не решит, какая страница главная для мастеров.
+ */
 const SITEMAP_ROUTES: { path: string; changefreq: string; priority: string }[] = [
   { path: '/', changefreq: 'daily', priority: '1.0' },
   { path: '/landing', changefreq: 'monthly', priority: '0.8' },
   { path: '/masters', changefreq: 'monthly', priority: '0.8' },
-  { path: '/search/extsearch', changefreq: 'weekly', priority: '0.7' },
   { path: '/catalog', changefreq: 'daily', priority: '0.6' },
   { path: '/static/oservice', changefreq: 'monthly', priority: '0.5' },
   { path: '/static/help', changefreq: 'monthly', priority: '0.5' },
@@ -331,12 +341,11 @@ async function getSitemapProfiles(): Promise<SitemapProfile[]> {
 }
 
 function renderSitemap(profiles: SitemapProfile[]): string {
-  // У статики нет честной даты правки. «Сегодня» на каждом обходе
-  // говорило бы роботу, что эти страницы меняются ежедневно.
   const staticUrls = SITEMAP_ROUTES.map(
     route =>
       `  <url>\n` +
       `    <loc>${SITE_URL}${route.path}</loc>\n` +
+      `    <lastmod>${SITEMAP_STATIC_LASTMOD}</lastmod>\n` +
       `    <changefreq>${route.changefreq}</changefreq>\n` +
       `    <priority>${route.priority}</priority>\n` +
       `  </url>`,
