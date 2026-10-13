@@ -10,6 +10,7 @@ import { basename, join } from 'node:path';
 import { URL } from 'node:url';
 import { AppServerModule } from './src/main.server';
 import { isIndexableProfileLink } from './src/app/profile-ba/helpers/noindex-profiles';
+import { catalogAnchorLabel } from './src/app/profile-ba/helpers/catalog-anchor';
 
 /**
  * Кеш готового HTML для SSR-рендера.
@@ -191,6 +192,8 @@ const SITEMAP_CACHE_TTL_MS = 60 * 60 * 1000;
 interface SitemapProfile {
   link: string;
   name: string | null;
+  city: string | null;
+  mainCategory: string | null;
   lastModified: string | null;
 }
 
@@ -299,9 +302,13 @@ async function fetchProfileLinks(): Promise<SitemapProfile[]> {
       if (seen.has(key)) continue;
       seen.add(key);
       const name = typeof item?.name === 'string' ? item.name.trim() : '';
+      const city = typeof item?.city === 'string' ? item.city.trim() : '';
+      const mainCategory = typeof item?.mainCategory === 'string' ? item.mainCategory.trim() : '';
       collected.push({
         link,
         name: name || null,
+        city: city || null,
+        mainCategory: mainCategory || null,
         lastModified: normalizeLastmod(item?.lastModified),
       });
     }
@@ -377,7 +384,7 @@ function renderHtmlCatalog(profiles: SitemapProfile[]): string {
   const items = profiles
     .map(profile => {
       const href = `${SITE_URL}/${encodeURIComponent(profile.link)}`;
-      const label = escapeHtml(profile.name || profile.link);
+      const label = escapeHtml(catalogAnchorLabel(profile));
       return `      <li><a href="${escapeHtml(href)}">${label}</a></li>`;
     })
     .join('\n');
@@ -405,7 +412,7 @@ function renderHtmlCatalog(profiles: SitemapProfile[]): string {
 <body>
   <p><a href="${SITE_URL}/">OnWaves</a></p>
   <h1>Каталог мастеров</h1>
-  <p>Публичные страницы мастеров и салонов. Запись онлайн без звонков.</p>
+  <p>Публичные страницы мастеров Каширы и района.</p>
   ${list}
 </body>
 </html>
