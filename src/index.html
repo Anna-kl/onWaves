@@ -45,10 +45,11 @@
 
 <!-- Analytics: Яндекс.Метрика + Top.Mail.Ru (VK Ads).
      Просмотры SPA шлёт AnalyticsService — здесь только загрузчики,
-     без авто-хита и без pid (USER_ID в кабинете VK — заглушка). -->
+     без авто-хита (defer) и без pid.
+     Счётчики грузятся только на боевом домене: localhost, onwaves-server.online
+     и ocpio.ru иначе пишут визиты в тот же счётчик. -->
 <script type="text/javascript">
-    var ANALYTICS_DISABLED_HOSTS = ['ssr.onwaves.online'];
-    if (ANALYTICS_DISABLED_HOSTS.indexOf(location.hostname) === -1) {
+    if (location.hostname === 'onwaves.online') {
         (function(m,e,t,r,i,k,a){
             m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
             m[i].l=1*new Date();
@@ -73,7 +74,7 @@
 <body>
   <app-root></app-root>
 
-  <noscript><div><img src="https://mc.yandex.ru/watch/102514111" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-  <noscript><div><img src="https://top-fwz1.mail.ru/counter?id=3792159;js=na" style="position:absolute;left:-9999px;" alt="Top.Mail.Ru" /></div></noscript>
+  <!-- Пиксели noscript не ставим: они не умеют проверить хост и слали бы
+       хиты с localhost и стейджинга. Приложение без JS не работает. -->
   <noscript>Для работы приложения включите JavaScript.</noscript>
 </body></html>

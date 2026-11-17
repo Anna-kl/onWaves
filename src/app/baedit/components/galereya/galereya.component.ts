@@ -83,7 +83,7 @@ export class GalereyaComponent implements OnDestroy {
   choosedAlbum(albumId: string, force = false) {
     this.chooseAlbum = this.albums.find(_ => _.id == albumId);
     if (this.chooseAlbum) {
-      this._apiImage.getImages(this.chooseAlbum.id, force).subscribe(
+      this._apiImage.getImages(this.chooseAlbum.id, force, true).subscribe(
         images => {
           this.images = images.map(image => this.toGalleryImage(image));
         });
@@ -91,16 +91,49 @@ export class GalereyaComponent implements OnDestroy {
   }
 
   loadAlbum(force = false) {
-    this._apiImage.getAlbums(this.profile?.id!, force).subscribe(
+    this._apiImage.getAlbums(this.profile?.id!, force, true).subscribe(
       result => {
         this.albums = result;
-        if (this.chooseAlbum) {
-          this.choosedAlbum(this.chooseAlbum.id, force);
+        const currentId = this.chooseAlbum?.id;
+        const stillThere = !!currentId && result.some(album => album.id === currentId);
+        if (stillThere && currentId) {
+          this.choosedAlbum(currentId, force);
+          return;
         }
-        else if (this.albums.length > 0) {
-          this.choosedAlbum(this.albums[0].id, force);
+        this.images = [];
+        this.chooseAlbum = undefined;
+        if (result.length > 0) {
+          this.choosedAlbum(result[0].id, force);
         }
       });
+  }
+
+  presentationSaving = false;
+  savePresentation(change: Parameters<AlbumsService['updatePresentation']>[1]): void {
+    if (this.presentationSaving || !this.profile?.id) return;
+    this.presentationSaving = true;
+    this._apiImage.updatePresentation(this.profile.id, change).pipe(takeUntil(this.destroy$)).subscribe({
+      next: result => {
+        this.presentationSaving = false;
+        if (result.code !== 200) { this.messageService.add({severity:'error', summary:'Галерея', detail:result.message || 'Не удалось сохранить'}); return; }
+        this.loadAlbum(true);
+      },
+      error: () => { this.presentationSaving = false; this.messageService.add({severity:'error', summary:'Галерея', detail:'Не удалось сохранить порядок и видимость'}); }
+    });
+  }
+  toggleAlbum(album: IAlbumWithFoto, event: Event): void {
+    event.stopPropagation(); this.savePresentation({albums:[{id:album.id,isPublished:album.isPublished === false}]});
+  }
+  toggleImage(image: IViewImage, event: Event): void {
+    event.stopPropagation(); this.savePresentation({images:[{id:image.id,isPublished:image.isPublished === false}]});
+  }
+  movePresentation(kind: 'albums' | 'images', id: string, offset: number, event: Event): void {
+    event.stopPropagation();
+    const list = [...(kind === 'albums' ? this.albums : this.images)];
+    const index = list.findIndex(item => item.id === id), target = index + offset;
+    if (index < 0 || target < 0 || target >= list.length) return;
+    [list[index],list[target]] = [list[target],list[index]];
+    this.savePresentation({[kind]:list.map((item, sortOrder) => ({id:item.id,sortOrder:sortOrder * 10}))});
   }
 
   loadServiceNames(profileId: string): void {
@@ -279,14 +312,28 @@ export class GalereyaComponent implements OnDestroy {
 
 
 
-  deleteAlbum(album: IAlbumWithFoto) {
-    const modalRef = this.modalService.open(DeleteAlbumComponent);
+  deleteAlbum(event: Event, album: IAlbumWithFoto) {
+    event.stopPropagation();
+    event.preventDefault();
+    const modalRef = this.modalService.open(DeleteAlbumComponent, { backdrop: 'static' });
     modalRef.componentInstance.deleteYes = album.id;
     modalRef.componentInstance.deleted.subscribe(
-      (res: any) => {
-        if (res == 1) {
+      (res: unknown) => {
+        if (res === 1) {
+          this.albums = this.albums.filter(item => item.id !== album.id);
+          if (this.chooseAlbum?.id === album.id) {
+            this.chooseAlbum = undefined;
+            this.images = [];
+          }
           this.loadAlbum(true);
+          return;
         }
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Альбом',
+          detail: typeof res === 'string' && res ? res : 'Не удалось удалить альбом',
+          life: 5000
+        });
       });
   }
 
@@ -354,13 +401,29 @@ export class GalereyaComponent implements OnDestroy {
   deleteImage(event: Event, product: any) {
     event.stopPropagation();
     event.preventDefault();
-    this._apiImage.deleteImage(product.id).subscribe(result => {
-      if (result.code === 200){
-        this.closeContextMenu();
-        this.loadAlbum(true);
-        this.images = this.images.filter(_ => _.id !== product.id);
-        if (this.images.length === 0){
+    this._apiImage.deleteImage(product.id).subscribe({
+      next: result => {
+        // 404 — карточка уже снята на сервере, а кабинет ещё показывает старый список.
+        if (result.code === 200 || result.code === 404) {
+          this.closeContextMenu();
+          this.images = this.images.filter(item => item.id !== product.id);
+          this.loadAlbum(true);
+          return;
         }
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Фото',
+          detail: result.message || 'Не удалось удалить фото',
+          life: 5000
+        });
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Фото',
+          detail: 'Не удалось удалить фото. Обновите страницу и попробуйте ещё раз.',
+          life: 5000
+        });
       }
     });
   }

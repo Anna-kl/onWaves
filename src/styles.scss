@@ -1338,23 +1338,49 @@ app-modalalbum{
 	width:30px;
 }
 /* EDIT BA Галерея http://localhost:3000/ba_edit7_gallery(1.75).html */
+/* Обложка альбома держит свою пропорцию: квадрат 1/1 растягивал портрет
+   и «сплющивал» работу. Высота ряда общая, ширина — от кадра. */
 .edit-ba-foto-tab{
-	min-width: 225px;
-    max-width: 225px;
-    margin: 0 5px 0px 5px;
-	border-radius: 12px;
-	aspect-ratio: 1 / 1;
+	position: relative;
+	flex: 0 0 auto;
+	min-width: 148px;
+	width: auto;
+	height: 220px;
+	margin: 0 5px 0px 5px;
+	border-radius: 16px;
+	aspect-ratio: auto;
 	background-color: $green-basic;
+	overflow: hidden;
+}
+.edit-ba-foto-tab.cont-horiz,
+.edit-ba-foto-tab.cont-horiz-end-end{
+	align-items: center;
+	justify-content: center;
+}
+.edit-ba-foto-tab:not(:has(.edit-ba-foto-albom)){
+	width: 220px;
+	min-width: 220px;
+}
+.edit-ba-foto-tab:has(.edit-ba-foto-albom){
+	background-color: #f3f5f7;
 }
 .edit-ba-foto-tab:hover{
 	background-color:$green-dark;
 	color:$green-dark;
 }
+.edit-ba-foto-tab:has(.edit-ba-foto-albom):hover{
+	background-color: #f3f5f7;
+}
 .edit-ba-foto-albom{
-	min-width: 200px;
-	width: 100%;
-	aspect-ratio: 1 / 1;
-	background-color:gray;
+	display: block;
+	height: 100%;
+	width: auto;
+	max-width: 420px;
+	min-width: 0;
+	aspect-ratio: auto;
+	object-fit: contain;
+	object-position: center;
+	background-color: #f3f5f7;
 }
 .card-albom-ba{
 	border-radius: 12px;
@@ -1450,7 +1476,8 @@ app-modalalbum{
 .card-albom-ba{
 	margin: 0px 5px 25px 5px;
     border: 2px solid #fff;
-    max-width: 225px; 
+    max-width: 440px;
+	flex: 0 0 auto;
 	display: flex;
 	flex-flow: column nowrap;
 	align-items: center; 
@@ -1460,7 +1487,9 @@ app-modalalbum{
 } 
 .card-albom-text{
 	margin: 0px 5px 5px 5px; 
-    width: 210px;
+    width: 100%;
+	box-sizing: border-box;
+	padding: 0 4px;
 	display: flex;
     justify-content: flex-start;
     align-items: flex-start;
@@ -1471,20 +1500,29 @@ app-modalalbum{
 }
 @media screen and (max-width: 480px) {
 	.edit-ba-foto-albom{
-		min-width: 130px;
-		width: 130px;
-		height: 130px;
+		height: 100%;
+		width: auto;
+		max-width: 300px;
+		min-width: 0;
 	}
 	.edit-ba-foto-tab{
-		min-width: 130px;
-		width: 130px;
-		height: 130px;
+		min-width: 120px;
+		width: auto;
+		height: 168px;
+	}
+	.edit-ba-foto-tab:not(:has(.edit-ba-foto-albom)){
+		width: 168px;
+		min-width: 168px;
+	}
+	.card-albom-ba{
+		max-width: 320px;
 	}
 	.card-albom-text{
-		width: 130px;
+		width: 100%;
 	}
 	.card-albom-name{
-		height: 70px;
+		min-height: 40px;
+		height: auto;
 	}
 } 
 .card-albom-kol-vo-foto{
@@ -2087,6 +2125,16 @@ app-modal-calendar{
 
 .record-success-telegram-dialog .modal-dialog {
 	max-width: 440px;
+}
+.booking-success-dialog {
+  .modal-dialog { max-width: 520px; margin: 20px auto; }
+  .modal-content { max-width: 520px; padding: 28px; border: 0; border-radius: 28px; box-shadow: 0 24px 80px rgba(4, 60, 72, .18); }
+}
+@media (max-width: 480px) {
+  .booking-success-dialog {
+    .modal-dialog { width: calc(100% - 24px); margin: 12px auto; }
+    .modal-content { padding: 20px; border-radius: 24px; }
+  }
 }
 .modal-content{/*bootsrap override*/
 	max-width:540px ; 

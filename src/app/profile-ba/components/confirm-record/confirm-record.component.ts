@@ -5,7 +5,7 @@ import {RecordService} from "../../../../services/record.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ProfileDataService} from "../../services/profile-data.service";
 import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessProfile";
-import {getAddressProfile, recordLocationText, serviceWorkLocationType} from "../../../../helpers/common/address";
+import {fixedPointLine, fixedPointsOf, getAddressProfile, recordLocationText, serviceWorkLocationType} from "../../../../helpers/common/address";
 import {NgbActiveModal, NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
 import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
 import { RecordSuccessTelegramModalComponent } from '../record-success-telegram-modal/record-success-telegram-modal.component';
@@ -24,22 +24,39 @@ import {getTokenMainClient, selectProfileMainClient} from "../../../ngrx-store/m
 import {getHours, getMinutes} from "../../../../helpers/common/timeHelpers";
 import {PaymentMethodType} from "../../../DTO/enums/paymentMethodType";
 import { finalize, map, Observable, Subscription, switchMap, tap } from 'rxjs';
-import { getPrice, getPriceService, getPriceString } from 'src/helpers/common/price.helpers';
+import { getPrice as sumServicePrice, getPriceService, getPriceString } from 'src/helpers/common/price.helpers';
 import { ErrorConfirmRecordComponent } from '../errorConfirmRecord/error-confirm-record.component';
 import { BookingContactModalComponent } from '../booking-contact-modal/booking-contact-modal.component';
 import { ProfileService } from 'src/services/profile.service';
 import { WelcomeQuote } from 'src/app/DTO/views/promo/welcome-coupon';
 import { WelcomeCouponService } from 'src/services/welcome-coupon.service';
+import { PromoSeatsService } from 'src/services/promo-seats.service';
+import { PromoSeatQuote } from 'src/app/DTO/views/promo/promo-seats';
+import { GiveawaysService } from 'src/services/giveaways.service';
+import { GiveawayLoad, GiveawayPrizeQuote } from 'src/app/DTO/views/giveaway/giveaway';
+import { clearPrizeDraft, readPrizeDraft, savePrizeDraft } from 'src/helpers/giveaway';
+import { promoTermsPath, seatsLeftText, ULTRASOUND_PROMO } from '../../helpers/promo-seats';
+import { ModalRegisterComponent } from '../../../components/modals/register-profile/modal-register/modal-register.component';
 import { formatAmount, formatRub, welcomeReasonText } from 'src/helpers/common/welcome-coupon';
+import { MARY_LEGS_SERVICE_ID, maryLegsPayRub, maryLegsSaleRub } from '../../helpers/mary-legs-sale';
+import { masterPromos, promoByLanding, PromoOffer, promoPriceRub, masterSaleRub } from '../../helpers/promo-terms';
+import {
+  MARY_SKIN_COUPON_RUB,
+  MARY_SKIN_LIST_RUB,
+  MARY_SKIN_SALE_RUB,
+  MARY_SKIN_SERVICE_ID,
+} from '../../helpers/mary-skinhale-sale';
 import { v4 as uuidv4 } from 'uuid';
 import { AnalyticsService } from 'src/services/analytics.service';
 import { resolveAvatarUrl } from 'src/helpers/common/avatar1';
 import { WorkLocationType } from '../../../DTO/enums/workLocationType';
+import { UserType } from '../../../DTO/classes/profiles/profile-user.model';
 import { IRecordLocation } from '../../../DTO/classes/records/recordLocation';
 import { IWorkLocation } from '../../../DTO/views/IWorkLocation';
 import { GroupService } from 'src/services/groupservice';
 import { toHoursMinutesString } from 'src/helpers/dateUtils/dateUtils';
-import { forkJoin } from 'rxjs';
+import { applyHourlyDuration, isHourly } from 'src/helpers/common/hourly';
+import { catchError, forkJoin, of } from 'rxjs';
 import { quoteDraftComment, readCellingsQuoteDraft } from '../../helpers/cellings-offer';
 import {
   CalculatorHandoff,
@@ -47,13 +64,20 @@ import {
   clearCalculatorHandoff,
   readCalculatorHandoff,
 } from '../../helpers/calculator-handoff';
+import { clearVisitSource, readVisitSource, visitSourceComment } from '../../helpers/visit-source';
 import {
   BOOKING_TIMEZONE,
   fromCalendarDateTime,
   toCalendarDate
 } from '../../helpers/booking-date';
+import { bookingSelectionKey } from '../../helpers/booking-storage';
+import { BookingPrice, bookingPrice, bookingPrizeIssue, bookingPrizePrice, couponDiscount } from '../../helpers/booking-price';
+import { BookingSuccessDetails, bookingSuccessDetails } from '../../helpers/booking-success';
+import { ReviewRewardCoupon, ReviewRewardsQuote } from 'src/app/DTO/views/promo/review-rewards';
+import { ReviewRewardsService } from 'src/services/review-rewards.service';
 
 interface StoredBookingDraft {
+  pointId?: string | null;
   version: 3;
   profileId: string;
   serviceId: string;
@@ -62,6 +86,7 @@ interface StoredBookingDraft {
   timezone: string;
   dayId: string;
   start: string;
+  duration?: number;
 }
 
 
@@ -84,22 +109,141 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   couponRefusal: string | null = null;
   private quoteKey = '';
   private quoteSub?: Subscription;
+  quoteLoading = false;
+  private readonly sessionSubscriptions = new Subscription();
+  rewardCoupons: ReviewRewardCoupon[] = [];
+  selectedRewardIds: string[] = [];
+  rewardQuote: ReviewRewardsQuote | null = null;
+  rewardQuoteLoading = false;
+  rewardQuoteError = '';
+  private rewardProfileId: string | null = null;
+  private rewardWalletSub?: Subscription;
+  private rewardQuoteSub?: Subscription;
+
+  get priceSummary(): BookingPrice {
+    const price = this.prizeQuote?.status === 'available'
+      ? bookingPrizePrice(this.prizeQuote, this.couponRefusal)
+      : bookingPrice(this.chooseServices, this.welcomeQuote, this.promoQuote, this.applyWelcome, this.businessProfile?.link);
+    price.notice = this.couponRefusal || this.promoRefusal || price.notice;
+    if (this.rewardQuote) {
+      price.payable = this.rewardQuote.clientPayableKopecks / 100;
+      price.reviewRewardDiscount = this.rewardQuote.discountKopecks / 100;
+      price.isFrom = false;
+    }
+    return price;
+  }
   protected readonly formatRub = formatRub;
   protected readonly formatAmount = formatAmount;
 
+  // ── Акция с местами ─────────────────────────────────────────────────────
+  // Место, скидку и итог считает сервер (promos/seats/quote); null — к записи акция не относится.
+  promoQuote: PromoSeatQuote | null = null;
+  /** Сервер отказал в месте при отправке: показываем цену без акции, клиент подтверждает заново. */
+  promoRefusal: string | null = null;
+  private promoSub?: Subscription;
+  private ordinaryUltrasound = false;
+  private ordinaryProfilePromo = false;
+  private get selectedPromoCampaign(): string | null {
+    if (this.ordinaryUltrasound || this.ordinaryProfilePromo) return null;
+    return this.activatedRoute.snapshot.queryParamMap.get('promoCampaign');
+  }
+  private get ultrasoundSelected(): boolean {
+    return this.selectedPromoCampaign === ULTRASOUND_PROMO;
+  }
+  get ultrasoundFlow(): boolean {
+    return !this.ordinaryUltrasound && !this.prizeAwardId && (this.ultrasoundSelected || !!this.promoQuote?.exclusive);
+  }
+
+  get ultrasoundUnavailable(): boolean {
+    return this.ultrasoundFlow && !this.quoteLoading && !this.promoApplies;
+  }
+
+  get profilePromoUnavailable(): boolean {
+    return !!this.selectedPromoCampaign && !this.ultrasoundSelected && !this.quoteLoading && !this.promoApplies;
+  }
+
+  get promoPhoneRequired(): boolean {
+    return this.promoQuote?.status === 'login_required' && (this.ultrasoundFlow || !!this.promoQuote.requireVerifiedPhone);
+  }
+
+  chooseOrdinaryProfileBooking(): void {
+    this.ordinaryProfilePromo = true;
+    this.retryUltrasoundQuote();
+  }
+
+  get profilePromoRefusalText(): string {
+    switch (this.promoQuote?.reason) {
+      case 'promo_not_started': return 'Запись по акции ещё не открылась.';
+      case 'promo_seats_exhausted': return 'Места по акции закончились.';
+      case 'promo_already_used': return 'На этот номер телефона уже занято место.';
+      case 'promo_ended': return 'Акция закончилась.';
+      case 'promo_visit_too_early':
+      case 'promo_visit_too_late': return 'Выберите дату визита в пределах срока акции.';
+      case 'promo_single_service_required': return 'Выберите одну акционную услугу.';
+      default: return this.promoRefusal ?? 'Запись по акции сейчас недоступна.';
+    }
+  }
+
+  chooseOrdinaryUltrasound(): void {
+    this.ordinaryUltrasound = true;
+    this.retryUltrasoundQuote();
+  }
+
+  retryUltrasoundQuote(): void {
+    this.quoteKey = '';
+    this.refreshWelcomeQuote();
+  }
+  prizeAwardId: string | null = null;
+  private prizeVersion = 0;
+  private restoredPrizeServices: subGroup[] = [];
+  private prizeRecordId: string | null = null;
+  prizeQuote: GiveawayPrizeQuote | null = null;
+  prizeBlocked = false;
+
+  get promoApplies(): boolean {
+    const q = this.promoQuote;
+    return !!q && (q.status === 'available' || q.status === 'login_required') && q.promoDiscount > 0;
+  }
+
+  /** Итог с акцией. Снятый купон возвращается в цену: сервер считал её с купоном. */
+  get promoTotal(): { list: number; pay: number } | null {
+    const q = this.promoQuote;
+    if (!q || !this.promoApplies) {
+      return null;
+    }
+    const pay = q.payableAmount + (this.welcomeApplies ? 0 : q.couponDiscount);
+    return { list: q.recordAmount, pay };
+  }
+
+  /** Расшифровка цены акции и ссылка на условия — на этом шаге обязательно. */
+  get promoSeatsLine(): { path: string; text: string } | null {
+    const q = this.promoQuote;
+    const slug = (this.businessProfile?.link ?? '').trim();
+    if (!q || !this.promoApplies || !slug || q.exclusive) {
+      return null;
+    }
+    const coupon = this.welcomeApplies ? q.couponDiscount : 0;
+    const parts = [`${formatRub(q.recordAmount)} − ${formatRub(q.promoDiscount)} (скидка OnWaves)`];
+    if (coupon > 0) {
+      parts.push(`− ${formatRub(coupon)} (купон)`);
+    }
+    return { path: promoTermsPath(slug), text: `${parts.join(' ')} = ${formatRub(this.promoTotal?.pay ?? 0)}` };
+  }
+
+  get promoSeatsText(): string | null {
+    const q = this.promoQuote;
+    return q && this.promoApplies ? seatsLeftText(q.seatsLeft, q.seatsLimit) : null;
+  }
+
   /** Сервер сообщил, что скидка может быть применена (для гостя — после входа). */
   get welcomeOffered(): boolean {
-    const q = this.welcomeQuote;
-    if (!q) return false;
-    return q.couponStatus === 'available' || (q.couponStatus === 'login_required' && q.potentialDiscount > 0);
+    return couponDiscount(this.welcomeQuote) > 0;
   }
   get welcomeApplies(): boolean {
     return this.welcomeOffered && this.applyWelcome;
   }
   get welcomeDiscount(): number {
-    const q = this.welcomeQuote;
-    if (!q) return 0;
-    return q.couponStatus === 'available' ? q.discountAmount : q.potentialDiscount;
+    return couponDiscount(this.welcomeQuote);
   }
   /** Подсказка, почему скидки нет (только понятные клиенту случаи). */
   get welcomeHint(): string | null {
@@ -128,6 +272,116 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
       || (quote.couponStatus === 'login_required' && quote.potentialDiscount > 0);
   }
 
+  /**
+   * Онлайн-запись шугаринга ног: 20% от прайса плюс купон, если сервер его дал.
+   * Прайс в карточке услуги не меняется.
+   */
+  get legsOffer(): { list: number; pay: number; badge: string } | null {
+    const chosen = this.chooseServices ?? [];
+    const legs = chosen.filter(item => item.id === MARY_LEGS_SERVICE_ID && !item.price?.isRange);
+    if (!legs.length) {
+      return null;
+    }
+    const legsList = legs.reduce((sum, item) => sum + Number(item.price?.price || 0), 0);
+    if (legsList <= 0) {
+      return null;
+    }
+    const others = chosen.filter(item => item.id !== MARY_LEGS_SERVICE_ID);
+    const [otherSum] = sumServicePrice(others);
+    const list = legsList + otherSum;
+    const coupon = this.welcomeApplies ? this.welcomeDiscount : 0;
+    const pay = maryLegsPayRub(legsList, coupon) + otherSum;
+    if (pay <= 0 || pay >= list) {
+      return null;
+    }
+    return {
+      list,
+      pay,
+      badge: coupon > 0 ? '−20% и купон' : '−20%',
+    };
+  }
+
+  /** Первая SKINHALE в корзине по цене мастера 5 000. Повтор и курс эту ветку не открывают. */
+  private get marySkinSaleInCart(): boolean {
+    return (this.chooseServices ?? []).some(item =>
+      item.id === MARY_SKIN_SERVICE_ID && !item.price?.isRange && Number(item.price?.price || 0) === MARY_SKIN_SALE_RUB);
+  }
+
+  /**
+   * Скидка мастера уже в прайсе. Купон, если сервер его дал, снимается отдельно: 5 000 − 500 = 4 500.
+   */
+  get skinOffer(): { master: number; pay: number; coupon: number } | null {
+    if (!this.marySkinSaleInCart) {
+      return null;
+    }
+    const [sum] = sumServicePrice(this.chooseServices ?? []);
+    if (sum <= 0) {
+      return null;
+    }
+    const coupon = this.welcomeApplies ? MARY_SKIN_COUPON_RUB : 0;
+    const pay = sum - coupon;
+    if (pay <= 0) {
+      return null;
+    }
+    return { master: sum, pay, coupon };
+  }
+
+  skinLine(service: { id?: string | null; price?: { price?: number | null; isRange?: boolean } | null }): string | null {
+    if (service.id !== MARY_SKIN_SERVICE_ID || service.price?.isRange) {
+      return null;
+    }
+    const price = Number(service.price?.price || 0);
+    if (price !== MARY_SKIN_SALE_RUB) {
+      return null;
+    }
+    return formatRub(MARY_SKIN_SALE_RUB);
+  }
+
+  readonly skinListText = formatRub(MARY_SKIN_LIST_RUB);
+
+  /** Строка последнего шага: ссылка на условия и расшифровка той суммы, которую видит клиент. */
+  get promoTermsLine(): { path: string; fragment: string; slug: string; text: string } | null {
+    const slug = (this.businessProfile?.link ?? '').trim().toLowerCase();
+    if (!masterPromos(slug)) {
+      return null;
+    }
+    const chosen = this.chooseServices ?? [];
+    const match = chosen
+      .map(item => promoByLanding(slug, null, item.id))
+      .find((offer): offer is PromoOffer => !!offer);
+    if (!match) {
+      return null;
+    }
+    const coupon = this.welcomeApplies ? match.couponRub : 0;
+    const pay = promoPriceRub(match) - coupon;
+    const parts = [`${formatRub(match.listRub)} − ${formatRub(masterSaleRub(match))}`];
+    if (coupon > 0) {
+      parts.push(`− ${formatRub(coupon)}`);
+    }
+    return {
+      path: `/${slug}/akcii`,
+      fragment: match.anchor,
+      slug,
+      text: `${parts.join(' ')} = ${formatRub(pay > 0 ? pay : 0)}`,
+    };
+  }
+
+  trackPromoTerms(slug: string): void {
+    this._analytics.trackPromoTerms(slug);
+  }
+
+  legsLine(service: { id?: string | null; price?: { price?: number | null; isRange?: boolean } | null }): string | null {
+    if (service.id !== MARY_LEGS_SERVICE_ID || service.price?.isRange) {
+      return null;
+    }
+    const list = Number(service.price?.price || 0);
+    const sale = maryLegsSaleRub(list);
+    if (sale <= 0) {
+      return null;
+    }
+    return formatRub(list - sale);
+  }
+
   /** Подпись у новой цены. Условие входа объясняет текст билета ниже, здесь — просто метка. */
   get totalBadgeText(): string {
     return this.welcomeQuote?.couponStatus === 'login_required' ? 'купон' : 'с купоном';
@@ -136,7 +390,8 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   /** Заголовок купона: право клиента, без разговора о новой цене. */
   get welcomeTitle(): string | null {
     const amount = this.welcomeDiscount;
-    return this.welcomeOffered && amount > 0 ? `Вам доступен купон на ${formatRub(amount)}` : null;
+    return this.welcomeOffered && amount > 0
+      ? `${this.welcomeQuote?.couponStatus === 'login_required' ? 'Возможен купон' : 'Вам доступен купон'} на ${formatRub(amount)}` : null;
   }
 
   /** Почему купон доступен: сумма записи и порог. Обе цифры — из расчёта сервера. */
@@ -151,13 +406,20 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     }
     // Порог называем, только когда он отличается от суммы записи: иначе строка
     // «запись на 7 000 ₽ подходит под условие — от 7 000 ₽» повторяет одно и то же.
+    // У первой SKINHALE купон считается от 7 000, а в корзине уже цена мастера 5 000.
+    if (this.marySkinSaleInCart) {
+      const skinBase = `Купон считается от цены без акции — ${formatRub(MARY_SKIN_LIST_RUB)}.`;
+      return quote.couponStatus === 'login_required'
+        ? `${skinBase} После ввода телефона проверим право на купон. Он доступен для первой выполненной записи через OnWaves.`
+        : `${skinBase} Купон закрепится за этой записью.`;
+    }
     const amount = formatAmount(quote.originalAmount, quote.amountIsFrom);
     const showThreshold = !!quote.threshold && !quote.amountIsFrom && quote.originalAmount > quote.threshold;
     const base = showThreshold
       ? `Ваша запись на ${amount} подходит под условие — от ${formatRub(quote.threshold!)}.`
       : `Ваша запись ${quote.amountIsFrom ? '' : 'на '}${amount} подходит под условие купона.`;
     return quote.couponStatus === 'login_required'
-      ? `${base} Войдите или зарегистрируйтесь при оформлении, чтобы закрепить купон за записью.`
+      ? `${base} После ввода телефона проверим право на купон. Он доступен для первой выполненной записи через OnWaves.`
       : `${base} Купон закрепится за этой записью.`;
   }
 
@@ -168,6 +430,84 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
 
   onToggleWelcome(): void {
     this._welcome.track(this.applyWelcome ? 'applied' : 'removed', this.welcomeQuote?.campaignCode);
+    this.refreshRewardsQuote();
+  }
+
+  get rewardQuoteBlocksBooking(): boolean {
+    return !!this.selectedRewardIds?.length && !this.rewardQuote;
+  }
+
+  toggleReward(couponId: string, selected: boolean): void {
+    this.selectedRewardIds = selected
+      ? [...new Set([...this.selectedRewardIds, couponId])]
+      : this.selectedRewardIds.filter(id => id !== couponId);
+    this.refreshRewardsQuote();
+  }
+
+  private loadRewardWallet(clientId: string | null): void {
+    if (this.rewardProfileId === clientId) return;
+    this.rewardProfileId = clientId;
+    this.rewardWalletSub?.unsubscribe();
+    this.selectedRewardIds = [];
+    this.rewardCoupons = [];
+    if (!clientId) return;
+    this.rewardWalletSub = this._reviewRewards.mine().subscribe({
+      next: wallet => this.rewardCoupons = wallet.items.filter(item => item.availableKopecks > 0),
+      error: () => this.rewardCoupons = [],
+    });
+  }
+
+  refreshRewardsQuote(): void {
+    this.rewardQuoteSub?.unsubscribe();
+    this.rewardQuote = null;
+    this.rewardQuoteError = '';
+    if (!this.selectedRewardIds?.length || this.prizeBlocked) return;
+    const masterId = this.getMasterId();
+    const clientId = this.profile?.id;
+    const serviceIds = this.chooseServices.map(service => service.id).filter((id): id is string => !!id);
+    if (!masterId || !clientId || !serviceIds.length) return;
+    this.rewardQuoteLoading = true;
+    this.rewardQuoteSub = this._reviewRewards.quote(masterId, {
+      clientId, serviceIds, daysOfScheduleId: this.dayId, rewardCouponIds: this.selectedRewardIds,
+      usePromoSeat: !this.prizeAwardId && this.promoApplies,
+      useWelcomeCoupon: !this.prizeAwardId && this.welcomeApplies,
+      prizeAwardId: this.prizeAwardId,
+    }).pipe(finalize(() => this.rewardQuoteLoading = false)).subscribe({
+      next: result => this.rewardQuote = result.reviewRewards,
+      error: error => {
+        const reason = error?.error?.reason ?? error?.error?.data?.reason;
+        this.rewardQuoteError = this.reviewRewardReason(reason);
+      },
+    });
+  }
+
+  clearRewards(): void {
+    this.selectedRewardIds = [];
+    this.refreshRewardsQuote();
+  }
+
+  private reviewRewardReason(reason?: string): string {
+    if (reason === 'coupon_expired' || reason === 'coupon_already_reserved' || reason === 'coupon_used'
+      || reason === 'coupon_unavailable') {
+      return 'Один из купонов уже использован или его срок истёк. Снимите выбор и проверьте доступные купоны.';
+    }
+    if (reason === 'price_not_fixed') return 'Купоны за отзывы можно применить после расчёта точной стоимости.';
+    return 'Не удалось подтвердить сумму с купонами. Пересчитайте её или снимите купоны.';
+  }
+
+  private onRewardQuoteChanged(reason?: string): void {
+    if (reason === 'amount_changed') {
+      this.retryBookingQuote();
+      this.rewardQuoteError = 'Сумма изменилась. Проверьте новый расчёт перед подтверждением записи.';
+      return;
+    }
+    this.rewardQuote = null;
+    this.rewardQuoteError = this.reviewRewardReason(reason);
+  }
+
+  private isRewardConflict(reason?: string): boolean {
+    return !!reason && ['amount_changed', 'price_not_fixed', 'coupon_expired', 'coupon_already_reserved',
+      'coupon_used', 'coupon_unavailable', 'coupon_not_owned', 'invalid_review_coupons'].includes(reason);
   }
 
   /** Расчёт по выбранным услугам. Запрашиваем только при смене мастера/услуг/клиента. */
@@ -177,17 +517,64 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     const ids = this.chooseServices.map(s => s.id).filter((id): id is string => !!id);
     if (!masterId || !ids.length) return;
     const clientId = this._welcome.isLoggedIn ? (this.profile?.id ?? null) : null;
-    const key = `${masterId}|${ids.join(',')}|${clientId ?? ''}`;
+    const dayId = this.dayId;
+    const explicitAward = this.activatedRoute.snapshot.queryParamMap.get('award');
+    const key = `${masterId}|${ids.join(',')}|${this._welcome.isLoggedIn}|${clientId ?? ''}|${dayId ?? ''}|${explicitAward ?? ''}|${this.selectedPromoCampaign ?? ''}`;
     if (key === this.quoteKey) return;
     this.quoteKey = key;
     this.quoteSub?.unsubscribe();
-    this.quoteSub = this._welcome.quote(masterId, ids, clientId).subscribe(q => {
+    this.rewardQuoteSub?.unsubscribe();
+    this.rewardQuote = null;
+    this.rewardQuoteError = '';
+    this.loadRewardWallet(this.profile?.userType === UserType.User ? clientId : null);
+    this.quoteLoading = true;
+    this.welcomeQuote = null;
+    this.promoQuote = null;
+    this.prizeAwardId = null;
+    this.prizeQuote = null;
+    this.prizeRecordId = null;
+    this.prizeBlocked = false;
+    this.couponRefusal = null;
+    const awardId$ = this.ultrasoundSelected || this.ordinaryUltrasound ? of(null)
+      : explicitAward ? of(explicitAward) : this._giveaways.findBookingPrize(masterId, ids, clientId);
+    this.quoteSub = awardId$.pipe(
+      switchMap((awardId): Observable<unknown> => {
+        if (!awardId) return this.loadOrdinaryQuote(masterId, ids, clientId, dayId);
+        this.prizeAwardId = awardId;
+        const draft = readPrizeDraft();
+        this.prizeRecordId = draft?.awardId === awardId ? (draft.recordId ?? null) : null;
+        return this._giveaways.prizeQuote(awardId, ids, clientId, dayId).pipe(tap(load => this.applyPrizeQuote(load)));
+      }),
+      catchError(() => {
+        this.prizeBlocked = true;
+        this.couponRefusal = 'Не удалось проверить условия записи. Попробуйте ещё раз.';
+        return of(null);
+      }),
+      finalize(() => this.quoteLoading = false),
+    ).subscribe({ complete: () => this.refreshRewardsQuote() });
+  }
+
+  private loadOrdinaryQuote(masterId: string, ids: string[], clientId: string | null, dayId: string | null | undefined): Observable<unknown> {
+    const ultrasoundSelected = this.ultrasoundSelected;
+    const campaign = this.selectedPromoCampaign;
+    return forkJoin({
+      welcome: campaign ? of(null) : this._welcome.quote(masterId, ids, clientId),
+      promo: this.ordinaryProfilePromo ? of(null) : this._promoSeats.quote(masterId, ids, clientId, dayId, campaign),
+    }).pipe(tap(({ welcome, promo: response }) => {
+      let promo = response;
+      if (this.ordinaryUltrasound && response?.exclusive) promo = null;
+      if (ultrasoundSelected && (!response?.exclusive || response.campaignCode !== ULTRASOUND_PROMO)) promo = null;
+      if (campaign && response?.campaignCode !== campaign) promo = null;
+      this.promoQuote = promo && promo.status !== 'none' ? promo : null;
+      // Акция и входящий в неё купон должны относиться к одному ответу сервера.
+      const q = promo && promo.status !== 'none' ? promo.coupon : welcome;
       this.welcomeQuote = q;
       this.couponRefusal = null;
+      this.promoRefusal = null;
       if (q && (q.couponStatus === 'available' || q.couponStatus === 'login_required') && q.potentialDiscount > 0) {
         this._welcome.track('quote', q.campaignCode, q.discountAmount || q.potentialDiscount);
       }
-    });
+    }));
   }
 
   getStatusConfirm(): any {
@@ -260,6 +647,27 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   get bookingCharacter(): WorkLocationType | null {
     return this.bookingTypes.length === 1 ? this.bookingTypes[0] : null;
   }
+  get visitPlace(): string {
+    const point = this.bookingPoint;
+    if (point) return fixedPointLine(point);
+    return this.businessProfile?.address ? getAddressProfile(this.businessProfile.address) : '';
+  }
+
+  private rememberPlaces(places: { code?: number; data?: unknown } | null): void {
+    const data = places?.code === 200 ? places.data : null;
+    const list = Array.isArray(data) ? data : (data ? [data] : []);
+    this.masterWorkLocations = list as IWorkLocation[];
+    this._profileData.transferWorkLocation(this.masterWorkLocations);
+  }
+
+  /** Точка «на месте»: из query, либо единственная точка профиля. */
+  private get bookingPoint() {
+    const points = fixedPointsOf(this.masterWorkLocations);
+    const id = this.activatedRoute.snapshot.queryParamMap.get('point');
+    if (id) return points.find(point => point.id === id) ?? null;
+    return points.length === 1 ? points[0] : null;
+  }
+
   /** Выездная бронь — нужен адрес клиента. Определяется характером услуги (workLocationType). */
   get isMobileBooking(): boolean {
     return this.bookingCharacter === WorkLocationType.Mobile;
@@ -281,12 +689,15 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
               private store$: Store,
               private _profile: ProfileService,
               private _welcome: WelcomeCouponService,
+              private _promoSeats: PromoSeatsService,
+              private _giveaways: GiveawaysService,
               private modalService: NgbModal,
               private _events: NotesService,
               private _analytics: AnalyticsService,
               private groupService: GroupService,
               private scheduleService: ScheduleService,
-              private _location: Location) {
+              private _location: Location,
+              private _reviewRewards: ReviewRewardsService) {
 
     let temp = this.location.getState();
     if ((temp as Object).hasOwnProperty('recordId')){
@@ -312,7 +723,10 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
         }
       });
     }else {
-      this.unsubscribe$ = this._profileData.sendDayId.subscribe(result => this.dayId = result);
+      this.sessionSubscriptions.add(this._profileData.sendDayId.subscribe(result => {
+        this.dayId = result;
+        this.refreshWelcomeQuote();
+      }));
       this.unsubscribe$ = this._profileData.sendDate.subscribe(result =>
           this.dayChoose = result
       );
@@ -326,12 +740,11 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
       });
       // Форматы работы мастера — для списка городов выезда в форме адреса клиента.
       this._profileData.sendWorkLocation.subscribe(wl => this.masterWorkLocations = wl ?? []);
-      this.unsubscribe$ = this.store$.pipe(select(selectProfileMainClient)).subscribe(firstResult => {
-        if (firstResult)
-            this.profile = firstResult; // Сохраняем результат первого Observable
+      this.sessionSubscriptions.add(this.store$.pipe(select(selectProfileMainClient)).subscribe(firstResult => {
+        this.profile = firstResult;
         this.refreshWelcomeQuote();
          // Переходим к выполнению второго Observable
-      });
+      }));
       // this.unsubscribe$ = this.store$.pipe(select(selectProfileMainClient))
       // .pipe((switchMap()=> {
       //     return  this.store$.pipe(select(getTokenMainClient))
@@ -345,9 +758,13 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.sessionSubscriptions.unsubscribe();
     this.unsubscribe$?.unsubscribe();
     this.restoreSubscription?.unsubscribe();
     this.quoteSub?.unsubscribe();
+    this.promoSub?.unsubscribe();
+    this.rewardWalletSub?.unsubscribe();
+    this.rewardQuoteSub?.unsubscribe();
   }
   ngOnInit(): void {
     this._events.transferIsWorkDay(true);
@@ -371,6 +788,18 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     if (extra) {
       this.message = extra;
     }
+  }
+
+  private restoreServices(profileId: string, firstId: string): Observable<subGroup> {
+    this.restoredPrizeServices = [];
+    const raw = this.activatedRoute.snapshot.queryParamMap.get('services');
+    const ids = this.activatedRoute.snapshot.queryParamMap.get('award') && raw ? [...new Set(raw.split(','))].slice(0, 20) : [];
+    if (ids.length > 1 && ids.includes(firstId)) {
+      return forkJoin(ids.map(id => this.groupService.getServiceById(profileId, id))).pipe(
+        tap(services => this.restoredPrizeServices = services), map(services => services[0]),
+      );
+    }
+    return this.groupService.getServiceById(profileId, firstId);
   }
 
   private restoreBookingDraft(): void {
@@ -397,10 +826,14 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
         if (!profileId || profileId !== draft.profileId) throw new Error('Booking profile mismatch');
         return forkJoin({
           profile: this._profile.getViewProfile(profileId),
-          service: this.groupService.getServiceById(profileId, serviceId)
+          service: this.restoreServices(profileId, serviceId),
+          places: this._profile.getWorkLocation(profileId).pipe(catchError(() => of(null))),
         });
       }),
-      switchMap(({profile, service}) => {
+      switchMap(({profile, service, places}) => {
+        if (isHourly(service) && !applyHourlyDuration(service, draft.duration)) {
+          throw new Error('Hourly duration is missing');
+        }
         // Сверяем черновик той же ручкой, что рисует экран выбора времени: у старой не отсекался
         // лид-тайм, и черновик «через 10 минут» проходил проверку, хотя записаться на него уже нельзя.
         const requestDay = toCalendarDate(new Date(
@@ -411,19 +844,21 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
         ));
         return this.scheduleService.getFreeSlotDetailed(
           draft.profileId,
-          service.duration ?? 0,
+          this.restoredPrizeServices.length > 1 ? this.restoredPrizeServices.reduce((sum, item) => sum + (item.duration ?? 0), 0) : service.duration ?? 0,
           draft.dayId,
-          requestDay
+          requestDay,
+          this.activatedRoute.snapshot.queryParamMap.get('point')
         ).pipe(map(response => {
           const isStillAvailable = response.slots.some(slot => toHoursMinutesString(String(slot.start)) === draft.start);
           if (!isStillAvailable) throw new Error('Stored booking slot is no longer available');
-          return {profile, service};
+          return {profile, service, places};
         }));
       }),
       finalize(() => this.restoringDraft = false)
     ).subscribe({
-      next: ({profile, service}) => {
-        this.setChooseServices([service]);
+      next: ({profile, service, places}) => {
+        this.rememberPlaces(places);
+        this.setChooseServices(this.restoredPrizeServices.length > 1 ? this.restoredPrizeServices : [service]);
         this.businessProfile = profile;
         this.dayChoose = date;
         this.dayId = draft.dayId;
@@ -448,6 +883,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
         ? fromCalendarDateTime(draft.date, draft.time)
         : null;
       const valid = draft?.version === 3 && draft.serviceId === serviceId && !!draft.profileId &&
+        (draft.pointId ?? null) === this.activatedRoute.snapshot.queryParamMap.get('point') &&
         draft.time === draft.start && draft.timezone === BOOKING_TIMEZONE &&
         !!draft.dayId && /^\d{2}:\d{2}$/.test(draft.start) && !!date &&
         date.getTime() >= Date.now() - 60_000;
@@ -460,7 +896,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   private clearStoredDraft(draft?: StoredBookingDraft | null): void {
     if (typeof sessionStorage === 'undefined') return;
     sessionStorage.removeItem('booking-draft');
-    if (draft) sessionStorage.removeItem(`choose-date-selection:${draft.profileId}:${draft.serviceId}`);
+    if (draft) sessionStorage.removeItem(bookingSelectionKey(draft.profileId, draft.serviceId, draft.pointId));
   }
 
   private setChooseServices(services: subGroup[] | null | undefined): void {
@@ -485,17 +921,19 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
         if (!profileId) throw new Error('Profile was not found');
         return forkJoin({
           profile: this._profile.getViewProfile(profileId),
-          service: this.groupService.getServiceById(profileId, serviceId)
-        }).pipe(map(({profile, service}) => ({profile, service, profileId})));
+          service: this.restoreServices(profileId, serviceId),
+          places: this._profile.getWorkLocation(profileId).pipe(catchError(() => of(null))),
+        }).pipe(map(({profile, service, places}) => ({profile, service, profileId, places})));
       }),
       finalize(() => this.restoringDraft = false)
     ).subscribe({
-      next: ({profile, service, profileId}) => {
+      next: ({profile, service, profileId, places}) => {
+        this.rememberPlaces(places);
         if (!service.isTimeUnlimited) {
           this.redirectAfterRestoreFailure(serviceId);
           return;
         }
-        this.setChooseServices([service]);
+        this.setChooseServices(this.restoredPrizeServices.length > 1 ? this.restoredPrizeServices : [service]);
         this.businessProfile = profile;
         this._profileData.transferId(profileId);
         this._profileData.transferProfileBA(profile);
@@ -509,7 +947,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     if (serviceId) {
       this._route.navigate(['../choose-date'], {
         relativeTo: this.activatedRoute,
-        queryParams: {serviceId, restoreError: 1},
+        queryParams: this.withPoint({ serviceId, restoreError: 1 }),
         replaceUrl: true
       });
       return;
@@ -557,6 +995,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   /** Очистка локального состояния после успешного создания записи (201 / 202). */
   private resetStateAfterRecordCreated(): void {
     clearCalculatorHandoff();
+    clearVisitSource();
     this.handoffCache = null;
     this._profileData.clearBookingState();
     this._events.clearRecordDraftState();
@@ -569,6 +1008,11 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     this.welcomeQuote = null;
     this.quoteKey = '';
     this.couponRefusal = null;
+    this.promoQuote = null;
+    this.promoRefusal = null;
+    this.prizeQuote = null;
+    this.prizeAwardId = null;
+    this.clearRewards();
     this.IsRemandDay = false;
     this.IsRemandHours = false;
     this.status = false;
@@ -588,7 +1032,14 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   }
 
   onConfirm() {
-    if (this.saveInProgress) {
+    if (this.saveInProgress || this.quoteLoading || this.rewardQuoteBlocksBooking) {
+      return;
+    }
+    if (this.ultrasoundUnavailable || this.profilePromoUnavailable) return;
+    if (this.promoPhoneRequired) {
+      const modal = this.modalService.open(ModalRegisterComponent, { centered: true });
+      // Первое окно закрывается при переходе к PIN. Готовый вход меняет профиль в NgRx.
+      void modal.result.then(() => { this.quoteKey = ''; }, () => {});
       return;
     }
     const masterId = this.getMasterId();
@@ -609,8 +1060,12 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.prizeBlocked) {
+      return;
+    }
+
     const record = {
-      id: uuidv4(),
+      id: this.prizeRecordId ?? uuidv4(),
       daysOfScheduleId: this.dayId,
       isRemandDay: this.IsRemandDay,
       isRemandHours: this.IsRemandHours,
@@ -619,10 +1074,27 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
       services: this.chooseServices,
       clientId: this.profile?.id,
       serverTime: new Date().toLocaleString(),
-      useWelcomeCoupon: this.welcomeApplies ? true : undefined,
-      expectedCouponDiscount: this.welcomeApplies ? this.welcomeDiscount : undefined,
+      useWelcomeCoupon: this.prizeAwardId ? undefined : (this.welcomeApplies ? true : undefined),
+      expectedCouponDiscount: this.prizeAwardId ? undefined : (this.welcomeApplies ? this.welcomeDiscount : undefined),
+      usePromoSeat: this.prizeAwardId ? undefined : (this.promoApplies ? true : undefined),
+      promoCampaignCode: !this.prizeAwardId && this.promoApplies ? this.promoQuote?.campaignCode ?? undefined : undefined,
+      expectedPromoDiscount: this.prizeAwardId ? undefined : (this.promoApplies ? this.promoQuote?.promoDiscount : undefined),
+      prizeAwardId: this.prizeAwardId,
+      expectedPrizeVersion: this.prizeAwardId ? this.prizeVersion : undefined,
+      expectedPrizeQuoteVersion: this.prizeAwardId ? this.prizeQuote?.quoteVersion : undefined,
+      expectedPayableAmount: this.prizeAwardId ? this.prizeQuote?.payableAmount
+        : this.promoApplies && (this.promoQuote?.exclusive || this.promoQuote?.requireVerifiedPhone) ? this.promoQuote.payableAmount : undefined,
+      reviewRewardCouponIds: this.rewardQuote?.discountKopecks ? this.selectedRewardIds : undefined,
+      reviewRewardQuoteVersion: this.rewardQuote?.discountKopecks ? this.rewardQuote.version : undefined,
       location: this.buildLocation(),
     } as Record;
+    if (this.prizeAwardId && record.id) {
+      this.prizeRecordId = record.id;
+      if (this.businessProfile?.link) {
+        savePrizeDraft({ awardId: this.prizeAwardId, version: this.prizeVersion, recordId: record.id,
+          masterSlug: this.businessProfile.link, serviceId: this.chooseServices.map(service => service.id).join(',') });
+      }
+    }
 
     if (!this.profile) {
       this.openBookingContactModal(masterId, record);
@@ -637,18 +1109,50 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
    * (бэк подставляет адрес мастера/ссылку сам).
    */
   private buildLocation(): IRecordLocation | null {
-    if (!this.isMobileBooking) {
-      return null;
+    if (this.isMobileBooking) {
+      const a = this.clientLocation;
+      return {
+        locationType: WorkLocationType.Mobile,
+        city: a.city.trim(),
+        street: a.street.trim(),
+        house: a.house.trim(),
+        apartment: a.apartment.trim() || null,
+        comment: a.comment.trim() || null,
+      };
     }
-    const a = this.clientLocation;
-    return {
-      locationType: WorkLocationType.Mobile,
-      city: a.city.trim(),
-      street: a.street.trim(),
-      house: a.house.trim(),
-      apartment: a.apartment.trim() || null,
-      comment: a.comment.trim() || null,
-    };
+    const point = this.bookingPoint;
+    if (this.bookingCharacter === WorkLocationType.Fixed && point?.id) {
+      return {
+        locationType: WorkLocationType.Fixed,
+        workLocationId: point.id,
+        title: point.title ?? null,
+        country: point.country ?? null,
+        region: point.region ?? null,
+        city: point.city ?? null,
+        street: point.street ?? null,
+        house: point.house ?? null,
+        apartment: point.apartment ?? null,
+      };
+    }
+    return null;
+  }
+
+  private withPoint(query: { [key: string]: string | number | undefined }): { [key: string]: string | number } {
+    const next: { [key: string]: string | number } = {};
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && `${value}` !== '') next[key] = value;
+    });
+    const point = this.activatedRoute.snapshot.queryParamMap.get('point');
+    if (point) next['point'] = point;
+    const campaign = this.activatedRoute.snapshot.queryParamMap.get('promoCampaign');
+    if (campaign) next['promoCampaign'] = campaign;
+    const award = this.activatedRoute.snapshot.queryParamMap.get('award');
+    if (award) {
+      next['award'] = award;
+      const services = this.activatedRoute.snapshot.queryParamMap.get('services');
+      if (services) next['services'] = services;
+    }
+    return next;
   }
 
   /** Гость: контакты + лёгкая регистрация перед сохранением записи (BookingContactModalComponent). */
@@ -663,13 +1167,40 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     const modalRef = this.modalService.open(BookingContactModalComponent, {
       backdrop: 'static',
       keyboard: false,
+      centered: true,
+      windowClass: 'booking-success-dialog',
     });
     modalRef.componentInstance.masterId = masterId;
+    modalRef.componentInstance.masterLink = this.businessProfile?.link;
+    modalRef.componentInstance.serviceId = this.goalServiceId();
     modalRef.componentInstance.record = record;
     modalRef.componentInstance.summaryTitle = summaryTitle;
     modalRef.componentInstance.summaryWhen = summaryWhen;
+    modalRef.componentInstance.successDetails = this.successDetailsFor(record);
+    modalRef.componentInstance.priceSummary = this.priceSummary;
+    modalRef.componentInstance.promoQuote = this.promoQuote;
     // Купон показываем и в последнем окне — но только если он действительно применится.
     modalRef.componentInstance.couponQuote = this.welcomeApplies ? this.welcomeQuote : null;
+    modalRef.componentInstance.onCouponDropped = (reason: string, quote?: WelcomeQuote | null) => {
+      this.applyGuestCouponDrop(reason, quote);
+      modalRef.componentInstance.promoTotal = this.promoTotal;
+      modalRef.componentInstance.priceSummary = this.priceSummary;
+    };
+    modalRef.componentInstance.onCouponChanged = (quote: WelcomeQuote) => {
+      this.welcomeQuote = quote;
+      // При изменении купона сохраняем скидку акции, обновляя только купонную часть.
+      if (this.promoQuote) {
+        this.promoQuote = { ...this.promoQuote, coupon: quote, couponDiscount: quote.discountAmount,
+          payableAmount: quote.payableAmount - this.promoQuote.promoDiscount };
+      }
+      modalRef.componentInstance.priceSummary = this.priceSummary;
+    };
+    modalRef.componentInstance.promoTotal = this.promoTotal;
+    modalRef.componentInstance.onPromoDropped = (result: { message?: string; data?: any }) => {
+      this.onPromoRefused(result);
+      modalRef.componentInstance.promoTotal = this.promoTotal;
+      modalRef.componentInstance.priceSummary = this.priceSummary;
+    };
 
     modalRef.result.then(
       () => {
@@ -686,6 +1217,18 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     );
   }
 
+  private goalServiceId(): string | undefined {
+    return this.activatedRoute.snapshot.queryParamMap.get('serviceId')
+      ?? this.chooseServices.find(service => !!service.id)?.id
+      ?? undefined;
+  }
+
+  private successDetailsFor(record: Record): BookingSuccessDetails {
+    const when = this.dayChoose ? new DatePipe('ru').transform(this.dayChoose, 'd MMMM yyyy, HH:mm') ?? '' : '';
+    return bookingSuccessDetails(this.chooseServices.map(service => service.name).join(', '),
+      this.businessProfile?.name ?? '', when, record.location, this.visitPlace, this.bookingCharacter);
+  }
+
   /** Возврат к календарю (choose-date) с сохранением выбора: услуга — в query, дата/время — в sessionStorage. */
   private goToCalendar(): void {
     const serviceId = this.activatedRoute.snapshot.queryParamMap.get('serviceId')
@@ -695,14 +1238,14 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     if (unlimited) {
       this._route.navigate(['../choose-service'], {
         relativeTo: this.activatedRoute,
-        queryParams: serviceId ? { serviceId, noAutoDate: 1 } : undefined,
+        queryParams: serviceId ? this.withPoint({ serviceId, noAutoDate: 1 }) : undefined,
       });
       return;
     }
     if (serviceId) {
       this._route.navigate(['../choose-date'], {
         relativeTo: this.activatedRoute,
-        queryParams: { serviceId },
+        queryParams: this.withPoint({ serviceId }),
       });
     } else {
       // Нет serviceId (например, вход по recordId) — безопасный откат назад.
@@ -723,14 +1266,36 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     this.unsubscribe$ = this._api
       .saveRecord(masterId, record)
       .pipe(finalize(() => (this.saveInProgress = false)))
-      .subscribe({ next: (result) => {
+      .subscribe({
+        next: (result) => {
+        if (record.reviewRewardCouponIds?.length && this.isRewardConflict(result.data?.reason)) {
+          this.onRewardQuoteChanged(result.data.reason);
+          return;
+        }
+        if (result.code === 409 && result.data?.reason && this.prizeAwardId) {
+          this.onPrizeConflict(String(result.data.reason), result.message);
+          return;
+        }
         if (result.code === 409 && result.data?.couponReason) {
           this.onCouponRefused(result);
           return;
         }
+        if (result.code === 409 && result.data?.promoReason) {
+          this.onPromoRefused(result);
+          return;
+        }
         if (result.code === 201 || result.code === 202) {
-          // Конверсия: услуга заказана (авторизованный клиент). Цель Метрики add_record.
-          this._analytics.trackEvent('booking', 'add_record', masterId);
+          this._welcome.invalidateMine();
+          clearPrizeDraft();
+          const priceSummary = { ...this.priceSummary, pending: false, notice: null };
+          const appliedRewards = result.data?.reviewRewards as ReviewRewardsQuote | undefined;
+          if (appliedRewards) {
+            priceSummary.payable = appliedRewards.clientPayableKopecks / 100;
+            priceSummary.reviewRewardDiscount = appliedRewards.discountKopecks / 100;
+          }
+          const successDetails = this.successDetailsFor(record);
+          // Конверсия: услуга заказана. add_record + client_contact, слаг мастера, не GUID.
+          this._analytics.trackBooking(this.businessProfile?.link, this.goalServiceId());
           const applied = result.data?.coupon as WelcomeQuote | null | undefined;
           if (applied) {
             this._welcome.track('booked', applied.campaignCode, applied.discountAmount);
@@ -739,16 +1304,22 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
           const afterModal = () => this.goPage(masterLink, masterIdForNav);
 
           if (result.code === 201) {
-            const modalRef = this.modalService.open(ConfirmModalComponent, option);
+            const modalRef = this.modalService.open(ConfirmModalComponent, {
+              ...option, centered: true, windowClass: 'booking-success-dialog',
+            });
+            modalRef.componentInstance.priceSummary = priceSummary;
+            modalRef.componentInstance.successDetails = successDetails;
             modalRef.result.then(afterModal, afterModal);
           } else {
             const modalRef = this.modalService.open(RecordSuccessTelegramModalComponent, {
               ...option,
               centered: true,
               size: 'md',
-              windowClass: 'record-success-telegram-dialog',
+              windowClass: 'booking-success-dialog',
             });
             modalRef.componentInstance.accountId = this.profile?.id ?? null;
+            modalRef.componentInstance.priceSummary = priceSummary;
+            modalRef.componentInstance.successDetails = successDetails;
             modalRef.result.then(afterModal, afterModal);
           }
         } else {
@@ -759,8 +1330,17 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
         }
       }, error: (err) => {
         const body = err?.error;
-        if (err?.status === 409 && body?.data?.couponReason) {
+        const reason = body?.data?.reason ?? body?.reason;
+        if (record.reviewRewardCouponIds?.length && this.isRewardConflict(reason)) {
+          this.onRewardQuoteChanged(reason);
+        } else if (this.prizeAwardId && body?.data?.reason) {
+          this.onPrizeConflict(String(body.data.reason), body.message);
+        } else if (err?.status === 409 && body?.data?.couponReason) {
           this.onCouponRefused(body);
+        } else if (err?.status === 409 && body?.data?.promoReason) {
+          this.onPromoRefused(body);
+        } else if (this.prizeAwardId) {
+          this.onPrizeConflict('', body?.message);
         } else {
           console.error('Не удалось сохранить запись', err);
         }
@@ -773,15 +1353,61 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
    */
   private onCouponRefused(result: { message?: string; data?: any }): void {
     const reason = result.data?.couponReason as string;
-    const quote = result.data?.quote as WelcomeQuote | null | undefined;
+    const previous = this.welcomeQuote;
+    const quote = (result.data?.quote as WelcomeQuote | null | undefined) ?? (previous ? {
+      ...previous, couponStatus: 'unavailable' as const, reason, discountAmount: 0, potentialDiscount: 0,
+      payableAmount: previous.payableAmount + couponDiscount(previous),
+    } : null);
     this._welcome.track('refused', quote?.campaignCode);
     if (quote) {
       this.welcomeQuote = quote;
+      if (this.promoQuote) {
+        const discount = quote.couponStatus === 'available' ? quote.discountAmount : 0;
+        this.promoQuote = { ...this.promoQuote, coupon: quote, couponDiscount: discount,
+          payableAmount: quote.payableAmount - this.promoQuote.promoDiscount };
+      }
     }
     if (reason !== 'amount_changed') {
       this.applyWelcome = false;
     }
     this.couponRefusal = result.message || welcomeReasonText(reason);
+    this.refreshRewardsQuote();
+  }
+
+  /**
+   * Место по акции не досталось, запись не создана. Цена — по прайсу (с купоном, если он положен),
+   * клиент видит её и подтверждает заново; молча цену не меняем.
+   */
+  private onPromoRefused(result: { message?: string; data?: any }): void {
+    const quote = result.data?.promoQuote as PromoSeatQuote | null | undefined;
+    if (quote?.coupon) {
+      this.welcomeQuote = quote.coupon;
+    }
+    this.promoQuote = quote && (quote.exclusive || result.data?.promoReason === 'promo_amount_changed' ||
+      (quote.requireVerifiedPhone && quote.status === 'unavailable')) ? quote : null;
+    this.promoRefusal = result.message || 'Места по акции закончились. Цена — по прайсу мастера.';
+    this.refreshRewardsQuote();
+  }
+
+  /**
+   * Гость ввёл номер, а купон к этому телефону уже нельзя применить.
+   * Снимаем скидку на экране подтверждения, чтобы цена совпала с окном контактов.
+   */
+  private applyGuestCouponDrop(reason: string, quote?: WelcomeQuote | null): void {
+    const previousPrice = this.priceSummary;
+    this.applyWelcome = false;
+    const base = quote ?? this.welcomeQuote;
+    if (base) {
+      this.welcomeQuote = {
+        ...base,
+        couponStatus: 'unavailable',
+        reason: null,
+        discountAmount: 0,
+        potentialDiscount: 0,
+        payableAmount: quote?.payableAmount ?? base.payableAmount + previousPrice.coupon,
+      };
+    }
+    this.couponRefusal = welcomeReasonText(reason);
   }
   // openPopUpModal() {
   //   // this.status = !this.status;
@@ -813,11 +1439,16 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   /** Комментарий записи: поле на экране + расчёт калькулятора + город/площадь с легаси-формы потолков. */
   private recordComment(): string {
     const current = (this.message ?? '').trim();
+    const source = visitSourceComment(readVisitSource());
     const extras = [
       calculatorHandoffComment(this.calculatorHandoff),
       quoteDraftComment(readCellingsQuoteDraft()),
     ].filter(extra => extra && !current.includes(extra));
-    return [current, ...extras].filter(Boolean).join('\n');
+    const body = [current, ...extras].filter(Boolean).join('\n');
+    if (!source || body.includes(source)) {
+      return body;
+    }
+    return [source, body].filter(Boolean).join('\n');
   }
   getAvatar(avatar?: string | null){
     return resolveAvatarUrl(avatar);
@@ -844,4 +1475,27 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     }
 
   protected readonly PaymentMethodType = PaymentMethodType;
+
+  private onPrizeConflict(reason: string, message?: string | null): void {
+    if (reason === 'slot_unavailable') {
+      this.prizeBlocked = false;
+      this.couponRefusal = 'Это время уже занято. Выберите другое.';
+      return;
+    }
+    this.prizeBlocked = true;
+    this.couponRefusal = message || 'Условия приза изменились. Обновите карточку и подтвердите запись ещё раз.';
+    this.retryBookingQuote();
+  }
+
+  retryBookingQuote(): void {
+    this.quoteKey = '';
+    this.refreshWelcomeQuote();
+  }
+
+  private applyPrizeQuote(load: GiveawayLoad<GiveawayPrizeQuote>): void {
+    this.prizeQuote = load.value;
+    this.couponRefusal = bookingPrizeIssue(load);
+    this.prizeBlocked = !!this.couponRefusal;
+    if (load.value?.awardVersion) this.prizeVersion = load.value.awardVersion;
+  }
 }

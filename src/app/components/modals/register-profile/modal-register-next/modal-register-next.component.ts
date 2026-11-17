@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { RememberedSessionService } from '../../../../auth/remembered-session.service';
 import {NgbActiveModal, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ModalEnterDataComponent} from "../modal-enter-data/modal-enter-data.component";
 import {ModalRegisterEndComponent} from "../modal-register-end/modal-register-end.component";
@@ -9,7 +10,6 @@ import { ProfileService } from '../../../../../services/profile.service';
 import { UserService } from 'src/app/DTO/classes/profiles/ProfileUser';
 import { BusService } from '../../../../../services/busService';
 import {IViewAuthProfile} from "../../../../DTO/views/profile/IViewAuthProfile";
-import {CookieService} from "ngx-cookie-service";
 import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
 import { UserType } from 'src/app/DTO/classes/profiles/profile-user.model';
 
@@ -34,7 +34,7 @@ export class ModalRegisterNextComponent implements OnInit {
     private modalService: NgbModal,
     public activeModal: NgbActiveModal,
     private _profile: ProfileService,
-    private _cookie: CookieService
+    private readonly session: RememberedSessionService,
   ) {
   }
 
@@ -57,12 +57,7 @@ export class ModalRegisterNextComponent implements OnInit {
           // this.notification.requestPermission(result.message);
           this.activeModal.close();
           const response = result.data as IViewAuthProfile;
-          let expiry = new Date();
-
-          expiry.setDate(expiry.getDate()+365);
-          this._cookie.set('auth-token-ocpio', response.token, expiry, '/');
-
-          this._cookie.set('profileId-ocpio', response.profileUserId!, expiry, '/');
+          this.session.remember(response.token, response.profileUserId);
 
           const modalRef = this.modalService.open(ModalRegisterEndComponent);
           modalRef.componentInstance.Id = response.profileUserId;

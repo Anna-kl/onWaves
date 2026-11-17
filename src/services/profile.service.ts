@@ -94,11 +94,26 @@ export class ProfileService {
        () => this.http.get<IResponse>(`${this.url}${id}/work-location`));
   }
 
-  /** Создать/обновить локацию работы (тип Mobile/Fixed, список городов для разъездной). */
+  /**
+   * Изменить одну строку локации. `body.id` — id точки.
+   * Без id остаётся прежний PUT на весь ресурс (выезд и онлайн).
+   */
   updateWorkLocation(id: string, body: IWorkLocation){
     let headers: HttpHeaders = new HttpHeaders();
     headers = headers.append('Authorization', 'Bearer ' + this.cookieService.get('auth-token-ocpio'));
-    return this.http.put<IResponse>(`${this.url}${id}/work-location`, body, {headers}).pipe(
+    const path = body.id
+      ? `${this.url}${id}/work-location/${body.id}`
+      : `${this.url}${id}/work-location`;
+    return this.http.put<IResponse>(path, body, {headers}).pipe(
+      tap(() => this.invalidateWorkLocation(id))
+    );
+  }
+
+  /** Удалить точку. Сервер отклоняет удаление, если на точку есть будущие записи. */
+  deleteWorkLocation(id: string, locationId: string) {
+    let headers: HttpHeaders = new HttpHeaders();
+    headers = headers.append('Authorization', 'Bearer ' + this.cookieService.get('auth-token-ocpio'));
+    return this.http.delete<IResponse>(`${this.url}${id}/work-location/${locationId}`, {headers}).pipe(
       tap(() => this.invalidateWorkLocation(id))
     );
   }
@@ -266,7 +281,8 @@ export class ProfileService {
 
   getBusinessProfileForEditById(id: string): Observable<IResponse>
   {
-    return this.http.get<IResponse>(`${this.url}get-for-edit-baprofile/${id}`);
+    const headers = new HttpHeaders({ Authorization: 'Bearer ' + this.cookieService.get('auth-token-ocpio') });
+    return this.http.get<IResponse>(`${this.url}get-for-edit-baprofile/${id}`, { headers });
   }
 
   getViewProfile(id: string){

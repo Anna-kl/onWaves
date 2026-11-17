@@ -80,7 +80,13 @@
             </div> 
             <!-- Правая колонка style="background-color: burlywood;"-->
             <div class="col50" >
-              <!-- 4. Время --> 
+              <!-- 4. Время -->
+              <div *ngIf="isDemoDraft" class="cont-horiz-start" style="min-height:44px;margin-bottom:16px">
+                <input class="custom-checkbox" id="durationUnknown" type="checkbox" formControlName="durationUnknown">
+                <label for="durationUnknown">Длительность пока не указана</label>
+              </div>
+              <p *ngIf="durationUnknown" class="color-grey-dark">Сохранится черновик без длительности. До её подтверждения запись включить нельзя.</p>
+              <ng-container *ngIf="!durationUnknown"> 
               <div class="txt-green-light margin-bottom25 w100" >
                   Укажите время продолжительности услуги
               </div> 
@@ -146,6 +152,7 @@
                       Без ограничения по времени
                   </div>
               </label>
+              </ng-container>
               <!--  5. Выберите кому подходит услуга -->
               <div class="cont-vert-start-center" style="gap: 20px;">
                   <div class="txt-green-light">
@@ -294,12 +301,20 @@
 
           <!-- Формат оказания услуги (radio) — варианты из форматов работы профиля -->
           <app-service-format-select
+            [allowDraft]="isDemoDraft"
             [profileId]="profile?.id ?? null"
             [value]="locationType"
-            (valueChange)="locationType = $event">
+            [pointIds]="fixedPointIds"
+            [invalid]="isErrorPoints"
+            (valueChange)="locationType = $event"
+            (pointIdsChange)="fixedPointIds = $event; isErrorPoints = false"
+            (pointChoiceCount)="fixedPointChoices = $event">
           </app-service-format-select>
           <div class="alert-validation" *ngIf="isErrorFormat" style="color: #d46c54; margin-bottom: 12px;">
             *Выберите формат оказания услуги
+          </div>
+          <div class="alert-validation" *ngIf="isErrorPoints" style="color: #d46c54; margin-bottom: 12px;">
+            *Выберите хотя бы одну точку
           </div>
 
           <!-- ══════════════════════════════════════════════════════════════ -->

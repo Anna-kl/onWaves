@@ -11,7 +11,7 @@ import {notificationMessages} from "../../../ngrx-store/notification/notificatio
 import {IViewNotification} from "../../../DTO/views/notifications/IViewNotification";
 import {DomSanitizer} from "@angular/platform-browser";
 import {resolveAvatarUrl} from "../../../../helpers/common/avatar1";
-import {recordLocationText} from "../../../../helpers/common/address";
+import {recordPlaceText} from "../../../../helpers/common/address";
 import {subGroup} from "../../../DTO/views/services/IViewSubGroups";
 import {RecordStatus} from "../../../DTO/enums/recordStatus";
 import { SeenDirective } from './seen.directive'; // где лежит директива
@@ -195,7 +195,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   /** Адрес выезда (разъездная услуга) по объекту уведомления. */
-  protected readonly recordLocationText = recordLocationText;
+  protected readonly recordLocationText = recordPlaceText;
 
   getNameServices(services: subGroup[]) {
     return services.map(_ => _.name).join('\n');

@@ -95,6 +95,14 @@ export class ColumnBAProfileEditComponent implements OnInit, OnDestroy {
     this._router.navigate(['ba-edit', this.id]);
   }
 
+  onSchedule(): void {
+    if (!this.businessProfile?.id) {
+      return;
+    }
+    this._dataService.transferBusinessProfile(this.businessProfile);
+    this._router.navigate(['ba-edit', this.id, 'schedule']);
+  }
+
   async ngOnInit(): Promise<void> {
     this.auth.subscribe(
       result => {

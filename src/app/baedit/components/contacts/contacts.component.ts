@@ -10,7 +10,7 @@ import {getAddressProfile, getFullAddressProfile} from "../../../../helpers/comm
 import {IViewAddress} from "../../../DTO/views/IViewAddress";
 import {WorkLocationType} from "../../../DTO/enums/workLocationType";
 import {IWorkLocation} from "../../../DTO/views/IWorkLocation";
-import {IWorkFormats, IWorkLocationChange} from "../../../DTO/views/IWorkFormats";
+import {IFixedPointDraft, IWorkFormats, IWorkLocationChange} from "../../../DTO/views/IWorkFormats";
 import {resolveAvatarUrl} from "../../../../helpers/common/avatar1";
 import {ProfileService} from "../../../../services/profile.service";
 import {LoginService} from "../../../auth/login.service";
@@ -19,6 +19,7 @@ import {selectProfileMainClient} from "../../../ngrx-store/mainClient/store.sele
 import {Observable, forkJoin, of} from "rxjs";
 import {catchError, map, switchMap} from "rxjs/operators";
 import {IViewCoordinates} from "../../../DTO/views/profile/IViewCoordinates";
+import {IResponse} from "../../../DTO/classes/IResponse";
 import { YMapComponent, YMapDefaultSchemeLayerDirective } from 'angular-yandex-maps-v3';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -38,6 +39,8 @@ export class ContactsComponent implements OnInit{
   strAddress: string = '';
   formats: IWorkFormats = { online: false, fixed: true, mobile: false };
   cities: string[] = [];
+  fixedPoints: IFixedPointDraft[] = [];
+  removedFixedPointIds: string[] = [];
   // Маркеры городов для разъездной работы
   geoList: IViewCoordinates[] = [];
 
@@ -59,44 +62,43 @@ export class ContactsComponent implements OnInit{
     this.address = $event.viewAddress;
     this.formats = $event.formats;
     this.cities = $event.cities ?? [];
-
-    // Карта: точка для фиксированного места + маркеры районов для разъездной.
-    this.geoPoint$ = this.formats.fixed
-      ? this._dictionaries.getPoint(this.fixedAddressStr())
-      : of(null);
-    if (this.formats.mobile) {
-      this.updateCityMarkers();
-    } else {
-      this.geoList = [];
-    }
+    this.fixedPoints = $event.fixedPoints ?? [];
+    this.removedFixedPointIds = $event.removedFixedPointIds ?? [];
+    this.refreshMap();
   }
 
-  /** Строка полного адреса фиксированного места (для геокодирования точки). */
-  private fixedAddressStr(): string {
-    const a = this.address;
-    if (!a) return this.strAddress;
-    return [a.country, a.region, a.city, a.street, a.home]
-      .filter(v => !!v && `${v}`.trim().length > 0)
-      .join(', ');
-  }
-
-  /** Геокодируем каждый выбранный город и показываем маркер на карте. */
-  private updateCityMarkers(): void {
-    const validCities = this.cities.filter(c => !!c && c.trim().length > 0);
-    if (!validCities.length) {
+  /** Маркер на каждую точку и на каждый город выезда. Одна точка без выезда остаётся главной меткой. */
+  private refreshMap(): void {
+    const pointQueries = this.formats.fixed
+      ? this.fixedPoints
+        .map(point => [point.country, point.region, point.city, point.street, point.house]
+          .filter(part => !!part && `${part}`.trim().length > 0)
+          .join(', '))
+        .filter(query => query.length > 0)
+      : [];
+    const cityQueries = this.formats.mobile
+      ? this.cities
+        .filter(city => !!city && city.trim().length > 0)
+        .map(city => [this.address?.country, this.address?.region, city]
+          .filter(part => !!part && `${part}`.trim().length > 0)
+          .join(', '))
+      : [];
+    if (pointQueries.length === 1 && !cityQueries.length) {
+      this.geoPoint$ = this._dictionaries.getPoint(pointQueries[0]);
       this.geoList = [];
       return;
     }
-    const region = this.address?.region ?? '';
-    const country = this.address?.country ?? '';
-    const requests = validCities.map(city =>
-      this._dictionaries.getPoint(`${country}, ${region}, ${city}`).pipe(
-        catchError(() => of(null))
-      )
-    );
-    forkJoin(requests).subscribe(results => {
-      this.geoList = results.filter((r): r is IViewCoordinates => !!r);
-    });
+    const queries = [...pointQueries, ...cityQueries];
+    if (!queries.length) {
+      this.geoPoint$ = of(null);
+      this.geoList = [];
+      return;
+    }
+    this.geoPoint$ = of(null);
+    forkJoin(queries.map(query => this._dictionaries.getPoint(query).pipe(catchError(() => of(null)))))
+      .subscribe(results => {
+        this.geoList = results.filter((item): item is IViewCoordinates => !!item);
+      });
   }
 
   lng = 0;
@@ -121,37 +123,30 @@ export class ContactsComponent implements OnInit{
 
   }
 
-  /** Формируем по одной записи WorkLocation на каждый выбранный формат. */
-  private buildWorkLocationBodies(): IWorkLocation[] {
-    const bodies: IWorkLocation[] = [];
-    const a = this.address;
-    if (this.formats.online) {
-      bodies.push({ locationType: WorkLocationType.Online });
-    }
-    if (this.formats.fixed) {
-      bodies.push({
-        locationType: WorkLocationType.Fixed,
-        country: a?.country ?? null,
-        region: a?.region ?? null,
-        city: a?.city ?? null,
-        street: a?.street ?? null,
-        house: a?.home ?? null,
-        apartment: a?.apartment ?? null,
-        longitude: null,
-        latitude: null
-      });
-    }
-    if (this.formats.mobile) {
-      bodies.push({
-        locationType: WorkLocationType.Mobile,
-        country: a?.country ?? null,
-        region: a?.region ?? null,
-        cities: this.cities.filter(c => !!c && c.trim().length > 0),
-        longitude: null,
-        latitude: null
-      });
-    }
-    return bodies;
+  private pointBody(point: IFixedPointDraft): IWorkLocation {
+    return {
+      ...(point.id ? { id: point.id } : {}),
+      title: point.title.trim() || null,
+      locationType: WorkLocationType.Fixed,
+      country: point.country,
+      region: point.region,
+      city: point.city,
+      street: point.street,
+      house: point.house,
+      apartment: point.apartment,
+      longitude: null,
+      latitude: null,
+    };
+  }
+
+  private saveCall(request: Observable<IResponse | null>): Observable<boolean> {
+    return request.pipe(
+      map(res => res?.code === 200 || res?.code === 201 || res?.code === 204),
+      catchError(err => {
+        console.error('Failed to save work location:', err);
+        return of(false);
+      })
+    );
   }
 
   /**
@@ -163,19 +158,34 @@ export class ContactsComponent implements OnInit{
    * Именно из-за этого раздел «Услуги» затем сообщал, что форматы не настроены.
    */
   private saveWorkLocation(id: string): Observable<boolean> {
-    const bodies = this.buildWorkLocationBodies();
-    if (!bodies.length) return of(true);
-    return forkJoin(
-      bodies.map(body =>
-        this._profileService.createWorkLocation(id, body).pipe(
-          map(res => res?.code === 200 || res?.code === 201),
-          catchError(err => {
-            console.error('Failed to save work location:', body.locationType, err);
-            return of(false);
-          })
-        )
-      )
-    ).pipe(map(results => results.every(Boolean)));
+    const calls: Observable<boolean>[] = [];
+    const a = this.address;
+    if (this.formats.online) {
+      calls.push(this.saveCall(this._profileService.createWorkLocation(id, { locationType: WorkLocationType.Online })));
+    }
+    if (this.formats.mobile) {
+      calls.push(this.saveCall(this._profileService.createWorkLocation(id, {
+        locationType: WorkLocationType.Mobile,
+        country: a?.country ?? null,
+        region: a?.region ?? null,
+        cities: this.cities.filter(city => !!city && city.trim().length > 0),
+        longitude: null,
+        latitude: null,
+      })));
+    }
+    for (const locationId of this.removedFixedPointIds) {
+      calls.push(this.saveCall(this._profileService.deleteWorkLocation(id, locationId)));
+    }
+    if (this.formats.fixed) {
+      for (const point of this.fixedPoints) {
+        const body = this.pointBody(point);
+        calls.push(this.saveCall(point.id
+          ? this._profileService.updateWorkLocation(id, body)
+          : this._profileService.createWorkLocation(id, body)));
+      }
+    }
+    if (!calls.length) return of(true);
+    return forkJoin(calls).pipe(map(results => results.every(Boolean)));
   }
 
   /**
@@ -184,8 +194,9 @@ export class ContactsComponent implements OnInit{
    */
   private missingFixedAddress(): boolean {
     if (!this.formats.fixed) return false;
-    const a = this.address ?? this.profile?.address ?? null;
-    return !a?.city || !`${a.city}`.trim();
+    if (!this.fixedPoints.length) return true;
+    return this.fixedPoints.some(point =>
+      !point.city?.trim() || !point.street?.trim() || !point.house?.trim());
   }
 
   async ngOnInit(): Promise<void> {
@@ -215,7 +226,7 @@ export class ContactsComponent implements OnInit{
     if (!this.profile) return;
 
     if (this.missingFixedAddress()) {
-      this.showError('Для фиксированного места укажите адрес — иначе формат работы не сохранится.');
+      this.showError('Для каждой точки укажите город, улицу и дом — иначе формат работы не сохранится.');
       return;
     }
 

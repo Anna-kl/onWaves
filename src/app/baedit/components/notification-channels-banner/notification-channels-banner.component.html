@@ -2,14 +2,42 @@
   <div class="consent-banner-icon">🔔</div>
 
   <div class="consent-banner-text">
-    <div class="consent-banner-title">Подключите уведомления</div>
-    <div class="consent-banner-subtitle">
-      У вас не включён ни один канал — вы можете пропустить сообщения о новых записях и статусах от клиентов
+    <div class="consent-banner-title">
+      {{statusFailed ? 'Уведомления'
+        : channelsStatus?.telegramFromPersonal ? 'Telegram подключён через личный аккаунт'
+        : channelsStatus?.telegram ? 'Telegram подключён'
+        : channelsStatus?.telegramExplicitlyDisabled ? 'Telegram для бизнеса отключён'
+        : telegramOnly ? 'Telegram для бизнеса' : 'Подключите уведомления'}}
     </div>
+    <div class="consent-banner-subtitle" role="status">
+      {{statusFailed ? 'Не удалось проверить статус уведомлений'
+        : waitingForTelegram ? 'Чтобы подтвердить подключение, нажмите в боте «Старт», затем «Подписаться»'
+        : channelsStatus?.telegram ? 'Уведомления о записях этого бизнеса приходят в Telegram.'
+        : channelsStatus?.telegramExplicitlyDisabled ? 'Настройка действует только для этого бизнес-профиля.'
+        : telegramOnly || channelsStatus?.telegramOwnConsent ? 'Подключите бота для уведомлений о записях.'
+        : 'Подключите мессенджер, чтобы получать сообщения о новых записях и статусах.'}}
+    </div>
+    <p *ngIf="warning" class="consent-banner-subtitle" role="alert">{{warning}}</p>
   </div>
 
   <div class="consent-banner-actions">
-    <button class="consent-banner-primary" (click)="openChannelSelect()">Подключить</button>
-    <button class="consent-banner-close" (click)="dismiss()" aria-label="Скрыть уведомление">&times;</button>
+    <button type="button" class="consent-banner-primary" *ngIf="statusFailed || waitingForTelegram"
+            (click)="checkChannels()">Проверить</button>
+    <ng-container *ngIf="!statusFailed">
+      <button type="button" class="consent-banner-primary" *ngIf="channelsStatus?.telegram"
+              [disabled]="telegramSaving" (click)="changeTelegram(false)">Отключить для бизнеса</button>
+      <button type="button" class="consent-banner-link" *ngIf="channelsStatus?.telegram && !waitingForTelegram"
+              [disabled]="telegramSaving" (click)="openChannelSelect(true)">Подключить другой Telegram</button>
+      <button type="button" class="consent-banner-primary" *ngIf="channelsStatus?.telegramExplicitlyDisabled"
+              [disabled]="telegramSaving" (click)="changeTelegram(true)">Включить для бизнеса</button>
+      <button type="button" class="consent-banner-primary"
+              *ngIf="(!channelsStatus?.telegram || waitingForTelegram) && !channelsStatus?.telegramExplicitlyDisabled"
+              (click)="openChannelSelect(telegramOnly || waitingForTelegram || !!channelsStatus?.telegramOwnConsent)">
+        {{waitingForTelegram ? 'Открыть новую ссылку' : (telegramOnly || channelsStatus?.telegramOwnConsent) ? 'Подключить Telegram' : 'Подключить'}}
+      </button>
+    </ng-container>
+    <button type="button" class="consent-banner-close" *ngIf="!telegramOnly && !channelsStatus?.telegram &&
+             !waitingForTelegram && !channelsStatus?.telegramExplicitlyDisabled && !channelsStatus?.telegramOwnConsent"
+            (click)="dismiss()" aria-label="Скрыть уведомление">&times;</button>
   </div>
 </div>

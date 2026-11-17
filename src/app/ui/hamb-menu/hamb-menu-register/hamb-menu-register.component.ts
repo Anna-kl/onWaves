@@ -1,3 +1,4 @@
+import { OwnerOperationsService } from 'src/services/owner-operations.service';
 // Ошибки влияющие на функционал прогрузки после регистрации БА?
 import {
   Component,
@@ -69,7 +70,7 @@ export class HambMenuRegisterComponent implements OnInit, OnDestroy{
   link: ILinkState|null = null;
   mainProfile$: Observable<IViewBusinessProfile | null> = new Observable();
   permissionCreateBA: boolean = true;
-  constructor(private _events: BusService,
+  constructor(public ownerOperations: OwnerOperationsService, private _events: BusService,
               public _login: LoginService,
               private sanitizer: DomSanitizer,
               private modalService: NgbModal,

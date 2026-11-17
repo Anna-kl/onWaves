@@ -13,6 +13,10 @@ export interface WelcomeCampaign {
   endsAt: string;
   currency: string;
   tiers: WelcomeTier[];
+  /** fixed — одна сумма мастера; без поля остаются прежние пороги. */
+  amountMode?: 'fixed' | 'tiers' | null;
+  fixedDiscountRub?: number | null;
+  offerText?: string | null;
 }
 
 export interface WelcomeOffer {
@@ -47,6 +51,8 @@ export interface WelcomeQuote {
   campaignCode?: string | null;
   /** Сумма получена из цены «от N ₽» — показывать её только с «от». */
   amountIsFrom?: boolean;
+  amountMode?: 'fixed' | 'tiers' | null;
+  fixedDiscountRub?: number | null;
 }
 
 /** Снимок на записи (одинаков для клиента и мастера). */

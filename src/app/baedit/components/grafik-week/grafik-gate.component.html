@@ -1,0 +1,4 @@
+<p class="week-screen__status" *ngIf="!ready">Загружаю график…</p>
+<button type="button" class="week-screen__link" *ngIf="ready && weekOk && !weekMode" (click)="showWeek()">Новая неделя</button>
+<app-grafik *ngIf="ready && !weekMode"></app-grafik>
+<router-outlet *ngIf="ready && weekMode"></router-outlet>

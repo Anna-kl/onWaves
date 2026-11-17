@@ -1,7 +1,7 @@
 import {Location} from '@angular/common';
 import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Subject, combineLatest, forkJoin, map, switchMap, take, takeUntil} from 'rxjs';
+import {Subject, Subscription, combineLatest, forkJoin, map, tap, switchMap, take, takeUntil} from 'rxjs';
 
 import {PaymentForType} from '../../../DTO/enums/paymentForType';
 
@@ -11,7 +11,9 @@ import {GroupService} from '../../../../services/groupservice';
 import {ProfileService} from '../../../../services/profile.service';
 import {ScheduleService} from '../../../../services/schedule.service';
 import {ProfileDataService} from '../../services/profile-data.service';
+import {applyHourlyDuration} from '../../../../helpers/common/hourly';
 import {Schedule} from '../../../DTO/classes/schedules/schedule';
+import {bookingSelectionKey} from '../../helpers/booking-storage';
 import {
   BOOKING_TIMEZONE,
   fromCalendarDateTime,
@@ -20,6 +22,7 @@ import {
 } from '../../helpers/booking-date';
 
 interface StoredBookingSelection {
+  pointId?: string | null;
   version: 3;
   profileId: string;
   serviceId: string;
@@ -28,6 +31,7 @@ interface StoredBookingSelection {
   timezone: string;
   dayId: string;
   start: string;
+  duration?: number;
 }
 
 @Component({
@@ -37,7 +41,7 @@ interface StoredBookingSelection {
   providers: [ScheduleService]
 })
 export class ChooseDateTimeComponent implements OnInit, OnDestroy {
-  private readonly storagePrefix = 'choose-date-selection:';
+  private pageRequest?: Subscription;
   private readonly destroy$ = new Subject<void>();
 
   @Output() onChooseDate = new EventEmitter();
@@ -45,7 +49,10 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
   today: Date = new Date();
   id: string | null = null;
   serviceId: string | null = null;
+  pointId: string | null = null;
+  awardId: string | null = null;
   services: subGroup[] = [];
+  private prizeServices: subGroup[] = [];
   duration = 0;
   isChoosed = false;
   /** Подсказку подсвечиваем только после попытки нажать неактивную кнопку. */
@@ -59,6 +66,7 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
   workDays: Schedule[] | null = null;
   restoreMessage = false;
   private storedSelection: StoredBookingSelection | null = null;
+  get profileSlug(): string | null { return this.route.snapshot.paramMap.get('id'); }
 
   constructor(
     private readonly scheduleService: ScheduleService,
@@ -84,11 +92,14 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
         }
 
         this.serviceId = serviceId;
+        this.pointId = query.get('point');
+        this.awardId = query.get('award');
         this.loadPage(profileLink, serviceId);
       });
   }
 
   loadPage(profileLink?: string, serviceId?: string): void {
+    this.pageRequest?.unsubscribe();
     const link = profileLink ?? this.route.snapshot.paramMap.get('id');
     const requestedServiceId = serviceId ?? this.route.snapshot.queryParamMap.get('serviceId');
     if (!link || !requestedServiceId) {
@@ -100,9 +111,12 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
     this.loadError = false;
     this.isChoosed = false;
     this.daySetInterval = null;
+    this.dayId = null;
+    this.restoredStart = undefined;
+    this.storedSelection = null;
     this.workDays = null;
 
-    this.profileService.translateLink(link).pipe(
+    this.pageRequest = this.profileService.translateLink(link).pipe(
       map(response => String(response.data ?? '')),
       switchMap(profileId => {
         if (!profileId) throw new Error('Profile was not found');
@@ -117,6 +131,9 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
           switchMap(catalogService => {
             const chosen = this.findChosenService(requestedServiceId);
             const effective = chosen ?? catalogService;
+            if (!chosen && effective.paymentForType === PaymentForType.ForHour) {
+              applyHourlyDuration(effective, this.storedSelection?.duration);
+            }
             // Безлимит: слотов нет, duration=0. Не грузим календарь — сразу к оформлению.
             if (effective.isTimeUnlimited) {
               return this.profileService.getViewProfile(profileId).pipe(
@@ -131,7 +148,9 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
                 profileId,
                 this.today.getFullYear(),
                 this.today.getMonth() + 1,
-                requestedServiceId
+                this.prizeServices.length > 1 ? null : requestedServiceId,
+                this.pointId,
+                this.prizeServices.length > 1 ? this.prizeServices.reduce((sum, service) => sum + (service.duration ?? 0), 0) : undefined
               )
             }).pipe(map(({profile, schedule}) => ({
               profile,
@@ -149,16 +168,16 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
         // API отдаёт каталожную запись — с часовой ценой и без выбранной длительности,
         // поэтому предпочитаем уже выбранный вариант. Иначе duration = 0 и экран
         // времени сообщал «не удалось определить длительность услуги».
-        this.services = [service];
+        this.services = this.prizeServices.length > 1 ? this.prizeServices : [service];
         this.workDays = schedule;
-        this.duration = service.duration ?? 0;
+        this.duration = this.services.reduce((sum, item) => sum + (item.duration ?? 0), 0);
         this.profileData.transferProfileBA(profile);
         this.profileData.transferChooseService(this.services);
 
         if (skipSlots) {
           this.router.navigate(['../confirm-record'], {
             relativeTo: this.route,
-            queryParams: {serviceId: requestedServiceId},
+            queryParams: this.bookingQuery({ serviceId: requestedServiceId }),
             replaceUrl: true
           });
           return;
@@ -181,6 +200,14 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
   }
 
   private loadService(profileId: string, serviceId: string) {
+    this.prizeServices = [];
+    const raw = this.route.snapshot.queryParamMap.get('services');
+    const ids = this.route.snapshot.queryParamMap.get('award') && raw ? [...new Set(raw.split(','))].slice(0, 20) : [];
+    if (ids.length > 1 && ids.includes(serviceId)) {
+      return forkJoin(ids.map(id => this.groupService.getServiceById(profileId, id))).pipe(
+        tap(rows => this.prizeServices = rows), map(rows => rows[0]),
+      );
+    }
     return this.groupService.getServiceById(profileId, serviceId);
   }
 
@@ -244,15 +271,20 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
     this.profileData.transferDayId(this.dayId);
     this.router.navigate(['../confirm-record'], {
       relativeTo: this.route,
-      queryParams: {serviceId: this.serviceId}
+      queryParams: this.bookingQuery({ serviceId: this.serviceId })
     });
   }
 
   inBack(): void {
+    if (this.awardId) {
+      const link = this.route.snapshot.paramMap.get('id');
+      void this.router.navigate(link ? ['/', link] : ['/']);
+      return;
+    }
     if (this.serviceId) {
       this.router.navigate(['../choose-service'], {
         relativeTo: this.route,
-        queryParams: {serviceId: this.serviceId, noAutoDate: 1}
+        queryParams: this.bookingQuery({ serviceId: this.serviceId, noAutoDate: 1 })
       });
     } else {
       this.location.back();
@@ -261,14 +293,33 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
 
   private redirectToServiceChoice(profileLink: string | null): void {
     if (profileLink) {
-      this.router.navigate(['/', profileLink], {replaceUrl: true});
+      this.router.navigate(['/', profileLink, 'choose-service'], {
+        queryParams: this.bookingQuery({ serviceId: this.serviceId, noAutoDate: 1 }),
+        replaceUrl: true,
+      });
     } else {
       this.router.navigate(['/'], {replaceUrl: true});
     }
   }
 
+  private bookingQuery(extra: Record<string, string | number | null | undefined>): Record<string, string | number> {
+    const query: Record<string, string | number> = {};
+    Object.entries(extra).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && `${value}` !== '') query[key] = value as string | number;
+    });
+    if (this.pointId) query['point'] = this.pointId;
+    const campaign = this.route.snapshot.queryParamMap.get('promoCampaign');
+    if (campaign) query['promoCampaign'] = campaign;
+    if (this.awardId) {
+      query['award'] = this.awardId;
+      const services = this.route.snapshot.queryParamMap.get('services');
+      if (services) query['services'] = services;
+    }
+    return query;
+  }
+
   private storageKey(serviceId = this.serviceId): string | null {
-    return this.id && serviceId ? `${this.storagePrefix}${this.id}:${serviceId}` : null;
+    return this.id && serviceId ? bookingSelectionKey(this.id, serviceId, this.pointId) : null;
   }
 
   private persistSelection(): void {
@@ -278,11 +329,13 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
       version: 3,
       profileId: this.id!,
       serviceId: this.serviceId,
+      pointId: this.pointId,
       date: toCalendarDate(this.dateRecord),
       time: toClockTime(this.dateRecord),
       timezone: BOOKING_TIMEZONE,
       dayId: this.dayId!,
-      start: toClockTime(this.dateRecord)
+      start: toClockTime(this.dateRecord),
+      duration: this.duration,
     };
     sessionStorage.setItem(key, JSON.stringify(value));
     sessionStorage.setItem('booking-draft', JSON.stringify(value));
@@ -309,6 +362,7 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
         ? fromCalendarDateTime(stored.date, stored.time)
         : null;
       const valid = stored?.version === 3 && stored.profileId === this.id &&
+        (stored.pointId ?? null) === this.pointId &&
         stored.serviceId === serviceId && stored.time === stored.start &&
         stored.timezone === BOOKING_TIMEZONE && !!stored.dayId && /^\d{2}:\d{2}$/.test(stored.start) &&
         !!date && !isNaN(date.getTime()) && date.getTime() >= Date.now() - 60_000;
@@ -327,6 +381,7 @@ export class ChooseDateTimeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.pageRequest?.unsubscribe();
     this.destroy$.next();
     this.destroy$.complete();
   }

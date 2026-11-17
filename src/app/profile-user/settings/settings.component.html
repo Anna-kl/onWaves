@@ -53,9 +53,11 @@
                     Выберите каналы, по которым вам можно присылать информационные сообщения
                     о записях, статусах и новостях сервиса. Согласие можно изменить в любой момент.
                 </div>
+                <app-notification-channels-banner *ngIf="activeBusinessId && activeBusinessId !== profile?.id"
+                  [profileId]="activeBusinessId" [telegramOnly]="true"></app-notification-channels-banner>
                 <div class="consent-row" *ngFor="let item of consentItems">
                     <label class="consent-switch">
-                        <input type="checkbox" [checked]="isToggleOn(item)" [disabled]="item.isPending"
+                        <input type="checkbox" [checked]="isToggleOn(item)" [disabled]="item.isPending || consentWritePending || !consentLoaded || consentReadFailed"
                                [attr.aria-label]="'Согласие: ' + item.name"
                                (change)="onToggleConsent(item, $event)">
                         <span class="consent-switch-track"></span>
@@ -63,22 +65,60 @@
                     <div class="consent-row-text">
                         <div class="consent-row-name">{{item.name}}</div>
                         <div class="consent-row-hint">{{item.hint}}</div>
-                        <button type="button" class="consent-row-status" *ngIf="needsSetup(item)"
+                        <ng-container *ngIf="item.channel === telegramChannel && (item.isGranted || consentReadFailed)">
+                            <p *ngIf="consentReadFailed || item.isSubscribed || telegramHandoffPending"
+                               class="push-status" [class.push-status--connected]="item.isSubscribed && !consentReadFailed"
+                               role="status">
+                                {{consentReadFailed ? 'Не удалось проверить подключение Telegram'
+                                    : item.telegramFromPersonal ? 'Telegram подключён через личный аккаунт'
+                                    : item.isSubscribed ? 'Telegram подключён'
+                                    : 'В Telegram нажмите «Старт», затем «Подписаться»'}}
+                            </p>
+                            <button type="button" class="consent-row-status"
+                                    *ngIf="consentReadFailed || (telegramHandoffPending && !item.isSubscribed)"
+                                    [disabled]="consentWritePending" (click)="retryPushCheck()">Проверить подключение</button>
+                        </ng-container>
+                        <ng-container *ngIf="item.channel === pushChannel &&
+                            (item.isGranted || consentReadFailed || (!consentLoaded && profile?.id))">
+                            <p class="push-status" [class.push-status--connected]="pushResult?.state === 'connected'"
+                               role="status">{{pushStatusText}}</p>
+                            <button type="button" class="consent-row-status" *ngIf="canSetUpPush && item.isGranted"
+                                    (click)="openSubscribeModal(item)">
+                                {{pushResult?.state === 'install' ? 'Как открыть приложение' : 'Подключить на этом устройстве'}}
+                            </button>
+                            <button type="button" class="consent-row-status"
+                                    *ngIf="consentReadFailed || pushResult?.state === 'unverified' || pushResult?.state === 'denied'"
+                                    [disabled]="consentWritePending" (click)="retryPushCheck()">Проверить снова</button>
+                            <details class="push-details" *ngIf="pushResult?.diagnostics as device">
+                                <summary>Техническая информация</summary>
+                                <dl>
+                                    <dt>Режим</dt><dd>{{device.isStandalone ? 'установленное приложение' : 'вкладка браузера'}}</dd>
+                                    <dt>Разрешение ОС</dt><dd>{{device.permission}}</dd>
+                                    <dt>Фоновый сервис</dt><dd>{{device.hasActiveWorker ? 'активен' : device.swState}}</dd>
+                                    <dt>Подписка устройства</dt><dd>{{device.hasSubscription ? 'есть' : 'нет'}}</dd>
+                                    <dt>Проверено</dt><dd>{{device.checkedAt | date:'dd.MM.yyyy HH:mm:ss'}}</dd>
+                                    <ng-container *ngIf="device.errorCode">
+                                        <dt>Код ошибки</dt><dd>{{device.errorCode}}</dd>
+                                    </ng-container>
+                                </dl>
+                            </details>
+                        </ng-container>
+                        <button type="button" class="consent-row-status" *ngIf="needsSetup(item) && !consentReadFailed"
                                 (click)="openSubscribeModal(item)">
                             <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
                                 <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/>
                                 <path d="M8 4.4v4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                                 <circle cx="8" cy="11.4" r="1" fill="currentColor"/>
                             </svg>
-                            <span>Канал не подключён — подключить</span>
+                            <span>{{item.channel === telegramChannel && telegramHandoffPending
+                                ? 'Открыть новую ссылку Telegram' : 'Канал не подключён — подключить'}}</span>
                             <span class="consent-row-status__arrow" aria-hidden="true">→</span>
                         </button>
                     </div>
                 </div>
                 <div class="cont-horiz-start margin-top10 margin-bottom30">
-                    <a class="consent-unsubscribe-all" (click)="unsubscribeFromAll()">
-                        Отписаться от всех рассылок
-                    </a>
+                    <button type="button" class="consent-unsubscribe-all" [disabled]="consentWritePending || !profile?.id"
+                            (click)="unsubscribeFromAll()">Отписаться от всех рассылок</button>
                 </div>
                 <!--div class="h4-name margin-top30 margin-bottom20">Уведомления</div>
                 <div class="cont-horiz-start margin-bottom20">

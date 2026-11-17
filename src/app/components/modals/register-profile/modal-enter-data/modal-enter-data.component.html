@@ -45,7 +45,7 @@
           class="button-text cont-vert margin-bottom25"
           [ngClass]="checkCode ? 'btn-green' : 'btn-gray'"
           (click)="next()"
-          [disabled]="!checkCode || isMaxWaiting">
+          [disabled]="!checkCode || isMaxWaiting || verifyingCode">
           Подтвердить
         </button>
 

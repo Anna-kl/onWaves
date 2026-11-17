@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnDestroy, Output} from '@angular/core';
-import {Observable, Subject, map, takeUntil} from 'rxjs';
+import {Observable, Subject, Subscription, map, takeUntil} from 'rxjs';
 
 import {IFreeSlotSchedule} from '../../../DTO/views/schedule/IFreeSlotSchedule';
 import {FreeSlotsReason, IFreeSlotsResponse} from '../../../DTO/views/schedule/IFreeSlotsResponse';
@@ -15,6 +15,12 @@ import {isPastBookingSlot, toCalendarDate} from '../../helpers/booking-date';
  */
 type SlotsStatus = 'idle' | 'loading' | 'ready' | 'empty' | 'error';
 
+interface SlotGroup {
+  key: 'morning' | 'day' | 'evening';
+  label: string;
+  slots: IFreeSlotSchedule[];
+}
+
 @Component({
   selector: 'app-set-interval-start',
   templateUrl: './set-interval-start.component.html',
@@ -29,9 +35,6 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
     too_late_today: 'На сегодня запись закрыта — выберите другой день',
     fully_booked: 'Все окна на этот день заняты',
     service_too_long: 'Для этой услуги нужно больше свободного времени — выберите другой день',
-    // Приходит и с бэка, и выставляется локально, когда у услуги не пришла длительность:
-    // раньше в этом случае блок просто оставался пустым без единого слова на экране.
-    invalid_duration: 'Не удалось определить длительность услуги — обновите страницу или выберите услугу заново',
   };
 
   dateRecord: Date = new Date();
@@ -39,6 +42,8 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
 
   status: SlotsStatus = 'idle';
   slots: IFreeSlotSchedule[] = [];
+  groups: SlotGroup[] = [];
+  readonly skeleton = Array.from({length: 8});
   emptyReason: FreeSlotsReason | string | null = null;
 
   @Input() id: string | null = null;
@@ -52,35 +57,34 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
    * иначе пропадёт возможность поставить запись впритык или задним числом.
    */
   @Input() mode: 'client' | 'master' = 'client';
+  /** Точка приёма. Пусто — график выезда, онлайна или единственной точки на сервере. */
+  @Input() pointId: string | null = null;
+  /** Тон пустого ответа: в кабинете мастера не пишем «мастер не работает». */
+  @Input() voice: 'client' | 'master' = 'client';
 
   @Output() setInterval = new EventEmitter<IChooseDayOfCalendar | null>();
   @Output() restoreFailed = new EventEmitter<void>();
 
   private lastRequestKey?: string;
   private restoredStart?: string;
+  private slotsRequest?: Subscription;
   private readonly destroy$ = new Subject<void>();
 
   constructor(private readonly api: ScheduleService) {}
 
   ngOnChanges(): void {
-    // `idle` — только когда день не выбран. Раньше сюда же попадали «день без dayId» и
-    // «услуга без duration»: экран молча оставался пустым, «Далее» не активировалась
-    // и пользователь не получал ни слотов, ни объяснения.
-    if (!this.day?.date || !this.id) {
+    // `idle` — день не выбран или у услуги нет длительности.
+    // «Без ограничений» и почасовая без выбранных часов дают 0 минут: это не поломка,
+    // слоты строить не из чего. Текст «обновите страницу» здесь врал.
+    if (!this.day?.date || !this.id || this.duration <= 0) {
+      this.slotsRequest?.unsubscribe();
+      if (this.selectedSlot) this.setInterval.emit(null);
+      this.dayId = null;
       this.lastRequestKey = undefined;
       this.restoredStart = undefined;
       this.status = 'idle';
-      this.slots = [];
+      this.setSlots([]);
       this.emptyReason = null;
-      return;
-    }
-
-    if (this.duration <= 0) {
-      this.lastRequestKey = undefined;
-      this.restoredStart = undefined;
-      this.status = 'empty';
-      this.slots = [];
-      this.emptyReason = 'invalid_duration';
       return;
     }
 
@@ -90,6 +94,16 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
   /** Текст пустого состояния. Показывается только при успешном ответе с пустым списком. */
   get emptyMessage(): string {
     const reason = this.emptyReason ?? '';
+    if (this.voice === 'master') {
+      const master: Record<string, string> = {
+        not_working_day: 'В этот день нет рабочего графика',
+        day_passed: 'Этот день уже прошёл — выберите другую дату',
+        too_late_today: 'На сегодня свободных окон уже нет — выберите другой день',
+        fully_booked: 'Все окна на этот день заняты',
+        service_too_long: 'Услуга не помещается в свободные окна этого дня',
+      };
+      return master[reason] ?? 'Нет свободных окон';
+    }
     return SetIntervalStartComponent.EMPTY_MESSAGES[reason] ?? 'Нет доступных слотов для записи';
   }
 
@@ -97,6 +111,55 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
     if (!this.day) return;
     this.lastRequestKey = undefined;
     this.loadFreeSlots(this.day);
+  }
+
+  get selectedSlot(): IFreeSlotSchedule | undefined {
+    return this.slots.find(item => item.isChoose);
+  }
+
+  get slotsCountLabel(): string {
+    const n = this.slots.length;
+    const mod10 = n % 10;
+    const mod100 = n % 100;
+    const word = mod10 === 1 && mod100 !== 11 ? 'свободное окно'
+      : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? 'свободных окна'
+      : 'свободных окон';
+    return `${n} ${word}`;
+  }
+
+  get durationLabel(): string {
+    const hours = Math.floor(this.duration / 60);
+    const minutes = this.duration % 60;
+    return [hours ? `${hours} ч` : '', minutes ? `${minutes} мин` : ''].filter(Boolean).join(' ');
+  }
+
+  /** Конец визита для подписи на выбранном чипе. Только отображение, в запись не уходит. */
+  endTime(slot: IFreeSlotSchedule): string {
+    const [h, m] = String(slot.start).split(':').map(Number);
+    const total = (h * 60 + m + this.duration) % (24 * 60);
+    return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+  }
+
+  trackGroup(_: number, group: SlotGroup): string {
+    return group.key;
+  }
+
+  trackSlot(_: number, slot: IFreeSlotSchedule): string {
+    return String(slot.start);
+  }
+
+  private setSlots(slots: IFreeSlotSchedule[]): void {
+    this.slots = slots;
+    const groups: SlotGroup[] = [
+      {key: 'morning', label: 'Утро', slots: []},
+      {key: 'day', label: 'День', slots: []},
+      {key: 'evening', label: 'Вечер', slots: []},
+    ];
+    for (const slot of slots) {
+      const hour = Number(String(slot.start).split(':')[0]);
+      groups[hour < 12 ? 0 : hour < 17 ? 1 : 2].slots.push(slot);
+    }
+    this.groups = groups.filter(group => group.slots.length > 0);
   }
 
   private loadFreeSlots(day: IChooseDayOfCalendar): void {
@@ -111,7 +174,7 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
       0, 0, 0, 0
     );
 
-    const requestKey = `${this.id}:${day.dayId ?? ''}:${this.duration}:${this.mode}:${toCalendarDate(this.dateRecord)}`;
+    const requestKey = `${this.id}:${day.dayId ?? ''}:${this.duration}:${this.mode}:${toCalendarDate(this.dateRecord)}:${this.pointId ?? ''}`;
     if (requestKey === this.lastRequestKey) {
       // День и услуга те же — данные уже загружены, осталось разобрать восстановление черновика.
       this.restoreStartIfNeeded();
@@ -119,12 +182,14 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
     }
 
     this.lastRequestKey = requestKey;
+    this.slotsRequest?.unsubscribe();
+    if (this.selectedSlot) this.setInterval.emit(null);
     this.restoredStart = undefined;
     this.status = 'loading';
-    this.slots = [];
+    this.setSlots([]);
     this.emptyReason = null;
 
-    this.requestSlots(day)
+    this.slotsRequest = this.requestSlots(day)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: response => this.applyResponse(response),
@@ -132,7 +197,7 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
         // черновик остаётся — restoreFailed здесь намеренно не эмитим.
         error: () => {
           this.status = 'error';
-          this.slots = [];
+          this.setSlots([]);
           this.emptyReason = null;
         }
       });
@@ -141,10 +206,10 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
   private requestSlots(day: IChooseDayOfCalendar): Observable<IFreeSlotsResponse> {
     const isoDay = toCalendarDate(this.dateRecord);
     if (this.mode === 'master') {
-      return this.api.getFreeSlotForDay(this.id!, this.duration, isoDay, day.dayId)
+      return this.api.getFreeSlotForDay(this.id!, this.duration, isoDay, day.dayId, this.pointId)
         .pipe(map(slots => ({slots: slots ?? [], reason: null})));
     }
-    return this.api.getFreeSlotDetailed(this.id!, this.duration, day.dayId, isoDay);
+    return this.api.getFreeSlotDetailed(this.id!, this.duration, day.dayId, isoDay, this.pointId);
   }
 
   private applyResponse(response: IFreeSlotsResponse): void {
@@ -161,15 +226,15 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
     // получим тот же рассинхром SSR/CSR, который уже был). Мастера не трогаем — ему нужно
     // ставить записи впритык и задним числом. Снять после починки бэка.
     const day = toCalendarDate(this.dateRecord);
-    this.slots = this.mode === 'client'
+    this.setSlots(this.mode === 'client'
       ? rawSlots.filter(item => !isPastBookingSlot(day, item.start))
-      : rawSlots;
+      : rawSlots);
 
     // Запись создаётся по `daysOfScheduleId` — без него выбранное время нельзя отправить.
     // Показываем ошибку, а не чипы, ведущие в неактивную «Далее».
     if (this.slots.length > 0 && !this.dayId) {
       this.status = 'error';
-      this.slots = [];
+      this.setSlots([]);
       this.emptyReason = null;
       return;
     }
@@ -177,8 +242,15 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
     if (this.slots.length === 0) {
       // Бэк прислал слоты, но все они уже прошли — свой же предохранитель их вырезал.
       // Показываем тот же текст, что бэк дал бы сам при рабочем лид-тайме.
-      this.status = 'empty';
-      this.emptyReason = rawSlots.length > 0 ? 'too_late_today' : response.reason;
+      const reason = rawSlots.length > 0 ? 'too_late_today' : response.reason;
+      // Контракт FreeSlotsReason: invalid_duration пользователю не показываем.
+      if (reason === 'invalid_duration') {
+        this.status = 'idle';
+        this.emptyReason = null;
+      } else {
+        this.status = 'empty';
+        this.emptyReason = reason;
+      }
     } else {
       this.status = 'ready';
       this.emptyReason = null;
@@ -204,6 +276,7 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
   }
 
   chooseInterval(slot: IFreeSlotSchedule): void {
+    if (this.status !== 'ready' || !this.slots.includes(slot)) return;
     const shouldChoose = !slot.isChoose;
     if (!shouldChoose) {
       // Клиент нажимает на уже выбранное время, чтобы подтвердить выбор, а не отменить его.
@@ -228,6 +301,7 @@ export class SetIntervalStartComponent implements OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.slotsRequest?.unsubscribe();
     this.destroy$.next();
     this.destroy$.complete();
   }

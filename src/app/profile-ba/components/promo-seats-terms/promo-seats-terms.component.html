@@ -1,0 +1,93 @@
+<main class="terms">
+  <p *ngIf="loading">Загружаю условия…</p>
+  <p *ngIf="!loading && !terms">Акция не найдена. Вопросы — <a [href]="'mailto:' + contactEmail">{{ contactEmail }}</a>.</p>
+
+  <ng-container *ngIf="terms as t">
+    <h1>Условия акции «{{ t.state.title }}»</h1>
+    <p class="terms__flag" role="status" *ngIf="promoStatusNotice(t.state) as notice">{{ notice }}</p>
+
+    <h2>1. Организатор</h2>
+    <p *ngIf="organizer; else noOrganizer">
+      {{ organizer }}<ng-container *ngIf="organizerDetails"> {{ organizerDetails }}</ng-container>
+      Электронная почта <a [href]="'mailto:' + contactEmail">{{ contactEmail }}</a>.
+    </p>
+    <ng-template #noOrganizer>
+      <p>Организатор будет указан до начала акции. Электронная почта <a [href]="'mailto:' + contactEmail">{{ contactEmail }}</a>.</p>
+    </ng-template>
+
+    <h2>2. Исполнитель услуг</h2>
+    <p>
+      {{ t.performerName || 'Мастер' }}<ng-container *ngIf="t.performerAddress">, {{ t.performerAddress }}</ng-container>.
+      Организатор акции услуги не оказывает.
+    </p>
+
+    <h2>3. Срок</h2>
+    <p>
+      {{ promoPeriodText(t.state) }}
+    </p>
+
+    <h2>4. Места</h2>
+    <p>
+      Акция действует для первых {{ t.state.seatsLimit }} записавшихся на весь перечень услуг ниже<ng-container *ngIf="open">, сейчас осталось мест: {{ t.state.seatsLeft }}</ng-container>.
+      Одна запись занимает одно место, один номер телефона — не больше одного.
+      <ng-container *ngIf="t.state.singlePromoService">В одной записи можно выбрать одну акционную услугу. </ng-container>
+      Порядок участия определяется моментом создания записи на сервере. Просмотр страницы и выбор времени место не занимают.
+      Если запись отменена до визита, место возвращается в акцию.
+      Если клиент не пришёл, место остаётся учтённым в числе первых {{ t.state.seatsLimit }} и следующему клиенту не передаётся.
+    </p>
+
+    <h2>5. Цены</h2>
+    <div class="terms__table">
+    <table>
+      <thead>
+        <tr>
+          <th>Услуга</th>
+          <th>Прайс</th>
+          <th>−{{ t.state.discountPercent }}%</th>
+          <th *ngIf="!t.state.excludeWelcomeCoupon">Купон</th>
+          <th>Цена для клиентки</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of t.state.services">
+          <td>{{ s.name }}</td>
+          <td>{{ formatRub(s.listAmount) }}</td>
+          <td>{{ formatRub(s.promoDiscount) }}</td>
+          <td *ngIf="!t.state.excludeWelcomeCoupon">{{ formatRub(s.couponDiscount) }}</td>
+          <td>{{ formatRub(s.clientPays) }}</td>
+        </tr>
+      </tbody>
+      <caption>
+        Скидка {{ t.state.discountPercent }}% — от цены по прайсу мастера.
+        <ng-container *ngIf="!t.state.excludeWelcomeCoupon">Купон OnWaves — на первую онлайн-запись; если купон не положен, цена по акции выше на сумму купона. </ng-container>
+        Другие услуги мастера в акцию не входят. {{ t.state.termsNote }} <ng-container *ngIf="t.masterSlug === 'chekanova_nails'">Дизайн оплачивается отдельно.</ng-container>
+      </caption>
+    </table>
+    </div>
+
+    <h2>6. Как получить</h2>
+    <p>
+      Записаться онлайн на {{ bookingUrl }} и выбрать услугу из списка. На месте оплатить мастеру цену по акции.
+      Запись по телефону или в мессенджере акцию не даёт.
+    </p>
+
+    <h2>7. Ограничения</h2>
+    <p>
+      <ng-container *ngIf="t.state.excludeWelcomeCoupon; else welcomeRules">Приветственный купон не суммируется с акцией. </ng-container>
+      <ng-template #welcomeRules>
+        <ng-container *ngIf="t.state.couponRequiresSeat">Купон доступен только вместе со скидкой в пределах тех же первых {{ t.state.seatsLimit }} мест. </ng-container>Купон — один раз на номер телефона.
+      </ng-template>
+      Акция не суммируется с другими скидками мастера.
+      Скидка не выдаётся деньгами. Коррекция — по цене мастера, в акцию не входит.
+    </p>
+
+    <h2>8. Противопоказания</h2>
+    <p>
+      Противопоказания мастер обсуждает на консультации. Если процедуру делать нельзя, запись отменяется,
+      место возвращается в акцию.
+    </p>
+
+    <h2>9. Вопросы</h2>
+    <p>Пишите на <a [href]="'mailto:' + contactEmail">{{ contactEmail }}</a>.</p>
+  </ng-container>
+</main>

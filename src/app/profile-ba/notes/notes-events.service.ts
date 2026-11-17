@@ -16,6 +16,9 @@ export class NotesService {
   workDay = this.isWorkDay.asObservable();
   ofDayId = this.dayId.asObservable();
   recordId = this._recordId.asObservable();
+  /** Календарь месяца перечитывает countNew после переноса: точка «новая запись» больше не актуальна. */
+  private readonly _calendarRevision = new BehaviorSubject(0);
+  calendarRevision = this._calendarRevision.asObservable();
 
   constructor() {
   }
@@ -40,6 +43,10 @@ export class NotesService {
 
   transferRecordId(recordId?: string): void {
     this._recordId.next(recordId);
+  }
+
+  refreshCalendar(): void {
+    this._calendarRevision.next(this._calendarRevision.value + 1);
   }
 
   /**

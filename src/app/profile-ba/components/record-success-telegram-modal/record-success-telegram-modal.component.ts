@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { environment } from 'src/enviroments/environment';
+import { BookingPrice } from '../../helpers/booking-price';
+import { BookingSuccessDetails } from '../../helpers/booking-success';
 
 @Component({
   selector: 'app-record-success-telegram-modal',
@@ -9,6 +11,8 @@ import { environment } from 'src/enviroments/environment';
 })
 /** Задаётся при открытии через modalRef.componentInstance (id клиента для ?start= в боте). */
 export class RecordSuccessTelegramModalComponent {
+  priceSummary: BookingPrice | null = null;
+  successDetails: BookingSuccessDetails | null = null;
   readonly telegramUrl = environment.telegramChannelUrl;
   /** Id аккаунта (клиента) для deep link подписки в боте. */
   accountId: string | null = null;

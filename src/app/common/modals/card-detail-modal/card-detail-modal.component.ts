@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, OnDestroy, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -7,7 +7,7 @@ import { IPrice } from '../../../DTO/views/services/IPrice';
 import { displayPriceUnit, formatPriceAmount } from '../../../../helpers/common/price.helpers';
 import { CurrencyType } from '../../../DTO/enums/currencyType';
 import { GroupService } from '../../../../services/groupservice';
-import { getMediaTitle, isGeneratedMediaName, MediaCard } from '../../../../helpers/common/media.helpers';
+import { getMediaText, isGeneratedMediaName, MediaCard } from '../../../../helpers/common/media.helpers';
 import { VideoPlaybackCoordinatorService } from '../../video-player/video-playback-coordinator.service';
 
 @Component({
@@ -22,15 +22,28 @@ export class CardDetailModalComponent implements OnInit, OnDestroy {
   @Input() linkedServices: Service[] = [];
   @Input() canBook: boolean = false;
   @Input() canBook$?: Observable<boolean>;
+  @Input() viewerLabel = 'Портфолио';
+  @Output() videoStarted = new EventEmitter<void>();
 
   @ViewChild('infoPanel') private infoPanelRef!: ElementRef<HTMLElement>;
 
   selectedIndex = -1;
   isLoading = false;
+  detailsExpanded = false;
+  videoUnavailable = false;
 
-  /** Заголовок карточки: null, если в name лежит служебное имя файла. */
+  get hasVideoDetails(): boolean {
+    return this.isLoading || this.linkedServices.length > 0 || this.paragraphs.length > 1 ||
+      this.paragraphs.join(' ').length > 100 || (this.title?.length ?? 0) > 60;
+  }
+
+  /** Заголовок из текста или осмысленного имени, без служебного имени файла. */
   get title(): string | null {
-    return getMediaTitle(this.card?.name);
+    return getMediaText(this.card?.name, this.card?.description).title;
+  }
+
+  get paragraphs(): string[] {
+    return getMediaText(this.card?.name, this.card?.description).paragraphs;
   }
 
   private swipeStartY = 0;

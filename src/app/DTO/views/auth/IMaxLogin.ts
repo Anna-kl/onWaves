@@ -8,6 +8,7 @@ export enum MaxLoginState {
   CodeSent = 2,
   Authorized = 3,
   Expired = 4,
+  DeliveryFailed = 5,
 }
 
 export interface IMaxLoginStart {
@@ -19,4 +20,6 @@ export interface IMaxLoginStart {
 export interface IMaxLoginStatus {
   sessionId: string;
   state: MaxLoginState;
+  expiresAt?: string;
+  link?: string;
 }

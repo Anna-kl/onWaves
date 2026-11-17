@@ -137,8 +137,9 @@
       <div><dt>Service Worker API</dt><dd>{{diagnostics.hasServiceWorkerApi ? 'есть' : 'нет'}}</dd></div>
       <div><dt>Разрешение</dt><dd>{{diagnostics.permission}}</dd></div>
       <div><dt>Воркер</dt><dd>{{diagnostics.swState}}</dd></div>
-      <div><dt>Скрипт воркера</dt><dd>{{diagnostics.swScriptUrl}}</dd></div>
-      <div><dt>Подписка</dt><dd>{{diagnostics.subscriptionEndpoint}}</dd></div>
+      <div><dt>Подписка устройства</dt><dd>{{diagnostics.hasSubscription ? 'есть' : 'нет'}}</dd></div>
+      <div><dt>Проверено</dt><dd>{{diagnostics.checkedAt | date:'dd.MM.yyyy HH:mm:ss'}}</dd></div>
+      <div *ngIf="diagnostics.errorCode"><dt>Код ошибки</dt><dd>{{diagnostics.errorCode}}</dd></div>
     </dl>
   </ng-container>
 </div>

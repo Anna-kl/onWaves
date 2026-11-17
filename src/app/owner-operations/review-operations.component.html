@@ -1,0 +1,53 @@
+<section class="review-ops" aria-label="Подтверждения визитов и модерация отзывов">
+  <button type="button" class="btn-transparent review-ops-toggle" [attr.aria-expanded]="open" (click)="toggle()">Запросы по визитам и жалобы на отзывы</button>
+  <div class="review-ops-content" *ngIf="open">
+    <p *ngIf="error" class="review-ops-error" role="alert">{{ error }}</p>
+    <p *ngIf="notice" role="status">{{ notice }}</p>
+    <p *ngIf="loading" role="status">Загружаем запросы и жалобы…</p>
+    <button *ngIf="error && !loaded" class="btn-transparent" type="button" (click)="reload()">Повторить</button>
+    <ng-container *ngIf="loaded">
+      <div>
+        <h2>Подтверждение визитов</h2>
+        <p *ngIf="!attendance.length">Запросов пока нет.</p>
+        <article *ngFor="let item of attendance">
+          <strong>{{ item.masterName }}</strong>
+          <p>{{ item.services.join(' · ') }}</p>
+          <p>Запрос от {{ item.requestedAt | date:'d MMMM yyyy, HH:mm':'+0300' }} МСК</p>
+          <p *ngIf="item.reason">{{ item.reason }}</p>
+          <div class="review-ops-actions">
+            <button class="btn-transparent" type="button" [disabled]="sending" (click)="choose('attendance', item.recordId, true)">Визит состоялся</button>
+            <button class="btn-transparent" type="button" [disabled]="sending" (click)="choose('attendance', item.recordId, false)">Неявка</button>
+          </div>
+          <ng-container *ngIf="decision?.id === item.recordId && decision?.kind === 'attendance'">
+            <ng-container *ngTemplateOutlet="decisionForm"></ng-container>
+          </ng-container>
+        </article>
+      </div>
+      <div>
+        <h2>Жалобы на отзывы</h2>
+        <p *ngIf="!reports.length">Жалоб пока нет.</p>
+        <article *ngFor="let item of reports">
+          <p>Жалоба от {{ item.createdAt | date:'d MMMM yyyy, HH:mm':'+0300' }} МСК</p>
+          <p><strong>Сообщение</strong> {{ item.text }}</p>
+          <blockquote>{{ item.reviewText }}<small *ngIf="item.reviewEstimate">Оценка {{ item.reviewEstimate }} из 5</small></blockquote>
+          <div class="review-ops-actions">
+            <button class="btn-transparent" type="button" [disabled]="sending" (click)="choose('report', item.id, false)">Оставить опубликованным</button>
+            <button class="btn-transparent" type="button" [disabled]="sending" (click)="choose('report', item.id, true)">Скрыть отзыв</button>
+          </div>
+          <ng-container *ngIf="decision?.id === item.id && decision?.kind === 'report'">
+            <ng-container *ngTemplateOutlet="decisionForm"></ng-container>
+          </ng-container>
+        </article>
+      </div>
+    </ng-container>
+  </div>
+</section>
+<ng-template #decisionForm>
+  <form class="review-ops-decision" (ngSubmit)="save()">
+    <label>Основание решения <textarea name="decision-reason" rows="2" [(ngModel)]="reason" maxlength="500" [disabled]="sending"></textarea></label>
+    <div class="review-ops-actions">
+      <button type="submit" class="btn-green" [disabled]="sending || !reason.trim()">Сохранить решение</button>
+      <button type="button" class="btn-transparent" [disabled]="sending" (click)="decision = null">Отмена</button>
+    </div>
+  </form>
+</ng-template>

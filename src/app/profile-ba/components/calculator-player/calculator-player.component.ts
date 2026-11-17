@@ -21,7 +21,7 @@ import { Subject, forkJoin, of, takeUntil } from 'rxjs';
 import { CalculatorAnswerKind } from '../../../DTO/enums/calculatorAnswerKind';
 import { WelcomeCouponMe, WelcomeOffer, WelcomeQuote } from '../../../DTO/views/promo/welcome-coupon';
 import { WelcomeCouponService } from 'src/services/welcome-coupon.service';
-import { formatRub, welcomeTierList } from 'src/helpers/common/welcome-coupon';
+import { formatRub, welcomeIsFixed, welcomeTierList } from 'src/helpers/common/welcome-coupon';
 import { CalculatorCtaKind } from '../../../DTO/enums/calculatorCtaKind';
 import { CalculatorQuoteStatus } from '../../../DTO/enums/calculatorQuoteStatus';
 import { CalculatorResultKind } from '../../../DTO/enums/calculatorResultKind';
@@ -345,7 +345,7 @@ export class CalculatorPlayerComponent implements OnInit, OnChanges, AfterViewIn
   /** Текст под сметой или null, если показывать нечего. */
   get couponNoteText(): string | null {
     const campaign = this.couponOffer?.campaign;
-    if (!this.couponOffer?.active || !this.couponOffer.masterParticipates || !campaign?.tiers?.length) {
+    if (!this.couponOffer?.active || !this.couponOffer.masterParticipates || (!campaign?.tiers?.length && !welcomeIsFixed(campaign))) {
       return null;
     }
 
@@ -362,6 +362,13 @@ export class CalculatorPlayerComponent implements OnInit, OnChanges, AfterViewIn
 
     // 2. К этой записи скидка не применится (бесплатный замер, цена за м²), но право
     // у клиента есть. Зовём записаться онлайн, не обещая скидку на саму эту запись.
+    if (campaign && welcomeIsFixed(campaign)) {
+      const amount = formatRub(campaign.fixedDiscountRub);
+      if (this.coupons.isLoggedIn && this.couponMine?.status !== 'available') {
+        return null;
+      }
+      return `Купон OnWaves ${amount} — на первую запись через сайт. К этому расчёту он не применяется.`;
+    }
     const tier = welcomeTierList(campaign)[0];
     if (!tier) {
       return null;
@@ -835,10 +842,18 @@ export class CalculatorPlayerComponent implements OnInit, OnChanges, AfterViewIn
 
   goRecord(): void {
     const serviceId = this.result?.measurementServiceId || this.connection?.measurementServiceId || '';
+    this.analytics.trackMeasurement(this.pageSlug(), serviceId || undefined);
     this.saveHandoff();
-    this.analytics.trackEvent('calculator', 'calculator_record', this.connection?.calculatorId ?? undefined);
     this.bookMeasurement.emit(serviceId);
     this.close();
+  }
+
+  /** Слаг из адреса карточки: плеер живёт на /:slug, GUID в цель не кладём. */
+  private pageSlug(): string | undefined {
+    if (!isPlatformBrowser(this.platformId)) {
+      return undefined;
+    }
+    return location.pathname.split('/').filter(Boolean)[0] || undefined;
   }
 
   formatMoney(amount: number): string {

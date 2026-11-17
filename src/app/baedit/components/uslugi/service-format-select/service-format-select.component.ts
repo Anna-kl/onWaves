@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { WorkLocationType } from 'src/app/DTO/enums/workLocationType';
-import { workLocationTypesOf } from 'src/helpers/common/address';
+import { IWorkLocation } from 'src/app/DTO/views/IWorkLocation';
+import { fixedPointsOf, workLocationTypesOf } from 'src/helpers/common/address';
 import { ProfileService } from 'src/services/profile.service';
 
 /**
@@ -21,11 +22,19 @@ export class ServiceFormatSelectComponent implements OnInit, OnChanges {
   @Input() profileId: string | null = null;
   /** Текущее значение (для редактирования услуги). */
   @Input() value: WorkLocationType | null = null;
+  @Input() pointIds: string[] = [];
+  /** Сохранение отклонено: ни один офис не отмечен. */
+  @Input() invalid = false;
+  @Input() allowDraft = false;
   @Output() valueChange = new EventEmitter<WorkLocationType | null>();
+  @Output() pointIdsChange = new EventEmitter<string[]>();
+  /** Сколько сохранённых точек можно выбрать. Одна подставляется сама. */
+  @Output() pointChoiceCount = new EventEmitter<number>();
 
   protected readonly WorkLocationType = WorkLocationType;
   /** Форматы, реально настроенные у профиля (в порядке Fixed → Mobile → Online). */
   available: WorkLocationType[] = [];
+  points: IWorkLocation[] = [];
   loading = true;
   /** Запрос форматов не удался — это НЕ то же самое, что «форматы не настроены». */
   loadFailed = false;
@@ -59,6 +68,10 @@ export class ServiceFormatSelectComponent implements OnInit, OnChanges {
       next: (res) => {
         // Нормализация терпит число, числовую строку, имя enum и PascalCase-ключ.
         this.available = res?.code === 200 ? workLocationTypesOf(res.data) : [];
+        if ((res?.code === 200 || res?.code === 404) && this.allowDraft && !this.available.length) this.available = [WorkLocationType.Fixed, WorkLocationType.Mobile, WorkLocationType.Online];
+        this.points = res?.code === 200 ? fixedPointsOf(res.data).filter(point => !!point.id) : [];
+        this.pointChoiceCount.emit(this.points.length);
+        this.keepKnownPoints();
 
         // Сбрасываем значение, если оно больше не поддерживается профилем.
         if (this.value != null && !this.available.includes(this.value)) {
@@ -68,6 +81,8 @@ export class ServiceFormatSelectComponent implements OnInit, OnChanges {
         // Единственный доступный формат — предвыбираем.
         if (this.value == null && this.available.length === 1) {
           this.select(this.available[0]);
+        } else if (this.value === WorkLocationType.Fixed) {
+          this.assignDefaultPoints();
         }
         this.loading = false;
       },
@@ -84,5 +99,68 @@ export class ServiceFormatSelectComponent implements OnInit, OnChanges {
   select(type: WorkLocationType): void {
     this.value = type;
     this.valueChange.emit(type);
+    if (type === WorkLocationType.Fixed) {
+      this.assignDefaultPoints();
+      return;
+    }
+    if (this.pointIds.length) {
+      this.pointIds = [];
+      this.pointIdsChange.emit([]);
+    }
+  }
+
+  pointOn(id: string | null | undefined): boolean {
+    return !!id && this.pointIds.includes(id);
+  }
+
+  get selectedCount(): number {
+    return this.points.filter(point => this.pointOn(point.id)).length;
+  }
+
+  pointTitle(point: IWorkLocation): string {
+    const title = `${point.title ?? ''}`.trim();
+    const city = `${point.city ?? ''}`.trim();
+    return title || city || 'Адрес';
+  }
+
+  /** Улица без повтора города, если он уже в заголовке карточки. */
+  pointAddress(point: IWorkLocation): string {
+    const title = `${point.title ?? ''}`.trim();
+    const city = `${point.city ?? ''}`.trim();
+    const street = [point.street, point.house, point.apartment]
+      .filter(part => !!part && `${part}`.trim().length > 0)
+      .join(', ');
+    const cityInTitle = !!city && title.toLowerCase() === city.toLowerCase();
+    if (!title || cityInTitle) return street || (cityInTitle ? '' : city);
+    return [city, street].filter(part => part.length > 0).join(', ');
+  }
+
+  togglePoint(id: string | null | undefined): void {
+    if (!id || this.points.length < 2) return;
+    this.pointIds = this.pointOn(id)
+      ? this.pointIds.filter(item => item !== id)
+      : [...this.pointIds, id];
+    this.pointIdsChange.emit(this.pointIds);
+  }
+
+  private keepKnownPoints(): void {
+    const allowed = new Set(this.points.map(point => point.id).filter((id): id is string => !!id));
+    const next = this.pointIds.filter(id => allowed.has(id));
+    if (next.length !== this.pointIds.length) {
+      this.pointIds = next;
+      this.pointIdsChange.emit(next);
+    }
+  }
+
+  /**
+   * Пустой список при нескольких офисах значит «во всех»: так услуга жила до явного выбора.
+   * Уже отмеченные офисы не трогаем. Одна точка подставляется сама.
+   */
+  private assignDefaultPoints(): void {
+    if (!this.points.length || this.pointIds.length) return;
+    const ids = this.points.map(point => point.id).filter((id): id is string => !!id);
+    if (!ids.length) return;
+    this.pointIds = ids;
+    this.pointIdsChange.emit(ids);
   }
 }

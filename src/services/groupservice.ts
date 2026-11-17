@@ -1,3 +1,4 @@
+import { CookieService } from 'ngx-cookie-service';
 // не доделал. По хорошему нужно сделать сервис, для получения группы услуги и услуг. Муконин.
 
 import { Injectable } from '@angular/core';
@@ -38,7 +39,7 @@ export class GroupService {
   private static readonly allServicesCache = new Map<string, ReadCacheEntry<Service[]>>();
   public payMethods$ = new BehaviorSubject<PaymentMethodType[]>([]);
   public checkStatusServices$ = new BehaviorSubject<IResponse|null>(null);
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private cookies: CookieService) { }
 
   getGroupById(id: string): Observable<Group> {
     const url = `https://83.222.9.120/v1/api/services/groups/${id}`;
@@ -51,9 +52,9 @@ export class GroupService {
       .get<IViewImage[]>(`${this.baseUrl}get-images/${id}`);
   }
 
-  getServiceWithout(profileId: string, force = false): Observable<Service[]> {
-    return this.cached(GroupService.withoutGroupCache, profileId, () =>
-      this.http.get<Service[]>(`${this.baseUrl}without-group/${profileId}`, this.freshOptions(force))
+  getServiceWithout(profileId: string, force = false, includeArchived = false): Observable<Service[]> {
+    return this.cached(GroupService.withoutGroupCache, `${profileId}:${includeArchived}`, () =>
+      this.http.get<Service[]>(`${this.baseUrl}without-group/${profileId}`, this.editorOptions(force, includeArchived))
     , force);
   }
 
@@ -82,9 +83,9 @@ export class GroupService {
     , force);
   }
 
-  getService(groupId: string, force = false): Observable<Service[]> {
-    return this.cached(GroupService.groupServicesCache, groupId, () =>
-      this.http.get<Service[]>(`${this.baseUrl}get-by-group/${groupId}`, this.freshOptions(force))
+  getService(groupId: string, force = false, includeArchived = false): Observable<Service[]> {
+    return this.cached(GroupService.groupServicesCache, `${groupId}:${includeArchived}`, () =>
+      this.http.get<Service[]>(`${this.baseUrl}get-by-group/${groupId}`, this.editorOptions(force, includeArchived))
     , force);
   }
 
@@ -142,7 +143,7 @@ export class GroupService {
    * @param requestId - UUID для идемпотентности (опционально)
    */
   saveService(service: Service, requestId?: string){
-    let headers: HttpHeaders = new HttpHeaders();
+    let headers: HttpHeaders = this.authHeaders();
 
     // ══════════════════════════════════════════════════════════════
     // КРИТИЧНО: Добавить Idempotency-Key header для предотвращения дублей
@@ -197,6 +198,18 @@ export class GroupService {
    * Заголовок Cache-Control сюда намеренно НЕ добавлен: он превратил бы простой GET
    * в preflight-запрос и завязал бы работу списка на корректность CORS.
    */
+  archiveService(id: string, archived: boolean): Observable<IResponse> {
+    return this.http.put<IResponse>(`${this.baseUrl}archive/${id}`, {archived}, {headers: this.authHeaders()})
+      .pipe(tap(result => { if (result.code === 200) this.clearReadCache(); }));
+  }
+  private authHeaders(): HttpHeaders {
+    return new HttpHeaders({Authorization: 'Bearer ' + this.cookies.get('auth-token-ocpio')});
+  }
+  private editorOptions(force: boolean, includeArchived: boolean) {
+    const options = this.freshOptions(force);
+    return includeArchived ? {...options, headers: this.authHeaders(), params: (options.params ?? new HttpParams()).set('includeArchived', 'true')} : options;
+  }
+
   private freshOptions(force: boolean): { headers?: HttpHeaders; params?: HttpParams } {
     if (!force) return {};
     return { params: new HttpParams().set('_', Date.now().toString()) };

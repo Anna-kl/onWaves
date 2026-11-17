@@ -24,6 +24,8 @@
         </div>
 
         <ng-container *ngIf="!isLoading && !loadError">
+          <app-booking-benefits class="w100" [masterId]="id" [slug]="profileSlug" [services]="services"
+            [dayId]="daySetInterval?.dayId ?? dayId" [awardId]="awardId"></app-booking-benefits>
           <div class="schedule-message" *ngIf="restoreMessage" role="status">
             Не удалось восстановить выбранную запись. Выберите дату и время ещё раз.
           </div>
@@ -39,12 +41,15 @@
             [type]="'User'"
             [today]="today"
             [initialWorkDays]="workDays"
-            [serviceId]="serviceId"
+            [serviceId]="awardId && services.length > 1 ? null : serviceId"
+            [duration]="awardId && services.length > 1 ? duration : undefined"
+            [pointId]="pointId"
             [userId]="id">
           </app-calendar>
           <app-set-interval-start ngSkipHydration
             [id]="id" [day]="daySetInterval"
             [duration]="duration"
+            [pointId]="pointId"
             [start]="restoredStart"
             (restoreFailed)="onRestoreFailed()"
             (setInterval)="setInterval($event)">

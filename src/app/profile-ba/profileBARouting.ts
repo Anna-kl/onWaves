@@ -10,6 +10,9 @@ import {ReviewsComponent} from "../baedit/profilebisacc/reviews/reviews.componen
 import { ConfirmRecord2Component } from "./components/confirm-record2/confirm-record2.component";
 import { LentaComponent } from "../common/profile/lenta/lenta.component";
 import { PublicProfileResolver } from "./public-profile.resolver";
+import { PromoTermsComponent } from "./components/promo-terms/promo-terms.component";
+import { organizerReady } from "./helpers/promo-terms";
+import { PromoSeatsTermsComponent } from "./components/promo-seats-terms/promo-seats-terms.component";
 
 const routes: Routes = [
   // { path:'profile-ba/:id', component: ProfileBAComponent, children: [
@@ -29,6 +32,17 @@ const routes: Routes = [
     ]},
   // Шаги воронки записи. Индексировать нечего: содержимое зависит от выбранной
   // услуги и живых слотов, а публичная ценность вся в карточке мастера.
+      {
+        path: ':id/akcii',
+        component: PromoTermsComponent,
+        data: {
+          dynamicSeo: true,
+          // Пока Анна не внесла наименование и ИНН, страницу нельзя индексировать.
+          noindex: !organizerReady(),
+        },
+      },
+      // Условия акции с местами: noindex ставит страница, пока у акции не указан организатор.
+      { path: ':id/usloviya', component: PromoSeatsTermsComponent, data: { dynamicSeo: true } },
       {path: ':id/choose-service',     component: GroupServiceComponent, data: { noindex: true, title: 'Выбор услуги | OnWaves' }},
   {path: ':id/choose-date',     component: ChooseDateTimeComponent, data: { noindex: true, title: 'Выбор даты и времени | OnWaves' }},
       {path: ':id/confirm-record',     component: ConfirmRecordComponent, data: { noindex: true, title: 'Подтверждение записи | OnWaves' }},

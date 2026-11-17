@@ -23,7 +23,7 @@
 						<div class="cont-horiz-between search-line-in">
 							<!--   -->
 							<div>
-								<input type="text" [(ngModel)]="searchRequest"	size="11" placeholder="Что вы ищете?" style="border:0px;" >
+								<input type="text" [(ngModel)]="searchRequest" (keydown.enter)="search()" size="11" placeholder="Что вы ищете?" style="border:0px;" >
 							</div>
 							<!-- Иконка лупы -->
 							<a class="round30 background-green-dark" (click)="search()">
@@ -67,7 +67,8 @@
 					</ng-template>
 				</ng-container>
 				<ng-container *ngIf="seconsCards.length > 0">
-					<p style="margin-bottom: 8px;">Возможно, это также Вас заинтересует!</p>
+					<p *ngIf="!firstCards.length && state?.search" role="status">По вашему запросу совпадений нет.</p>
+					<h2 style="margin-bottom: 8px;">Альтернативные предложения</h2>
 					<!-- Если categoryIds с API не совпали с рубриками 2-го уровня из словаря, getCategories() пустой — показываем список без заголовков рубрик -->
 					<ng-container *ngIf="secondCardCategories.length > 0; else secondCardsFlat">
 						<div *ngFor="let category of secondCardCategories" class="w100 left-right20mob" >

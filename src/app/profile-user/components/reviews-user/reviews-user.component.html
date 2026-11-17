@@ -1,38 +1,91 @@
-
-<div class="w100" style="max-width: 540px;" >
-    <div class="cont-vert">
-        <div class="w100  cont-horiz-start margin-bottom30" >
-            <img [src]="avatar" style="max-width:60px; height: 60px; border-radius: 60px; margin-right: 20px;"/>
-            <!-- Имя БА которому ставим отзыв -->
-            <h2 style="font-size:  1.25rem; ">
-                {{name}}
-            </h2>
+<div class="modal-header">
+  <h2 id="review-dialog-title" class="modal-title fs-5">{{ saved ? 'Отзыв опубликован' : own ? 'Редактировать отзыв' : 'Оставить отзыв' }}</h2>
+  <button type="button" class="review-close" aria-label="Закрыть" [disabled]="busy" (click)="close()">×</button>
+</div>
+<div class="modal-body" *ngIf="saved; else editor" role="status">
+  <ng-container *ngIf="saved.rewardAmountKopecks as amount">
+    <p class="review-reward">Начислен купон {{ money(amount / 100) }}</p>
+    <p>Действует до {{ saved.rewardExpiresAt | date:'d MMMM yyyy, HH:mm':'+0300' }} МСК.</p>
+    <a class="btn-green review-submit" [routerLink]="['/page-user', clientId]" fragment="review-coupons" (click)="close()">Мои купоны</a>
+  </ng-container>
+  <button type="button" class="btn-transparent" (click)="close()">Готово</button>
+</div>
+<ng-template #editor>
+  <div class="modal-body" *ngIf="loading || loadError; else fields" role="status">
+    {{ loadError || 'Открываем отзыв…' }}
+  </div>
+  <ng-template #fields>
+    <form (ngSubmit)="save()">
+      <div class="modal-body review-fields">
+        <div>
+          <strong>{{ name }}</strong>
+          <p class="review-meta" *ngIf="services.length">{{ services.join(' · ') }}</p>
         </div>
-        <div class="margin-bottom20 w100" style="text-align: left;" >
-            <b>Сеанс окончен!</b>
+        <p *ngIf="own?.moderationReason as reason" class="review-error" role="status">Отзыв скрыт. Причина: {{ reason }}</p>
+        <fieldset class="review-stars" [disabled]="busy || !!own?.moderationReason">
+          <legend>Ваша оценка</legend>
+          <label *ngFor="let star of stars" [class.review-star-chosen]="star <= rating">
+            <input type="radio" name="review-rating" [value]="star" [(ngModel)]="rating"
+              [attr.aria-label]="star + ' из 5'" [disabled]="busy">
+            <span aria-hidden="true">★</span>
+          </label>
+        </fieldset>
+        <label class="review-text">Отзыв
+          <textarea name="review-text" rows="4" maxlength="4000" [(ngModel)]="text" [disabled]="busy || !!own?.moderationReason"
+            placeholder="Расскажите, как прошёл визит"></textarea>
+          <small>Добавьте текст или хотя бы одно фото или видео.</small>
+        </label>
+        <div *ngIf="!own?.moderationReason && eligibility.mediaLimits as limits" class="review-upload">
+          <div class="review-files">
+            <label class="btn-transparent review-file">Добавить фото
+              <input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple
+                [disabled]="busy" (change)="chooseFiles(photos, 'photo')" #photos>
+            </label>
+            <label class="btn-transparent review-file">Добавить видео
+              <input type="file" accept=".mp4,.mov,video/mp4,video/quicktime"
+                [disabled]="busy" (change)="chooseFiles(video, 'video')" #video>
+            </label>
+          </div>
+          <small>До {{ limits.maxPhotos }} фото по {{ megabytes(limits.maxPhotoBytes) }} МБ. Видео до {{ megabytes(limits.maxVideoBytes) }} МБ и {{ limits.maxVideoSeconds }} сек.</small>
         </div>
-        <p style="max-width:500px;" class="margin-bottom30">
-            Напишите отзыв об исполнителе и оказанных услугах. <br/><br/>
-            Хороший отзыв мотивирует исполнителя, а негативный убережет других пользователей
-            от недобросовестных исполнителей!
-        </p>
-        <p style="text-align: center;">
-            <b>Поставьте оценку </b>
-        </p>
-        <div class="cont-horiz-around w100 margin-top-bottom30" style="max-width: 320px;" >
-            <div [class]="rating.class"   *ngFor="let rating of ratings" (click)="setRating(rating)" > 
-            </div> 
-        </div>
-        <textarea
-            [(ngModel)]="text"
-            class="textarea-reg-ba margin-bottom50" rows="5" cols="45"
-            name="text"
-            placeholder="Добавьте описание" >
-            </textarea>
-        <div class="w100 margin-bottom30"
-             (click)="saveRating()"
-             [class]="getColor()" style="text-align:center">
-            Оставить отзыв
-        </div>
-    </div>
-</div> 
+        <ul class="review-attachments" *ngIf="attachments.length">
+          <li *ngFor="let item of attachments">
+            <div class="review-preview" *ngIf="item.preview">
+              <img *ngIf="item.kind === 'photo'" [src]="item.preview" alt="Предпросмотр фото">
+              <video *ngIf="item.kind === 'video'" [src]="item.file ? item.preview : item.media?.url"
+                [poster]="item.file ? '' : (item.media?.thumbnailUrl ?? '')" controls playsinline preload="metadata"
+                aria-label="Предпросмотр видео"></video>
+            </div>
+            <span>{{ item.name }}</span>
+            <small *ngIf="item.state === 'uploading'">Загружаем{{ item.progress === null ? '…' : ' · ' + item.progress + '%' }}</small>
+            <small *ngIf="item.state === 'processing'">Проверяем файл…</small>
+            <small *ngIf="item.error" role="alert">{{ item.error }}</small>
+            <button type="button" class="btn-transparent" *ngIf="item.state === 'rejected' && item.file" [disabled]="busy" (click)="upload(item)">Повторить</button>
+            <button type="button" class="btn-transparent" [disabled]="busy" (click)="removeAttachment(item)">Убрать</button>
+          </li>
+        </ul>
+        <label *ngIf="attachments.length" class="review-consent">
+          <input type="checkbox" name="media-consent" [(ngModel)]="consent" [disabled]="busy">
+          <span>У меня есть право на публикацию этих материалов. Они будут видны в отзыве.</span>
+        </label>
+        <details *ngIf="!own && eligibility.rewardAmountKopecks as amount">
+          <summary>Условия купона на {{ money(amount / 100) }}</summary>
+          <p>Купон начисляется за любую оценку после подтверждённого визита. Он действует {{ eligibility.rewardDays }} дней у любого мастера OnWaves и складывается с другими скидками. Остаток сохраняется до исходной даты окончания.</p>
+          <p>Если вы записались до истечения срока, скидка сохранится до визита. При отмене записи после этой даты остаток станет недоступен.</p>
+        </details>
+        <p class="review-error" *ngIf="error" role="alert">{{ error }}</p>
+        <p *ngIf="confirmRemove" role="status">Удалить отзыв с публичной страницы? Купон за него сохранится.</p>
+      </div>
+      <div class="modal-footer review-footer">
+        <ng-container *ngIf="confirmRemove; else submit">
+          <button type="button" class="btn-transparent" [disabled]="busy" (click)="confirmRemove = false">Назад</button>
+          <button type="button" class="btn-green review-submit" [disabled]="busy" (click)="delete()">Удалить отзыв</button>
+        </ng-container>
+        <ng-template #submit>
+          <button *ngIf="own" type="button" class="btn-transparent review-delete" [disabled]="busy" (click)="confirmRemove = true">Удалить отзыв</button>
+          <button *ngIf="!own?.moderationReason" type="submit" class="btn-green review-submit" [disabled]="!canSave">{{ busy ? 'Сохраняем…' : own ? 'Сохранить' : 'Опубликовать отзыв' }}</button>
+        </ng-template>
+      </div>
+    </form>
+  </ng-template>
+</ng-template>

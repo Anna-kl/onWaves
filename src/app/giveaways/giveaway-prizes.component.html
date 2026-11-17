@@ -1,0 +1,62 @@
+<section class="gw-prizes" id="prizes" aria-labelledby="gw-prizes-title">
+  <h2 id="gw-prizes-title">Мои выигрыши</h2>
+
+  <p *ngIf="load.kind === 'loading'">Загружаем выигрыши…</p>
+
+  <div *ngIf="load.kind === 'failed'" class="gw-prize">
+    <p>Не удалось загрузить выигрыши.</p>
+    <button type="button" (click)="reload()">Повторить</button>
+  </div>
+
+  <div *ngIf="load.kind === 'verification_required'" class="gw-prize">
+    <p>Подтвердите номер телефона, чтобы увидеть и использовать выигрыши.</p>
+    <button type="button" (click)="needPhoneProof.emit()">Подтвердить номер телефона</button>
+  </div>
+
+  <p *ngIf="load.kind === 'ready' && !items.length">Пока нет назначенных выигрышей.</p>
+
+  <article class="gw-prize" *ngFor="let item of items">
+    <h3>{{ item.campaignCode === 'svetlana-vk-2026-11' ? 'Ваш приз у Светланы' : 'Ваш приз · ' + (item.master.name || item.campaignCode) }}</h3>
+    <ng-container *ngIf="item.policy as policy; else fixedPrize">
+      <p>{{ policy.description }}</p>
+      <p *ngIf="policy.maxVisits > 1">Использовано {{ money(item.usedAmountRub ?? 0) }}. Доступно для новой записи {{ money(item.remainingAmountRub ?? 0) }}.</p>
+      <p *ngIf="policy.maxVisits > 1">Визитов использовано {{ item.completedVisits ?? 0 }} из {{ policy.maxVisits }}<ng-container *ngIf="item.reservedVisits">, запланировано {{ item.reservedVisits }}</ng-container>.</p>
+      <p *ngIf="policy.maxServices">Услуг использовано {{ item.completedServices ?? 0 }} из {{ policy.maxServices }}<ng-container *ngIf="item.reservedServices">, запланировано {{ item.reservedServices }}</ng-container>.</p>
+      <button type="button" *ngIf="item.canBook && choosingAwardId !== item.awardId" (click)="choose(item)">Выбрать услугу</button>
+      <section *ngIf="item.canBook && choosingAwardId === item.awardId" class="gw-prize__selection" aria-label="Выбор услуги приза">
+        <p>{{ policy.maxVisits === 1 ? 'Выберите одну услугу.' : 'Выберите услуги этого визита.' }}<ng-container *ngIf="policy.allowClientTopUp"> Сумму сверх доступного покрытия вы оплачиваете отдельно. Доплата будет показана до записи.</ng-container></p>
+        <label *ngFor="let service of item.services" class="gw-prize__service">
+          <input [type]="policy.maxVisits === 1 ? 'radio' : 'checkbox'" [name]="'prize-' + item.awardId"
+            [disabled]="policy.maxVisits > 1 && serviceLimitReached(item, service.id)"
+            [checked]="selectedIds.includes(service.id)" (change)="toggle(item, service.id)" />
+          <span>{{ service.name }} · {{ money(service.price) }}</span>
+        </label>
+        <p *ngIf="!item.services?.length">Подходящие услуги сейчас недоступны. Свяжитесь с организатором.</p>
+        <p *ngIf="selection.kind === 'loading'" role="status">Проверяем стоимость…</p>
+        <p *ngIf="selection.kind === 'failed'" role="alert">Не удалось проверить приз. Выберите услугу ещё раз.</p>
+        <ng-container *ngIf="selection.value as quote">
+          <p *ngIf="quote.status !== 'available'" role="alert">{{ quote.reason === 'prize_service_limit_exceeded' ? 'Достигнут общий предел услуг по призу с учётом выполненных и запланированных визитов.' : 'Выбранные услуги недоступны по призу. Измените выбор.' }}</p>
+          <ng-container *ngIf="quote.status === 'available'">
+            <p>Цена по прайсу {{ money(quote.originalAmount) }} · OnWaves оплачивает {{ money(quote.prizeDiscountAmount) }}.</p>
+            <p><b>Вы платите {{ money(quote.payableAmount) }}.</b></p>
+            <p *ngIf="policy.maxVisits === 1">После выполненного визита купон погашается целиком. Остаток не переносится.</p>
+            <p *ngIf="policy.maxVisits > 1">Остаток покрытия можно использовать в пределах общего числа услуг и визитов. После исчерпания суммы или лимита услуг приз закрывается.</p>
+            <button type="button" (click)="book(item)">Выбрать время</button>
+          </ng-container>
+        </ng-container>
+      </section>
+    </ng-container>
+    <ng-template #fixedPrize>
+      <p>{{ item.service?.name }}</p>
+      <p *ngIf="item.service?.includedItems">{{ item.service?.includedItems }}</p>
+      <p><b>{{ money(item.clientPays) }}</b>. Услугу оплачивает OnWaves.</p>
+      <button type="button" *ngIf="item.canBook" (click)="book(item)">Выбрать время</button>
+    </ng-template>
+    <p *ngIf="item.city || item.address">{{ item.city }}<ng-container *ngIf="item.address">{{ item.city ? ' · ' : '' }}{{ item.address }}</ng-container></p>
+    <p *ngIf="item.visitEndsAt">Использовать по {{ when(item.visitEndsAt) }} включительно.</p>
+    <p *ngIf="statusText(item)">{{ statusText(item) }}</p>
+    <a *ngIf="item.recordId && clientId" [routerLink]="['/profile-user', clientId]">Открыть свои записи</a>
+    <p *ngIf="item.canBookReason === 'master_unavailable'">Сейчас у мастера закрыта запись. Приз сохраняется, выберите время, когда приём откроется.</p>
+    <p *ngIf="item.status === 'expired' || item.status === 'review_required' || item.status === 'revoked'">Напишите организатору, если нужно разобрать этот случай.</p>
+  </article>
+</section>

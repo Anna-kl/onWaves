@@ -5,6 +5,9 @@ export interface IViewConsent {
   channel: ConsentChannel;
   isGranted: boolean;
   isSubscribed: boolean;
+  telegramFromPersonal?: boolean;
+  telegramOwnConsent?: boolean;
+  telegramConnectionPending?: boolean;
   grantedAt: string | null;
   revokedAt: string | null;
   consentTextVersion: string;

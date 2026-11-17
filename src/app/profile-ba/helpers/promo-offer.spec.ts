@@ -1,7 +1,7 @@
 import { LandingOfferType } from '../../DTO/enums/landingOfferType';
 import { PromoMediaKind } from '../../DTO/enums/promoMediaKind';
 import { ILandingOffer } from '../../DTO/views/landing/ILandingOffer';
-import { coverMedia, extraMedia } from './promo-offer';
+import { coverMedia, extraMedia, offerHeaderChips } from './promo-offer';
 
 function offer(partial: Partial<ILandingOffer> = {}): ILandingOffer {
   return {
@@ -15,6 +15,35 @@ function offer(partial: Partial<ILandingOffer> = {}): ILandingOffer {
     ...partial,
   };
 }
+
+describe('offerHeaderChips', () => {
+  it('uses every stored proposal, sale and coupon apart', () => {
+    const chips = offerHeaderChips(offer({
+      proposals: [
+        { text: 'Скидка 20%', tone: 'sale' },
+        { text: 'Купон', tone: 'coupon' },
+      ],
+    }));
+
+    expect(chips).toEqual([
+      { text: 'Скидка 20%', tone: 'sale' },
+      { text: 'Купон', tone: 'coupon' },
+    ]);
+  });
+
+  it('builds both chips from the percent and the coupon text when the server omits proposals', () => {
+    const chips = offerHeaderChips(offer({
+      discountPercent: 20,
+      description: '20 % и купон на первую запись',
+      benefits: [{ title: 'Маникюр', description: 'минус 20 % и купон 300 ₽', iconType: 0, sortOrder: 1 }],
+    }));
+
+    expect(chips).toEqual([
+      { text: 'Скидка 20%', tone: 'sale' },
+      { text: 'Купон', tone: 'coupon' },
+    ]);
+  });
+});
 
 describe('coverMedia / extraMedia', () => {
   it('uses imageUrl as cover and keeps other media as extras', () => {

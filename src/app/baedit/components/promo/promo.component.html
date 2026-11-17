@@ -1,4 +1,5 @@
 <div class="promo" *ngIf="!isLoading; else loading">
+  <app-promo-participants [masterId]="profile?.id"></app-promo-participants>
 
   <div class="promo-intro">
     <div class="promo-hook">

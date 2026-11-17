@@ -5,6 +5,7 @@ import { Comment } from "../../classes/comments/Comment";
 import {IViewBusinessProfile} from "../business/IViewBussinessProfile";
 import {PaymentMethodType} from "../../enums/paymentMethodType";
 import {CouponSnapshot} from "../promo/welcome-coupon";
+import { ReviewRewardBookingSnapshot } from '../promo/review-rewards';
 
 export interface IViewRecordUser extends INote{
   id: string;
@@ -22,6 +23,9 @@ export interface IViewRecordUser extends INote{
   isHasReview?: boolean;
   /** Снимок приветственного купона на записи (сервер считает; здесь только показ). */
   couponSnapshot?: CouponSnapshot | null;
+  /** Призовая запись: отдельный снимок, не купон. */
+  prizeSnapshot?: CouponSnapshot | null;
+  reviewRewards?: ReviewRewardBookingSnapshot | null;
   methodsPayment: PaymentMethodType[];
 }
 

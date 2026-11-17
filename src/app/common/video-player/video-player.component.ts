@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  HostBinding,
   Inject,
   Input,
   NgZone,
@@ -15,6 +16,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FALLBACK_VIDEO_POSTER } from '../../../helpers/common/media.helpers';
+import { VideoPlaybackCoordinatorService } from './video-playback-coordinator.service';
 
 type PlayerState = 'idle' | 'warming' | 'metadata' | 'ready' | 'loading' | 'playing' | 'error';
 
@@ -27,11 +29,19 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
   @Input() url!: string;
   @Input() poster: string | null = null;
   @Input() compact = false;
+  /** Полный просмотр: кадр целиком, управление в отдельной полосе под ним. */
+  @Input() fullFrame = false;
+  /** Просмотр портфолио на весь экран: управление поверх кадра, тап для паузы. */
+  @Input() immersive = false;
   @Input() warmup = true;
   @Input() autoplay = false;
+  /** Беззвучный запуск в центре экрана; плитки выбора видео в кабинете исключены. */
+  @Input() viewportAutoplay = true;
   @Input() eager = false;
   /** Клик по играющему ролику (не по нативным контролам) — открыть крупнее. */
   @Input() expandable = false;
+  /** Превью акции: даже первый клик открывает просмотр, не требует запуска в карточке. */
+  @Input() expandOnPlay = false;
   /**
    * false — превью без воспроизведения: клик проходит насквозь, решение принимает карточка.
    * Нужно там, где ролик не смотрят, а выбирают — например в сетке галереи кабинета.
@@ -40,6 +50,8 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
   @Output() expand = new EventEmitter<void>();
   /** Первый успешный старт ролика. Один раз на источник — повтор и пауза не считаются. */
   @Output() started = new EventEmitter<void>();
+  /** Ролик не открылся. Родитель убирает слот, на странице не остаётся «повторить». */
+  @Output() unavailable = new EventEmitter<void>();
 
   @ViewChild('hostEl') private hostElRef?: ElementRef<HTMLElement>;
   @ViewChild('videoEl') private videoRef?: ElementRef<HTMLVideoElement>;
@@ -48,6 +60,7 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
   hasFirstFrame = false;
   /** Доля загруженного ролика в процентах; null — пока длительность неизвестна. */
   loadedPercent: number | null = null;
+  muted = true;
 
   private readonly isBrowser: boolean;
   private browserInitialized = false;
@@ -55,9 +68,11 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
   private hasSource = false;
   private pendingPlay = false;
   private startReported = false;
+  private autoplayAttempted = false;
   private operationId = 0;
   private playAttempt?: Promise<void>;
   private warmupObserver?: IntersectionObserver;
+  private unregisterViewport?: () => void;
 
   get visiblePoster(): string | null {
     if (this.poster?.trim()) return this.poster.trim();
@@ -71,16 +86,24 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
       : `Видео загружается… ${this.loadedPercent}%`;
   }
 
+  @HostBinding('class.is-unavailable')
+  get unavailableHost(): boolean {
+    return this.state === 'error';
+  }
+
   get playLabel(): string {
     if (!this.interactive) return 'Открыть видео';
-    if (this.state === 'error') return 'Повторить загрузку видео';
+    if (this.state === 'error') return 'Видео недоступно';
+    if (this.expandable && this.expandOnPlay) return 'Смотреть видео на весь экран';
+    if (this.immersive && this.state === 'playing') return 'Приостановить видео';
     if (this.state === 'playing' && this.expandable) return 'Открыть видео';
     return 'Воспроизвести видео';
   }
 
   constructor(
     @Inject(PLATFORM_ID) platformId: object,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private playback: VideoPlaybackCoordinatorService
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
   }
@@ -94,17 +117,25 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
       this.loadedPercent = null;
       // Сброс только здесь: повтор после ошибки — тот же ролик, второе событие не нужно.
       this.startReported = false;
+      this.autoplayAttempted = false;
       this.state = 'idle';
 
       if (this.browserInitialized) {
+        this.unregisterViewport?.();
         this.resetMediaElement();
         this.observeForWarmup();
+        this.registerViewport();
       }
       return;
     }
 
     if (this.browserInitialized && ('eager' in changes || 'warmup' in changes || 'autoplay' in changes)) {
       this.observeForWarmup();
+    }
+    if (this.browserInitialized && ('viewportAutoplay' in changes || 'interactive' in changes)) {
+      this.unregisterViewport?.();
+      this.pausePlayback();
+      this.registerViewport();
     }
   }
 
@@ -124,8 +155,12 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
     video.addEventListener('progress', this.onProgress);
     video.addEventListener('durationchange', this.onProgress);
     video.addEventListener('timeupdate', this.onProgress);
+    video.addEventListener('volumechange', this.onVolumeChange);
+    video.addEventListener('ended', this.onPause);
+    video.muted = true;
 
     this.observeForWarmup();
+    this.registerViewport();
   }
 
   ngOnDestroy(): void {
@@ -134,6 +169,7 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
     this.pendingPlay = false;
     this.playAttempt = undefined;
     this.disconnectObserver();
+    this.unregisterViewport?.();
 
     if (!this.browserInitialized || !this.videoRef) return;
 
@@ -147,11 +183,13 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
     video.removeEventListener('progress', this.onProgress);
     video.removeEventListener('durationchange', this.onProgress);
     video.removeEventListener('timeupdate', this.onProgress);
+    video.removeEventListener('volumechange', this.onVolumeChange);
+    video.removeEventListener('ended', this.onPause);
     this.releaseMediaElement(video);
     this.browserInitialized = false;
   }
 
-  onPlayClick(event: Event): void {
+  onPlayClick(event: Event, allowExpand = true): void {
     // Превью без воспроизведения: событие не гасим, пусть его обработает карточка снаружи.
     if (!this.interactive) return;
 
@@ -160,19 +198,20 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
 
     if (!this.browserInitialized || this.destroyed) return;
 
-    if (this.state === 'playing' && this.expandable) {
-      this.pausePlayback();
-      this.expand.emit();
+    if (allowExpand && this.expandable && (this.expandOnPlay || this.state === 'playing')) {
+      this.onExpandClick(event);
+      return;
+    }
+
+    if (this.immersive && this.state === 'playing') {
+      this.onPauseClick(event);
       return;
     }
 
     if (this.state === 'loading' || this.state === 'playing') return;
     if (!this.normalizedUrl) return;
 
-    if (this.state === 'error') {
-      this.resetMediaElement();
-    }
-
+    if (this.video) this.playback.claim(this.video);
     this.pendingPlay = true;
     this.state = 'loading';
     if (!this.ensureSource(true)) {
@@ -183,7 +222,17 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
     this.tryPlay();
   }
 
+  onExpandClick(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!this.interactive || !this.expandable || !this.browserInitialized || !this.normalizedUrl) return;
+    if (this.video) this.playback.block(this.video);
+    this.pausePlayback();
+    this.expand.emit();
+  }
+
   pausePlayback(): void {
+    this.operationId++;
     this.pendingPlay = false;
     this.playAttempt = undefined;
     const video = this.video;
@@ -198,6 +247,68 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
       this.state = this.hasSource ? 'ready' : 'idle';
     }
   }
+
+  onPauseClick(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.video) this.playback.block(this.video);
+    this.pausePlayback();
+  }
+
+  get playbackDuration(): number {
+    const duration = this.video?.duration;
+    return duration && Number.isFinite(duration) ? duration : 0;
+  }
+
+  get playbackTime(): number {
+    return this.video?.currentTime || 0;
+  }
+
+  get playbackPercent(): number {
+    return this.playbackDuration > 0 ? 100 * this.playbackTime / this.playbackDuration : 0;
+  }
+
+  formatPlaybackTime(seconds: number): string {
+    const time = Math.max(0, Math.floor(seconds));
+    return `${Math.floor(time / 60)}:${String(time % 60).padStart(2, '0')}`;
+  }
+
+  seek(event: Event): void {
+    const value = Number((event.target as HTMLInputElement).value);
+    if (this.video && Number.isFinite(value) && this.playbackDuration > 0) {
+      this.video.currentTime = Math.max(0, Math.min(value, this.playbackDuration));
+    }
+  }
+
+  toggleMuted(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const video = this.video;
+    if (!video) return;
+    video.muted = !video.muted;
+    this.muted = video.muted;
+  }
+
+  private registerViewport(): void {
+    const video = this.video;
+    const host = this.hostElRef?.nativeElement;
+    if (!video || !host || !this.interactive || !this.viewportAutoplay || !this.normalizedUrl) return;
+    this.unregisterViewport = this.playback.register(video, host,
+      () => this.ngZone.run(() => {
+        if (this.destroyed || this.state === 'error') return;
+        video.muted = true;
+        this.muted = true;
+        this.pendingPlay = true;
+        this.state = 'loading';
+        if (this.ensureSource(true)) this.tryPlay();
+        else this.fail('video-load-failed');
+      }),
+      () => this.ngZone.run(() => this.pausePlayback()));
+  }
+
+  private onVolumeChange = (): void => {
+    this.muted = this.video?.muted ?? true;
+  };
 
   private get normalizedUrl(): string {
     return this.url?.trim() ?? '';
@@ -320,7 +431,8 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
     this.hasFirstFrame = true;
     if (!this.pendingPlay && this.state !== 'playing') this.state = 'ready';
 
-    if (this.autoplay && this.state !== 'playing') {
+    if (this.autoplay && !this.autoplayAttempted && !this.viewportAutoplay && this.interactive && this.state !== 'playing') {
+      this.autoplayAttempted = true;
       this.pendingPlay = true;
       this.state = 'loading';
     }
@@ -328,11 +440,11 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
   };
 
   private onPlaying = (): void => {
-    if (this.destroyed) return;
+    if (this.destroyed || this.video?.paused) return;
     this.pendingPlay = false;
     this.state = 'playing';
     const video = this.video;
-    if (video) video.controls = true;
+    if (video) video.controls = !this.fullFrame && !this.immersive;
 
     if (!this.startReported) {
       this.startReported = true;
@@ -424,6 +536,7 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
 
           this.pendingPlay = false;
           this.state = this.hasSource ? 'ready' : 'idle';
+          this.playback.block(currentVideo);
         });
       })
       .finally(() => {
@@ -440,7 +553,11 @@ export class VideoPlayerComponent implements AfterViewInit, OnChanges, OnDestroy
     this.playAttempt = undefined;
     this.hasSource = false;
     this.loadedPercent = null;
+    if (this.state === 'error') {
+      return;
+    }
     this.state = 'error';
+    this.unavailable.emit();
   }
 
   private shouldWaitForPlayableData(error: unknown, video: HTMLVideoElement): boolean {

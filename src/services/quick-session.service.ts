@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { CookieService } from 'ngx-cookie-service';
 import { filter, map, switchMap } from 'rxjs';
 import { LoginService } from '../app/auth/login.service';
 import { ConsentService } from './consent.service';
@@ -11,18 +10,12 @@ import { ConsentService } from './consent.service';
 @Injectable({ providedIn: 'root' })
 export class QuickSessionService {
   constructor(
-    private readonly cookies: CookieService,
     private readonly login: LoginService,
     private readonly consent: ConsentService,
   ) {}
 
   apply(token: string, profileUserId: string | null | undefined, phone: string, notifyConsent: boolean): void {
-    const expiry = new Date();
-    expiry.setDate(expiry.getDate() + 365);
-    this.cookies.set('auth-token-ocpio', token, expiry, '/');
-    if (profileUserId) {
-      this.cookies.set('profileId-ocpio', profileUserId, expiry, '/');
-    }
+    this.login.session.remember(token, profileUserId);
 
     if (notifyConsent) {
       this.grantNotifications(profileUserId ?? null, phone);

@@ -1,27 +1,257 @@
-<div 
-[style]="isAuth ? 'margin-top: 50px' : 'margin-top:0'"
-style="margin-top: 50px; width: 100%;">
-  <!--- Экран 1 --->
-  <div  style="margin-top: 10px;">
-    <!-- Единственный h1 главной. Стоит над поиском, потому что именно это
-         пользователь и делает на этом экране, а поисковику нужен один явный
-         заголовок страницы — до правки на главной не было ни одного. -->
-    <h1 class="main-page__h1">Онлайн-запись к мастерам и в салоны красоты</h1>
-    <app-main-menu  ></app-main-menu>
-    <!--- Слайдер Start  --->
-    <!-- ngSkipHydration: p-carousel считает numVisible из window.innerWidth, а на
-         сервере window нет — PrimeNG рендерит с numVisible=1 (5 карточек + 2 клона
-         при circular), браузер пересчитывает на 7-9 (5 + 14-18 клонов). Разное
-         количество узлов = ошибка гидратации NG0500, после которой Angular рисует
-         карусель заново, а неразобранная серверная разметка остаётся в DOM — на
-         экране две карусели. Со skip серверная разметка выбрасывается целиком и
-         карусель строится на клиенте один раз (в HTML для поисковиков она есть). -->
-    <app-slider ngSkipHydration></app-slider>
-    <a class="main-page__masters" routerLink="/landing" *ngIf="!isAuth">
-      <span class="main-page__masters-kicker">Мастерам</span>
-      <span class="main-page__masters-title">Принимайте записи 24/7 — бесплатно и без комиссий</span>
-      <span class="main-page__masters-cta">Стать мастером</span>
-    </a>
-    <app-uaafter-register  ></app-uaafter-register>
-  </div>
-</div> 
+<div class="hs">
+
+  <!-- Первый экран: местная витрина, поиск и пример записи. -->
+  <section class="hs-hero">
+    <div class="hs-hero__copy">
+      <p class="hs-place">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        Кашира · Ступино · Озёры · Домодедово
+      </p>
+      <!-- Единственный h1 главной. -->
+      <h1 class="hs-hero__title">Местные мастера. <span>Запись онлайн —</span> без&nbsp;переписки.</h1>
+      <p class="hs-hero__sub">
+        Смотрите работы и цены, выбирайте свободное время и записывайтесь в пару касаний.
+        Звонить и ждать ответа не нужно.
+      </p>
+
+      <form class="hs-search" (ngSubmit)="goToSearch()" role="search">
+        <label class="visually-hidden" for="hs-search-input">Услуга или мастер</label>
+        <svg class="hs-search__ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="hs-search-input" type="search" name="search" [(ngModel)]="search"
+               placeholder="Маникюр, потолки, сантехник…" autocomplete="off" enterkeyhint="search" />
+        <button type="submit" class="hs-btn hs-btn--primary hs-search__btn">Найти мастера</button>
+      </form>
+
+      <div class="hs-chips" aria-label="Популярные услуги">
+        <button type="button" class="hs-chip" *ngFor="let s of quickServices" (click)="searchService(s)">{{ s }}</button>
+      </div>
+      <div class="hs-links">
+        <button type="button" class="hs-link" (click)="toggleRubric()">Все категории</button>
+        <a class="hs-link" routerLink="/search/extsearch">Расширенный поиск</a>
+      </div>
+    </div>
+
+    <!-- Иллюстрация записи: мастер и фото настоящие, время — пример. Декор, не интерактив. -->
+    <div class="hs-hero__visual" aria-hidden="true" *ngIf="demo$ | async as demo">
+      <div class="hs-demo-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        Без звонков и переписки
+      </div>
+      <div class="hs-demo">
+        <div class="hs-demo__head">
+          <img [src]="demo.avatar" alt="" width="52" height="52" (error)="avatarFailed(demo.id)" *ngIf="!brokenAvatars.has(demo.id)" />
+          <div>
+            <b>{{ demo.name }}</b>
+            <span>{{ demo.title }} · {{ demo.place }}</span>
+          </div>
+        </div>
+        <div class="hs-demo__service">
+          <span>{{ demo.title }}</span>
+          <b>{{ (prices$ | async)?.[demo.id]?.text }}</b>
+        </div>
+        <div class="hs-demo__days">
+          <span *ngFor="let d of demoDays" class="hs-demo__day" [class.is-picked]="d.picked"><i>{{ d.name }}</i>{{ d.num }}</span>
+        </div>
+        <div class="hs-demo__times">
+          <span *ngFor="let t of demoTimes" class="hs-demo__time" [class.is-picked]="t.state === 'picked'" [class.is-busy]="t.state === 'busy'">{{ t.time }}</span>
+        </div>
+        <div class="hs-demo__cta">Записаться на 16:00</div>
+      </div>
+    </div>
+  </section>
+
+  <section *ngIf="ultrasoundOffer as offer" class="hs-promo" aria-labelledby="hs-promo-title">
+    <figure class="hs-promo__cover">
+      <img [src]="ultrasoundCover" alt="" loading="lazy" decoding="async" />
+      <figcaption>Иллюстрация процедуры</figcaption>
+    </figure>
+    <div class="hs-promo__body">
+      <p class="hs-promo__place">Озёры · Светлана Бирюкова</p>
+      <h2 id="hs-promo-title">Ультразвуковая чистка лица за полцены</h2>
+      <p class="hs-promo__terms">OnWaves оплачивает вторую половину. Без дополнительных купонов.</p>
+      <p class="hs-promo__terms">Запись по {{ offer.lastBookingAt | date:'d MMMM':'+0300' }}, визит по {{ offer.visitDeadline | date:'d MMMM':'+0300' }} включительно.</p>
+    </div>
+    <div class="hs-promo__action">
+      <p class="hs-promo__price"><strong>{{ offer.price }}</strong> вместо <s>{{ offer.originalPrice }}</s></p>
+      <p class="hs-promo__seats">{{ offer.remaining }}</p>
+      <a class="hs-btn hs-btn--primary" [routerLink]="['/permanent_ozery', 'choose-date']"
+         [queryParams]="{ serviceId: offer.serviceId, promoCampaign: ultrasoundCampaign }"
+         (click)="track('home_card_open', ultrasoundCampaign)">Записаться за {{ offer.price }}</a>
+    </div>
+  </section>
+
+  <app-giveaway-banner variant="home" [load]="giveaway"></app-giveaway-banner>
+
+  <app-rubric-menu *ngIf="isRubricOpen" [isOpen]="isRubricOpen" (setCategory)="setCategory($event)"></app-rubric-menu>
+
+  <!-- Подборка мастеров. На SSR: ссылки на карточки — и навигация, и перелинковка для поиска. -->
+  <section class="hs-section" id="masters" aria-labelledby="hs-masters-title">
+    <div class="hs-section__head">
+      <div>
+        <h2 id="hs-masters-title">Мастера рядом</h2>
+        <p>Работы, цены и свободное время — на странице каждого мастера.</p>
+      </div>
+      <div class="hs-section__tools" *ngIf="counts$ | async as counts">
+        <div class="hs-tabs" role="tablist" aria-label="Категории" *ngIf="counts.beauty && counts.home">
+          <button type="button" role="tab" [attr.aria-selected]="(filter$ | async) === 'all'" [class.is-active]="(filter$ | async) === 'all'" (click)="setFilter('all')">Все · {{ counts.all }}</button>
+          <button type="button" role="tab" [attr.aria-selected]="(filter$ | async) === 'beauty'" [class.is-active]="(filter$ | async) === 'beauty'" (click)="setFilter('beauty')">Красота · {{ counts.beauty }}</button>
+          <button type="button" role="tab" [attr.aria-selected]="(filter$ | async) === 'home'" [class.is-active]="(filter$ | async) === 'home'" (click)="setFilter('home')">Для дома · {{ counts.home }}</button>
+        </div>
+        <a class="hs-more" routerLink="/catalog">Весь каталог
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <ng-container *ngIf="mastersLoad$ | async as load">
+      <div *ngIf="load.kind === 'error'" class="hs-load-message" role="alert">
+        <p>{{ load.masters.length ? 'Не удалось загрузить всех мастеров. Показаны доступные карточки.' : 'Не удалось загрузить мастеров. Попробуйте ещё раз.' }}</p>
+        <button type="button" class="hs-btn hs-btn--ghost" (click)="retryMasters()">Повторить загрузку</button>
+      </div>
+      <p *ngIf="load.kind === 'loading'" class="hs-empty" role="status">Загружаем мастеров…</p>
+      <p *ngIf="load.kind === 'loaded' && !load.masters.length" class="hs-empty">В подборке пока нет мастеров.</p>
+    </ng-container>
+
+    <ng-container *ngIf="groups$ | async as groups">
+      <ng-container *ngFor="let g of groups; let last = last; trackBy: trackByGroup">
+        <div class="hs-divider"><span>{{ g.label }}</span></div>
+        <div class="hs-grid">
+          <a class="hs-card" *ngFor="let m of g.masters; trackBy: trackById" [class.hs-card--home]="m.group === 'home'"
+             [class.hs-card--promo]="!!(perks$ | async)?.[m.id]?.promo"
+             [routerLink]="['/', m.link]" (click)="track('home_card_open', m.link)">
+            <div class="hs-card__band">
+              <span class="hs-card__place">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                {{ m.place }}
+              </span>
+            </div>
+            <div class="hs-card__ava">
+              <img *ngIf="m.avatar && !brokenAvatars.has(m.id); else mono" [src]="m.avatar" [alt]="m.title" width="104" height="104" loading="lazy" (error)="avatarFailed(m.id)" />
+              <ng-template #mono><span class="hs-mono" aria-hidden="true">{{ m.initial }}</span></ng-template>
+            </div>
+            <div class="hs-card__body">
+              <h3>{{ m.title }}</h3>
+              <p class="hs-card__sub">{{ m.subtitle }}</p>
+              <ng-container *ngIf="(perks$ | async)?.[m.id] as perks">
+                <div class="hs-perks" *ngIf="perks.coupon || perks.promo">
+                  <span class="hs-perk hs-perk--coupon" *ngIf="perks.coupon as coupon" [attr.title]="coupon.hint">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2.5"/></svg>
+                    <span><b>{{ coupon.text }}</b> на первую запись<small *ngIf="coupon.until"> · до {{ coupon.until | date:'d MMMM' }}</small></span>
+                  </span>
+                  <p class="hs-perk hs-perk--promo" *ngIf="perks.promo as promo" [attr.title]="promo.title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                    <span><i>{{ promo.badge }}</i><b>{{ promo.title }}</b><small *ngIf="promo.until"> · до {{ promo.until | date:'d MMMM' }}</small></span>
+                  </p>
+                </div>
+              </ng-container>
+              <ul class="hs-tags">
+                <li *ngFor="let t of m.tags">{{ t }}</li>
+              </ul>
+              <div class="hs-card__foot">
+                <span class="hs-price" [class.is-empty]="!(prices$ | async)?.[m.id]">{{ (prices$ | async)?.[m.id]?.text }}</span>
+                <span class="hs-btn hs-btn--primary hs-btn--sm">Записаться</span>
+              </div>
+            </div>
+          </a>
+
+          <!-- Приглашение мастеру — последняя ячейка, чтобы ряд не выглядел дырявым. -->
+          <a *ngIf="last" class="hs-invite" routerLink="/masters" (click)="track('home_invite')">
+            <span class="hs-invite__plus" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            </span>
+            <span class="hs-invite__title">Здесь может быть ваша страница</span>
+            <span class="hs-invite__text">Вы мастер? Страница с записью — бесплатно. Рекламу и купон на первую запись берём на себя.</span>
+            <span class="hs-more">Как подключиться
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+            </span>
+          </a>
+        </div>
+      </ng-container>
+    </ng-container>
+  </section>
+
+  <!-- Лента: ролики, фото работ и посты мастеров подборки, свежие сверху. -->
+  <section class="hs-section" id="feed" aria-labelledby="hs-feed-title" #feedAnchor>
+    <div class="hs-section__head">
+      <div>
+        <h2 id="hs-feed-title">Лента мастеров</h2>
+        <p>Новые работы, ролики и советы — свежие сверху.</p>
+      </div>
+    </div>
+
+    <ng-container *ngIf="mastersLoad$ | async as load">
+    <p *ngIf="load.kind === 'error' && !load.masters.length; else feedContent" class="hs-empty">Лента появится после загрузки мастеров.</p>
+    <ng-template #feedContent>
+    <ng-container *ngIf="feed$ | async as feed; else feedLoading">
+      <div class="hs-feed" *ngIf="feed.length; else feedEmpty">
+        <article class="hs-post" *ngFor="let item of feed | slice:0:feedLimit; trackBy: trackById">
+          <div class="hs-post__media" [class.is-text]="item.kind === 'post'">
+            <app-video-player *ngIf="item.kind === 'video'" [url]="item.media!" [poster]="item.poster" [compact]="true"></app-video-player>
+            <img *ngIf="item.kind === 'photo'" [src]="item.media" [alt]="item.master.title" loading="lazy" decoding="async" />
+            <p *ngIf="item.kind === 'post'" class="hs-post__quote" #postText
+               [attr.data-post-id]="item.id" [class.is-open]="expandedPosts.has(item.id)">{{ item.text }}</p>
+            <button *ngIf="item.kind === 'post' && clampedPosts.has(item.id)" type="button" class="hs-post__more"
+                    [attr.aria-expanded]="expandedPosts.has(item.id)" (click)="togglePost(item.id)">
+              {{ expandedPosts.has(item.id) ? 'Свернуть' : 'Читать полностью' }}
+            </button>
+            <span class="hs-post__kind" *ngIf="item.kind === 'video'">Ролик</span>
+          </div>
+          <div class="hs-post__body">
+            <a class="hs-post__author" [routerLink]="['/', item.master.link]" (click)="track('home_feed_master', item.master.link)">
+              <img *ngIf="item.master.avatar && !brokenAvatars.has(item.master.id); else feedMono" [src]="item.master.avatar" alt="" width="36" height="36" loading="lazy" (error)="avatarFailed(item.master.id)" />
+              <ng-template #feedMono><span class="hs-mono hs-mono--sm" aria-hidden="true">{{ item.master.initial }}</span></ng-template>
+              <span><b>{{ item.master.name }}</b><time [attr.datetime]="item.date.toISOString()">{{ item.date | date:'d MMMM' }}</time></span>
+            </a>
+            <p class="hs-post__text" *ngIf="item.kind !== 'post' && item.text" #postText
+               [attr.data-post-id]="item.id" [class.is-open]="expandedPosts.has(item.id)">{{ item.text }}</p>
+            <button *ngIf="item.kind !== 'post' && clampedPosts.has(item.id)" type="button" class="hs-post__more"
+                    [attr.aria-expanded]="expandedPosts.has(item.id)" (click)="togglePost(item.id)">
+              {{ expandedPosts.has(item.id) ? 'Свернуть' : 'Читать полностью' }}
+            </button>
+          </div>
+        </article>
+      </div>
+      <div class="hs-feed__more" *ngIf="feed.length > feedLimit">
+        <button type="button" class="hs-btn hs-btn--ghost" (click)="showMoreFeed()">Показать ещё</button>
+      </div>
+    </ng-container>
+    </ng-template>
+    </ng-container>
+
+    <ng-template #feedLoading>
+      <div class="hs-feed" aria-hidden="true">
+        <div class="hs-post hs-post--skel" *ngFor="let s of [1, 2, 3]"><div class="hs-post__media"></div><div class="hs-post__body"><i></i><i></i></div></div>
+      </div>
+    </ng-template>
+    <ng-template #feedEmpty>
+      <p class="hs-empty">Мастера скоро поделятся новыми работами.</p>
+    </ng-template>
+  </section>
+
+  <section class="hs-section" id="how" aria-labelledby="hs-how-title">
+    <div class="hs-section__head"><h2 id="hs-how-title">Как записаться</h2></div>
+    <ol class="hs-steps">
+      <li><span>01</span><b>Выберите мастера</b><p>По услуге и городу. Работы и цены видны сразу, без запроса прайса.</p></li>
+      <li><span>02</span><b>Выберите время</b><p>Свободные окна — в календаре мастера. Не нужно писать и ждать ответа.</p></li>
+      <li><span>03</span><b>Приходите</b><p>Мастер подтвердит запись, и вам придёт уведомление.</p></li>
+    </ol>
+  </section>
+
+  <!-- Набор мастеров: офферы совпадают с /masters. -->
+  <section class="hs-band" *ngIf="!isAuth" aria-labelledby="hs-band-title">
+    <div class="hs-band__copy">
+      <p class="hs-band__kicker">Для мастеров</p>
+      <h2 id="hs-band-title">Страница, реклама и купон — за наш счёт</h2>
+      <p>Соберём страницу с работами, ценами и онлайн-записью. Рекламу на ваш город и скидку на первую электронную запись берём на себя.</p>
+      <div class="hs-band__actions">
+        <a class="hs-btn hs-btn--light" routerLink="/masters" (click)="track('home_masters_band')">Хочу страницу</a>
+        <a class="hs-band__link" routerLink="/landing">Зарегистрироваться самому</a>
+      </div>
+    </div>
+    <ul class="hs-band__offers">
+      <li>Страница с записью — бесплатно</li>
+      <li>Неделя рекламы за наш счёт</li>
+      <li>Купон на первую электронную запись</li>
+    </ul>
+  </section>
+</div>

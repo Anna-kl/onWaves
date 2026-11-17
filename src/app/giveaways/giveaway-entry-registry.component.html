@@ -1,0 +1,43 @@
+<section aria-labelledby="registry-title">
+  <h2 id="registry-title">Участники</h2>
+  <div class="filters">
+    <label>Источник
+      <select [(ngModel)]="source" (ngModelChange)="load()">
+        <option value="">Все источники</option>
+        <option value="telegram">Telegram</option>
+        <option value="vk">VK</option>
+        <option value="direct">Прямой / не определён</option>
+      </select>
+    </label>
+    <button type="button" (click)="load()" [disabled]="loading">Обновить</button>
+    <button type="button" (click)="download()" [disabled]="busy || !rows?.canExport">Выгрузить все номера (CSV)</button>
+  </div>
+  <p *ngIf="rows && !rows.canExport">Выгрузка откроется после окончания приёма заявок.</p>
+  <p *ngIf="error" role="alert">{{ error }}</p>
+  <p *ngIf="loading" role="status">Загружаем заявки…</p>
+  <ng-container *ngIf="!loading && rows as page">
+    <p>Заявок{{ source ? ' по фильтру' : '' }}: {{ page.total }}</p>
+    <div class="rows">
+      <article *ngFor="let row of page.items">
+        <strong>№{{ row.number }}</strong>
+        <p>{{ row.createdAt | date:'dd.MM.yyyy HH:mm':'+0300' }} МСК · {{ row.status === 'winner' ? 'Приз назначен' : 'Заявка принята' }}</p>
+        <p>{{ row.phoneMasked }} <ng-container *ngIf="row.firstName || row.lastName"> · {{ row.firstName }} {{ row.lastName }}</ng-container></p>
+        <p>{{ row.attribution.source || 'Прямой / не определён' }}<ng-container *ngIf="row.attribution.medium"> · {{ row.attribution.medium }}</ng-container><ng-container *ngIf="row.attribution.content"> · {{ row.attribution.content }}</ng-container></p>
+      </article>
+    </div>
+    <nav class="paging" aria-label="Страницы заявок" *ngIf="page.total > page.pageSize">
+      <button type="button" (click)="load(page.page - 1)" [disabled]="page.page <= 1">Назад</button>
+      <span>Страница {{ page.page }}</span>
+      <button type="button" (click)="load(page.page + 1)" [disabled]="page.page * page.pageSize >= page.total">Вперёд</button>
+    </nav>
+    <p *ngIf="campaign.phase === 'results_published'">Итоги опубликованы.</p>
+    <div *ngIf="page.canExport && allPrizesAssigned && campaign.phase === 'awaiting_results'">
+      <button type="button" *ngIf="!confirming" (click)="confirming = true">Опубликовать итоги на сайте</button>
+      <div *ngIf="confirming">
+        <p>На странице розыгрыша появятся номера победительниц. Сверьте выдачу в разделе «Назначить приз».</p>
+        <button type="button" [disabled]="busy" (click)="publish()">Подтвердить публикацию</button>
+        <button type="button" [disabled]="busy" (click)="confirming = false">Отмена</button>
+      </div>
+    </div>
+  </ng-container>
+</section>

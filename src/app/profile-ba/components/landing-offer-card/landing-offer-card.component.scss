@@ -103,9 +103,48 @@
   color: #fff;
 }
 
+.offer__proposal {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.offer__proposal--sale {
+  background: #ff2d3a;
+  color: #fff;
+}
+
+.offer__proposal--coupon {
+  background: #155eef;
+  color: #fff;
+}
+
 .offer__until {
   background: #e8f6f1;
   color: $green-basic;
+}
+
+.offer__seats {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #fff4e0;
+  color: #8a5a00;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.offer__demo {
+  margin: 10px 0 0;
+  color: #8a5a00;
+  font-size: 14px;
 }
 
 .offer__title {
@@ -179,6 +218,109 @@
   color: $green-basic;
 }
 
+.offer--entry .offer__cover {
+  min-height: 150px;
+  max-height: 220px;
+  aspect-ratio: 16 / 9;
+}
+
+.offer--mary {
+  --mary-price-bg: #f6f0ea;
+  --mary-price-rule: #e3d6c8;
+  --mary-price-accent: #764b37;
+  border: 1px solid #dce7e5;
+
+  &.offer--entry {
+    --mary-price-bg: #eef7f5;
+    --mary-price-rule: #cfe3de;
+    --mary-price-accent: #006174;
+  }
+
+  .offer__body {
+    min-width: 0;
+    padding: clamp(18px, 3vw, 28px);
+  }
+
+  .offer__actions {
+    margin-top: 16px;
+  }
+
+  .offer__btn {
+    min-width: min(220px, 100%);
+  }
+
+  .offer__terms {
+    margin-top: 12px;
+  }
+}
+
+.offer__mary-price {
+  margin: 16px 0 0;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--mary-price-bg);
+  color: $green-dark;
+}
+
+.offer__mary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.35;
+
+  dd {
+    margin: 0;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  &--main {
+    font-weight: 700;
+
+    dd {
+      font-size: clamp(26px, 4vw, 34px);
+      letter-spacing: -0.03em;
+    }
+  }
+
+  &--regular {
+    margin-top: 2px;
+    color: #536669;
+  }
+
+  &--coupon {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--mary-price-rule);
+    color: var(--mary-price-accent);
+
+    dd {
+      font-size: 18px;
+    }
+  }
+}
+
+.offer__terms {
+  display: inline-block;
+  margin-top: 8px;
+  color: $green-basic;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.offer__price-for {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: $green-dark;
+}
+
 .offer__price-note {
   display: block;
   margin-top: 4px;
@@ -186,6 +328,84 @@
   font-weight: 400;
   color: $grey-dark;
   line-height: 1.35;
+}
+
+.offer__calc {
+  margin-top: 12px;
+}
+
+.offer__calc-skel,
+.offer__calc-error {
+  min-height: 72px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #f4f7f8;
+  color: #4f5568;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.offer__calc-error p {
+  margin: 0;
+}
+
+.offer__calc-error button,
+.offer__calc-note {
+  margin-top: 8px;
+}
+
+.offer__calc-error button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: $green-basic;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.offer__calc-error button:active {
+  transform: scale(0.98);
+}
+
+.offer__calc-row,
+.offer__calc-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: 6px 0 0;
+  color: $black;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.offer__calc-total {
+  margin-top: 10px;
+
+  strong {
+    color: $green-dark;
+    font-size: 32px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+}
+
+.offer__calc-seats {
+  margin: 8px 0 0;
+  color: $green-basic;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.offer__calc-note {
+  margin: 8px 0 0;
+  color: #4f5568;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .offer__lead {
@@ -261,6 +481,7 @@
 }
 
 .offer__btn {
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -299,6 +520,85 @@
   font-size: 13px;
   line-height: 1.4;
   color: $grey-dark;
+}
+
+.offer__full {
+  margin-top: 12px;
+  text-align: left;
+}
+
+.offer__full summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 97, 116, 0.18);
+  border-radius: 14px;
+  background: #f3fafb;
+  color: $green-dark;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.3;
+  cursor: pointer;
+  list-style: none;
+}
+
+.offer__full summary::-webkit-details-marker {
+  display: none;
+}
+
+.offer__full summary::after {
+  content: '';
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid $green-basic;
+  border-bottom: 2px solid $green-basic;
+  transform: rotate(45deg) translateY(-2px);
+}
+
+.offer__full[open] summary::after {
+  transform: rotate(225deg) translateY(-2px);
+}
+
+.offer__full-body {
+  padding-top: 12px;
+  color: $green-dark;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.offer__full-body p {
+  margin: 0 0 10px;
+}
+
+.offer__full-body a {
+  color: $green-basic;
+  font-weight: 700;
+}
+
+.offer__full-body a + a {
+  margin-left: 12px;
+}
+
+.offer__full-table {
+  overflow-x: auto;
+  margin: 0 0 10px;
+}
+
+.offer__full-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.offer__full-body th,
+.offer__full-body td {
+  padding: 8px 6px;
+  border-bottom: 1px solid rgba(4, 60, 72, 0.12);
+  text-align: left;
+  vertical-align: top;
 }
 
 .offer__media {
@@ -407,6 +707,13 @@
     max-height: 420px;
   }
 
+  /* Вход Mary: фото ног есть, но цена и кнопка остаются на первом экране. */
+  .offer--entry.offer--showcase .offer__cover {
+    min-height: 180px;
+    max-height: 220px;
+    aspect-ratio: 16 / 9;
+  }
+
   .offer--showcase .offer__media {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -421,4 +728,24 @@
   .offer__btn {
     transition: none;
   }
+}
+
+.offer__status { padding: 12px; border-radius: 10px; background: #fff4e0; color: #634900; font-weight: 600; }
+
+@media (max-width: 767px) {
+  // Смысл услуги и цена читаются до большого ролика.
+  .offer--video-showcase .offer__body { order: -1; }
+}
+
+// Полный кадр ролика сохраняет титры вертикального видео на обеих ширинах.
+.offer--video-showcase .offer__cover {
+  aspect-ratio: 9 / 16;
+  min-height: 320px;
+  max-height: 560px;
+}
+@media (min-width: 768px) {
+  .offer--video-showcase { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+  .offer--mary.offer--video-showcase { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); }
+  .offer--video-showcase .offer__cover { height: 100%; min-height: 480px; max-height: 560px; }
+  .offer--video-showcase .offer__body { align-self: center; }
 }

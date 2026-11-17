@@ -1,44 +1,53 @@
-<div class="cont-horiz-start wrap w100" style="margin-bottom: 20px;" *ngIf="reviews$|async as reviews">
-  <h2 class="margin-top30">
-    Отзывы
-  </h2>
-
-  <ng-container *ngIf="reviews.length == 0">
-    <div class="w100">
-      <p class="nullReviews">
-        Отзывов пока нет 
-      </p>
+<section class="master-reviews" *ngIf="canManage || items.length || error" aria-labelledby="master-reviews-title">
+  <h2 id="master-reviews-title" *ngIf="!canManage">Отзывы</h2>
+  <p *ngIf="canManage && !loading && !error && !items.length">Отзывов пока нет.</p>
+  <p *ngIf="message" role="status">{{ message }}</p>
+  <article *ngFor="let review of items" class="master-review">
+    <header>
+      <strong>{{ review.nameAuthor || 'Клиент OnWaves' }}</strong>
+      <span *ngIf="review.estimate" class="master-rating" [attr.aria-label]="'Оценка ' + review.estimate + ' из 5'">
+        <span aria-hidden="true">★</span> {{ review.estimate }} / 5
+      </span>
+      <time [attr.datetime]="review.dateCreated">{{ review.dateCreated | date:'d MMMM yyyy' }}</time>
+    </header>
+    <div class="master-review-labels" *ngIf="review.verifiedVisit || review.rewarded">
+      <span *ngIf="review.verifiedVisit">Подтверждённый визит</span>
+      <span *ngIf="review.rewarded">Купон за отзыв</span>
     </div>
-
-   
-  </ng-container>
-  <ng-container *ngIf="reviews.length > 0">
-    <div *ngFor="let product of reviews" class="w100 description_card comment cont-vert-start-start">
-      <div class="cont-horiz-start" style="gap: 10px 10px;">
-        <div>
-          <img [src]="getAvatar(product.avatar)" class="comment-foto">
-        </div>
-        <div class="cont-vert-start w100">
-          <div style="margin:0px!important; font-size: 1rem;">
-            <b>{{product.nameAuthor}}</b>
-          </div>
-          <div class="cont-horiz-between" style="gap: 10px 10px;">
-            <div class="cont-horiz-start-start" style="gap: 10px 10px;">
-              <img src="./assets/img/ico/ico_rating_pc24.svg" class="comment-img-raiting ">
-              <div class="raiting-numb margin-right10">
-                {{product.estimate}}
-              </div>
-            </div>
-            <div class="txt-gray-dark">
-              {{product.dateCreated | date: 'mediumDate'}}
-            </div>
-          </div> 
-        </div>
+    <p *ngIf="review.text" class="master-review-text">{{ review.text }}</p>
+    <ul class="master-review-media" *ngIf="review.media?.length">
+      <ng-container *ngFor="let file of review.media">
+        <li *ngIf="file.status === 'ready' && mediaUrl(file.url) as url">
+          <a *ngIf="file.kind === 'photo'" [href]="url" target="_blank" rel="noopener">
+            <img [src]="mediaUrl(file.thumbnailUrl) || url" loading="lazy" alt="Открыть фото из отзыва">
+          </a>
+          <video *ngIf="file.kind === 'video'" [src]="url" [attr.poster]="mediaUrl(file.thumbnailUrl)"
+            controls playsinline preload="none" aria-label="Видео из отзыва"></video>
+        </li>
+      </ng-container>
+    </ul>
+    <aside class="master-review-reply" *ngFor="let reply of review.childReviews">
+      <strong>Ответ мастера</strong>
+      <p>{{ reply.text }}</p>
+    </aside>
+    <div class="master-review-actions" *ngIf="canManage">
+      <button type="button" class="btn-transparent" *ngIf="!review.childReviews?.length" [disabled]="sending" (click)="open(review.id, 'reply')">Ответить</button>
+      <button type="button" class="btn-transparent" [disabled]="sending" (click)="open(review.id, 'report')">Пожаловаться</button>
+    </div>
+    <div class="master-review-editor" *ngIf="action?.reviewId === review.id">
+      <label>{{ action?.kind === 'reply' ? 'Ответ мастера' : 'Причина жалобы' }}
+        <textarea rows="3" maxlength="2000" [(ngModel)]="draft" [disabled]="sending"></textarea>
+      </label>
+      <p *ngIf="actionError" role="alert">{{ actionError }}</p>
+      <div class="master-review-actions">
+        <button type="button" class="btn-green" [disabled]="!draft.trim() || sending" (click)="submit()">Отправить</button>
+        <button type="button" class="btn-transparent" [disabled]="sending" (click)="action = null">Отмена</button>
       </div>
-      <p *ngIf="product.text">
-        {{ product.text | slice:0:150 }}
-        <span *ngIf="product.text.length > 150">...</span>
-      </p>
     </div>
-  </ng-container>
-</div> 
+  </article>
+  <p *ngIf="loading" role="status">Загружаем отзывы…</p>
+  <p *ngIf="error" role="alert">{{ error }}</p>
+  <button type="button" *ngIf="error || (!loading && items.length < total)" class="btn-transparent" (click)="load()">
+    {{ error ? 'Повторить' : 'Показать ещё' }}
+  </button>
+</section>

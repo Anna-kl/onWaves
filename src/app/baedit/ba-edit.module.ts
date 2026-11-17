@@ -10,7 +10,10 @@ import { PromoEditorComponent } from './components/promo/promo-editor.component'
 import { ContactsComponent } from './components/contacts/contacts.component';
 import { UslugiComponent } from './components/uslugi/uslugi.component';
 import { GalereyaComponent } from './components/galereya/galereya.component';
-import { GrafikComponent } from './components/grafik/grafik.component';
+import { GrafikGateComponent } from './components/grafik-week/grafik-gate.component';
+import { GrafikWeekComponent } from './components/grafik-week/grafik-week.component';
+import { GrafikDayComponent } from './components/grafik-week/grafik-day.component';
+import { GrafikTemplateComponent } from './components/grafik-week/grafik-template.component';
 import { OplataComponent } from './components/oplata/oplata.component';
 import { RubricComponent } from './components/rubric/rubric.component';
 import { ArendaComponent } from './components/uslugi/arenda/arenda.component';
@@ -39,7 +42,15 @@ const routes: Routes = [
       { path: 'promo/edit/:offerId', component: PromoEditorComponent },
       { path: 'contacts', component: ContactsComponent },
       { path: 'rubric', component: RubricComponent },
-      { path: 'schedule', component: GrafikComponent },
+      {
+        path: 'schedule',
+        component: GrafikGateComponent,
+        children: [
+          { path: '', component: GrafikWeekComponent },
+          { path: 'day/:date', component: GrafikDayComponent },
+          { path: 'template', component: GrafikTemplateComponent },
+        ],
+      },
       { path: 'oplata', component: OplataComponent },
       { path: 'arenda-hour', component: ArendaComponent },
       { path: 'arenda-service', component: Arenda2Component },

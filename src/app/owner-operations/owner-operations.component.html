@@ -1,0 +1,162 @@
+<main class="operations ym-hide-content">
+  <header class="page-heading"><div><span class="eyebrow">Личный раздел · OnWaves</span><h1>Акции и выплаты</h1><p>Визиты, обязательства и уже совершённые переводы.</p></div>
+    <button type="button" class="primary" *ngIf="allowed" (click)="open('manual')">+ Добавить обязательство</button></header>
+  <ng-container *ngIf="allowed; else locked">
+    <section class="toolbar" aria-label="Даты и мастер">
+      <form *ngIf="showPeriod; else singleDate" class="period-control" aria-label="Период" (ngSubmit)="applyPeriod()">
+        <label>С<input type="date" name="periodFrom" [(ngModel)]="draftFrom" (ngModelChange)="periodError = ''" min="2000-01-01" max="2099-12-31"></label>
+        <label>По<input type="date" name="periodTo" [(ngModel)]="draftTo" (ngModelChange)="periodError = ''" min="2000-01-01" max="2099-12-31"></label>
+        <button type="submit">Применить</button>
+        <button type="button" (click)="clearPeriod()" [disabled]="!hasPeriod && !draftFrom && !draftTo && !(tab === 'visits' && undated)">Все даты</button>
+        <p class="problem period-error" *ngIf="periodError" role="alert">{{periodError}}</p>
+      </form>
+      <ng-template #singleDate><div class="date-control"><button type="button" aria-label="Предыдущий день" (click)="changeDay(-1)" [disabled]="loading">‹</button>
+        <label>Дата<input type="date" [(ngModel)]="date" (change)="changeFilter()" required></label>
+        <button type="button" aria-label="Следующий день" (click)="changeDay(1)" [disabled]="loading">›</button><button type="button" (click)="today()">Сегодня</button></div></ng-template>
+      <label class="master-select">Мастер<select [(ngModel)]="masterId" (change)="changeFilter()"><option value="">Все мастера</option><option *ngFor="let master of masters" [value]="master.id">{{master.name}}</option></select></label>
+      <button type="button" (click)="refresh()" [disabled]="loading || busy">{{loading ? 'Обновляем…' : 'Обновить'}}</button>
+    </section>
+    <div class="freshness"><span>Часовой пояс: Москва</span><span *ngIf="summary">Успешное обновление: {{summary.asOfUtc | date:'dd.MM HH:mm:ss':'+0300'}}</span></div>
+    <nav class="tabs" aria-label="Разделы учёта"><button *ngFor="let item of tabs" type="button" [class.active]="tab === item.key" [attr.aria-current]="tab === item.key ? 'page' : null" (click)="chooseTab(item.key)">{{item.label}}</button></nav>
+    <app-review-operations *ngIf="tab === 'visits'"></app-review-operations>
+    <p *ngIf="showPeriod && !(tab === 'visits' && undated)" class="context">
+      {{tab === 'campaigns' ? 'Период участия в акциях' : tab === 'payouts' ? 'Срок оплаты обязательств' : tab === 'visits' ? 'Дата визита' : 'Фактическая дата перевода'}} ·
+      <span *ngIf="periodFrom">с {{periodFrom | date:'dd.MM.yyyy'}} </span><span *ngIf="periodTo">по {{periodTo | date:'dd.MM.yyyy'}}</span><span *ngIf="!hasPeriod">все даты</span>
+    </p>
+    <div *ngIf="notice" class="notice" role="status">{{notice}}<button type="button" aria-label="Скрыть сообщение" (click)="notice = ''">×</button></div>
+    <div *ngIf="error" class="error" role="alert">{{error}}<button type="button" (click)="refresh()">Повторить</button></div>
+    <p *ngIf="loading" class="loading" role="status">Загружаем актуальные данные…</p>
+    <div [attr.aria-busy]="loading" [class.stale]="loading || !!error">
+      <ng-container *ngIf="tab === 'today' && summary as s">
+        <p class="context">События за {{date | date:'dd.MM.yyyy'}}. Статусы и остатки — на момент обновления.</p>
+        <section class="metrics" aria-label="Сводка дня">
+          <button type="button" (click)="showDayVisits()"><span>Визиты дня</span><strong>{{s.visitsCount}}</strong><small>{{s.confirmedVisitsCount}} подтверждены · {{s.pendingVisitsCount}} ждут</small></button>
+          <button type="button" (click)="showDayVisits('pending')"><span>Нужна отметка посещения</span><strong>{{s.attendanceNeededCount}}</strong><small>Время закончилось, результата ещё нет</small></button>
+          <button type="button" (click)="showDue('today')"><span>К оплате сегодня</span><strong>{{s.dueTodayKopecks | operationsMoney}}</strong><small>{{s.dueTodayRecipients}} получателей · подтверждённый долг</small></button>
+          <button type="button" class="overdue" (click)="showDue('overdue')"><span>С прежних дней</span><strong>{{s.overdueKopecks | operationsMoney}}</strong><small>Непогашенные обязательства</small></button>
+          <button type="button" (click)="showDayPayments()"><span>Выплачено за день</span><strong>{{s.paidTodayKopecks | operationsMoney}}</strong><small>По фактической дате перевода</small></button>
+        </section>
+        <div class="work-grid">
+          <section class="work-list"><div class="section-heading"><h2>С прежних дней</h2><span>{{s.overdue.length}}</span></div>
+            <app-operation-obligation *ngFor="let row of s.overdue" [row]="row" (pay)="pay([$event])" (history)="history($event)"></app-operation-obligation>
+            <p class="empty compact" *ngIf="!s.overdue.length">Подтверждённых долгов с прежних дней нет.</p>
+            <div class="section-heading"><h2>К оплате сегодня</h2><button type="button" (click)="showAllObligations()">Все выплаты</button></div>
+            <app-operation-obligation *ngFor="let row of s.dueToday" [row]="row" (pay)="pay([$event])" (history)="history($event)"></app-operation-obligation>
+            <p class="empty compact" *ngIf="!s.dueToday.length">На этот день нет подтверждённых выплат.</p>
+          </section>
+          <aside class="budget"><span class="eyebrow">Общий бюджет OnWaves</span><h2>{{s.budget.monthlyLimitKopecks | operationsMoney}} <small>/ месяц</small></h2>
+            <p>Единый предел проекта для всех мастеров и расходов.</p><dl>
+              <div><dt>Выплачено в месяце</dt><dd>{{s.budget.paidThisMonthKopecks | operationsMoney}}</dd></div>
+              <div><dt>Подтверждённый долг, все сроки</dt><dd>{{s.budget.confirmedDebtKopecks | operationsMoney}}</dd></div>
+              <div><dt>Резерв назначенных визитов</dt><dd>{{s.budget.reservedVisitsKopecks | operationsMoney}}</dd></div>
+              <div><dt>Права без распределения по месяцу</dt><dd>{{s.budget.unallocatedRightsKopecks | operationsMoney}}</dd></div>
+              <div><dt>Проекты без утверждения</dt><dd>{{s.budget.drafts}}</dd></div></dl>
+            <p class="budget-warning">{{s.budget.message}}</p><p class="small">Строк на сверке: {{s.budget.excludedRows}}. Выплат без известной даты: {{s.budget.unknownPaymentDates}}.</p>
+            <button type="button" (click)="reconcile()">Сверить исторические выплаты</button>
+          </aside>
+        </div>
+        <section class="forecast"><div><span class="eyebrow">Отдельно от долга</span><h2>Потребуется после визитов</h2><p>Прогноз по визитам выбранного дня, ожидающим результата.</p></div><strong>{{s.afterVisitsForecastKopecks | operationsMoney}}</strong></section>
+        <section><div class="section-heading"><h2>Визиты дня</h2><button type="button" (click)="showDayVisits()">Открыть список</button></div>
+          <div class="cards"><ng-container *ngFor="let v of s.visits"><ng-container *ngTemplateOutlet="visitCard; context: {$implicit: v}"></ng-container></ng-container></div>
+          <p class="empty" *ngIf="!s.visits.length">В этот день акционных визитов нет.</p></section>
+        <section *ngIf="s.issues.length"><div class="section-heading"><h2>Без даты и на сверке</h2><button type="button" (click)="showAllObligations('review')">Разобрать</button></div>
+          <div class="cards"><app-operation-obligation *ngFor="let row of s.issues" [row]="row" (pay)="pay([$event])" (history)="history($event)"></app-operation-obligation></div></section>
+      </ng-container>
+      <ng-container *ngIf="tab === 'campaigns'">
+        <app-review-program></app-review-program>
+        <a routerLink="/admin/giveaways" [queryParams]="{ campaign: 'svetlana-vk-2026-11' }">Призы розыгрыша Светланы</a>
+        <a routerLink="/admin/giveaways" [queryParams]="{ campaign: 'mary-skinhale-2026-11', tab: 'entries' }">Участники розыгрыша Mary</a>
+        <div class="filters"><label>Состояние<select [(ngModel)]="state" (change)="changeFilter()"><option value="">{{hasPeriod ? 'Все состояния' : 'Активные и с обязательствами'}}</option><option>Активна</option><option>Черновик</option><option>Запланирована</option><option>Приостановлена</option><option>Завершена</option></select></label>
+          <label>Вид<select [(ngModel)]="kind" (change)="changeFilter()"><option value="">Все</option><option value="promoSeat">Места акции</option><option value="giveaway">Розыгрыш</option><option value="coupon">Купоны</option><option value="manualPlan">Ручной план</option></select></label>
+          <label>Город<input [(ngModel)]="city" (change)="changeFilter()"></label></div>
+        <div class="cards"><article class="campaign card" *ngFor="let c of campaigns?.items"><div class="tags"><span>{{c.marketingState}}</span><span>{{c.city || 'OnWaves'}}</span></div>
+          <h2>{{c.title}}</h2><p>{{c.master}}</p><p class="small">{{c.conditionsSource}}</p><div class="status-line">{{c.executionState}} · {{c.settlementState}}</div>
+          <dl><div><dt>Начало</dt><dd>{{c.startsAtUtc ? (c.startsAtUtc | date:'dd.MM.yyyy':'+0300') : 'Не указано'}}</dd></div>
+            <div><dt>Участие / запись до</dt><dd>{{c.entriesEndUtc ? (c.entriesEndUtc | date:'dd.MM.yyyy':'+0300') : 'Не указано'}}</dd></div>
+            <div><dt>Использование / визит до</dt><dd>{{c.useByUtc ? (c.useByUtc | date:'dd.MM.yyyy':'+0300') : 'Не указано'}}</dd></div>
+            <div><dt>Лимит прав / выдано</dt><dd>{{c.rightsLimit ?? 'Неизвестен'}} / {{c.issued}}</dd></div><div><dt>Назначено / выполнено</dt><dd>{{c.reserved}} / {{c.completed}}</dd></div>
+            <div><dt>Неявки / истекло</dt><dd>{{c.noShow}} / {{c.expired}}</dd></div><div><dt>Осталось прав</dt><dd>{{c.rightsLeft ?? 'Нужно уточнить'}}</dd></div>
+            <div><dt>Подтверждённый долг</dt><dd>{{c.debtKopecks | operationsMoney}}</dd></div><div><dt>Выплачено</dt><dd>{{c.paidKopecks | operationsMoney}}</dd></div>
+            <div><dt>Будущий максимальный расход</dt><dd>{{c.futureMaximumKopecks | operationsMoney}}</dd></div></dl>
+          <details><summary>Компоненты акции</summary><small *ngFor="let ref of c.components">{{ref}}</small></details>
+          <div class="actions"><a *ngIf="c.profileUrl" [href]="c.profileUrl" target="_blank" rel="noopener">Профиль</a><a *ngIf="c.rulesUrl" [href]="c.rulesUrl" target="_blank" rel="noopener">Правила</a>
+            <a *ngIf="c.sourceType === 'giveaway' && c.masterId === '8bb0b62b-2ada-441c-adfe-e6e07acf94f8'" routerLink="/admin/giveaways" [queryParams]="{ campaign: 'svetlana-vk-2026-11' }">Назначить приз</a>
+            <button type="button" (click)="history(c.campaignKey)">История</button><ng-container *ngIf="c.sourceType === 'manualPlan'"><button type="button" (click)="addVisit(c)">Внешний визит</button><button type="button" (click)="manualEdit(c)">Изменить</button><button type="button" (click)="link(c)">Связать с записью</button></ng-container></div>
+        </article></div><p class="empty" *ngIf="campaigns?.total === 0">Акций с выбранными условиями нет.</p>
+        <ng-container *ngTemplateOutlet="pagination; context: {$implicit: campaigns}"></ng-container>
+      </ng-container>
+      <ng-container *ngIf="tab === 'visits'">
+        <div class="filters"><label>Результат<select [(ngModel)]="state" (change)="changeFilter()"><option value="">Все статусы</option><option value="pending">Ждём подтверждения</option><option value="attended">Посещение подтверждено</option><option value="cancelled">Отмена / неявка</option></select></label>
+          <label class="check"><input type="checkbox" [(ngModel)]="undated" (change)="changeFilter()">Внешние визиты без даты</label></div>
+        <div class="list-total" *ngIf="visitPage as page"><p>{{undated ? 'Визитов без даты' : 'Визитов по фильтру'}}: <strong>{{page.total}}</strong></p></div>
+        <div class="cards"><ng-container *ngFor="let v of visitPage?.items"><ng-container *ngTemplateOutlet="visitCard; context: {$implicit: v}"></ng-container></ng-container></div>
+        <p class="empty" *ngIf="visitPage?.total === 0">Визитов с выбранными условиями нет.</p><ng-container *ngTemplateOutlet="pagination; context: {$implicit: visitPage}"></ng-container>
+        <div class="section-heading"><h2>Права без записи</h2></div><p class="context">Лимит визитов — возможность использования права. Он не означает, что все эти визиты назначены.</p>
+        <div class="cards"><app-operation-obligation *ngFor="let row of undatedRights" [row]="row" (history)="history($event)"></app-operation-obligation></div>
+        <p class="empty" *ngIf="!undatedRights.length">Неиспользованных прав без записи в этом фильтре нет.</p>
+      </ng-container>
+      <ng-container *ngIf="tab === 'payouts'">
+        <div class="filters"><label>Состояние<select [(ngModel)]="state" (change)="changeFilter()"><option value="">Все обязательства</option><option value="waiting">Ждут подтверждения</option><option value="payable">Подтверждённые остатки</option><option value="due">К оплате</option><option value="partial">Частично оплачено</option><option value="paid">Оплачено</option><option value="cancelled">Отмена</option><option value="review">Требует сверки</option></select></label>
+          <label class="search">Поиск по получателю, акции или ID записи<input [(ngModel)]="search" (change)="changeFilter()" type="search"></label></div>
+        <div class="list-total" *ngIf="obligations"><p>По всему фильтру к выплате: <strong>{{obligations.totals?.outstandingKopecks | operationsMoney}}</strong><br><small>Строк на сверке: {{obligations.totals?.excludedRows}}</small></p>
+          <button type="button" class="primary" [disabled]="!selection.length" (click)="pay(selection)">Перевод по выбранным ({{selection.length}})</button></div>
+        <div class="cards"><app-operation-obligation *ngFor="let row of obligations?.items" [row]="row" [selectable]="true" [selected]="selected(row)" (toggle)="toggle($event)" (pay)="pay([$event])" (history)="history($event)"></app-operation-obligation></div>
+        <p class="empty" *ngIf="obligations?.total === 0">Обязательств с выбранными условиями нет.</p><ng-container *ngTemplateOutlet="pagination; context: {$implicit: obligations}"></ng-container>
+      </ng-container>
+      <ng-container *ngIf="tab === 'history'">
+        <div class="section-heading"><div><h2>Фактические переводы</h2><p class="small">Дата перевода и время регистрации хранятся отдельно.</p></div><button type="button" (click)="reconcile()">Сверка legacy</button></div>
+        <div *ngIf="payments?.totals as totals" class="list-total">
+          <p>Итого по фильтру: <strong>{{totals.amountKopecks | operationsMoney}}</strong></p>
+          <small *ngIf="hasPeriod && totals.unknownDates">Исторических выплат без даты: {{totals.unknownDates}}. Они доступны в режиме «Все даты».</small>
+        </div>
+        <div class="cards"><article class="card payment-card" *ngFor="let p of payments?.items"><span class="eyebrow">{{p.kind.startsWith('legacy') ? 'Исторический итог' : p.kind === 'refund' ? 'Фактический возврат' : p.kind === 'mistaken' ? 'Исправление ошибочной отметки' : 'Перевод'}}</span>
+          <h2>{{p.recipient}}</h2><strong class="amount">{{p.amountKopecks | operationsMoney}}</strong><p>{{p.reason}}</p><p *ngIf="p.reference">{{p.reference}}</p>
+          <dl><div><dt>Перевод</dt><dd>{{p.transferredAtUtc ? (p.transferredAtUtc | date:'dd.MM.yyyy HH:mm':'+0300') : 'Дата неизвестна'}}</dd></div><div><dt>Зарегистрирован</dt><dd>{{p.kind === 'legacy_pending' ? 'Дата неизвестна — ожидается импорт' : (p.registeredAtUtc | date:'dd.MM.yyyy HH:mm':'+0300')}}</dd></div></dl>
+          <details><summary>Состав и автор отметки</summary><p class="small wrap">Аккаунт: {{p.actorAuthId || 'Исторические данные отсутствуют'}}</p><p class="small wrap" *ngFor="let a of p.allocations">{{a.obligationKey}} · {{a.amountKopecks | operationsMoney}}</p></details>
+          <button type="button" *ngIf="!p.correctsPaymentId && p.version === 1" (click)="correction(p)">Добавить корректировку</button></article></div>
+        <p class="empty" *ngIf="payments?.total === 0">По выбранному фильтру переводов нет.</p>
+        <section class="audit"><div class="section-heading"><h2>Журнал изменений</h2><button type="button" *ngIf="entityKey" (click)="entityKey = ''; changeFilter()">Все события</button></div><p class="small wrap" *ngIf="entityKey">{{entityKey}}</p>
+          <article *ngFor="let item of audit?.items"><time>{{item.atUtc | date:'dd.MM.yyyy HH:mm:ss':'+0300'}}</time><div><b>{{item.action}}</b><p>{{item.reason}}</p><small class="wrap">{{item.entityKey}} · аккаунт {{item.actorAuthId}}</small></div></article>
+          <p class="empty" *ngIf="audit?.total === 0">Событий пока нет.</p>
+          <div class="pagination" *ngIf="audit && audit.total > 0"><span>События {{auditCursor + 1}}–{{auditCursor + audit.items.length}} из {{audit.total}}</span><button type="button" *ngIf="auditCursor" (click)="nextAudit(0)">В начало истории</button><button type="button" [disabled]="audit.nextCursor == null || loading" (click)="nextAudit(audit.nextCursor)">Следующие события</button></div></section>
+        <ng-container *ngTemplateOutlet="pagination; context: {$implicit: payments}"></ng-container>
+      </ng-container>
+    </div>
+  </ng-container>
+  <ng-template #locked><section class="empty"><h2>Проверка доступа</h2><p>Раздел доступен владельцу после входа и проверки прав. Для работы нужно подключение к сети.</p></section></ng-template>
+</main>
+
+<ng-template #visitCard let-v><article class="card visit-card"><div class="tags"><span>{{v.startsAtUtc ? (v.startsAtUtc | date:'dd.MM.yyyy HH:mm':'+0300') : 'Пока без даты'}} · {{v.durationMinutes}} мин</span><span>{{v.city || 'Внешний визит'}}</span></div>
+  <h3>{{v.master}}</h3><p>{{v.client}} · {{v.services || 'Услуги не указаны'}}</p><p class="status-line">{{v.attendance === 'attended' ? 'Посещение подтверждено' : v.attendance === 'cancelled' ? 'Отмена / неявка' : 'Ждём подтверждения'}} · {{v.recordStatus}}</p>
+  <dl><div><dt>Стоимость</dt><dd>{{v.originalKopecks | operationsMoney}}</dd></div><div><dt>Клиент по условиям</dt><dd>{{v.clientPayableKopecks | operationsMoney}}</dd></div><div><dt>Доля OnWaves</dt><dd>{{v.contributionKopecks | operationsMoney}}</dd></div></dl>
+  <div class="actions"><button type="button" *ngIf="v.canConfirm || !v.recordId && v.attendance === 'pending'" (click)="attendance(v)">Отметить посещение</button><button type="button" (click)="history(v.obligationKey)">История</button></div><small class="wrap">{{v.recordId || v.visitKey}}</small></article></ng-template>
+<ng-template #pagination let-page><div class="pagination" *ngIf="page && page.total > 0"><span>{{cursor + 1}}–{{cursor + page.items.length}} из {{page.total}}</span><button type="button" *ngIf="cursor" (click)="next(0)">В начало</button><button type="button" [disabled]="page.nextCursor == null || loading" (click)="next(page.nextCursor)">Следующие</button></div></ng-template>
+
+<dialog #editor (cancel)="cancel($event)" aria-labelledby="dialogTitle"><div class="dialog-body" *ngIf="mode">
+  <div class="dialog-heading"><h2 id="dialogTitle">{{mode === 'payment' ? 'Отметить выплату' : mode === 'manual' ? 'Ручное обязательство' : mode === 'visit' ? 'Внешний визит' : mode === 'attendance' ? 'Результат визита' : mode === 'correction' ? 'Корректировка платежа' : mode === 'link' ? 'Связать со штатным источником' : 'Сверка исторических выплат'}}</h2><button type="button" aria-label="Закрыть" [disabled]="busy" (click)="close()">×</button></div>
+  <p class="error" role="alert" *ngIf="formError">{{formError}}</p>
+  <ng-container *ngIf="mode === 'payment'"><p class="info">Фиксируем уже совершённый перевод. Кнопка не переводит деньги.</p>
+    <div *ngIf="!preview"><div class="allocation" *ngFor="let item of payRows"><h3>{{item.row.recipient}}</h3><p>{{item.row.title}} · Остаток {{item.row.outstandingKopecks | operationsMoney}}</p><label>Переведено по этому обязательству, ₽<input inputmode="decimal" [(ngModel)]="item.amount" required></label></div>
+      <label>Фактическая дата и время перевода · Москва<input type="datetime-local" [(ngModel)]="form.when" required></label><label>Способ<select [(ngModel)]="form.method"><option value="sbp">СБП</option><option value="transfer">Перевод</option><option value="cash">Наличные</option><option value="other">Другое</option></select></label>
+      <label>Основание перевода<textarea [(ngModel)]="form.reason" maxlength="1000" required></textarea></label><label>Номер или комментарий платежа · необязательно<input [(ngModel)]="form.reference" maxlength="500"></label><button type="button" class="primary full" [disabled]="busy" (click)="prepare()">Проверить и показать итог</button></div>
+    <div *ngIf="preview as p"><p>Получатель: <b>{{p.recipient}}</b></p><strong class="amount">{{p.totalKopecks | operationsMoney}}</strong><p>{{form.when.replace('T', ' ')}} · Москва</p><p>{{form.reason}}</p>
+      <p *ngFor="let a of prepared?.allocations" class="small wrap">{{a.obligationKey}}: {{a.amountKopecks | operationsMoney}}</p><div class="actions"><button type="button" [disabled]="busy" (click)="preview = null">Назад</button><button type="button" class="primary" [disabled]="busy" (click)="savePayment()">{{busy ? 'Сохраняем…' : 'Подтвердить отметку'}}</button></div></div></ng-container>
+  <ng-container *ngIf="mode === 'manual'"><p class="info">Запись обещания или расхода не включает акцию и не меняет прайс мастера.</p>
+    <label>Тип<select [(ngModel)]="form.kind"><option value="service">Услуга</option><option value="gift">Подарок / приз</option><option value="partner">Партнёр</option><option value="advertising">Реклама</option><option value="printing">Печать</option><option value="other">Другое</option></select></label>
+    <label>Название<input [(ngModel)]="form.title" maxlength="200" required></label><label>Получатель<input [(ngModel)]="form.recipient" maxlength="200" required></label>
+    <label>Мастер · если относится к профилю<select [(ngModel)]="form.masterId"><option value="">Внешний получатель</option><option *ngFor="let m of masters" [value]="m.id">{{m.name}}</option></select></label>
+    <label>Источник договорённости<textarea [(ngModel)]="form.agreementSource" maxlength="1000" required></textarea></label><label>Услуги и условия<textarea [(ngModel)]="form.terms" maxlength="2000"></textarea></label>
+    <label class="check"><input type="checkbox" [(ngModel)]="form.approved">Финансовые условия согласованы</label><label class="check"><input type="checkbox" [(ngModel)]="form.requiresVisit">Начисление только после визита</label>
+    <div class="form-grid"><label>Фиксированная сумма, ₽<input inputmode="decimal" [(ngModel)]="form.fixed"></label><label>Или процент, %<input type="number" min="0" max="100" [(ngModel)]="form.percent"></label><label>Подтверждённая полная база, ₽<input inputmode="decimal" [(ngModel)]="form.base"></label><label>Общий предел обязательства, ₽<input inputmode="decimal" [(ngModel)]="form.cap"></label></div>
+    <p class="small">Пустая сумма означает «нужно уточнить». Для «до» укажите предел отдельно. Купон автоматически не добавляется.</p>
+    <label>Не более визитов / прав<input type="number" min="1" max="1000" [(ngModel)]="form.rightsLimit"></label><div class="form-grid"><label>Использовать до<input type="date" [(ngModel)]="form.useBy"></label><label>Согласованный срок оплаты<input type="date" [(ngModel)]="form.dueDate"></label></div>
+    <label>Комментарий<textarea [(ngModel)]="form.reason" maxlength="1000"></textarea></label><button type="button" class="primary full" [disabled]="busy" (click)="saveManual()">Сохранить обязательство</button></ng-container>
+  <ng-container *ngIf="mode === 'visit'"><p class="info">Внешний визит не создаёт запись в календаре мастера.</p><label>Клиент · краткое обозначение<input [(ngModel)]="form.client" maxlength="100"></label><label>Состав услуг<textarea [(ngModel)]="form.services" maxlength="1000"></textarea></label>
+    <label class="check"><input type="checkbox" [(ngModel)]="form.undated">Пока без даты</label><label *ngIf="!form.undated">Дата и время · Москва<input type="datetime-local" [(ngModel)]="form.when"></label><label>Длительность, минут<input type="number" min="1" max="1440" [(ngModel)]="form.duration"></label><label>Фактическая полная стоимость, ₽<input inputmode="decimal" [(ngModel)]="form.base"></label>
+    <label>Результат<select [(ngModel)]="form.result"><option value="pending">Ожидается</option><option value="attended">Посещение подтверждено</option><option value="noShow">Неявка</option><option value="cancelled">Отмена</option></select></label><label>Источник подтверждения<textarea [(ngModel)]="form.reason" maxlength="1000"></textarea></label><button type="button" class="primary full" [disabled]="busy" (click)="saveVisit()">Сохранить визит</button></ng-container>
+  <ng-container *ngIf="mode === 'attendance'"><p>{{selectedVisit?.master}} · {{selectedVisit?.client}}</p><label>Результат<select [(ngModel)]="form.result"><option value="attended">Услуга оказана</option><option value="noShow">Клиент не пришёл</option></select></label><label>Основание подтверждения<textarea [(ngModel)]="form.reason" maxlength="1000" required></textarea></label><button type="button" class="primary full" [disabled]="busy" (click)="saveAttendance()">Зафиксировать результат</button></ng-container>
+  <ng-container *ngIf="mode === 'correction'"><p>{{selectedPayment?.recipient}} · {{selectedPayment?.amountKopecks | operationsMoney}}</p><label>Что произошло<select [(ngModel)]="form.result"><option value="mistaken">Ошибочно отметила перевод</option><option value="refund">Деньги фактически возвращены</option></select></label><label *ngIf="form.result === 'refund'">Фактическое время возврата · Москва<input type="datetime-local" [(ngModel)]="form.when"></label><label>Обязательная причина<textarea [(ngModel)]="form.reason" maxlength="1000" required></textarea></label><p class="small">Исходный платёж остаётся в истории.</p><button type="button" class="primary full" [disabled]="busy" (click)="saveCorrection()">Добавить отменяющую запись</button></ng-container>
+  <ng-container *ngIf="mode === 'link'"><p>Связь исключит ручное обязательство из повторного подсчёта. Строки с платежами требуют отдельной сверки.</p><label>Ключ штатного обязательства<input [(ngModel)]="form.reference" placeholder="prizeAward:… или promoSeat:…"></label><label>Основание связи<textarea [(ngModel)]="form.reason" required></textarea></label><button type="button" class="primary full" [disabled]="busy" (click)="saveLink()">Сохранить связь</button></ng-container>
+  <ng-container *ngIf="mode === 'reconciliation'"><p class="info">Dry-run не изменяет данные. Импорт сохраняет известные оплаченные суммы и не придумывает число переводов.</p><ng-container *ngIf="reconciliation as r"><p>Новых исторических итогов: {{r.items.length}}. Без даты: {{r.unknownDates}}. Требуют сверки: {{r.requiresReview}}.</p><article class="reconciliation-row" *ngFor="let row of r.items"><b>{{row.amountKopecks | operationsMoney}}</b><p class="small wrap">{{row.obligationKey}}</p><p class="small">{{row.description}} · {{row.transferredAtUtc ? (row.transferredAtUtc | date:'dd.MM.yyyy':'+0300') : 'Дата неизвестна'}}</p><p class="problem" *ngFor="let reason of row.dataQuality">{{reason}}</p></article>
+      <button type="button" class="primary full" [disabled]="busy || !r.items.length" (click)="importLegacy()">Импортировать эти исторические итоги</button></ng-container></ng-container>
+</div></dialog>

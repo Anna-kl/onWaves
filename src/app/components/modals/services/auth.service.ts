@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../enviroments/environment';
 import { Observable } from 'rxjs';
 import { IResponse } from '../../../DTO/classes/IResponse';
@@ -10,8 +10,12 @@ import { ISendCode } from '../../../DTO/ISendCode';
 
 export class AuthServices {
   private url = environment.Uri + 'auths/';
+  private readonly statusHttp: HttpClient;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, backend: HttpBackend) {
+    // Angular 16 may cache repeated GETs until the application becomes stable.
+    // A live authentication status must always come from the server.
+    this.statusHttp = new HttpClient(backend);
 
   }
 
@@ -42,8 +46,8 @@ export class AuthServices {
    * поэтому код, который всё-таки дойдёт звонком, не обесценивается.
    * Ошибки в body.code: 409 — не привязан, 502 — MAX не принял сообщение.
    */
-  sendCodeToMax(phone: string, sessionId?: string): Observable<IResponse> {
-    return this.http.post<IResponse>(`${this.url}max/send-code`, {phone, sessionId});
+  sendCodeToMax(phone: string, sessionId?: string, uuid?: string): Observable<IResponse> {
+    return this.http.post<IResponse>(`${this.url}max/send-code`, {phone, sessionId, uuid});
   }
 
   /**
@@ -56,8 +60,12 @@ export class AuthServices {
   }
 
   /** 0 ждали бота, 1 подтверждение номера, 2 код ушёл, 3 авторизован, 4 ссылка просрочена. */
-  getMaxLoginStatus(sessionId: string): Observable<IResponse> {
-    return this.http.get<IResponse>(`${this.url}max/login-status/${sessionId}`);
+  getMaxLoginStatus(sessionId: string, uuid?: string): Observable<IResponse> {
+    return this.statusHttp.get<IResponse>(`${this.url}max/login-status/${sessionId}`, { params: uuid ? { uuid } : {} });
+  }
+
+  cancelMaxLogin(sessionId: string, uuid: string): Observable<IResponse> {
+    return this.http.post<IResponse>(`${this.url}max/login-cancel/${sessionId}`, null, { params: { uuid } });
   }
 
   checkCode(send: ISendCode): Observable<IResponse> {

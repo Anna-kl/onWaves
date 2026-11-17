@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Inject, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, PLATFORM_ID, ViewChild } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { take } from 'rxjs';
 import { select, Store } from '@ngrx/store';
@@ -7,15 +7,18 @@ import { AnalyticsService } from '../../../services/analytics.service';
 import { selectProfileMainClient } from '../../ngrx-store/mainClient/store.select';
 
 /**
- * Маркетинговая страница /masters: страница и неделя рекламы для мастеров.
- * Вёрстка статична и отдаётся SSR; визиты и клики — только в браузере.
+ * Маркетинговая страница /masters: страница, неделя рекламы и купон на запись.
+ * Срока акции нет: дату убрали 05.10.2026. Купон — действующие уровни
+ * 200/300/500 ₽ на первую электронную запись, не «300 ₽ трём клиентам».
+ * Вёрстка статична и отдаётся SSR. Заход на страницу не оповещает.
+ * Клик «Написать» в Telegram или MAX уходит в Kafka только в браузере.
  */
 @Component({
   selector: 'app-masters-landing',
   templateUrl: './masters-landing.component.html',
   styleUrls: ['./masters-landing.component.scss'],
 })
-export class MastersLandingComponent implements OnInit, AfterViewInit {
+export class MastersLandingComponent implements AfterViewInit {
   constructor(
     @Inject(PLATFORM_ID) private readonly platformId: Object,
     private readonly profileService: ProfileService,
@@ -31,18 +34,12 @@ export class MastersLandingComponent implements OnInit, AfterViewInit {
   public readonly examplePageUrl = 'https://onwaves.online/cellings';
 
   /**
-   * Срок и организатор видны в блоке «Условия акции»: без них оффер со скидкой
-   * публиковать нельзя. Форму ИП или самозанятости не домысливаем — в политике
-   * ПДн указано имя оператора.
+   * Организатор виден в блоке «Условия акции». Форму ИП или самозанятости
+   * не домысливаем — в политике ПДн указано имя оператора.
    */
-  public readonly promoUntil = '31 октября 2026 года';
   public readonly promoOrganizer = 'Климова Анна Геннадиевна';
 
   @ViewChild('contact') private readonly contactSection?: ElementRef<HTMLElement>;
-
-  ngOnInit(): void {
-    this.trackLandingEvent('masters_page_visit');
-  }
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) {

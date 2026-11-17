@@ -24,6 +24,7 @@ Disallow: /chat-page/
 Disallow: /confirm-url/
 Disallow: /common/
 Disallow: /profile-ba/
+Disallow: /admin/
 
 # Выдача поиска: бесконечное число URL с одними и теми же карточками.
 # Сама форма расширенного поиска (/search/extsearch) остаётся открытой.

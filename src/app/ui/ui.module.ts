@@ -16,6 +16,7 @@ import {NotificationsComponent} from "./header/notifications/notifications.compo
 import {HeaderBAComponent} from "./header/header-ba/header-ba.component";
 import { SeenDirective } from "./header/notifications/seen.directive";
 import { CommonComponentsModule } from "src/app/common/common.module";
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
     declarations: [
@@ -29,7 +30,7 @@ import { CommonComponentsModule } from "src/app/common/common.module";
         SeenDirective
     ],
     imports: [
-    CommonModule, NgOptimizedImage, MenuModule, ButtonModule, NgbCollapse, CarouselModule,
+    CommonModule, FormsModule, NgOptimizedImage, MenuModule, ButtonModule, NgbCollapse, CarouselModule,
     NgbPanelTitle,
     RouterModule,
     CommonComponentsModule

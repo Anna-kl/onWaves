@@ -10,6 +10,8 @@
         <a routerLink="/static/oservice" class="footer-text">О сервисе</a>
         <a routerLink="/static/help" class="footer-text">Помощь</a>
         <a routerLink="/static/policies" class="footer-text">Политика конфиденциальности</a>
+        <a routerLink="/static/kupon" class="footer-text">Условия купона</a>
+        <span class="footer-text" *ngIf="organizerReady">{{ organizer.name }}<ng-container *ngIf="organizer.status">, {{ organizer.status }}</ng-container>, ИНН {{ organizer.inn }}<ng-container *ngIf="organizer.ogrn">, ОГРН(ИП) {{ organizer.ogrn }}</ng-container></span>
         <!-- href, не routerLink: /catalog отдаёт Express, Angular :id принял бы «catalog» за slug мастера. -->
         <a href="/catalog" class="footer-text">Каталог мастеров</a>
         <!-- <div class="btn-black" (click)="openPopUp()" > Зарегистрироваться</div> -->

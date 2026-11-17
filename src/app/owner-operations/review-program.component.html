@@ -1,0 +1,33 @@
+<section class="review-program" aria-label="Программа купонов за отзывы">
+  <h2>Купоны за отзывы</h2>
+  <p *ngIf="error" class="review-program-error" role="alert">{{ error }}</p>
+  <p *ngIf="notice" role="status">{{ notice }}</p>
+  <p *ngIf="loading" role="status">Загружаем данные программы…</p>
+  <button type="button" class="btn-transparent" *ngIf="error && !editing" (click)="reload()">Обновить</button>
+  <ng-container *ngIf="program as state">
+    <p *ngIf="!state.program?.enabled">Начисление новых купонов выключено.</p>
+    <p *ngIf="state.program?.enabled">Начисление настроено с {{ state.program?.startsAt | date:'d MMMM yyyy, HH:mm':'+0300' }} МСК.</p>
+    <dl *ngIf="state.counts as amounts">
+      <div><dt>Купонов выдано</dt><dd>{{ amounts.issued }}</dd></div>
+      <div><dt>Номинал</dt><dd>{{ amounts.issuedKopecks | operationsMoney }}</dd></div>
+      <div><dt>Доступно</dt><dd>{{ amounts.availableKopecks | operationsMoney }}</dd></div>
+      <div><dt>В резерве</dt><dd>{{ amounts.reservedKopecks | operationsMoney }}</dd></div>
+      <div><dt>Использовано</dt><dd>{{ amounts.usedKopecks | operationsMoney }}</dd></div>
+      <div><dt>Истекло</dt><dd>{{ amounts.expiredKopecks | operationsMoney }}</dd></div>
+    </dl>
+    <p *ngIf="!state.counts">Купоны за отзывы ещё не выдавались.</p>
+    <button type="button" class="btn-transparent" *ngIf="!editing" (click)="edit()" [disabled]="loading">Настроить начисление</button>
+    <form *ngIf="editing" (ngSubmit)="save()">
+      <label class="review-program-enable">
+        <input type="checkbox" name="enabled" [(ngModel)]="enabled" [disabled]="sending">
+        <span>Начислять купоны за новые отзывы</span>
+      </label>
+      <label>Дата и время запуска, МСК <input type="datetime-local" name="startsAt" [(ngModel)]="startsAt" [disabled]="sending" required></label>
+      <label>Причина изменения <textarea name="program-reason" [(ngModel)]="reason" rows="2" maxlength="1000" [disabled]="sending"></textarea></label>
+      <div class="review-program-actions">
+        <button type="submit" class="btn-green" [disabled]="sending || !startsAt || !reason.trim()">Сохранить настройки</button>
+        <button type="button" class="btn-transparent" [disabled]="sending" (click)="editing = false">Отмена</button>
+      </div>
+    </form>
+  </ng-container>
+</section>

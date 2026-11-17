@@ -30,7 +30,7 @@ import {
 import { getNameCurrency, priceUnitOf } from "src/helpers/common/price.helpers";
 import { environment } from "src/enviroments/environment";
 import { WorkLocationType } from "../../../../DTO/enums/workLocationType";
-import { serviceWorkLocationType } from "src/helpers/common/address";
+import { serviceFixedPointIds, serviceWorkLocationType } from "src/helpers/common/address";
 import { ServicePriceUnit } from "../../../../DTO/enums/servicePriceUnit";
 
 @Component({
@@ -112,8 +112,8 @@ export class Arenda2Component implements OnInit, OnDestroy {
   };
   limitServiceName(event: any) {
     const inputText = event.target.value;
-    if (inputText.length > 50) {
-      event.target.value = inputText.substring(0, 50); // Truncate to 70 characters
+    if (inputText.length > 70) {
+      event.target.value = inputText.substring(0, 70); // Truncate to 70 characters
     }
     this.characterCount = event.target.value.length;
   }
@@ -199,6 +199,9 @@ export class Arenda2Component implements OnInit, OnDestroy {
         this.destroy$.complete();
   }
 
+  get isDemoDraft(): boolean { return this.profile?.isPromo === true && this.profile?.isGetOrder !== true; }
+  get durationUnknown(): boolean { return this.isDemoDraft && !!this.serviceGroup?.get('durationUnknown')?.value; }
+
   ngOnInit(): void {
 
     this.serviceGroup = this.builder.group({
@@ -219,6 +222,7 @@ export class Arenda2Component implements OnInit, OnDestroy {
         currencyType: new FormControl(this.currencies[0], Validators.required),
         priceUnit: ServicePriceUnit.Service,
       }),
+      durationUnknown: this.isDemoDraft,
       isTimeUnlimited: false,
       durationHours: this.groupsHours[0],
       durationMinutes: this.groupsMinutes[0]
@@ -251,12 +255,15 @@ export class Arenda2Component implements OnInit, OnDestroy {
                 priceUnit: [priceUnitOf(this.service.price) ?? ServicePriceUnit.Service],
               }),
               durationHours: [this.service.duration ? getHoursString(this.service.duration) : this.groupsHours[0]],
+              durationUnknown: [this.isDemoDraft && this.service.duration == null && !this.service.isTimeUnlimited],
               isTimeUnlimited: [this.service.isTimeUnlimited],
               durationMinutes: [this.service.duration ? getMinutesStr(this.service.duration) : this.groupsMinutes[0]],
             });
 
             // Характер услуги — для редактирования (устойчиво к регистру ключа).
             this.locationType = serviceWorkLocationType(this.service) ?? null;
+            this.fixedPointIds = serviceFixedPointIds(this.service);
+            this.applyNailPieceUnit(this.service.name, selectedGroup?.name);
   }
           
     this.serviceGroup?.get('about')!.valueChanges.subscribe(
@@ -296,8 +303,11 @@ export class Arenda2Component implements OnInit, OnDestroy {
   isErrorName = false;
   isErrorGender = false;
   isErrorFormat = false;
+  isErrorPoints = false;
   /** Формат оказания услуги (radio). Значение выбирается в app-service-format-select. */
   locationType: WorkLocationType | null = null;
+  fixedPointIds: string[] = [];
+  fixedPointChoices = 0;
 
   isFormValid(): boolean {
     const priceControl = this.serviceGroup?.get('price');
@@ -318,7 +328,7 @@ export class Arenda2Component implements OnInit, OnDestroy {
     ||this.serviceGroup?.get('isChildren')?.value)){
         flag = false;
     }
-    if (!this.serviceGroup?.get('isTimeUnlimited')?.value){
+    if (!this.durationUnknown && !this.serviceGroup?.get('isTimeUnlimited')?.value){
           if (this.serviceGroup?.get('durationHours')?.value === '00' &&
           this.serviceGroup?.get('durationMinutes')?.value === '00' ){
             flag = false;
@@ -341,6 +351,20 @@ export class Arenda2Component implements OnInit, OnDestroy {
   setCategory($event: ICategory) {
     this.isRubric = false;
     this.category = $event;
+    this.applyNailPieceUnit($event.name);
+  }
+
+  /** Маникюр и педикюр — штучная услуга: чип «шт» включён, пока мастер не выбрал другую единицу. */
+  private applyNailPieceUnit(...names: Array<string | null | undefined>): void {
+    const blob = names.filter((name): name is string => !!name).join(' ').toLowerCase();
+    if (!blob.includes('маникюр') && !blob.includes('педикюр')) {
+      return;
+    }
+    const control = this.serviceGroup?.get('price')?.get('priceUnit');
+    const current = control?.value as ServicePriceUnit | null | undefined;
+    if (current == null || current === ServicePriceUnit.Service) {
+      control?.setValue(ServicePriceUnit.Piece);
+    }
   }
 
   updateCounter() {
@@ -423,6 +447,7 @@ export class Arenda2Component implements OnInit, OnDestroy {
     this.isErrorTime = false;
     this.isErrorPrice = false;
     this.isErrorFormat = false;
+    this.isErrorPoints = false;
     let data = this.serviceGroup?.getRawValue();
     let gender: Gender[] = [];
 
@@ -432,7 +457,7 @@ export class Arenda2Component implements OnInit, OnDestroy {
     if (data['isPet']) gender.push(Gender.Pet);
     if (data['isAll']) gender.push(Gender.All);
 
-    if ((data['durationHours'] === '00' && data['durationMinutes'] === '00') && !data['isTimeUnlimited']) {
+    if ((data['durationHours'] === '00' && data['durationMinutes'] === '00') && !data['isTimeUnlimited'] && !this.durationUnknown) {
       this.isErrorTime = true;
       flagValidation = false;
     }
@@ -446,6 +471,10 @@ export class Arenda2Component implements OnInit, OnDestroy {
     }
     if (this.locationType == null) {
       this.isErrorFormat = true;
+      flagValidation = false;
+    }
+    if (this.locationType === WorkLocationType.Fixed && this.fixedPointChoices > 1 && !this.fixedPointIds.length) {
+      this.isErrorPoints = true;
       flagValidation = false;
     }
 
@@ -465,13 +494,15 @@ export class Arenda2Component implements OnInit, OnDestroy {
       PaymentForType.ForService,
       data['group'].id !== '' ? data['group']['id'] : null,
       data['about'],
-      getTimeFromFields(data['durationHours'], data['durationMinutes']),
-      data['isTimeUnlimited'],
+      this.durationUnknown ? null : getTimeFromFields(data['durationHours'], data['durationMinutes']),
+      this.durationUnknown ? false : data['isTimeUnlimited'],
       // При редактировании рубрику заново не выбирают — сохраняем существующую категорию услуги.
       this.category?.id ?? this.service?.categoryId
     );
     // Характер услуги (backend 2026-07-19).
+    service.serviceStatus = this.service?.serviceStatus ?? service.serviceStatus;
     service.workLocationType = this.locationType;
+    service.fixedPointIds = this.locationType === WorkLocationType.Fixed ? this.fixedPointIds : [];
 
     // ══════════════════════════════════════════════════════════════
     // КРИТИЧНО: Передаем requestId для идемпотентности

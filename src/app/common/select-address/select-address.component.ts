@@ -1,33 +1,42 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { take } from 'rxjs';
 
 import { IViewAddress } from 'src/app/DTO/views/IViewAddress';
 import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
 import { WorkLocationType } from 'src/app/DTO/enums/workLocationType';
-import { IWorkLocationChange } from 'src/app/DTO/views/IWorkFormats';
-import { parseWorkLocationType, workLocationTypesOf } from 'src/helpers/common/address';
+import { IFixedPointDraft, IWorkLocationChange } from 'src/app/DTO/views/IWorkFormats';
+import { fixedPointsOf, parseWorkLocationType, workLocationTypesOf } from 'src/helpers/common/address';
 
 import { DictionaryService } from 'src/services/dictionary.service';
 import { ServiceRegisterBusinessProfile } from 'src/services/service-register-business';
 import { ProfileService } from 'src/services/profile.service';
+import { ScheduleService } from 'src/services/schedule.service';
+
+interface PointForm extends IFixedPointDraft {
+  anotherCity: boolean;
+}
 
 @Component({
   selector: 'app-select-address',
   templateUrl: './select-address.component.html',
   styleUrls: ['./select-address.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [DictionaryService,ServiceRegisterBusinessProfile]
+  providers: [DictionaryService, ServiceRegisterBusinessProfile, ScheduleService]
 })
 export class SelectAddressComponent implements OnInit {
 
   constructor( private _dictionaries: DictionaryService,
     private _serviceRegisterBusinessProfile: ServiceRegisterBusinessProfile,
     private _profileService: ProfileService,
+    private _schedules: ScheduleService,
     private _cdr: ChangeDetectorRef)
     {
     }
 
   @Output() changeAddress = new EventEmitter<IWorkLocationChange>();
   @Input() profile: IViewBusinessProfile | null = null;
+  /** В кабинете точек несколько. Регистрация остаётся с одним адресом. */
+  @Input() multiplePoints = false;
 
   // Мультивыбор форматов работы: Онлайн / Фиксированное место / Разъездная.
   // Можно выбрать несколько сразу — каждый формат уйдёт на бэк отдельной записью WorkLocation.
@@ -37,6 +46,11 @@ export class SelectAddressComponent implements OnInit {
   isMobile: boolean = false;
   // Список районов/городов для разъездной работы
   cities: string[] = [];
+  points: PointForm[] = [];
+  /** Вторую точку пускаем только когда новая неделя графика отвечает. */
+  weekReady = false;
+  private loadedFixedIds: string[] = [];
+  private pointsTouched = false;
   /** Ответ `work-location` получен (успешно или с ошибкой) — до этого состояние переключателей неизвестно. */
   formatsResolved = false;
   /** У профиля есть хотя бы один сохранённый формат. false → то, что видно на экране, лишь предвыбор. */
@@ -58,6 +72,9 @@ export class SelectAddressComponent implements OnInit {
       this.isOnline = !this.isOnline;
     } else if (kind === 'fixed') {
       this.isFixed = !this.isFixed;
+      if (this.isFixed && this.multiplePoints && !this.points.length) {
+        this.points = [this.emptyPoint()];
+      }
     } else {
       this.isMobile = !this.isMobile;
       if (this.isMobile && this.cities.length === 0) {
@@ -86,9 +103,24 @@ export class SelectAddressComponent implements OnInit {
       // Профиля нет или адрес не заполнен — пустая форма
       this.address = this.emptyAddress();
     }
+    if (this.multiplePoints && !this.points.length) {
+      this.points = [this.emptyPoint()];
+    }
     // Подгружаем сохранённую локацию работы, чтобы переключатель отражал реальное состояние
     if (this.profile?.id) {
       this.loadWorkLocation();
+      if (this.multiplePoints) {
+        this._schedules.getWeek(this.profile.id).pipe(take(1)).subscribe({
+          next: result => {
+            this.weekReady = result?.code === 200 && !!result.data;
+            this._cdr.markForCheck();
+          },
+          error: () => {
+            this.weekReady = false;
+            this._cdr.markForCheck();
+          }
+        });
+      }
     }
   await this.getListCountry();
   }
@@ -137,8 +169,21 @@ export class SelectAddressComponent implements OnInit {
         this.isFixed = types.includes(WorkLocationType.Fixed);
         this.isMobile = types.includes(WorkLocationType.Mobile);
 
+        const records: any[] = Array.isArray(res.data) ? res.data : (res.data ? [res.data] : []);
+        if (this.multiplePoints && !this.pointsTouched) {
+          const fixed = fixedPointsOf(records);
+          this.loadedFixedIds = fixed.map(point => point.id).filter((id): id is string => !!id);
+          this.points = fixed.length ? fixed.map(point => this.pointFrom(point)) : [this.emptyPoint()];
+          const first = fixed[0];
+          if (first) {
+            this.myCountry = first.country ?? this.myCountry;
+            this.myRegion = first.region ?? this.myRegion;
+            if (this.myCountry) this.getListRegions(this.myCountry);
+            if (this.myRegion) this.getListCity(this.myRegion);
+          }
+        }
+
         if (this.isMobile) {
-          const records: any[] = Array.isArray(res.data) ? res.data : [res.data];
           const mobile = records.find(r => parseWorkLocationType(r) === WorkLocationType.Mobile);
           this.myRegion = mobile?.region ?? this.myRegion;
           this.cities = Array.isArray(mobile?.cities) && mobile.cities.length ? [...mobile.cities] : [''];
@@ -156,6 +201,84 @@ export class SelectAddressComponent implements OnInit {
         this._cdr.markForCheck();
       }
     });
+  }
+
+  addPoint(): void {
+    if (!this.weekReady) return;
+    this.pointsTouched = true;
+    this.points = [...this.points, this.emptyPoint()];
+    this.checkAddress(true);
+  }
+
+  removePoint(index: number): void {
+    if (this.points.length < 2) return;
+    this.pointsTouched = true;
+    this.points = this.points.filter((_, item) => item !== index);
+    this.checkAddress(true);
+  }
+
+  setPoint(index: number, field: 'title' | 'city' | 'street' | 'house' | 'apartment', value: string): void {
+    const point = this.points[index];
+    if (!point) return;
+    this.pointsTouched = true;
+    point[field] = value ?? '';
+    this.checkAddress(true);
+  }
+
+  setPointCity(index: number, value: string): void {
+    this.setPoint(index, 'city', value);
+  }
+
+  setPointAnother(index: number, on: boolean): void {
+    const point = this.points[index];
+    if (!point) return;
+    this.pointsTouched = true;
+    point.anotherCity = on;
+    point.city = '';
+    this.checkAddress(true);
+  }
+
+  private emptyPoint(): PointForm {
+    return {
+      id: null,
+      title: '',
+      country: this.myCountry,
+      region: this.myRegion,
+      city: '',
+      street: '',
+      house: '',
+      apartment: '',
+      anotherCity: false,
+    };
+  }
+
+  private pointFrom(point: { id?: string | null; title?: string | null; city?: string | null; street?: string | null; house?: string | null; apartment?: string | null }): PointForm {
+    return {
+      id: point.id ?? null,
+      title: `${point.title ?? ''}`.trim(),
+      country: this.myCountry,
+      region: this.myRegion,
+      city: point.city ?? '',
+      street: point.street ?? '',
+      house: point.house ?? '',
+      apartment: point.apartment ?? '',
+      anotherCity: false,
+    };
+  }
+
+  private draftPoints(): IFixedPointDraft[] {
+    if (!this.isFixed) return [];
+    if (!this.multiplePoints) return [];
+    return this.points.map(point => ({
+      id: point.id,
+      title: point.title.trim(),
+      country: this.myCountry,
+      region: this.myRegion,
+      city: point.city,
+      street: point.street,
+      house: point.house,
+      apartment: point.apartment,
+    }));
   }
 
   addCity(): void {
@@ -212,11 +335,36 @@ export class SelectAddressComponent implements OnInit {
   }
 
   private emitAddress(cities: string[], fromUser = false): void {
+    const drafts = this.draftPoints();
+    const first = drafts[0];
+    const viewAddress = this.multiplePoints && this.isFixed && first
+      ? {
+          country: first.country,
+          region: first.region,
+          city: first.city,
+          street: first.street,
+          home: first.house,
+          apartment: first.apartment,
+        } as IViewAddress
+      : this.address;
+    if (this.multiplePoints && this.isFixed && first) {
+      this.address = viewAddress;
+    }
+    const kept = new Set(drafts.map(point => point.id).filter((id): id is string => !!id));
+    const pointText = drafts
+      .map(point => [point.title, point.city, point.street, point.house].filter(part => !!part && `${part}`.trim()).join(', '))
+      .filter(Boolean)
+      .join('  •  ');
+    const mobileText = this.isMobile && cities.length ? cities.join(', ') : '';
     const payload: IWorkLocationChange = {
-      strAddress: this.getStringAddress(),
-      viewAddress: this.address,
+      strAddress: this.multiplePoints && this.isFixed
+        ? [pointText, mobileText].filter(Boolean).join('  •  ')
+        : this.getStringAddress(),
+      viewAddress,
       formats: { online: this.isOnline, fixed: this.isFixed, mobile: this.isMobile },
       cities,
+      fixedPoints: this.multiplePoints ? drafts : undefined,
+      removedFixedPointIds: this.multiplePoints ? this.loadedFixedIds.filter(id => !kept.has(id)) : undefined,
       userChanged: fromUser
     };
     this.changeAddress.emit(payload);
@@ -246,6 +394,17 @@ export class SelectAddressComponent implements OnInit {
         break;
       }
         case 'region': {
+          if (this.multiplePoints && fromUser) {
+            this.pointsTouched = true;
+            this.points = this.points.map(point => ({
+              ...point,
+              city: '',
+              street: '',
+              house: '',
+              apartment: '',
+              anotherCity: false,
+            }));
+          }
           this.getListCity(this.myRegion!);
             if (this.isMobile) {
               // Разъездная: сбрасываем список городов под новый регион
@@ -343,18 +502,47 @@ export class SelectAddressComponent implements OnInit {
 public async getListRegions(myCountry: string|null){
   if (myCountry) {
     (await this._serviceRegisterBusinessProfile.getAllRegions(myCountry))
-      .subscribe(_ => {
-          this.myRegion = _.find(_ => _.includes(this.myRegion!))! ?? null;
-          this.change(null, 'region')
+      .subscribe(regions => {
+          const current = `${this.myRegion ?? ''}`.trim();
+          const match = current
+            ? regions.find(region => region === current || region.includes(current))
+            : undefined;
+          if (match) this.myRegion = match;
+          this._cdr.markForCheck();
           });
   }
 }
+
+  /** Регион выбран вручную. Пустой регион не сбрасывает уже введённый адрес точки. */
+  onRegion(value: string | null): void {
+    const previous = `${this.myRegion ?? ''}`.trim();
+    this.myRegion = value;
+    const next = `${value ?? ''}`.trim();
+    if (this.multiplePoints && previous && previous !== next) {
+      this.pointsTouched = true;
+      this.points = this.points.map(point => ({
+        ...point,
+        city: '',
+        street: '',
+        house: '',
+        apartment: '',
+        anotherCity: false,
+      }));
+    }
+    if (next) this.getListCity(next);
+    this.checkAddress(true);
+  }
 
 public async getListCity(myRegion: string){
   if (myRegion) {
     (await this._serviceRegisterBusinessProfile.getAllCity(myRegion))
       .subscribe(_ => {
         this.allCity = _;
+          if (this.multiplePoints) {
+            this.points.forEach(point => {
+              if (point.city && !_.includes(point.city)) point.anotherCity = true;
+            });
+          }
           if (_.length === 1){
               this.myCity = _[0];
           }

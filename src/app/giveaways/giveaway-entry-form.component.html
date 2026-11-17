@@ -1,0 +1,73 @@
+<section class="entry ym-hide-content" aria-labelledby="entry-title">
+  <ng-container *ngIf="entry as saved; else join">
+    <h2 id="entry-title">{{ saved.result === 'participating' ? 'Вы участвуете!' : 'Ваш номер в розыгрыше' }} №{{ saved.number }}</h2>
+    <p>{{ campaign.master.name }}<ng-container *ngIf="saved.city"> · {{ saved.city }}</ng-container></p>
+    <p *ngIf="saved.result === 'won'">Вы выиграли. Приз доступен в личном кабинете.</p>
+    <p *ngIf="saved.result === 'not_won'">В этот раз ваш номер не выиграл.</p>
+    <p *ngIf="saved.result === 'participating' && saved.resultsPlannedAt">Итоги {{ date(saved.resultsPlannedAt, false) }}.</p>
+    <p>Номер сохранён в личном кабинете. Покупать услугу или записываться для участия не нужно.</p>
+    <div class="entry__actions">
+      <button type="button" (click)="cabinet()">Мои участия</button>
+      <a routerLink="." queryParamsHandling="preserve" fragment="rules">Посмотреть условия</a>
+    </div>
+  </ng-container>
+  <ng-template #join>
+    <h2 id="entry-title">Участие в розыгрыше у {{ campaign.master.name }}</h2>
+    <p *ngIf="checking" role="status">Проверяем участие…</p>
+    <ng-container *ngIf="!checking">
+      <ng-container *ngIf="campaign.phase === 'active'; else notActive">
+        <button *ngIf="!open" type="button" (click)="showForm()">Участвовать</button>
+        <form *ngIf="open" (ngSubmit)="submit()">
+          <fieldset [disabled]="busy">
+            <legend class="entry__legend">Подтвердите телефон, чтобы получить номер участника</legend>
+            <label for="giveaway-phone">Телефон</label>
+            <input id="giveaway-phone" name="phone" type="tel" autocomplete="tel" placeholder="+7"
+              [(ngModel)]="phone" (ngModelChange)="persistDraft()" maxlength="32" [readOnly]="!!otpSession || !!maxStatus" required />
+            <div class="entry__names">
+              <label>Имя (обязательно)<input name="firstName" autocomplete="given-name" [(ngModel)]="firstName" (ngModelChange)="persistDraft()" maxlength="80" required /></label>
+              <label>Фамилия (по желанию)<input name="lastName" autocomplete="family-name" [(ngModel)]="lastName" (ngModelChange)="persistDraft()" maxlength="80" /></label>
+            </div>
+            <label class="entry__terms">
+              <input type="checkbox" name="accepted" [(ngModel)]="accepted" (ngModelChange)="persistDraft()" required />
+              <span>Принимаю <a routerLink="." queryParamsHandling="preserve" fragment="rules">условия розыгрыша</a> и соглашаюсь на обработку данных по <a routerLink="/static/policies" target="_blank" rel="noopener">политике конфиденциальности</a>.</span>
+            </label>
+            <ng-container *ngIf="otpSession">
+              <label for="giveaway-code">Код подтверждения</label>
+              <p *ngIf="otpChannel === 1">Введите последние четыре цифры номера входящего звонка.</p>
+              <p *ngIf="otpChannel === 2">Введите код из сообщения в MAX.</p>
+              <p *ngIf="otpChannel === 3">Введите код из SMS.</p>
+              <input id="giveaway-code" name="code" inputmode="numeric" autocomplete="one-time-code" [(ngModel)]="code" pattern="[0-9]{4}" maxlength="4" required />
+            </ng-container>
+            <div class="entry__max" *ngIf="maxStatus" aria-live="polite">
+              <p>{{ maxStatus }}</p>
+              <ng-container *ngIf="maxLink">
+                <p>Нажмите «Начать» в боте и подтвердите тот же номер. Затем вернитесь в этот браузер и введите код из MAX.</p>
+                <div class="entry__actions">
+                  <a [href]="maxLink" target="_blank" rel="noopener noreferrer">Открыть MAX</a>
+                  <button type="button" class="entry__link" (click)="copyMaxLink()">Скопировать ссылку</button>
+                </div>
+                <img *ngIf="maxQr" class="entry__qr" [src]="maxQr" width="168" height="168" alt="QR-код для открытия бота MAX" />
+              </ng-container>
+            </div>
+            <button *ngIf="!maxStatus" type="submit" [disabled]="busy || !accepted || (!!otpSession && code.length !== 4)">{{ busy ? 'Проверяем…' : otpSession ? 'Подтвердить и участвовать' : 'Подтвердить телефон и участвовать' }}</button>
+            <div class="entry__actions">
+              <button *ngIf="!maxStatus" type="button" class="entry__link" [disabled]="!accepted" (click)="useMax()">Получить код в MAX</button>
+              <button *ngIf="maxLinkOffer" type="button" class="entry__link" [disabled]="!accepted" (click)="useMax(true)">Получить код через бота MAX</button>
+              <button type="button" class="entry__link" [disabled]="!accepted" (click)="sendCode(3)">Получить код по СМС</button>
+            </div>
+          </fieldset>
+          <div class="entry__actions">
+            <button *ngIf="otpSession || maxStatus || busy" type="button" class="entry__link" (click)="changePhone()">Изменить телефон</button>
+            <button type="button" class="entry__link" (click)="cancel()">Отменить участие</button>
+          </div>
+        </form>
+      </ng-container>
+      <ng-template #notActive>
+        <p *ngIf="campaign.phase === 'scheduled'">Приём заявок начнётся {{ date(campaign.startsAt) }}.</p>
+        <p *ngIf="campaign.phase !== 'scheduled'">Приём завершён. Свой номер можно посмотреть после входа по телефону, который вы указали при участии.</p>
+        <a routerLink="/" [queryParams]="{action: 'register'}" *ngIf="campaign.phase !== 'scheduled'">Войти в личный кабинет</a>
+      </ng-template>
+    </ng-container>
+    <p *ngIf="error" class="entry__error" role="alert">{{ error }}</p>
+  </ng-template>
+</section>

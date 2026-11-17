@@ -6,6 +6,20 @@
   max-width: 100%;
 }
 
+.point-card {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(4, 60, 72, .12);
+}
+
+.point-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
 .worktype,
 .geo-panels {
   width: 100%;
@@ -87,6 +101,7 @@ select {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
+  pointer-events: none;
 } 
 /*--------------------Нижний раздел---------------------------*/
 .container-contacts-footer{
@@ -297,7 +312,7 @@ select {
   background: #FAFDFE;
 }
 .geo-location-fields {
-  display: contents;
+  display: block;
 }
 .geo-block__head {
   display: flex;

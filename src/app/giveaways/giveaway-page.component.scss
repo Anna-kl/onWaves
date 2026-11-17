@@ -1,0 +1,49 @@
+@import '../../assets/styles/main/color';
+
+.gw-page { background: #fafafc; }
+.gw-page__inner { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+.gw-kicker { margin: 0 0 8px; color: $green-basic; font-weight: 700; }
+h1 { margin: 0 0 12px; color: $green-dark; font-size: 32px; line-height: 1.15; }
+.gw-lead { font-size: 18px; line-height: 1.45; }
+.gw-prizes { display: grid; gap: 12px; }
+.gw-card { margin: 16px 0; padding: 16px; border-radius: 20px; background: #fff; }
+.gw-card h2 { margin: 0 0 8px; color: $green-dark; font-size: 20px; }
+.gw-btn, .gw-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 56px;
+  margin: 8px 0;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #0d94a0, $green-basic);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+.gw-btn--ghost, .gw-link {
+  background: #fff;
+  color: $green-dark;
+  border: 1px solid rgba(4, 60, 72, .14);
+}
+.gw-btn:focus-visible, .gw-link:focus-visible { outline: 3px solid $green-dark; outline-offset: 3px; }
+.gw-btn:active, .gw-link:active { transform: scale(0.98); }
+ol { padding-left: 18px; }
+
+@media (min-width: 768px) {
+  .gw-prizes { grid-template-columns: 1fr 1fr; }
+  .gw-btn, .gw-link { width: auto; }
+  h1 { font-size: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gw-btn:active, .gw-link:active { transform: none; }
+}
+
+.gw-rules { scroll-margin-top: 100px; }
+.gw-rules p { white-space: pre-line; overflow-wrap: anywhere; line-height: 1.6; }

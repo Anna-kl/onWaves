@@ -25,6 +25,9 @@ export class CalendarComponent implements OnChanges, OnDestroy {
   @Input('userId') userId: string|null = null;
   /** Услуга, под которую считать занятость дня. Без неё бэк отдаёт `canAdd` по старой эвристике. */
   @Input() serviceId: string|null = null;
+  @Input() duration: number | undefined;
+  /** Точка приёма: слоты «на месте» считаются по её графику. */
+  @Input() pointId: string|null = null;
   @Input() initialWorkDays: Schedule[] | null = null;
   @Input() period?: string;
   @Input() isCabinet:boolean = false;
@@ -33,6 +36,7 @@ export class CalendarComponent implements OnChanges, OnDestroy {
   workDays: Schedule[] = [];
   /** Месяц не загрузился. Показываем «Повторить» вместо разметки прошлого месяца. */
   loadError = false;
+  isLoading = false;
   private scheduleSubscription?: Subscription;
   private scheduleRequestId = 0;
   /** Родитель сам грузит расписание и передаёт его входом — свой запрос не дублируем. */
@@ -52,6 +56,16 @@ export class CalendarComponent implements OnChanges, OnDestroy {
       this.parentOwnsWorkDays = true;
     }
 
+    const contextChanged = ['userId', 'serviceId', 'pointId', 'duration'].some(key => changes[key] && !changes[key].firstChange);
+    if (contextChanged) {
+      this.scheduleRequestId++;
+      this.scheduleSubscription?.unsubscribe();
+      this.workDays = [];
+      this.choosedDay = undefined;
+      this.clearInterval.emit(true);
+      this.changeToday(this.year, this.month, this.today?.getDate());
+    }
+
     // Месяц синхронизируем с `today` только когда родитель его реально поменял. Раньше это
     // делалось на каждый ngOnChanges и сбрасывало месяц, выбранный стрелками.
     if (changes['today'] && this.today && !isNaN(this.today.getTime())) {
@@ -64,7 +78,9 @@ export class CalendarComponent implements OnChanges, OnDestroy {
     // пометки доступности пропадали, а `dayId` выбранного дня становился undefined.
     if (changes['initialWorkDays'] && this.initialWorkDays !== null) {
       this.scheduleSubscription?.unsubscribe();
+      this.scheduleRequestId++;
       this.loadError = false;
+      this.isLoading = false;
       this.workDays = this.initialWorkDays;
       this.changeToday(this.year, this.month, this.today?.getDate());
       if (this.choosedDay) this.onDate.emit(this.choosedDay);
@@ -73,10 +89,13 @@ export class CalendarComponent implements OnChanges, OnDestroy {
 
     // Родитель ещё грузит расписание — ждём его, а не шлём второй days-in-month.
     if (this.parentOwnsWorkDays && this.initialWorkDays === null) {
+      this.isLoading = true;
+      this.workDays = [];
+      this.changeToday(this.year, this.month, this.today?.getDate());
       return;
     }
 
-    if (this.userId && (changes['userId'] || changes['isUpdate'] || changes['serviceId'])) {
+    if (this.userId && (changes['userId'] || changes['isUpdate'] || changes['serviceId'] || changes['pointId'] || changes['duration'])) {
       this.getSchedule(this.userId, this.year, this.month);
     }
 
@@ -104,11 +123,15 @@ export class CalendarComponent implements OnChanges, OnDestroy {
     const requestId = ++this.scheduleRequestId;
     this.scheduleSubscription?.unsubscribe();
     this.loadError = false;
-    this.scheduleSubscription = this._api.getWorkDaysInMonth(id, year, month + 1, this.serviceId)
+    this.isLoading = true;
+    this.workDays = [];
+    this.changeToday(year, month, this.today?.getDate());
+    this.scheduleSubscription = this._api.getWorkDaysInMonth(id, year, month + 1, this.serviceId, this.pointId, this.duration)
       .subscribe({
         next: workDays => {
           if (requestId !== this.scheduleRequestId || year !== this.year || month !== this.month) return;
           this.workDays = workDays;
+          this.isLoading = false;
           this.changeToday(year, month, this.today ? this.today.getDate() : undefined);
           if(this.type !== 'User' && this.userId && this.choosedDay?.date){
               this._api.readCalendar(this.userId, this.choosedDay?.date).subscribe({
@@ -126,6 +149,7 @@ export class CalendarComponent implements OnChanges, OnDestroy {
         error: () => {
           if (requestId !== this.scheduleRequestId) return;
           this.loadError = true;
+          this.isLoading = false;
           this.workDays = [];
           this.changeToday(year, month, this.today ? this.today.getDate() : undefined);
         }
@@ -275,7 +299,7 @@ export class CalendarComponent implements OnChanges, OnDestroy {
   chooseDay(d: IViewCalendar) {
       // При ошибке загрузки месяца разметки нет: клик дал бы день без `dayId`,
       // и блок времени молча остался бы пустым.
-      if (!d.day || this.cellIsPast(d) || this.loadError) {
+      if (!d.day || this.cellIsPast(d) || this.loadError || this.isLoading) {
         return;
       }
       this.today = new Date(this.year, this.month, d.day, 0,0,0);

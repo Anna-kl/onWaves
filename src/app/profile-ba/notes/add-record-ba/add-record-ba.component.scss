@@ -142,6 +142,139 @@ input:focus {outline:none!important;}*/
 .client-address__grid input:focus,
 .client-address__grid select:focus,
 .client-address__comment:focus { border-color: #00DAB3; outline: none; }
+.point-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.point-chips__btn {
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(4, 60, 72, .16);
+  background: #fff;
+  font: inherit;
+}
+.point-chips__btn--on {
+  background: #006174;
+  color: #fff;
+  border-color: #006174;
+}
 @media (max-width: 560px) {
   .client-address__grid { grid-template-columns: 1fr; }
+}
+.record-service-list {
+  width: 100%;
+}
+
+.booking-summary {
+  margin: 16px 0 24px;
+  padding: 14px 16px 6px;
+  border-radius: 14px;
+  background: rgba($green-basic, .055);
+  color: $green-dark;
+
+  &__totals {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    margin: 0;
+
+    > :last-child { text-align: right; }
+
+    dt { font-size: 13px; font-weight: 500; }
+    dd {
+      margin: 3px 0 0;
+      font-size: clamp(17px, 4.6vw, 20px);
+      line-height: 1.3;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 8px;
+    margin-left: -8px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: $green-basic;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover, &:active { text-decoration: underline; text-underline-offset: 3px; }
+    &[aria-expanded='true'] .booking-summary__chevron { transform: rotate(225deg); }
+  }
+
+  &__chevron {
+    width: 7px;
+    height: 7px;
+    border: solid currentColor;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+
+  &__fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    max-width: 216px;
+    padding: 2px 0 8px;
+
+    label { display: grid; gap: 5px; min-width: 0; font-size: 13px; }
+
+    input {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 44px;
+      padding: 6px 10px;
+      border: 1px solid rgba($green-dark, .28);
+      border-radius: 8px;
+      background: $white;
+      color: $black;
+      font: inherit;
+      font-size: 16px;
+
+      &[aria-invalid='true'] { border-color: $color-error; }
+    }
+  }
+
+  &__fields input:focus-visible,
+  &__action:focus-visible {
+    outline: 2px solid $green-basic;
+    outline-offset: 2px;
+  }
+
+  &__reference {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 16px;
+    border-top: 1px solid rgba($green-dark, .12);
+    padding-top: 2px;
+    font-size: 13px;
+  }
+
+  &__note, &__error {
+    margin: 0;
+    padding: 2px 0 8px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  &__error { color: #9e3b2a; }
+
+  @media (min-width: 768px) {
+    padding-inline: 20px;
+  }
 }

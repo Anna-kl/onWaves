@@ -13,11 +13,13 @@ import { OserviceComponent } from './oservice/oservice.component';
 import { PravilaComponent } from './pravila/pravila.component';
 import { StranicaComponent } from './stranica/stranica.component';
 import { PoliciesComponent } from './policies/policies.component';
+import { KuponComponent } from './kupon/kupon.component';
 import { TypographyComponent } from './typography/typography.component';
 import { LowermenuComponent } from './lowermenu/lowermenu.component';
 import { FooternComponent } from './footern/footern.component';
 import { FaqQuestionComponent } from '../common/faq-question/faq-question.component';
 import { SettingsComponent } from '../profile-user/settings/settings.component';
+import { NotificationChannelsBannerComponent } from '../baedit/components/notification-channels-banner/notification-channels-banner.component';
 import {
   SubscribeChannelModalComponent,
 } from '../profile-user/settings/subscribe-channel-modal/subscribe-channel-modal.component';
@@ -42,6 +44,7 @@ import {
     PravilaComponent,
     StranicaComponent,
     PoliciesComponent,
+    KuponComponent,
     TypographyComponent,
     LowermenuComponent,
     FooternComponent,
@@ -50,6 +53,7 @@ import {
     SubscribeChannelModalComponent,
     RevokeChannelModalComponent],
   imports: [
+    NotificationChannelsBannerComponent,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

@@ -6,6 +6,7 @@ export interface Record {
   id?: string;
   daysOfScheduleId: string;
   services: subGroup[];
+  durationOverrideMinutes?: number;
   comment?: string;
   start: string;
   clientId?: string;
@@ -19,6 +20,17 @@ export interface Record {
    */
   useWelcomeCoupon?: boolean;
   expectedCouponDiscount?: number | null;
+  /** Занять место акции мастера. Место, право и сумму проверяет сервер. */
+  usePromoSeat?: boolean;
+  promoCampaignCode?: string;
+  expectedPromoDiscount?: number | null;
+  /** Запись на назначенный приз. Сервер проверяет право, фронт сумму не считает. */
+  prizeAwardId?: string | null;
+  expectedPrizeVersion?: number | null;
+  expectedPrizeQuoteVersion?: string | null;
+  expectedPayableAmount?: number | null;
+  reviewRewardCouponIds?: string[];
+  reviewRewardQuoteVersion?: string;
   /**
    * Локация брони (backend 2026-07-19, `Location`). Для выездной услуги — адрес клиента;
    * для «на месте»/«онлайн» шлём `null` (бэк заполняет сам).

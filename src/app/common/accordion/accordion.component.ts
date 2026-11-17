@@ -1,4 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, PLATFORM_ID, SimpleChanges, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { PromoSeatsService } from '../../../services/promo-seats.service';
+import { PromoSeatState } from '../../DTO/views/promo/promo-seats';
+import { servicePromotion } from '../../profile-ba/helpers/service-promotion';
 import { ToastService } from 'src/services/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GroupService } from '../../../services/groupservice';
@@ -22,7 +26,7 @@ import { getHours, getMinutes } from "../../../helpers/common/timeHelpers";
 import { ConfirmWithoutTimeComponent } from "./modals/confirm-without-time/confirm-without-time.component";
 import { IPrice } from 'src/app/DTO/views/services/IPrice';
 import { BehaviorSubject, catchError, finalize, forkJoin, map, Observable, of, shareReplay, startWith, Subject, Subscription, switchMap, take, tap, timeout } from 'rxjs';
-import { serviceWorkLocationType } from 'src/helpers/common/address';
+import { serviceFixedPointIds, serviceOfferedAtPoint, serviceWorkLocationType } from 'src/helpers/common/address';
 import { resetHourly } from 'src/helpers/common/hourly';
 import { normalizeImageMedia, toMediaCard } from '../../../helpers/common/media.helpers';
 import { displayPriceUnit, formatPriceAmount, isPriceBoundSet } from '../../../helpers/common/price.helpers';
@@ -38,6 +42,25 @@ import { VideoPlaybackCoordinatorService } from '../video-player/video-playback-
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
+  private promotionRequest?: Subscription;
+  private promoState: PromoSeatState | null = null;
+
+  promotionFor(service: subGroup) {
+    if (this.isUpdate) return null;
+    const slug = this._activateRoute.snapshot.paramMap.get('id');
+    return servicePromotion(service, slug, this.promoState);
+  }
+
+  private loadPromotions(): void {
+    this.promotionRequest?.unsubscribe();
+    this.promoState = null;
+    if (!this.profileId || this.isUpdate || !isPlatformBrowser(this.platform)) return;
+    const masterId = this.profileId;
+    this.promotionRequest = this.promos.getState(masterId).pipe(take(1)).subscribe(state => {
+      this.promoState = state;
+      this.cdr.markForCheck();
+    });
+  }
 
   /** Один контейнер на все подписки компонента. */
   private readonly subscriptions = new Subscription();
@@ -90,11 +113,24 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
 
   trackById = (_: number, s: Service | subGroup) => s.id;
 
+  private hiddenVideoUrls = new Set<string>();
+
   imagesOf(svc: Service | subGroup): IViewImage[] {
     return ((svc as Service).images ?? []).filter(img => {
       const media = normalizeImageMedia(img);
+      if (media.isVideo && media.mediaUrl && this.hiddenVideoUrls.has(media.mediaUrl)) {
+        return false;
+      }
       return media.isVideo ? !!media.mediaUrl : !!media.previewUrl;
     });
+  }
+
+  onVideoUnavailable(url: string | null): void {
+    if (!url || this.hiddenVideoUrls.has(url)) {
+      return;
+    }
+    this.hiddenVideoUrls.add(url);
+    this.cdr.markForCheck();
   }
 
   previewOf(img: IViewImage): string | null {
@@ -157,7 +193,8 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
     const modalRef = this.modalService.open(CardDetailModalComponent, {
       centered: true,
       size: 'xl',
-      windowClass: 'card-detail-modal'
+      windowClass: card.isVideo ? 'card-detail-modal card-detail-modal--video' : 'card-detail-modal',
+      ariaLabelledBy: card.isVideo ? 'cdm-viewer-title' : undefined
     });
     modalRef.componentInstance.card = card;
     modalRef.componentInstance.profileId = this.profileId ?? '';
@@ -183,7 +220,13 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   formatPriceUnit(svc: Service | subGroup): string {
-    return displayPriceUnit(svc?.price, svc?.paymentForType);
+    const unit = displayPriceUnit(svc?.price, svc?.paymentForType);
+    return !this.isUpdate && svc?.paymentForType === PaymentForType.ForService && unit === 'шт'
+      ? 'за услугу' : unit;
+  }
+
+  offersPoint(svc: Service | subGroup): boolean {
+    return serviceOfferedAtPoint(svc, this.pointId);
   }
 
   workLocationLabel(svc: Service | subGroup): string | null {
@@ -201,6 +244,35 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.canSetService) return;
     svc.isChecked = !svc.isChecked;
     this.setService(svc);
+  }
+
+  /** Почасовая сначала требует длительность, безлимитная сразу ведёт к оформлению. */
+  bookService(svc: Service | subGroup, event?: Event): void {
+    event?.stopPropagation();
+    if (!this.canBook || this.isUpdate || !svc.id) {
+      return;
+    }
+    const slug = this.profileSlug();
+    if (!slug) {
+      return;
+    }
+    const step = svc.isTimeUnlimited ? 'confirm-record'
+      : svc.paymentForType === PaymentForType.ForHour ? 'choose-service' : 'choose-date';
+    this._route.navigate(['/', slug, step], {
+      queryParams: { serviceId: svc.id },
+    });
+  }
+
+  private profileSlug(): string | null {
+    let route: ActivatedRoute | null = this._activateRoute;
+    while (route) {
+      const id = route.snapshot.paramMap.get('id');
+      if (id) {
+        return id;
+      }
+      route = route.parent;
+    }
+    return null;
   }
 
   getPrice(price: IPrice): string | number {
@@ -224,6 +296,8 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
   groups: GroupWithDate[] | Group[] = [];
   group: Group[] = [];
   @Input() canSetService: boolean = true;
+  /** Прямая запись из раскрытой карточки. В кабинете и в журнале записей выключено. */
+  @Input() canBook = false;
   @Input() viewCreate: boolean = false;
   //companyId = '{2b48605e-cbf2-4505-bbed-4bea2bbf5d0a}';
   // @Input() reload убран: родитель обновляет список прямым вызовом update()
@@ -236,6 +310,8 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
   groupShow: GroupShowWithDate[] = [];
   @Input() isUpdate = false;
   @Input() profileId: string | null = null;
+  /** Если задана, в прайсе остаются услуги «на месте» этой точки. */
+  @Input() pointId: string | null = null;
   @Input() chooseServices: subGroup[] = [];
   @Output() setServices = new EventEmitter<subGroup[]>();
   private reload$ = new BehaviorSubject<string|null>(null);
@@ -250,7 +326,9 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
     private sanitizer: DomSanitizer,
     private cdr: ChangeDetectorRef,
     private dataService: DataService,
-    private videoCoordinator: VideoPlaybackCoordinatorService) { }
+    private videoCoordinator: VideoPlaybackCoordinatorService,
+    private promos: PromoSeatsService,
+    @Inject(PLATFORM_ID) private platform: object) { }
 
   showCreateAlbumBlock: boolean = false;
 
@@ -344,17 +422,19 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
       this.servicesPending = { groups: true, without: true };
       let idsChoose = this.chooseServices.map(_ => _.id);
     
-      this.serviceWithout$ = this._groupService.getServiceWithout(this.profileId, force)
+      this.serviceWithout$ = this._groupService.getServiceWithout(this.profileId, force, this.isUpdate)
         .pipe(map((items: Service[]) => {
           if (items.length > 0)
               this.ifExist = true;
             items = items.map(_ => {
               const service = new Service(_.id, _.name, _.gender, _.profileUserId, _.price,
-              _.paymentForType, _.groupServiceId, _.about, _.duration, _.isTimeUnlimited, undefined, !!this.serviceId && this.serviceId === _.id);
+              _.paymentForType, _.groupServiceId, _.about, _.duration, _.isTimeUnlimited, _.categoryId, !!this.serviceId && this.serviceId === _.id);
               // Конструктор Service не копирует характер услуги — переносим вручную
               // (устойчиво к регистру ключа: workLocationType / WorkLocationType).
               service.workLocationType = serviceWorkLocationType(_);
+              service.fixedPointIds = serviceFixedPointIds(_);
               service.images = _.images;
+              service.serviceStatus = _.serviceStatus;
               return service;
             });
             return items;
@@ -393,7 +473,7 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
             this.ifExist = true;
           // Используем forkJoin, чтобы выполнить второй запрос для каждого элемента массива
           const userDetailRequests = users.map(item =>
-                this._groupService.getService(item.id!, force).pipe(
+                this._groupService.getService(item.id!, force, this.isUpdate).pipe(
                   map(details => ({
                     isOpen: true,
                     group: item,
@@ -401,6 +481,7 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
                       ...x,                                      // распаковываем сервис
                       isChecked: !!this.serviceId && this.serviceId === x.id,
                       workLocationType: serviceWorkLocationType(x),
+                      fixedPointIds: serviceFixedPointIds(x),
                       images: x.images,
                     })),
                   })),
@@ -577,6 +658,7 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['profileId'] || changes['isUpdate']) this.loadPromotions();
     if (!this.profileId) {
       // Профиль пропал (родитель ещё не получил его или сбросил) — грузить нечего,
       // но и оставлять плашку «Ищем услуги» от прошлого профиля нельзя.
@@ -590,11 +672,13 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
     // `reload` из списка убран: после мутаций родитель зовёт update() напрямую.
     const reloadInputs = ['profileId', 'serviceId', 'isUpdate'];
     if (!changes || reloadInputs.some(key => changes[key])) {
-      this.update();
+      // Owner views must re-read after a visit to another editor section, too.
+      this.update(this.isUpdate);
     }
   }
 
   ngOnDestroy(): void {
+    this.promotionRequest?.unsubscribe();
     this.subscriptions.unsubscribe();
   }
 
@@ -686,6 +770,14 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
     );
   }
 
+  archiveService(svc: subGroup): void {
+    if (!this.isUpdate || !svc.id) return;
+    this._groupService.archiveService(svc.id, svc.serviceStatus !== 2).pipe(take(1)).subscribe({
+      next: result => { if (result.code !== 200) { this.showErrorDelService(result.message); return; } this.update(true); },
+      error: () => this.showErrorDelService('Не удалось изменить архив услуги')
+    });
+  }
+
   deleteService(subGroup: subGroup) {
     if (!subGroup.id) return;
     this._groupService.deleteService(subGroup.id).subscribe({
@@ -735,7 +827,7 @@ export class AccordionComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
   isWriteTime(subGroup: Service) {
-    return subGroup.paymentForType !== PaymentForType.ForHour && !subGroup.isTimeUnlimited;
+    return subGroup.paymentForType !== PaymentForType.ForHour && !subGroup.isTimeUnlimited && (subGroup.duration ?? 0) > 0;
   }
 
   private clearAllServices(ids: string[]) {

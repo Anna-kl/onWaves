@@ -1,0 +1,31 @@
+<section class="wallet" aria-labelledby="review-coupons-title" *ngIf="loading || failed || wallet?.items?.length || wallet?.terms">
+  <h2 id="review-coupons-title">Мои купоны</h2>
+  <p *ngIf="loading" role="status">Загружаем купоны за отзывы…</p>
+  <div *ngIf="failed" role="status">
+    <p>Не удалось загрузить купоны за отзывы.</p>
+    <button class="btn-transparent" type="button" (click)="reload()">Повторить</button>
+  </div>
+  <ng-container *ngIf="wallet as data">
+    <p *ngIf="data.items.length; else emptyWallet">Доступно за отзывы <strong>{{ money(data.availableKopecks / 100) }}</strong></p>
+    <ng-template #emptyWallet><p>Здесь появятся купоны за отзывы о подтверждённых визитах.</p></ng-template>
+    <ul *ngIf="data.items.length" class="wallet-items">
+      <li *ngFor="let coupon of data.items" class="wallet-item">
+        <div>
+          <strong>Купон за отзыв · {{ money(coupon.issuedKopecks / 100) }}</strong>
+          <p>Начислен {{ coupon.issuedAt | date:'d MMMM yyyy':'+0300' }} · до {{ coupon.expiresAt | date:'d MMMM yyyy, HH:mm':'+0300' }} МСК</p>
+        </div>
+        <dl>
+          <div><dt>Доступно</dt><dd>{{ money(coupon.availableKopecks / 100) }}</dd></div>
+          <div><dt>Зарезервировано</dt><dd>{{ money(coupon.reservedKopecks / 100) }}</dd></div>
+          <div><dt>Использовано</dt><dd>{{ money(coupon.usedKopecks / 100) }}</dd></div>
+          <div *ngIf="coupon.expiredKopecks"><dt>Истекло</dt><dd>{{ money(coupon.expiredKopecks / 100) }}</dd></div>
+        </dl>
+      </li>
+    </ul>
+    <details *ngIf="data.terms as terms">
+      <summary>Условия купонов за отзывы</summary>
+      <p>Купон {{ money(terms.amountKopecks / 100) }} начисляется за любую оценку после подтверждённого визита. Купон действует {{ terms.lifetimeDays }} дней у любого мастера OnWaves. Купоны складываются между собой и с другими скидками до полной оплаты записи.</p>
+      <p>Остаток сохраняется до исходной даты окончания. Запись, сделанная до истечения срока, сохраняет закреплённую скидку. При отмене после истечения срока сумма станет недоступна.</p>
+    </details>
+  </ng-container>
+</section>

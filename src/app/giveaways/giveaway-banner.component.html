@@ -1,0 +1,57 @@
+<section class="gw-banner" *ngIf="shown" [attr.data-giveaway-phase]="campaign?.phase" [class.gw-banner--master]="variant === 'master'" [class.gw-banner--failed]="load?.kind === 'failed'" [class.gw-banner--with-rules]="rulesParagraphs.length > 0" [class.gw-banner--with-media]="hasWorkPhotos || campaign?.banner?.imageUrl" aria-labelledby="gw-banner-title">
+  <div class="gw-banner__copy" *ngIf="load?.kind === 'failed'">
+    <h2 id="gw-banner-title">Информация о розыгрыше временно недоступна</h2>
+    <p>Обновите страницу чуть позже. Это не значит, что розыгрыш закончился.</p>
+  </div>
+
+  <ng-container *ngIf="campaign as item">
+    <div class="gw-banner__copy">
+      <div class="gw-banner__eyebrow">
+        <span class="gw-banner__label">Розыгрыш OnWaves</span>
+        <span class="gw-banner__city" *ngIf="item.city">{{ item.city }}</span>
+      </div>
+      <h2 id="gw-banner-title">{{ title }}</h2>
+      <p class="gw-banner__intro" *ngIf="showPrizes">
+        {{ isSvetlana ? 'Выбирайте услуги Светланы Бирюковой. OnWaves оплатит их в пределах приза.' : item.summary }}
+      </p>
+      <div class="gw-banner__prizes" *ngIf="showPrizes">
+        <div class="gw-banner__prize" *ngFor="let prize of item.prizes">
+          <span class="gw-banner__prize-label">{{ item.configured ? 'Приз №' + prize.position : prize.position === 1 ? 'Первый приз' : 'Второй приз' }}</span>
+          <p class="gw-banner__amount"><span *ngIf="prize.rewardType === 'amount_coupon' || (!item.configured && !websiteEntry && prize.policy?.anyMasterService !== false)">до</span> {{ prize.maxAmountRub | number:'1.0-2' }}&nbsp;₽</p>
+          <span class="gw-banner__prize-caption">{{ prizeCaption(prize) }}</span>
+        </div>
+      </div>
+      <p class="gw-banner__intro" *ngIf="item.phase === 'awaiting_results'">
+        {{ !isSvetlana && resultsDate ? 'Итоги — ' + resultsDate + '.' : 'Спасибо за участие! Готовим итоги и запись выбора победительниц.' }}
+      </p>
+      <p class="gw-banner__intro" *ngIf="item.phase === 'results_published'">Победительницы выбраны. Посмотрите итоги розыгрыша.</p>
+      <div class="gw-banner__actions">
+        <a class="gw-banner__cta" *ngIf="linkToMaster" [attr.href]="'/' + item.master.slug + '#giveaway'" (click)="openDetails()">{{ item.phase === 'active' ? 'Участвовать' : 'Условия розыгрыша' }}</a>
+        <a class="gw-banner__cta" *ngIf="canJoinVk" [href]="item.vkPostUrl" target="_blank" rel="noopener noreferrer" (click)="openVk()">Участвовать во VK</a>
+        <ng-container *ngIf="!linkToMaster && (websiteEntry || !canJoinVk)" [ngTemplateOutlet]="detailsCta"></ng-container>
+        <ng-template #detailsCta>
+          <a class="gw-banner__cta" [routerLink]="detailsLink" [queryParams]="entryParams" (click)="openDetails()">{{ cta }}</a>
+        </ng-template>
+        <p class="gw-banner__deadline" *ngIf="item.phase === 'active' && deadline">{{ isSvetlana || item.configured ? 'Заявки до ' + deadline : 'Заявки по ' + deadline + ' включительно' }}</p>
+        <p class="gw-banner__deadline" *ngIf="item.phase === 'scheduled' && deadline">Старт {{ deadline }}</p>
+      </div>
+      <p class="gw-banner__note" *ngIf="showPrizes && !websiteEntry && !item.configured">{{ canJoinVk ? 'Для участия — подписка на OnWaves и комментарий под постом.' : 'Условия уже можно прочитать.' }}</p>
+    </div>
+    <figure class="gw-banner__visual" *ngIf="hasWorkPhotos || item.banner?.imageUrl">
+      <ng-container *ngIf="hasWorkPhotos">
+        <img class="gw-banner__work gw-banner__work--brows" src="/assets/img/giveaways/svetlana-brows.webp" alt="Перманент бровей — работа Светланы Бирюковой" width="529" height="600" loading="lazy" decoding="async" />
+        <img class="gw-banner__work gw-banner__work--lips" src="/assets/img/giveaways/svetlana-lips.webp" alt="Перманент губ — работа Светланы Бирюковой" width="450" height="600" loading="lazy" decoding="async" />
+        <figcaption class="gw-banner__photo-caption">Работы Светланы Бирюковой</figcaption>
+      </ng-container>
+      <img class="gw-banner__custom-photo" *ngIf="item.banner?.imageUrl" [src]="item.banner?.imageUrl" [alt]="item.banner?.alt || ''" width="640" height="420" loading="lazy" decoding="async" />
+    </figure>
+  </ng-container>
+</section>
+
+<details class="gw-banner-rules" *ngIf="shown && rulesParagraphs.length">
+  <summary>Полные условия розыгрыша</summary>
+  <div class="gw-banner-rules__body">
+    <p *ngFor="let paragraph of rulesParagraphs">{{ paragraph }}</p>
+    <a *ngIf="vkEntry && campaign?.vkPostUrl && campaign?.phase !== 'scheduled'" [href]="campaign?.vkPostUrl" target="_blank" rel="noopener noreferrer">Исходный конкурсный пост во VK</a>
+  </div>
+</details>

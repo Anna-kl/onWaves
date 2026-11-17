@@ -1,0 +1,96 @@
+<app-grafik-point-switch [profileId]="profileId" [disabled]="saving"></app-grafik-point-switch>
+<section class="week-screen" *ngIf="template; else state">
+  <button type="button" class="week-screen__link back-link" (click)="back()">‹ Неделя</button>
+  <h2 class="screen-title">Постоянный график</h2>
+  <p class="screen-lead">Выберите рабочие дни, часы и перерыв для выбранной точки. После сохранения даты добавятся на 8 недель вперёд и будут продлеваться автоматически. Разовые изменения дат сохранятся.</p>
+  <p class="week-screen__status" *ngIf="template.lastWorkingDate">Рабочие дни добавлены до {{ formatScheduleDate(template.lastWorkingDate) }}.</p>
+  <p class="week-screen__status" *ngIf="template.lastWorkingDate === null">Будущих рабочих дат пока нет.</p>
+
+  <fieldset class="schedule-fields" [disabled]="saving">
+
+    <div class="quick">
+      <span class="quick__label">Заполнить быстро</span>
+      <button type="button" class="week-btn week-btn--ghost" (click)="fillWeekdays()">Пн–Пт 10:00–19:00</button>
+      <button type="button" class="week-btn week-btn--ghost" (click)="copyMonday()">Все дни как понедельник</button>
+    </div>
+
+    <article *ngFor="let day of template.weekdays">
+      <div class="tpl-row">
+        <button type="button" class="tpl-row__main" (click)="toggleOpen(day.dayOfWeek)" [attr.aria-expanded]="opened === day.dayOfWeek">
+          <span class="tpl-row__name">{{ weekdayName(day.dayOfWeek) }}</span>
+          <span class="tpl-row__off" *ngIf="day.isDayOff">Выходной</span>
+          <ng-container *ngIf="!day.isDayOff && day.work">
+            <span class="tpl-row__hours">{{ clock(day.work.start) }}–{{ clock(day.work.end) }}</span>
+            <span class="tpl-row__break" *ngIf="day.break">перерыв {{ clock(day.break.start) }}–{{ clock(day.break.end) }}</span>
+          </ng-container>
+        </button>
+        <label class="ow-switch" [class.ow-switch--on]="!day.isDayOff">
+          <input type="checkbox" [ngModel]="!day.isDayOff" (ngModelChange)="setWorking(day, $event)" [attr.aria-label]="weekdayName(day.dayOfWeek) + ': рабочий день'">
+          <span class="ow-switch__ui" aria-hidden="true"></span>
+        </label>
+      </div>
+      <div class="tpl-edit" *ngIf="opened === day.dayOfWeek && !day.isDayOff && day.work">
+        <div class="break-form">
+          <div class="break-form__head">
+            <strong>Часы приёма</strong>
+          </div>
+          <div class="break-form__times">
+            <label class="time-field">
+              <span>С</span>
+              <input type="time" required [ngModel]="workTimes[day.dayOfWeek].start" (ngModelChange)="setWorkTime(day, 'start', $event)" [name]="'start' + day.dayOfWeek" [attr.aria-label]="weekdayName(day.dayOfWeek) + ': начало приёма'">
+            </label>
+            <label class="time-field">
+              <span>До</span>
+              <input type="time" required [ngModel]="workTimes[day.dayOfWeek].end" (ngModelChange)="setWorkTime(day, 'end', $event)" [name]="'end' + day.dayOfWeek" [attr.aria-label]="weekdayName(day.dayOfWeek) + ': конец приёма'">
+            </label>
+          </div>
+        </div>
+
+        <button type="button" class="week-btn week-btn--ghost break-add" *ngIf="!hasBreak(day)" (click)="addBreak(day)">Добавить перерыв</button>
+
+        <div class="break-form" *ngIf="hasBreak(day)">
+          <div class="break-form__head">
+            <strong>Перерыв</strong>
+            <button type="button" class="closure__remove" (click)="removeBreak(day)">Убрать</button>
+          </div>
+          <p class="break-form__note">Повторяется каждую неделю в этот день.</p>
+          <div class="break-form__times">
+            <label class="time-field">
+              <span>С</span>
+              <input type="time" required [ngModel]="breakTimes[day.dayOfWeek].start" (ngModelChange)="setBreakTime(day, 'start', $event)" [name]="'breakStart' + day.dayOfWeek" [attr.aria-invalid]="timeError.includes('перерыв') ? true : null" [attr.aria-label]="weekdayName(day.dayOfWeek) + ': начало перерыва'">
+            </label>
+            <label class="time-field">
+              <span>До</span>
+              <input type="time" required [ngModel]="breakTimes[day.dayOfWeek].end" (ngModelChange)="setBreakTime(day, 'end', $event)" [name]="'breakEnd' + day.dayOfWeek" [attr.aria-invalid]="timeError.includes('перерыв') ? true : null" [attr.aria-label]="weekdayName(day.dayOfWeek) + ': конец перерыва'">
+            </label>
+          </div>
+        </div>
+        <p class="form-error" role="alert" *ngIf="timeError.startsWith(weekdayName(day.dayOfWeek))">{{ timeError }}</p>
+      </div>
+    </article>
+
+  </fieldset>
+
+  <div class="day-actions">
+    <button type="button" class="day-btn day-btn--primary" (click)="save()" [disabled]="saving">{{ saving ? 'Применяю…' : 'Сохранить и применить к датам' }}</button>
+    <p class="form-error" role="alert" *ngIf="saveError">{{ saveError }}</p>
+    <p class="week-screen__status" role="status" *ngIf="saved">Даты обновлены. Разовые изменения оставлены как есть.</p>
+  </div>
+
+  <article class="skipped" *ngIf="template.skipped.length">
+    <h3>Разовые изменения · {{ template.skipped.length }}</h3>
+    <p class="screen-lead">Эти даты не меняются вместе с постоянным графиком. «Вернуть» восстановит сохранённые обычные часы и снимет разовые закрытия даты.</p>
+    <div class="tpl-row" *ngFor="let date of template.skipped">
+      <span class="tpl-row__hours">{{ formatScheduleDate(date) }}</span>
+      <button type="button" class="week-btn week-btn--ghost" (click)="reset(date)">Вернуть</button>
+    </div>
+  </article>
+</section>
+
+<ng-template #state>
+  <section class="week-screen">
+    <button type="button" class="week-screen__link back-link" (click)="back()">‹ Неделя</button>
+    <p class="week-screen__status" *ngIf="loading">Загружаю постоянный график…</p>
+    <p class="week-screen__status" *ngIf="error">{{ error }}</p>
+  </section>
+</ng-template>

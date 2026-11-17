@@ -19,6 +19,7 @@ import {PaymentForType} from "../../../DTO/enums/paymentForType";
 import {subGroup} from "../../../DTO/views/services/IViewSubGroups";
 import {ActivatedRoute, Router, Routes} from "@angular/router";
 import {ProfileDataService} from "../../services/profile-data.service";
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {BehaviorSubject, catchError, forkJoin, of, switchMap, take} from "rxjs";
 import {ChooseTimeModalComponent} from "../choose-time-modal/choose-time-modal.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
@@ -26,7 +27,12 @@ import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessPr
 import { getPrice, getPriceString } from 'src/helpers/common/price.helpers';
 import { applyHourlyDuration } from 'src/helpers/common/hourly';
 import { ProfileService } from 'src/services/profile.service';
+import { resolveAvatarUrl } from 'src/helpers/common/avatar1';
 import { IWorkLocation } from 'src/app/DTO/views/IWorkLocation';
+import { WorkLocationType } from 'src/app/DTO/enums/workLocationType';
+import { fixedPointLine, fixedPointsOf, serviceOfferedAtPoint, serviceWorkLocationType } from 'src/helpers/common/address';
+import { BookingPrice } from '../../helpers/booking-price';
+import { formatAmount } from '../../../../helpers/common/welcome-coupon';
 
 @Component({
   selector: 'app-group-service',
@@ -50,9 +56,19 @@ export class GroupServiceComponent implements OnInit, AfterViewInit {
   services: subGroup[] = [];
   @Output() onChecked = new EventEmitter();
   businessProfile: IViewBusinessProfile | null = null;
+  fixedPoints: IWorkLocation[] = [];
+  selectedPointId: string | null = null;
+  readonly pointLine = fixedPointLine;
   preSelectedServiceId: string | null = null;
   /** Не перескакивать автоматически на выбор даты (возврат с выбора дня по «Назад»). */
   suppressAutoDate = false;
+  selectionQuote: BookingPrice | null = null;
+  private quotedSelection = '';
+
+  onSelectionPrice(price: BookingPrice | null): void {
+    this.selectionQuote = price;
+    this.quotedSelection = this.chooseServices.map(s => s.id).join(',');
+  }
 
   constructor(private _profileData: ProfileDataService,
               private _route: Router,
@@ -67,10 +83,48 @@ export class GroupServiceComponent implements OnInit, AfterViewInit {
       .subscribe(result => this.groupShow = result);
   }
 
+  /** Ссылка на карточку мастера. Параметр маршрута — это slug, не GUID. */
+  get masterPath(): string[] | null {
+    const link = (this.businessProfile?.link || this._activateRoute.snapshot.paramMap.get('id') || '').trim();
+    return link ? ['/', link] : null;
+  }
+
+  get masterAvatar(): string {
+    return resolveAvatarUrl(this.businessProfile?.avatarUrl);
+  }
+
   showError() {
     this.messageService.add({severity:'error', summary: 'Ошибка',
       detail: 'Услуги не выбраны', life:5000});
   }
+  selectPoint(pointId: string | null | undefined): void {
+    this.selectedPointId = pointId ?? null;
+    this.chooseServices = this.chooseServices.filter(service => {
+      const keep = serviceOfferedAtPoint(service, pointId);
+      if (!keep) service.isChecked = false;
+      return keep;
+    });
+    [this.priceServices, this.countService, this.duration] = getPrice(this.chooseServices);
+  }
+
+  private applyPoints(workLocations: IWorkLocation[]): void {
+    this.fixedPoints = fixedPointsOf(workLocations).filter(point => !!point.id);
+    if (this.selectedPointId && this.fixedPoints.some(point => point.id === this.selectedPointId)) {
+      return;
+    }
+    const query = this._activateRoute.snapshot.queryParamMap.get('point');
+    if (query && this.fixedPoints.some(point => point.id === query)) {
+      this.selectedPointId = query;
+      return;
+    }
+    this.selectedPointId = this.fixedPoints[0]?.id ?? null;
+  }
+
+  private bookingPointId(): string | null {
+    const fixed = this.chooseServices.some(service => serviceWorkLocationType(service) === WorkLocationType.Fixed);
+    return fixed ? this.selectedPointId : null;
+  }
+
   chooseDate(carryServiceId = false){
     if (this.businessProfile?.isPromo) {
       return;
@@ -81,7 +135,7 @@ export class GroupServiceComponent implements OnInit, AfterViewInit {
         const serviceId = this.chooseServices[0]?.id ?? this.preSelectedServiceId;
         this._route.navigate(['../confirm-record'], {
           relativeTo: this._activateRoute,
-          queryParams: serviceId ? { serviceId } : undefined
+          queryParams: this.bookingQuery(serviceId)
         });
       } else {
         // serviceId обязателен на экране выбора даты: без него он сразу редиректит
@@ -90,11 +144,10 @@ export class GroupServiceComponent implements OnInit, AfterViewInit {
         const serviceId = (carryServiceId ? this.preSelectedServiceId : null)
           ?? this.chooseServices[0]?.id
           ?? this.preSelectedServiceId;
-        const extras: any = { relativeTo: this._activateRoute };
-        if (serviceId) {
-          extras.queryParams = { serviceId };
-        }
-        this._route.navigate(['../choose-date'], extras);
+        this._route.navigate(['../choose-date'], {
+          relativeTo: this._activateRoute,
+          queryParams: this.bookingQuery(serviceId),
+        });
       }
     } else {
       this.showError();
@@ -135,6 +188,9 @@ export class GroupServiceComponent implements OnInit, AfterViewInit {
       if (!result) {
         this.loadProfileForDirectOpen();
       }
+    });
+    this._profileData.sendWorkLocation.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(locations => {
+      this.applyPoints(locations ?? []);
     });
     // this._profileData.sendChooseServices.subscribe(
     //     result => this.chooseServices = result
@@ -217,6 +273,7 @@ export class GroupServiceComponent implements OnInit, AfterViewInit {
         const workLocations = Array.isArray(locationData)
           ? locationData as IWorkLocation[]
           : (locationData ? [locationData as IWorkLocation] : []);
+        this.applyPoints(workLocations);
         this._profileData.transferWorkLocation(workLocations);
       },
       error: () => {
@@ -238,8 +295,11 @@ export class GroupServiceComponent implements OnInit, AfterViewInit {
             this.services$.next(null);
             return;
           }
-          this.chooseServices.push(subGroup);
+          this.chooseServices = [...this.chooseServices, subGroup];
           this.services$.next(subGroup);
+          if (subGroup.id === this.preSelectedServiceId && !this.suppressAutoDate) {
+            this.chooseDate(true);
+          }
         }).catch(() => {
           // Закрытие по Esc/клику вне окна — тоже отмена выбора.
           subGroup.isChecked = false;
@@ -247,7 +307,7 @@ export class GroupServiceComponent implements OnInit, AfterViewInit {
           this.services$.next(null);
         });
       }else {
-        this.chooseServices.push(subGroup);
+        this.chooseServices = [...this.chooseServices, subGroup];
         this.services$.next(subGroup);
         // this.getPrice();
       }
@@ -278,8 +338,19 @@ export class GroupServiceComponent implements OnInit, AfterViewInit {
   }
 
   get selectionPrice(): string {
+    if (this.selectionQuote && this.quotedSelection === this.chooseServices.map(s => s.id).join(',')) {
+      return formatAmount(this.selectionQuote.payable, this.selectionQuote.isFrom);
+    }
     const raw = (getPriceString(this.chooseServices) || '').trim();
     return raw ? `${raw} ₽` : '';
+  }
+
+  /** Иначе на плашке остаётся только сумма, и неясно, за какую услугу она. */
+  get selectionNames(): string {
+    return this.chooseServices
+      .map(item => (item.name || '').trim())
+      .filter(Boolean)
+      .join(' · ');
   }
 
   get durationLabel(): string {
@@ -313,6 +384,14 @@ export class GroupServiceComponent implements OnInit, AfterViewInit {
     } else {
       return 'Выбрать дату';
     }
+  }
+
+  private bookingQuery(serviceId: string | null | undefined): Record<string, string> {
+    const query: Record<string, string> = {};
+    if (serviceId) query['serviceId'] = serviceId;
+    const point = this.bookingPointId();
+    if (point) query['point'] = point;
+    return query;
   }
 
   setService($event: subGroup[]) {

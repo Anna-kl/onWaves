@@ -24,6 +24,7 @@ import {Group} from "../../../DTO/views/services/IViewGroups";
 import {ProfileDataEditService} from "../../../baedit/services/ba-edit-service";
 import {Arenda2Component} from "../../../baedit/components/uslugi/arenda2/arenda2.component";
 import {PaymentForType} from "../../../DTO/enums/paymentForType";
+import { LoginService } from '../../../auth/login.service';
 
 @Component({
   selector: 'app-formatuslugi',
@@ -51,7 +52,8 @@ export class FormatuslugiComponent implements OnInit {
               private renderer: Renderer2,
               private _cookie: CookieService,
               private _editEvent: ProfileDataEditService,
-              private activeModal: NgbActiveModal) {
+              private activeModal: NgbActiveModal,
+              private readonly login: LoginService) {
     this.renderer.listen('window', 'click',(e:Event)=>{
       /**
        * Only run when toggleButton is not clicked
@@ -120,9 +122,9 @@ export class FormatuslugiComponent implements OnInit {
     return this.mainProfile?.userType === UserType.Business;
   }
 
-  exit() {
+  async exit() {
     this.mainProfile = undefined;
-    this._cookie.delete('auth-token-ocpio');
+    await this.login.logoutAndClearCaches();
     this._events.transferToken(null);
     this._router.navigate(['/']);
   }

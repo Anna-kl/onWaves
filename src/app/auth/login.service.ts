@@ -1,7 +1,10 @@
-import {Injectable} from "@angular/core";
+import {DestroyRef, Inject, Injectable, PLATFORM_ID} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RememberedSessionService } from './remembered-session.service';
 import {environment} from "../../enviroments/environment";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {BehaviorSubject, catchError, EMPTY, filter, map, take, takeUntil, takeWhile, tap} from "rxjs";
+import {BehaviorSubject, catchError, EMPTY, filter, finalize, map, of, switchMap, take, tap, timeout, withLatestFrom} from 'rxjs';
 import {CookieService} from "ngx-cookie-service";
 import {Md5} from "ts-md5";
 import {IResponse} from "../DTO/classes/IResponse";
@@ -14,6 +17,7 @@ import { clearActiveProfileAction, getActionStateMainProfileClient, logoutAction
 import { UserType } from "../DTO/classes/profiles/profile-user.model";
 import { selectLink } from "../ngrx-store/links/link.selector";
 import { clearLinkAction } from "../ngrx-store/links/link.action";
+import { takePrizeCabinetReturn } from "../../helpers/giveaway";
 import { Router } from "@angular/router";
 import { requestAction } from "../ngrx-store/notification/notification.action";
 import { PushDebugService } from "src/services/push-notification.service";
@@ -25,8 +29,27 @@ export class LoginService {
                 private cookieService: CookieService,
                 private _apiProfie: ProfileService,
                 private _push: PushDebugService,
-                private _router: Router) {
-
+                private _router: Router,
+                public readonly session: RememberedSessionService,
+                @Inject(PLATFORM_ID) private readonly platformId: string,
+                destroyRef: DestroyRef) {
+        this.session.ended$.pipe(takeUntilDestroyed(destroyRef)).subscribe(() => {
+            this.mainCategoriesProfile$.next(null);
+            this.allProfiles$.next([]);
+            this.isAutentificate$.next(false);
+        });
+        // Инициализация могла пройти офлайн. Успешное тихое продление после возврата
+        // сети восстанавливает и профиль, а не только cookie с JWT.
+        this.session.renewed$.pipe(
+            filter(() => this.isLoad$.value && !this.isAutentificate$.value),
+            tap(() => this.isLoad$.next(false)),
+            switchMap(data => this.checkRequestAccount(data).pipe(
+                tap(() => this.isAutentificate$.next(this.isAuthenticated())),
+                catchError(() => EMPTY),
+                finalize(() => this.isLoad$.next(true)),
+            )),
+            takeUntilDestroyed(destroyRef),
+        ).subscribe();
     }
     private url = environment.Uri + 'auths/';
     private urlProfile = environment.Uri + 'profiles/';
@@ -72,45 +95,23 @@ export class LoginService {
       };
       return send;
     }
-    checkCookie(){
-     //   this.getAccount()
-        if (this.isAuthenticated()) {
-            this.isAutentificate$.next(true);
-            let send = this.prepareSend();
-            let headers: HttpHeaders = new HttpHeaders();
-            headers = headers.append('Authorization', 'Bearer ' + send.token);
-            return this.http.post<IResponse>(`${this.url}uuid`, send, {headers}).pipe(
-                tap(data => {
-                    if (data.code === 200) {
-                        this.isLoad$.next(true);
-                        // Только тихая пересинхронизация уже выданной подписки:
-                        // subscribe() запросил бы разрешение вне пользовательского
-                        // жеста — на iOS это молча ничего не даёт, в Chrome дало бы
-                        // системное окно на голой загрузке страницы.
-                        // data.message — sessionId; subscribe/{id} ждёт profileId,
-                        // иначе бэк пишет FK на несуществующий профиль и отвечает 500.
-                        const profileId = data.data?.profile?.id as string | undefined;
-                        if (profileId) {
-                            this._push.syncExistingSubscription(profileId)
-                                .catch(error => console.warn('Push sync failed', error));
-                        }
-                        this.checkRequestAccount(data);
-                    } else {
-                        this.isAutentificate$.next(false);
-                        this.isLoad$.next(true);
-                    }
-                }),
-                catchError(() => {
-                    this.isAutentificate$.next(false);
-                    this.isLoad$.next(true);
-                    return EMPTY;
-                }));
-        }
-        else {
+    checkCookie(keepPage = false){
+        if (!isPlatformBrowser(this.platformId) || !this.isAuthenticated()) {
             this.isAutentificate$.next(false);
             this.isLoad$.next(true);
             return null;
         }
+        if (!keepPage) this.isLoad$.next(false);
+        return this.session.renew().pipe(
+            switchMap(data => this.checkRequestAccount(data, !keepPage)),
+            tap(() => this.isAutentificate$.next(this.isAuthenticated())),
+            // Сетевой сбой не стирает cookie: следующий заход снова восстановит сессию.
+            catchError(() => {
+                if (!this.isAuthenticated()) this.isAutentificate$.next(false);
+                return EMPTY;
+            }),
+            finalize(() => { if (!keepPage) this.isLoad$.next(true); }),
+        );
     }
 
     isProfileId() {
@@ -148,65 +149,54 @@ export class LoginService {
                     
                     this.allProfiles$.next(res);
                   });
-                  this.mainCategoriesProfile$.next({profile: result.data, token: result.message});
+                  this.mainCategoriesProfile$.next({profile: result.data, token: this.cookieService.get('auth-token-ocpio')});
                 }
             }
         );
     }
 
-    checkRequestAccount(data: IResponse){
-      this.isLoad$.next(true);
-      let profile = data.data.profile;
-      let view: IViewBusinessProfile[] = [];
-      if (profile) {
-        view.push(profile);
-      }
-      let profileId = this.isProfileId();
-      this.getAllBusinessProfile(profile?.id!, data.data.token!,
-          profile?.userType!).subscribe(
-          result => {
-
-            if (result.code !== 404 && Array.isArray(result.data)) {
-              view.push(...result.data.filter((_: IViewBusinessProfile) => !!_));
-            }
-
-            if (profileId){
-                this.allProfiles$.next(view);
-                let tempProfile =  view.find((_:IViewBusinessProfile) => _?.id === profileId);
-                if (tempProfile){
-                    this.store$.dispatch(getActionStateMainProfileClient(
-                        { tokenMainClient: data.data.token,
-                                    profileMainClient:  tempProfile} ))
-                    this.store$.dispatch(requestAction({request: tempProfile.id!}));
-                    this.store$.pipe(
-                        select(selectLink),
-                        filter(linkResult => linkResult.isHasLink),
-                        take(1)
-                    ).subscribe(
-                        linkResult => {
-                            this.store$.dispatch(clearLinkAction());
-                            this._router.navigate([linkResult.link]);
-                        }
-                    );
-                } else {
-                    // profileId-ocpio устарел/не найден среди профилей пользователя —
-                    // не сносим JWT-сессию, просто уводим выбрать профиль заново.
-                    this._router.navigate(['/']);
-                }
-            }
-          }
+    checkRequestAccount(data: IResponse, followLink = true){
+      const profile = data.data.profile as IViewBusinessProfile;
+      const token = data.data.token as string;
+      const profileId = this.isProfileId();
+      return this.getAllBusinessProfile(profile.id!, token, profile.userType!).pipe(
+          take(1),
+          timeout(10_000),
+          catchError(() => of({ code: 503, data: [], message: '' } as IResponse)),
+          withLatestFrom(this.store$.pipe(select(selectLink))),
+          tap(([result, link]) => {
+              if (!this.session.sameSession(token, this.cookieService.get('auth-token-ocpio'))) return;
+              const extra = Array.isArray(result.data) ? result.data.filter(Boolean) : [];
+              const view: IViewBusinessProfile[] = [profile, ...extra.filter((item: IViewBusinessProfile) => item.id !== profile.id)];
+              // При временной ошибке списка BA сохраняем уже выбранный профиль из текущей сессии.
+              const previous = this.mainCategoriesProfile$.value?.profile;
+              const selected = view.find(item => item.id === profileId)
+                  ?? (result.code === 503 && previous?.id === profileId ? previous : profile);
+              const currentToken = this.cookieService.get('auth-token-ocpio');
+              this.session.remember(currentToken, result.code === 503 && profileId ? profileId : selected.id);
+              this.allProfiles$.next(view);
+              this.mainCategoriesProfile$.next({ profile: selected, token: currentToken });
+              this.store$.dispatch(getActionStateMainProfileClient({
+                  tokenMainClient: currentToken, profileMainClient: selected,
+              }));
+              this.store$.dispatch(requestAction({request: selected.id!}));
+              const notificationProfile = view.find(item => item.userType === UserType.User) ?? selected;
+              void this._push.syncExistingSubscription(notificationProfile.id!).catch(() => {});
+              if (followLink && link.isHasLink) {
+                  this.store$.dispatch(clearLinkAction());
+                  const ua = view.find(item => item.userType === UserType.User);
+                  if (takePrizeCabinetReturn() && ua?.id) {
+                      void this._router.navigate(['/page-user', ua.id], { fragment: 'prizes' });
+                  } else {
+                      void this._router.navigate([link.link]);
+                  }
+              }
+          }),
       );
     }
 
     updateProfileUA(){
-      let send = this.prepareSend()
-      let headers: HttpHeaders = new HttpHeaders();
-      headers = headers.append('Authorization', 'Bearer ' + send.token);
-      this.http.post<IResponse>(`${this.url}uuid`, send, {headers}).subscribe
-        (data => {
-            if (data.code === 200) {
-              this.checkRequestAccount(data);
-    }});
+      this.checkCookie()?.subscribe();
   }
 
   /**
@@ -288,17 +278,9 @@ export class LoginService {
     }
   }
 
-  private clearAuthCookies(): void {
-      const cookieNames = ['auth-token-ocpio', 'profileId-ocpio', 'uuid-ocpio'];
-      for (const name of cookieNames) {
-          // Try both root-path and default-path variants to avoid stale auth cookies.
-          this.cookieService.delete(name, '/');
-          this.cookieService.delete(name);
-      }
-  }
-
   async logoutAndClearCaches(): Promise<void> {
-      this.clearAuthCookies();
+      if (!isPlatformBrowser(this.platformId)) return;
+      const revoke = this.session.logout();
 
       this.mainCategoriesProfile$.next(null);
       this.allProfiles$.next([]);
@@ -326,6 +308,7 @@ export class LoginService {
       // устройству, а не к сессии: она переживает логаут, а при входе другого
       // профиля upsert по endpoint на бэкенде перепривяжет её к нему.
       // Кеши выше почищены — на push они не влияют.
+      await revoke;
   }
 
 }

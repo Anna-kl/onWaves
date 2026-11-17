@@ -1,129 +1,86 @@
-// import {Component, Input, OnInit} from '@angular/core';
-// import {RatingService} from "../../../services/rating.service";
-// import {IViewReview} from "../../DTO/views/rating/IViewReview";
-// import {DomSanitizer} from "@angular/platform-browser";
-
-// @Component({
-//   selector: 'app-reviews-carusel',
-//   templateUrl: './razrab.component.html',
-//   styleUrls: ['./razrab.component.css'],
-//   providers: [RatingService ]
-// })
-// export class ReviewsCaruselComponent implements OnInit {
-//   reviews: IViewReview[] = [];
-
-//   constructor(private _apiRating: RatingService,
-//               private sanitizer: DomSanitizer) {
-//   }
-//   ngOnInit(): void {
-//     if (this.id) {
-//       this._apiRating.getRatings(this.id!).subscribe(
-//           result => {
-//             this.reviews = result;
-//           }
-//       );
-//     }
-//     if (this.id) {
-//       this._apiRating.getRatings(this.id!).subscribe(
-//           result => {
-//               this.reviews = result.map(review => {
-//                   const nameAuthorObject = JSON.parse(review.nameAuthor.replace(/;/g, ','));
-//                   return {
-//                       ...review,
-//                       name: nameAuthorObject.Name.trim(), // Получаем имя из JSON и убираем лишние пробелы
-//                       author: nameAuthorObject.Family.trim() // Получаем фамилию из JSON и убираем лишние пробелы
-//                   };
-//               });
-//           }
-//       );
-//   }
-//   }
-
-//   products = [1,2,3];
-//   @Input() id: string|null = null;
-//   responsiveOptions = [
-//     {
-//       breakpoint: '1600px',
-//       numVisible: 2,
-//       numScroll: 1
-//     },
-//     {
-//       breakpoint: '2000px',
-//       numVisible: 3,
-//       numScroll: 1
-//     },
-//     {
-//       breakpoint: '1199px',
-//       numVisible: 2,
-//       numScroll: 1
-//     },
-//     {
-//       breakpoint: '768px',
-//       numVisible: 2,
-//       numScroll: 1
-//     },
-//     {
-//       breakpoint: '460px',
-//       numVisible: 1,
-//       numScroll: 1
-//     },
-//     {
-//       breakpoint: '346px',
-//       numVisible: 1,
-//       numScroll: 1
-//     }
-//   ];
-
-//   getAvatar(avatar: string) {
-//     if (avatar) {
-//       return  this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64,
-//        ${avatar}`);
-//     } else {
-//       return  '/assets/img/AvatarBig.png';
-//     }
-//   }
-// }
-
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
-import { RatingService } from "../../../services/rating.service";
-import { IViewReview } from "../../DTO/views/rating/IViewReview";
-import { DomSanitizer } from "@angular/platform-browser";
-import {catchError, Observable, of} from "rxjs";
+import { Component, DestroyRef, Input, OnChanges } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize, Subscription } from 'rxjs';
+import { PublicReview } from 'src/app/DTO/views/rating/verified-review';
+import { reviewError, reviewMediaUrl, VerifiedReviewsService } from 'src/services/verified-reviews.service';
 
 @Component({
   selector: 'app-reviews-carusel',
   templateUrl: './razrab.component.html',
   styleUrls: ['./razrab.component.css'],
-  providers: [RatingService]
 })
 export class ReviewsCaruselComponent implements OnChanges {
   @Input() id: string | null = null;
-  reviews$: Observable<IViewReview[]>|null = null;
+  @Input() canManage = false;
+  items: PublicReview[] = [];
+  total = 0;
+  loading = false;
+  sending = false;
+  error = '';
+  actionError = '';
+  message = '';
+  action: { reviewId: string; kind: 'reply' | 'report' } | null = null;
+  draft = '';
+  readonly mediaUrl = reviewMediaUrl;
+  private request?: Subscription;
 
-  constructor(private _apiRating: RatingService, private sanitizer: DomSanitizer) { }
+  constructor(private api: VerifiedReviewsService, private destroyRef: DestroyRef) {}
 
   ngOnChanges(): void {
-    if (this.id) {
-      this.reviews$ = this._apiRating.getRatings(this.id!).pipe(
-        catchError(() => of([]))
-      );
-    }
+    this.request?.unsubscribe();
+    this.items = [];
+    this.total = 0;
+    this.action = null;
+    this.error = '';
+    this.load();
   }
 
-  // getAvatar(avatar: string) {
-  //   if (avatar) {
-  //     // return this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64,${avatar}`);
-  //     return '/assets/img/AvatarBig.png';
-  //   } else {
-  //     return '/assets/img/AvatarBig.png';
-  //   }
-  // }
-  getAvatar(avatar: string | null) {
-    if (avatar) {
-      return this.sanitizer.bypassSecurityTrustResourceUrl(`data:image/jpg;base64,${avatar}`);
-    } else {
-      return '/assets/img/onwaves/user.png';
-    }
+  load(): void {
+    if (!this.id || this.loading) return;
+    this.loading = true;
+    this.error = '';
+    this.request = this.api.publicPage(this.id, this.items.length).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.loading = false),
+    ).subscribe({
+      next: page => {
+        this.items = [...this.items, ...page.items];
+        this.total = page.total;
+      },
+      error: () => this.error = 'Не удалось загрузить отзывы.',
+    });
   }
-  
+
+  open(reviewId: string, kind: 'reply' | 'report'): void {
+    if (this.sending) return;
+    this.action = { reviewId, kind };
+    this.draft = '';
+    this.message = '';
+    this.actionError = '';
+  }
+
+  submit(): void {
+    const action = this.action;
+    const text = this.draft.trim();
+    if (!action || !text || this.sending) return;
+    this.sending = true;
+    this.actionError = '';
+    const request = action.kind === 'reply' ? this.api.reply(action.reviewId, text) : this.api.report(action.reviewId, text);
+    request.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.sending = false),
+    ).subscribe({
+      next: () => {
+        this.action = null;
+        this.draft = '';
+        this.message = action.kind === 'reply' ? 'Ответ опубликован.' : 'Жалоба отправлена.';
+        if (action.kind === 'reply') {
+          this.request?.unsubscribe();
+          this.items = [];
+          this.load();
+        }
+      },
+      error: error => this.actionError = reviewError(error, 'Не удалось отправить сообщение. Повторите попытку.'),
+    });
+  }
 }

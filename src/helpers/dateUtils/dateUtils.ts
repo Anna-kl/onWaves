@@ -155,6 +155,12 @@ export function generateCalendar(year: number, month: number){
  * с намерением бэка независимо от таймзоны клиента — их и нужно читать.
  */
 export function toBusinessCalendarDate(value: string | Date): Date {
+  // Без смещения API уже передал календарную дату. Разбор через Date сначала
+  // привязал бы её к таймзоне браузера, а затем UTC-геттеры могли бы сдвинуть день.
+  if (typeof value === 'string') {
+    const wallDate = /^(\d{4})-(\d{2})-(\d{2})(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?)?$/.exec(value);
+    if (wallDate) return new Date(Number(wallDate[1]), Number(wallDate[2]) - 1, Number(wallDate[3]));
+  }
   const d = value instanceof Date ? value : new Date(value);
   return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0);
 }

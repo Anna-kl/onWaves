@@ -32,4 +32,14 @@ export interface ILandingOffer {
   isActive: boolean;
   sortOrder: number;
   benefits: ILandingBenefit[];
+  /**
+   * Предложения одной акции. Все показываются плашками в шапке:
+   * sale — скидка, яркая; coupon — купон, другой цвет.
+   */
+  proposals?: ILandingOfferProposal[] | null;
+}
+
+export interface ILandingOfferProposal {
+  text: string;
+  tone?: 'sale' | 'coupon' | string | null;
 }

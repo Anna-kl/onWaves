@@ -34,21 +34,12 @@
     color: #333;
   }
 
-  // Баннер занимает всю ширину окна и сам служит кнопкой.
-  .coupon-img-btn {
-    display: block;
-    width: 100%;
-    padding: 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-  }
-
-  .coupon-img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 12px 12px 0 0;
+  .coupon-banner {
+    padding: 28px 46px 24px 20px;
+    background: #e7f4f2;
+    color: #074b51;
+    font-size: clamp(1.2rem, 4vw, 1.7rem);
+    font-weight: 700;
   }
 
   &__body {
@@ -82,7 +73,7 @@
 
   .action-btn {
     padding: 0.6rem 1.2rem;
-    background: #007bff;
+    background: #006d74;
     color: #fff;
     border: none;
     border-radius: 8px;

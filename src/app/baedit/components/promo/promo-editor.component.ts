@@ -40,6 +40,7 @@ import {
   extraMedia,
   offerActions,
   offerMedia,
+  offerPriceServiceName,
   offerPriceText,
 } from '../../../profile-ba/helpers/promo-offer';
 import { ICalculatorConnection } from '../../../DTO/views/calculator/ICalculator';
@@ -57,6 +58,7 @@ export class PromoEditorComponent implements OnInit, OnDestroy {
   template!: PromoTemplateDef;
   offer!: ILandingOffer;
   badgeText = '';
+  validFrom = '';
   validTo = '';
   services: Service[] = [];
   graphs: ICalculatorConnection[] = [];
@@ -145,6 +147,7 @@ export class PromoEditorComponent implements OnInit, OnDestroy {
     if (this.template.fields.discount && !Number(this.offer.discountPercent)) {
       return 'Укажите скидку в процентах';
     }
+    if (this.validFrom && this.validTo && this.validFrom > this.validTo) return 'Начало акции должно быть не позже окончания';
     if (this.template.type === LandingTemplateType.Campaign && !this.validTo) {
       return 'Укажите дату окончания акции';
     }
@@ -153,6 +156,19 @@ export class PromoEditorComponent implements OnInit, OnDestroy {
 
   get previewPrice(): string | null {
     return this.offer ? offerPriceText(this.offer, this.prices, this.offer.calculator) : null;
+  }
+
+  get previewServiceName(): string | null {
+    if (!this.offer) {
+      return null;
+    }
+    const names = new Map<string, string>();
+    for (const service of this.services) {
+      if (service.id && service.name) {
+        names.set(service.id, service.name);
+      }
+    }
+    return offerPriceServiceName(this.offer, names, this.offer.calculator);
   }
 
   get canAddAction(): boolean {
@@ -385,6 +401,7 @@ export class PromoEditorComponent implements OnInit, OnDestroy {
             ?? templateFromOfferType(existing.offerType);
           this.template = getPromoTemplate(type);
           this.badgeText = this.offer.badge ?? this.landing.promoBadgeText ?? this.template.defaultBadge;
+          this.validFrom = toDateInput(this.offer.validFrom);
           this.validTo = toDateInput(this.offer.validTo);
           this.attachDefaultServices();
           this.isLoading = false;
@@ -398,7 +415,8 @@ export class PromoEditorComponent implements OnInit, OnDestroy {
         this.template = getPromoTemplate(stored.templateType);
         this.offer = this.hydrate({ ...stored.offer, id: undefined });
         this.badgeText = stored.badgeText || this.template.defaultBadge;
-        this.validTo = toDateInput(this.offer.validTo);
+        this.validFrom = toDateInput(this.offer.validFrom);
+          this.validTo = toDateInput(this.offer.validTo);
         this.isNew = true;
         this.attachDefaultServices();
         this.isLoading = false;
@@ -550,6 +568,7 @@ export class PromoEditorComponent implements OnInit, OnDestroy {
       media: this.media,
       galleryUrls: this.media.filter(item => item.kind === PromoMediaKind.Image).map(item => item.url),
       calculator,
+      validFrom: this.validFrom ? new Date(`${this.validFrom}T00:00:00`).toISOString() : null,
       validTo: this.validTo ? new Date(`${this.validTo}T23:59:59`).toISOString() : null,
       benefits: this.offer.benefits
         .filter(item => item.title.trim())

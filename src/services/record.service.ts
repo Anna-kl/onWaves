@@ -25,7 +25,7 @@ export class RecordService {
   }
 
   updateTime(userId: string, data: IViewUpdateTime){
-    return this.http.put<IResponse>(`${this.url}update-time/${userId}`, data);
+    return this.http.put<IResponse>(`${this.url}update-time/${userId}`, data, { headers: this.authHeaders() });
   }
 
   getSale(id: string){
@@ -36,14 +36,15 @@ export class RecordService {
     return this.http.post<ISendPromo>(`${this.url}check-coupon`, {recordId, pin});
   }
   
-  saveRecord(id: string, record: Record){
-    // Токен нужен серверу, чтобы применить приветственный купон именно к этому клиенту.
-    // Гость и мастер, создающий запись вручную, идут без изменений.
-    let headers = new HttpHeaders();
-    if (record.useWelcomeCoupon && this.cookies.check('auth-token-ocpio')) {
-      headers = headers.set('Authorization', 'Bearer ' + this.cookies.get('auth-token-ocpio'));
-    }
+  saveRecord(id: string, record: Record, fromMasterCabinet = false){
+    const headers = fromMasterCabinet || record.useWelcomeCoupon || record.usePromoSeat ||
+      record.prizeAwardId || record.reviewRewardCouponIds?.length ? this.authHeaders() : new HttpHeaders();
     return this.http.post<IResponse>(`${this.url}add-user/${id}`, record, {headers});
+  }
+
+  private authHeaders(): HttpHeaders {
+    const token = this.cookies.get('auth-token-ocpio');
+    return token ? new HttpHeaders().set('Authorization', 'Bearer ' + token) : new HttpHeaders();
   }
 
   getCoupon(id: string){
@@ -55,8 +56,17 @@ export class RecordService {
   }
 
   confirmRecord(id: string, record: ISendRecord){
-    return this.http.post<IResponse>(`${this.url}confirm-record/${id}`, record);
-    // return this.http.post<IResponse>(`${this.url}confirm-record2/${id}`, record);
+    // Смена статуса требует JWT: без токена сервер не принимает «выполнено» и отмену.
+    let headers = new HttpHeaders();
+    if (this.cookies.check('auth-token-ocpio')) {
+      headers = headers.set('Authorization', 'Bearer ' + this.cookies.get('auth-token-ocpio'));
+    }
+    return this.http.post<IResponse>(`${this.url}confirm-record/${id}`, record, {headers});
+  }
+
+  /** Перенос записи мастером. Уведомление клиенту собирает сервер тем же контуром, что подтверждение. */
+  rescheduleRecord(profileId: string, body: { recordId: string; dayId: string; start: string }) {
+    return this.http.post<IResponse>(`${this.url}reschedule/${profileId}`, body, { headers: this.authHeaders() });
   }
 
   getUserRecords(id: string, date: string){

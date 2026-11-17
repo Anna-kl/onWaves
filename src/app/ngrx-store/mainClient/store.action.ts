@@ -13,3 +13,4 @@ export const clearActiveProfileAction = createAction(
   '[Main client] Clear active profile',
 )
 
+export const renewSessionTokenAction = createAction('[Session] Renew token', props<{ token: string }>());

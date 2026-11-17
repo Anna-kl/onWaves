@@ -1,0 +1,47 @@
+<section class="participants" aria-label="Учёт участников акции">
+  <div class="participants__heading">
+    <div><p class="participants__eyebrow">Записи по акции</p><h3>Участники и явка</h3></div>
+    <button type="button" class="participants__refresh" (click)="load()" [disabled]="loading || !!saving">Обновить</button>
+  </div>
+  <p class="participants__intro">Место занимает созданная запись, а не просмотр страницы. Неявка учитывается отдельно и не возвращает место следующему клиенту.</p>
+  <p *ngIf="loading" role="status">Загружаем участников…</p>
+  <p class="participants__error" *ngIf="error" role="alert">{{ error }}</p>
+  <p class="participants__empty" *ngIf="!loading && !error && !reports.length">Акций с лимитом мест пока нет. Когда такая акция будет настроена, здесь появится реестр записавшихся.</p>
+  <article class="campaign" *ngFor="let report of reports">
+    <header class="campaign__heading">
+      <div><span class="campaign__limit">Для первых {{ report.seatsLimit }} записавшихся</span><h4>{{ report.title }}</h4></div>
+      <strong class="campaign__taken">{{ report.taken }} <span>/ {{ report.seatsLimit }} мест</span></strong>
+    </header>
+    <div class="campaign__progress" aria-hidden="true"><span [style.width.%]="progress(report)"></span></div>
+    <div class="campaign__stats">
+      <div><b>{{ report.seatsLeft }}</b><span>Свободно</span></div>
+      <div><b>{{ report.awaitingVisit }}</b><span>Ожидают визита / отметки</span></div>
+      <div><b>{{ report.attended }}</b><span>Пришли</span></div>
+      <div class="campaign__stat--no-show"><b>{{ report.noShows }}</b><span>Не пришли</span></div>
+      <div><b>{{ report.cancelled }}</b><span>Отменены</span></div>
+    </div>
+    <p class="campaign__empty" *ngIf="!report.entries.length">Пока никто не записался по этой акции.</p>
+    <div class="participant" *ngFor="let entry of report.entries" [class.participant--no-show]="entry.outcome === 'no_show'">
+      <div class="participant__body">
+        <b class="participant__name">{{ entry.clientName }}</b>
+        <span>{{ entry.serviceName }}</span>
+        <time *ngIf="entry.visitAt; else noDate">{{ entry.visitAt | date:'d MMMM yyyy, HH:mm':visitTimezone(entry) }}</time>
+        <ng-template #noDate><span>Дата визита не назначена</span></ng-template>
+        <small>Записался {{ entry.registeredAt | date:'d MMMM, HH:mm':visitTimezone(entry) }}</small>
+      </div>
+      <div class="participant__result">
+        <span class="participant__status">{{ outcome(entry) }}</span>
+        <div class="participant__actions" *ngIf="entry.canMarkAttendance && confirmingNoShow !== entry.recordId">
+          <button type="button" class="participant__arrived" (click)="mark(entry, true)" [disabled]="!!saving || loading">Пришёл</button>
+          <button type="button" class="participant__absent" (click)="confirmingNoShow = entry.recordId" [disabled]="!!saving || loading">Не пришёл</button>
+        </div>
+        <div class="participant__confirm" *ngIf="confirmingNoShow === entry.recordId" role="group" aria-label="Подтверждение неявки">
+          <p>Место останется занятым. Визит не будет отмечен выполненным.</p>
+          <button type="button" (click)="mark(entry, false)" [disabled]="!!saving || loading">Подтвердить неявку</button>
+          <button type="button" (click)="confirmingNoShow = null" [disabled]="!!saving">Назад</button>
+        </div>
+      </div>
+    </div>
+    <p class="campaign__note">Явку отмечает мастер после времени визита. При обычной отмене место освобождается. Повторная отправка отметки не меняет счётчик.</p>
+  </article>
+</section>

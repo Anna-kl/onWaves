@@ -1,0 +1,21 @@
+<section class="booking-price" *ngIf="price as p" [class.booking-price--confirmed]="confirmed" [class.booking-price--benefit]="confirmed && (p.promo > 0 || p.coupon > 0 || !!p.reviewRewardDiscount)" aria-label="Стоимость записи" aria-live="polite">
+  <div class="booking-price__head">
+    <span class="booking-price__label">{{ p.prize ? 'К оплате' : (p.totalLabel || 'К оплате у мастера') }}</span>
+    <span class="booking-price__badge" *ngIf="p.promo || p.coupon || p.reviewRewardDiscount">{{ confirmed ? p.promo ? 'Акция применена' : 'Купон применён' : p.pending ? 'После проверки телефона' : 'Со скидкой' }}</span>
+  </div>
+  <div class="booking-price__total">
+    <s *ngIf="p.original > p.payable">{{ amount(p.original, p.isFrom) }}</s>
+    <strong>{{ amount(p.payable, p.isFrom) }}</strong>
+  </div>
+  <div class="booking-price__row" *ngIf="p.prize"><span>Цена по прайсу</span><b>{{ money(p.original) }}</b></div>
+  <div class="booking-price__row" *ngIf="p.prize"><span>Приз OnWaves</span><b>−{{ money(p.prizeDiscount ?? p.original) }}</b></div>
+  <div class="booking-price__row" *ngIf="p.promo && !p.prize"><span>{{ p.promoLabel || 'Скидка по акции' }}</span><b>−{{ money(p.promo) }}</b></div>
+  <div class="booking-price__row" *ngIf="p.coupon && !p.prize"><span>{{ p.couponLabel || 'Приветственный купон' }}</span><b>−{{ money(p.coupon) }}</b></div>
+  <div class="booking-price__row" *ngIf="p.reviewRewardDiscount"><span>Купоны за отзывы</span><b>−{{ money(p.reviewRewardDiscount) }}</b></div>
+  <p class="booking-price__note" *ngIf="p.prize">OnWaves оплачивает сумму приза. <ng-container *ngIf="p.payable > 0">Доплату вы оплачиваете мастеру.</ng-container></p>
+  <p class="booking-price__note" *ngIf="p.seats as seats">Акция для первых {{ seats.limit }} записавшихся.<ng-container *ngIf="!confirmed"> Сейчас осталось мест: {{ seats.left }}. Место закрепляется при создании записи.</ng-container></p>
+  <p class="booking-price__note" *ngIf="p.pending && !confirmed && !p.prize">{{ p.pendingNote || 'Это предварительная цена. После ввода телефона проверим право на скидку. Если она недоступна, покажем причину и новую сумму до создания записи.' }}</p>
+  <p class="booking-price__note" *ngIf="p.coupon && !confirmed">Купон действует на первую выполненную запись через OnWaves.</p>
+  <p class="booking-price__notice" *ngIf="p.notice" role="status">{{ p.notice }}</p>
+  <a class="booking-price__terms" *ngIf="p.termsPath" [routerLink]="p.termsPath" target="_blank" rel="noopener">Условия {{ p.promo ? 'акции' : 'купона' }} <span aria-hidden="true">↗</span></a>
+</section>

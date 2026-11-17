@@ -7,6 +7,9 @@ import { WorkLocationType } from '../../enums/workLocationType';
  */
 export interface IRecordLocation {
   locationType: WorkLocationType;
+  /** Точка приёма, если запись «на месте». */
+  workLocationId?: string | null;
+  title?: string | null;
   country?: string | null;
   region?: string | null;
   city?: string | null;

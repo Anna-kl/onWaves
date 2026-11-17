@@ -24,9 +24,8 @@ export function pickField<T>(payload: unknown, ...keys: string[]): T | undefined
 
 /** Код лежит в теле, HTTP-статус у этих ручек почти всегда 200. */
 export function authBodyCode(result: IResponse | null | undefined, httpStatus?: number): number {
-  if (result && typeof result.code === 'number') {
-    return result.code;
-  }
+  const code = pickField<number>(result, 'code', 'Code');
+  if (typeof code === 'number') return code;
   return httpStatus ?? 0;
 }
 
@@ -48,7 +47,7 @@ export function parseSessionId(payload: unknown): string {
 }
 
 export function parseMaxLoginStart(result: IResponse | null | undefined): IMaxLoginStart | null {
-  const payload = result?.data;
+  const payload = pickField(result, 'data', 'Data');
   if (!payload || typeof payload !== 'object') {
     return null;
   }
@@ -69,6 +68,7 @@ export function parseMaxLoginState(value: unknown): MaxLoginState | null {
     || numeric === MaxLoginState.CodeSent
     || numeric === MaxLoginState.Authorized
     || numeric === MaxLoginState.Expired
+    || numeric === MaxLoginState.DeliveryFailed
   ) {
     return numeric;
   }
@@ -79,13 +79,16 @@ export function parseMaxLoginStatus(result: IResponse | null | undefined): IMaxL
   if (authBodyCode(result) === 404) {
     return { sessionId: '', state: MaxLoginState.Expired };
   }
-  const payload = result?.data;
+  const payload = pickField(result, 'data', 'Data');
   const sessionId = parseSessionId(payload);
   const state = parseMaxLoginState(pickField(payload, 'state', 'State'));
   if (state == null) {
     return null;
   }
-  return { sessionId, state };
+  return { sessionId, state,
+    expiresAt: pickField<string>(payload, 'expiresAt', 'ExpiresAt'),
+    link: pickField<string>(payload, 'link', 'Link'),
+  };
 }
 
 /**

@@ -1,4 +1,5 @@
 import {Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import {DomSanitizer} from "@angular/platform-browser";
 import {IViewAddress} from "../../DTO/views/IViewAddress";
 import {select, Store} from "@ngrx/store";
@@ -14,7 +15,7 @@ import { filter, forkJoin, mergeMap, Observable, of, skipWhile, Subscription, sw
 import { ProfileService } from 'src/services/profile.service';
 import { WelcomeCouponMe } from 'src/app/DTO/views/promo/welcome-coupon';
 import { WelcomeCouponService } from 'src/services/welcome-coupon.service';
-import { formatRub, welcomeTierList } from 'src/helpers/common/welcome-coupon';
+import { formatRub, welcomeIsFixed, welcomeOfferLine, welcomeTierList } from 'src/helpers/common/welcome-coupon';
 import { Md5 } from 'ts-md5';
 import { AuthService } from 'src/services/auth.service';
 import { DictionaryService } from 'src/services/dictionary.service';
@@ -118,6 +119,7 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
             } else{
               this.showPhoneCode = false;
               this.phoneVerified = false;
+              this.phoneProofTick += 1;
             }
         });
 
@@ -144,8 +146,12 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
   slice: number = 1;
   /** Раздел «Мой купон»: состояние права приходит с сервера (coupons/welcome/me). */
   welcomeMe: WelcomeCouponMe | null = null;
+  phoneProofTick = 0;
+  routeProfileId: string | null = null;
   protected readonly formatRub = formatRub;
   protected readonly welcomeTierList = welcomeTierList;
+  protected readonly welcomeIsFixed = welcomeIsFixed;
+  protected readonly welcomeOfferLine = welcomeOfferLine;
   phoneInput: string|undefined = undefined;
   emailInput: string|undefined = undefined;
   
@@ -157,11 +163,23 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
               private _serviceRegisterBusinessProfile: ServiceRegisterBusinessProfile,
               private _profile: ProfileService,
               private _welcomeCoupon: WelcomeCouponService,
-              private modalService: NgbModal) {
+              private modalService: NgbModal,
+              private route: ActivatedRoute) {
     //получаем данные профиля из store
     
 
     // this._events.choosedProfile.subscribe(result => {this.user = result;});
+  }
+
+  get showPrizes(): boolean {
+    return !!this.mainProfileCleint?.id && this.mainProfileCleint.id === this.routeProfileId;
+  }
+
+  beginPhoneProof(): void {
+    this.sendPhoneCode();
+    if (typeof document !== 'undefined') {
+      document.getElementById('cabinet-phone')?.focus();
+    }
   }
 
   ngOnDestroy(): void {
@@ -224,6 +242,7 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.routeProfileId = this.route.snapshot.paramMap.get('id');
 
     await this.getListCities();
     this._storeService.pipe(

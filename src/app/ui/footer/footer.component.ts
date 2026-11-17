@@ -3,12 +3,15 @@ import {Router} from "@angular/router";
 import {StoreService} from "../../ngrx-store/mainClient/store.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import { ModalRegisterComponent } from '../../components/modals/register-profile/modal-register/modal-register.component';
+import { PROMO_ORGANIZER, organizerReady } from '../../profile-ba/helpers/promo-terms';
 @Component({
   selector: 'app-footer',
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.css']
 })
 export class FooterComponent {
+  readonly organizerReady = organizerReady();
+  readonly organizer = PROMO_ORGANIZER;
   showLoginButton: boolean = false;
   showRegisterButton: boolean = true;
   choosedClient:any;

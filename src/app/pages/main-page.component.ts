@@ -1,194 +1,376 @@
-
-import { Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { AfterViewInit, Component, DestroyRef, ElementRef, HostListener, Inject, NgZone, OnInit, PLATFORM_ID, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {ProfileService} from "../../services/profile.service";
-import {selectProfileMainClient} from "../ngrx-store/mainClient/store.select";
-import {select, Store} from "@ngrx/store";
-import { Subscription, take } from 'rxjs';
+import { select, Store } from '@ngrx/store';
+import {
+  BehaviorSubject, EMPTY, Observable, ReplaySubject, combineLatest, expand, filter, fromEvent, map, merge, of, scan,
+  shareReplay, startWith, switchMap, take, timer,
+} from 'rxjs';
+import { ProfileService } from '../../services/profile.service';
+import { selectProfileMainClient } from '../ngrx-store/mainClient/store.select';
 import { IViewBusinessProfile } from '../DTO/views/business/IViewBussinessProfile';
 import { BackendService } from 'src/services/backend.service';
 import { LoginService } from '../auth/login.service';
 import { ModalRegisterComponent } from 'src/app/components/modals/register-profile/modal-register/modal-register.component';
+import { DictionaryService } from 'src/services/dictionary.service';
+import { ICategory } from '../DTO/classes/ICategory';
+import { AnalyticsService } from 'src/services/analytics.service';
+import {
+  HomeFeedItem, HomeMaster, HomeMastersLoad, HomePerks, HomePrice, HomeShowcaseService,
+} from 'src/services/home-showcase.service';
+import { HOME_GROUP_LABEL, HOME_QUICK_SERVICES, HomeGroup } from './home/home-showcase.config';
+import { GiveawayCampaign, GiveawayLoad } from '../DTO/views/giveaway/giveaway';
+import { GiveawaysService } from '../../services/giveaways.service';
+import { PromoSeatsService } from '../../services/promo-seats.service';
+import { lastPromoBookingAt, seatsLeftText, ULTRASOUND_COVER, ULTRASOUND_MASTER_ID, ULTRASOUND_PROMO } from '../profile-ba/helpers/promo-seats';
+import { formatRub } from '../../helpers/common/welcome-coupon';
 
-interface SubSubcategory {
-  name: string;
+type GroupFilter = 'all' | HomeGroup;
+
+interface MasterGroupView {
+  group: HomeGroup;
+  label: string;
+  masters: HomeMaster[];
 }
 
-interface Subcategory {
-  name: string;
-  subSubcategories: SubSubcategory[];
-  showSubSubcategories: boolean;
-}
+/** Сколько материалов ленты показываем за раз: ролики тяжёлые, больше сразу не нужно. */
+const FEED_PAGE = 6;
 
 @Component({
   selector: 'app-menu',
   templateUrl: './main-page.component.html',
-   styleUrls: ['./main-page.component.css'],
-  providers: [ProfileService, BackendService]
+  styleUrls: ['./main-page.component.scss'],
+  providers: [ProfileService, BackendService, DictionaryService]
 })
+export class MainPageComponent implements OnInit, AfterViewInit {
+  search = '';
+  isAuth = false;
+  isRubricOpen = false;
 
+  readonly quickServices = HOME_QUICK_SERVICES;
+  readonly groupLabel = HOME_GROUP_LABEL;
+  readonly isBrowser: boolean;
 
-export class MainPageComponent implements OnInit, OnDestroy {
-  search: string = '';
-  isAuth: boolean = false;
-  profile: IViewBusinessProfile|null = null;
-  private unsubscribe$: Subscription|null = null;
+  /** Пример записи на первом экране: дни от сегодняшнего, время — иллюстрация, не живые слоты. */
+  readonly demoDays = this.buildDemoDays();
+  readonly demoTimes = [
+    { time: '11:00', state: 'free' }, { time: '13:30', state: 'free' },
+    { time: '16:00', state: 'picked' }, { time: '18:30', state: 'busy' },
+  ];
 
-  constructor(private elementRef: ElementRef,
-              private _apiProfile: ProfileService,
+  readonly filter$ = new BehaviorSubject<GroupFilter>('all');
+  masters$!: Observable<HomeMaster[]>;
+  mastersLoad$!: Observable<HomeMastersLoad>;
+  groups$!: Observable<MasterGroupView[]>;
+  counts$!: Observable<Record<GroupFilter, number>>;
+  prices$!: Observable<Record<string, HomePrice | null>>;
+  perks$!: Observable<Record<string, HomePerks>>;
+  demo$!: Observable<HomeMaster | null>;
+
+  feed$!: Observable<HomeFeedItem[] | null>;
+  feedLimit = FEED_PAGE;
+  giveaway: GiveawayLoad<GiveawayCampaign> = { kind: 'loading', value: null };
+  ultrasoundOffer: {
+    serviceId: string;
+    price: string;
+    originalPrice: string;
+    remaining: string;
+    lastBookingAt: number;
+    visitDeadline: string;
+  } | null = null;
+  readonly ultrasoundCampaign = ULTRASOUND_PROMO;
+  readonly ultrasoundCover = ULTRASOUND_COVER;
+  private readonly feedRequested$ = new ReplaySubject<void>(1);
+  private feedObserver?: IntersectionObserver;
+
+  /** Аватар не загрузился — рисуем монограмму, а не битую картинку. */
+  readonly brokenAvatars = new Set<string>();
+
+  /** Посты, чей текст не влез в обрезку карточки: у них есть кнопка «Читать полностью». */
+  readonly clampedPosts = new Set<string>();
+  /** Посты, которые читатель раскрыл. */
+  readonly expandedPosts = new Set<string>();
+  private measureQueued = false;
+  @ViewChildren('postText') private postTexts?: QueryList<ElementRef<HTMLElement>>;
+
+  private categories: ICategory[] = [];
+
+  @ViewChild('feedAnchor') private feedAnchor?: ElementRef<HTMLElement>;
+
+  constructor(private _apiProfile: ProfileService,
               private backendService: BackendService,
               private _loginService: LoginService,
               private route: ActivatedRoute,
               private modalService: NgbModal,
-              private store: Store) {
-
+              private store: Store,
+              private router: Router,
+              private dictionary: DictionaryService,
+              private showcase: HomeShowcaseService,
+              private analytics: AnalyticsService,
+              private giveaways: GiveawaysService,
+              private promoSeats: PromoSeatsService,
+              private destroyRef: DestroyRef,
+              private zone: NgZone,
+              @Inject(PLATFORM_ID) platformId: object) {
+    this.isBrowser = isPlatformBrowser(platformId);
   }
-  ngOnDestroy(): void {
-    this.unsubscribe$?.unsubscribe();
-  }
 
-  async ngOnInit(): Promise<any> {
+  ngOnInit(): void {
+    this.dictionary.getMainCategories().pipe(take(1)).subscribe(result => {
+      this.categories = result;
+    });
+
     if (this.route.snapshot.queryParamMap.get('action') === 'register') {
       this.modalService.open(ModalRegisterComponent);
     }
 
-    this.unsubscribe$ = this.store.pipe(select(selectProfileMainClient)).subscribe(
-      result => {
-        if (result){
-           this.isAuth = true;
-           let profile = new IViewBusinessProfile();
-           profile.copyProfile(result);
-           this._apiProfile.getCoordinates(result.id!)
-           .pipe(take(1)).subscribe(coordinate => {
-              if (coordinate.code === 404){
-                if (navigator.geolocation) {
-                  navigator.geolocation.getCurrentPosition(position => {
-                    profile.longitude = position.coords.longitude;
-                    profile.latitude = position.coords.latitude;
-                    this.backendService.saveProfile(profile.id!, profile).pipe(take(1))
-                    .subscribe(res => {
-                      // Именно локальная копия: поле this.profile нигде не заполняется
-                      // и всегда null — на нём падало «Cannot read properties of null».
-                      this._loginService.updateProfile(profile.id!);
-                    });
-                  });
-                }
-              }
-           });
-        }
+    this.initShowcase();
+    this.initUltrasoundOffer();
+    this.giveaways.publicList('home').pipe(takeUntilDestroyed(this.destroyRef)).subscribe(load => {
+      this.giveaway = load;
+    });
+    this.initAuthGeo();
+  }
+
+  private initUltrasoundOffer(): void {
+    // Остаток меняется при брони и отмене. Не сохраняем его в SSR-кеше главной.
+    if (!this.isBrowser) return;
+    const readOffer = () => this.promoSeats.readState(ULTRASOUND_MASTER_ID, ULTRASOUND_PROMO).pipe(
+      map(load => {
+        const state = load.value;
+        const service = state?.services[0];
+        if (!state || state.code !== ULTRASOUND_PROMO || !state.exclusive || state.status !== 'open'
+          || state.seatsLeft <= 0 || !service) return null;
+        const lastBookingAt = lastPromoBookingAt(state.endsAt);
+        if (!Number.isFinite(lastBookingAt) || lastBookingAt < Date.now()) return null;
+        return {
+          serviceId: service.serviceId,
+          price: formatRub(service.clientPays),
+          originalPrice: formatRub(service.listAmount),
+          remaining: seatsLeftText(state.seatsLeft, state.seatsLimit),
+          lastBookingAt,
+          visitDeadline: state.visitDeadline,
+        };
+      }),
+    );
+    // Минутный таймер не должен мешать Angular завершить гидрацию.
+    this.zone.runOutsideAngular(() => fromEvent(window, 'focus').pipe(
+      startWith(null),
+      switchMap(() => readOffer().pipe(expand(offer => {
+        if (!offer) return EMPTY;
+        const endsAt = offer.lastBookingAt + 1;
+        return timer(Math.min(60_000, Math.max(0, endsAt - Date.now()))).pipe(
+          switchMap(() => endsAt <= Date.now() ? of(null) : readOffer()),
+        );
+      }))),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(offer => this.zone.run(() => this.ultrasoundOffer = offer)));
+  }
+
+  ngAfterViewInit(): void {
+    // Лента подгружается асинхронно и дописывается по «Показать ещё» — меряем после каждой отрисовки.
+    if (this.isBrowser) {
+      this.postTexts?.changes.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.queueMeasure());
+      this.queueMeasure();
+    }
+    // Лента — десятки запросов к альбомам. Грузим, только когда до неё почти долистали,
+    // и только в браузере: серверному рендеру и первому экрану они не нужны.
+    if (!this.isBrowser || !this.feedAnchor) return;
+    if (!('IntersectionObserver' in window)) {
+      this.feedRequested$.next();
+      return;
+    }
+    this.feedObserver = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting)) {
+        this.feedRequested$.next();
+        this.feedObserver?.disconnect();
       }
+    }, { rootMargin: '600px 0px' });
+    this.feedObserver.observe(this.feedAnchor.nativeElement);
+    this.destroyRef.onDestroy(() => this.feedObserver?.disconnect());
+  }
+
+  private initShowcase(): void {
+    this.mastersLoad$ = this.showcase.getMastersLoad();
+    this.masters$ = this.showcase.getMasters();
+
+    this.counts$ = this.masters$.pipe(map(list => ({
+      all: list.length,
+      beauty: list.filter(m => m.group === 'beauty').length,
+      home: list.filter(m => m.group === 'home').length,
+    })));
+
+    this.groups$ = combineLatest([this.masters$, this.filter$]).pipe(
+      map(([list, f]) => (['beauty', 'home'] as HomeGroup[])
+        .filter(g => f === 'all' || f === g)
+        .map(g => ({ group: g, label: HOME_GROUP_LABEL[g], masters: list.filter(m => m.group === g) }))
+        .filter(v => v.masters.length > 0))
+    );
+
+    this.demo$ = this.masters$.pipe(
+      map(list => list.find(m => m.group === 'beauty' && !!m.avatar) ?? null)
+    );
+
+    // Цены — отдельные запросы прайса на каждого мастера; на сервере их не ждём.
+    this.prices$ = this.isBrowser
+      ? this.masters$.pipe(
+        switchMap(list => merge(...list.map(m => this.showcase.getMinPrice(m.id, m.priceText).pipe(
+          map(price => ({ id: m.id, price }))
+        )))),
+        scan((acc, { id, price }) => ({ ...acc, [id]: price }), {} as Record<string, HomePrice | null>),
+        startWith({} as Record<string, HomePrice | null>),
+        shareReplay({ bufferSize: 1, refCount: true })
+      )
+      : of({});
+
+    // Купон и акция — тоже по запросу на мастера и только в браузере: условия могут
+    // закончиться, а HTML главной живёт в 60-секундном SSR-кеше.
+    this.perks$ = this.isBrowser
+      ? this.masters$.pipe(
+        switchMap(list => merge(...list.map(m => this.showcase.getPerks(m).pipe(
+          map(perks => ({ id: m.id, perks }))
+        )))),
+        scan((acc, { id, perks }) => ({ ...acc, [id]: perks }), {} as Record<string, HomePerks>),
+        startWith({} as Record<string, HomePerks>),
+        shareReplay({ bufferSize: 1, refCount: true })
+      )
+      : of({});
+
+    this.feed$ = this.feedRequested$.pipe(
+      take(1),
+      switchMap(() => this.masters$),
+      switchMap(list => this.showcase.getFeed(list)),
+      startWith(null),
+      shareReplay({ bufferSize: 1, refCount: true })
     );
   }
-  // title = 'MainSiteOcpio';
 
-// toggleActive() {
-//   const divElement = this.elementRef.nativeElement.querySelector('.nav-container');
-//   divElement.classList.toggle('active');
-// }
-
-tab : any = 'tab1';
-tab0 : any
-tab1 : any
-tab2 : any
-tab3 : any
-tab4 : any
-tab5 : any
-tab6 : any
-tab7 : any
-tab8 : any
-tab9 : any
-tab10 : any
-tab11 : any
-tab12 : any
-tab13 : any
-tab14 : any
-tab15 : any
-Clicked : boolean | undefined
-
-onClick(check: number){
-  //    console.log(check);
-      if(check==1){
-        this.tab = 'tab1';
-      }else if(check==2){
-        this.tab = 'tab2';
-      }else if(check==3){
-        this.tab = 'tab3';
-      }else if(check==4){
-        this.tab = 'tab4';
-      }else if(check==5){
-        this.tab = 'tab5';
-      }else if(check==6){
-        this.tab = 'tab6';
-      }else if(check==7){
-        this.tab = 'tab7';
-      }else if(check==8){
-        this.tab = 'tab8';
-      }else if(check==9){
-        this.tab = 'tab9';
-      }else if(check==10){
-        this.tab = 'tab10';
-      }else if(check==11){
-        this.tab = 'tab11';
-      }else if(check==12){
-        this.tab = 'tab12';
-      }else if(check==13){
-        this.tab = 'tab13';
-      }else if(check==14){
-        this.tab = 'tab14';
-      }else if(check==15){
-        this.tab = 'tab15';
-      }else{
-        this.tab = 'tab16';
-      }
-
+  retryMasters(): void {
+    this.showcase.retryMasters();
   }
 
-
-
-menuOpen = false;
-selectedCategory: string = 'Авто/Мото';
-selectedSubcategory: string = '';
-
-
-// Анимация на меню. Пока не нужна //
-isExpanded: boolean = false
-state: string = 'initial'
-status = false;
-
-
-expand() {
-   this.isExpanded = !this.isExpanded
-   this.state = this.isExpanded ? 'expanded' : 'initial'
-}
-
-toggleMenu() {
-  // this.isExpanded = !this.isExpanded
-  // this.state = this.isExpanded ? 'expanded' : 'initial'
-  this.menuOpen = !this.menuOpen;
-}
-
-toggleCategory(category: string) {
-  if (this.selectedCategory === category) {
-    this.selectedCategory = '';
-    this.selectedSubcategory = '';
-  } else {
-    this.selectedCategory = category;
-    this.selectedSubcategory = '';
+  /** Как раньше: если у вошедшего BA нет координат — берём геолокацию браузера. */
+  private initAuthGeo(): void {
+    this.store.pipe(
+      select(selectProfileMainClient),
+      filter(Boolean),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(result => {
+      this.isAuth = true;
+      const profile = new IViewBusinessProfile();
+      profile.copyProfile(result);
+      this._apiProfile.getCoordinates(result.id!).pipe(take(1)).subscribe(coordinate => {
+        if (coordinate.code === 404 && this.isBrowser && navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(position => {
+            profile.longitude = position.coords.longitude;
+            profile.latitude = position.coords.latitude;
+            this.backendService.saveProfile(profile.id!, profile).pipe(take(1))
+              .subscribe(() => this._loginService.updateProfile(profile.id!));
+          });
+        }
+      });
+    });
   }
-}
 
-  toggleSubcategory(subcategory: string) {
-    if (this.selectedSubcategory === subcategory) {
-      this.selectedSubcategory = '';
+  setFilter(value: GroupFilter): void {
+    this.filter$.next(value);
+  }
+
+  goToSearch(): void {
+    this.analytics.trackEvent('home', 'home_search', this.search || undefined);
+    this.router.navigate(['search/result'], {
+      queryParams: { search: this.search || null, distance: null, categoryId: null, gender: null }
+    });
+  }
+
+  searchService(name: string): void {
+    this.analytics.trackEvent('home', 'home_chip', name);
+    this.router.navigate(['search/result'], {
+      queryParams: { search: name, distance: null, categoryId: null, gender: null }
+    });
+  }
+
+  toggleRubric(): void {
+    this.isRubricOpen = !this.isRubricOpen;
+  }
+
+  setCategory(event: ICategory): void {
+    this.isRubricOpen = false;
+    const category = this.categories.find(item => item.id === event.id) ?? event;
+    this.router.navigate(['search/result'], {
+      queryParams: { search: null, distance: null, categoryId: category.id, gender: null, geo: null, address: null }
+    });
+  }
+
+  track(action: string, label?: string): void {
+    this.analytics.trackEvent('home', action, label);
+  }
+
+  showMoreFeed(): void {
+    this.feedLimit += FEED_PAGE;
+  }
+
+  avatarFailed(id: string): void {
+    this.brokenAvatars.add(id);
+  }
+
+  togglePost(id: string): void {
+    if (this.expandedPosts.has(id)) {
+      this.expandedPosts.delete(id);
     } else {
-      this.selectedSubcategory = subcategory;
+      this.expandedPosts.add(id);
     }
   }
 
+  /** Поворот телефона и смена ширины меняют число строк — обрезку пересчитываем. */
+  @HostListener('window:resize')
+  onFeedResize(): void {
+    this.queueMeasure();
+  }
 
+  /**
+   * Кнопку показываем только там, где текст действительно обрезан. Длину строки для этого
+   * считать бесполезно: сколько влезет в четыре строки, зависит от ширины экрана, поэтому меряем DOM.
+   */
+  private queueMeasure(): void {
+    if (!this.isBrowser || this.measureQueued) {
+      return;
+    }
+    this.measureQueued = true;
+    requestAnimationFrame(() => {
+      this.measureQueued = false;
+      this.postTexts?.forEach(ref => {
+        const el = ref.nativeElement;
+        const id = el.dataset['postId'];
+        // Раскрытый пост не меряем: без обрезки он «помещается», а кнопка «Свернуть» нужна.
+        if (!id || this.expandedPosts.has(id)) {
+          return;
+        }
+        if (el.scrollHeight > el.clientHeight + 1) {
+          this.clampedPosts.add(id);
+        } else {
+          this.clampedPosts.delete(id);
+        }
+      });
+    });
+  }
 
+  trackById(_: number, item: { id: string }): string {
+    return item.id;
+  }
+
+  trackByGroup(_: number, item: MasterGroupView): string {
+    return item.group;
+  }
+
+  private buildDemoDays(): { name: string; num: number; picked: boolean }[] {
+    const names = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    const today = new Date();
+    return Array.from({ length: 5 }, (_, i) => {
+      const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i + 1);
+      return { name: names[d.getDay()], num: d.getDate(), picked: i === 2 };
+    });
+  }
 }
-
-
-

@@ -6,7 +6,7 @@ import * as compression from 'compression';
 import * as express from 'express';
 import { existsSync, readFileSync } from 'node:fs';
 import { request as httpsRequest } from 'node:https';
-import { basename, join } from 'node:path';
+import { basename, extname, join } from 'node:path';
 import { URL } from 'node:url';
 import { AppServerModule } from './src/main.server';
 import { isIndexableProfileLink } from './src/app/profile-ba/helpers/noindex-profiles';
@@ -31,7 +31,7 @@ const ssrCache = new Map<string, { html: string; expiresAt: number }>();
  * а браузер после гидрации дорисовывал «нет доступных слотов» — на экране оказывались
  * оба состояния сразу.
  */
-const SSR_CACHE_SKIP = [/\/choose-date(\/|\?|$)/, /\/confirm-record2?(\/|\?|$)/];
+const SSR_CACHE_SKIP = [/\/choose-date(\/|\?|$)/, /\/confirm-record2?(\/|\?|$)/, /\/page-user(\/|\?|$)/, /\/profile-user(\/|\?|$)/, /\/admin(\/|\?|$)/, /^\/giveaways(\/|\?|$)/];
 const INDEX_HTML_TITLE = 'OnWaves — онлайн-запись к мастерам и в салоны красоты';
 const CELLINGS_SHELL_TITLE =
   'Натяжные потолки — Кашира, Ступино, Озёры, Коломна и Домодедово — OnWaves';
@@ -40,9 +40,26 @@ const CELLINGS_SHELL_DESCRIPTION =
 const RESERVED_PROFILE_SLUGS = new Set([
   'catalog', 'landing', 'masters', 'search', 'static', 'ba-edit',
   'profilebisacc', 'cabinet-ba', 'sitemap.xml', 'robots.txt',
+  'giveaways', 'admin',
 ]);
 // Демо-slug (developer, user-example, bussiness) — в NOINDEX_PROFILE_SLUGS.
 // Тот же модуль читает карточка для meta robots. Список временный, до isTest на бэке.
+
+/**
+ * Расширения сборки. Тот же набор, что в src/.htaccess, плюс html/txt/xml:
+ * yandex_*.html, robots.txt и xml остаются файлами. Любая другая точка в пути —
+ * публичный slug вроде permanent.ali, его нельзя закрывать как отсутствующий файл.
+ */
+const STATIC_ASSET_EXTENSIONS = new Set([
+  '.js', '.mjs', '.css', '.map', '.json', '.webmanifest', '.wasm',
+  '.ico', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.avif',
+  '.woff', '.woff2', '.ttf', '.otf', '.eot',
+  '.html', '.txt', '.xml', '.pdf',
+]);
+
+function isBundledAssetPath(urlPath: string): boolean {
+  return STATIC_ASSET_EXTENSIONS.has(extname(urlPath).toLowerCase());
+}
 
 function ssrPathname(url: string): string {
   const path = (url.split('#')[0] ?? '').split('?')[0] || '/';
@@ -102,6 +119,10 @@ function ssrH1Text(html: string): string {
  * /cellings — свой контракт оффера; остальные публичные slug — имя в h1.
  */
 function canCacheSsrHtml(url: string, html: string): boolean {
+  // Ссылка участия должна появиться в момент старта и исчезнуть по окончании приёма.
+  if (html.includes('data-giveaway-phase="scheduled"') || html.includes('data-giveaway-phase="active"')) {
+    return false;
+  }
   if (isCellingsSsrPath(url)) {
     if (isCatalogHead(html)) {
       return false;
@@ -165,13 +186,14 @@ const SITEMAP_STATIC_LASTMOD = '2026-10-13';
  * `/search/extsearch` нет: в первом HTML нет h1 и своего текста.
  * `/landing` остаётся, пока владелец не решит, какая страница главная для мастеров.
  */
-const SITEMAP_ROUTES: { path: string; changefreq: string; priority: string }[] = [
+const SITEMAP_ROUTES: { path: string; changefreq: string; priority: string; lastmod?: string }[] = [
   { path: '/', changefreq: 'daily', priority: '1.0' },
   { path: '/landing', changefreq: 'monthly', priority: '0.8' },
   { path: '/masters', changefreq: 'monthly', priority: '0.8' },
   { path: '/catalog', changefreq: 'daily', priority: '0.6' },
   { path: '/static/oservice', changefreq: 'monthly', priority: '0.5' },
   { path: '/static/help', changefreq: 'monthly', priority: '0.5' },
+  { path: '/help/grafik', changefreq: 'monthly', priority: '0.4', lastmod: '2026-10-30' },
 ];
 
 /**
@@ -352,7 +374,7 @@ function renderSitemap(profiles: SitemapProfile[]): string {
     route =>
       `  <url>\n` +
       `    <loc>${SITE_URL}${route.path}</loc>\n` +
-      `    <lastmod>${SITEMAP_STATIC_LASTMOD}</lastmod>\n` +
+      `    <lastmod>${route.lastmod ?? SITEMAP_STATIC_LASTMOD}</lastmod>\n` +
       `    <changefreq>${route.changefreq}</changefreq>\n` +
       `    <priority>${route.priority}</priority>\n` +
       `  </url>`,
@@ -575,9 +597,18 @@ export function app(): express.Express {
 
   // Example Express Rest API endpoints
   // server.get('/api/**', (req, res) => { });
-  // Serve static files from /browser
+  // Serve static files from /browser.
+  // '*.*' ловит и slug с точкой. Не-ассет пропускаем в SSR ниже, иначе
+  // /permanent.ali отвечает «Static asset not found» и карточка не открывается.
   server.get(
     '*.*',
+    (req, _res, next) => {
+      if (!isBundledAssetPath(req.path)) {
+        next('route');
+        return;
+      }
+      next();
+    },
     express.static(distFolder, {
       maxAge: '1y',
       setHeaders: (res, filePath) => {

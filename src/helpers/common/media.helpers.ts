@@ -18,7 +18,7 @@ export interface MediaCard extends NormalizedMedia {
   serviceIds?: string[];
   description?: string;
   /**
-   * Готовая подпись карточки: описание, иначе осмысленное имя, иначе null.
+   * Короткая подпись карточки; полный текст остаётся в description.
    * Служебное имя файла сюда не попадает — считается по getMediaTitle().
    */
   caption: string | null;
@@ -54,15 +54,35 @@ export function isGeneratedMediaName(name?: string | null): boolean {
 
   // UUID как с дефисами, так и без них (некоторые загрузчики отдают "хвост" без них).
   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const uuidPlain = /^[0-9a-f]{32}$/i;
+  // Загрузчик видео также возвращает SHA-256 (64 символа), иногда без расширения.
+  const storageHash = /^[0-9a-f]{32,128}$/i;
 
-  return uuid.test(withoutExtension) || uuidPlain.test(withoutExtension);
+  return uuid.test(withoutExtension) || storageHash.test(withoutExtension);
 }
 
 /** Заголовок карточки: только осмысленное имя, служебное имя файла — скрываем. */
 export function getMediaTitle(name?: string | null): string | null {
   const value = (name ?? '').trim();
   return value && !isGeneratedMediaName(value) ? value : null;
+}
+
+/** Первый короткий абзац длинного описания служит заголовком при полном просмотре. */
+export function getMediaText(name?: string | null, description?: string | null): {
+  title: string | null; paragraphs: string[]; caption: string | null;
+} {
+  const paragraphs = (description ?? '').trim().split(/\r?\n\s*\r?\n/).map(p => p.trim()).filter(Boolean);
+  const hasHeading = paragraphs.length > 1 && paragraphs[0].length <= 160;
+  const title = hasHeading ? paragraphs[0] : getMediaTitle(name);
+  const shortCaptions: Record<string, string> = {
+    'Active Line: когда хочется уделить время себе': 'Уход Active Line',
+    'ELYSIEN: знакомство с необычной маской': 'Маска ELYSIEN с CLEOPINE',
+    'Коллагеновые пластины: уход, который хочется рассмотреть поближе': 'Массаж на коллагеновых пластинах'
+  };
+  return {
+    title,
+    paragraphs: hasHeading ? paragraphs.slice(1) : paragraphs,
+    caption: (title && shortCaptions[title]) || (hasHeading ? title : paragraphs[0]) || title
+  };
 }
 
 export function getMediaThumbUrl(image: IViewImage): string | null {
@@ -89,7 +109,6 @@ export function normalizeImageMedia(image: IViewImage): NormalizedMedia {
 
 export function toMediaCard(image: IViewImage, albumId: string): MediaCard {
   const media = normalizeImageMedia(image);
-  const description = (image.description ?? '').trim();
 
   return {
     ...media,
@@ -99,7 +118,7 @@ export function toMediaCard(image: IViewImage, albumId: string): MediaCard {
     albumId,
     serviceIds: image.serviceIds,
     description: image.description,
-    caption: description || getMediaTitle(image.name)
+    caption: getMediaText(image.name, image.description).caption
   };
 }
 

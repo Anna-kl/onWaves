@@ -5,19 +5,98 @@
   <span class="landing-skel__line landing-skel__line--btn"></span>
 </div>
 
+<app-landing-offer-card *ngIf="ultrasoundCard as card" class="ultrasound-offer" [id]="ultrasoundAnchor"
+  [offer]="card.offer" [promoPrice]="card.price" [bookingEnabled]="bookingEnabled"
+  (actionClick)="bookUltrasound($event.serviceId)">
+</app-landing-offer-card>
+<div *ngIf="ultrasoundLoadFailed" class="promo-check">
+  <p>Не удалось проверить места на УЗ-чистку.</p>
+  <button type="button" (click)="retryPromo()">Повторить</button>
+</div>
+
+<section class="profile-promo" *ngIf="profilePromo as campaign" id="promo-seats" aria-labelledby="profile-promo-title">
+  <div class="profile-promo__header">
+    <h2 id="profile-promo-title">{{ campaign.title }}</h2>
+    <p class="profile-promo__status" role="status" [ngSwitch]="campaign.closedReason">
+      <ng-container *ngSwitchCase="'not_started'">Старт {{ promoMoscowDate(campaign.startsAt, false) }}</ng-container>
+      <ng-container *ngSwitchCase="'seats_exhausted'">Места закончились</ng-container>
+      <ng-container *ngSwitchCase="'ended'">Акция закончилась</ng-container>
+      <ng-container *ngSwitchDefault>Свободных мест: {{ campaign.seatsLeft }} из {{ campaign.seatsLimit }}</ng-container>
+    </p>
+  </div>
+  <div class="profile-promo__services" *ngIf="campaign.status === 'open' || campaign.closedReason === 'not_started'">
+    <article *ngFor="let service of campaign.services">
+      <h3>{{ service.name }}</h3>
+      <p><strong>{{ formatRub(service.clientPays) }}</strong> <del>{{ formatRub(service.listAmount) }}</del></p>
+      <button type="button" *ngIf="campaign.status === 'open' && bookingEnabled && !profilePromoError"
+              [disabled]="profilePromoPending" (click)="bookProfilePromo(service.serviceId)"
+              [attr.aria-label]="'Выбрать время: ' + service.name">Выбрать время</button>
+    </article>
+  </div>
+  <p>{{ campaign.discountPercent }}% стоимости оплачивает OnWaves. {{ campaign.seatsLimit }} места на все услуги акции<ng-container *ngIf="campaign.singlePromoService">, одна акционная услуга на человека</ng-container>.</p>
+  <p>{{ promoPeriodText(campaign) }}</p>
+  <p *ngIf="campaign.termsNote">{{ campaign.termsNote }}</p>
+  <p *ngIf="campaign.excludeWelcomeCoupon">Приветственный купон не суммируется с акцией.</p>
+  <p *ngIf="profilePromoError" role="status">Не удалось проверить наличие мест. <button type="button" class="profile-promo__retry" (click)="refreshProfilePromo()">Повторить</button></p>
+  <a *ngIf="profilePromoTermsPath as path" [routerLink]="path">Условия акции</a>
+</section>
+
 <section class="landing-section" *ngIf="visibleOffers.length"
          [class.landing-section--campaign]="isCampaign || isCellingsProfile">
+  <div class="promo-check" *ngIf="promoLoadFailed">
+    <p>Цену акции сейчас нельзя проверить.</p>
+    <button type="button" (click)="retryPromo()">Повторить</button>
+  </div>
+  <ng-container *ngFor="let offer of visibleOffers; let first = first">
+  <div class="promo-closed" *ngIf="promoClosedFor(offer); else offerCard">
+    <ng-container *ngIf="priceView(offer) as price">
+      <p class="promo-closed__name" *ngIf="price.serviceName">{{ price.serviceName }}</p>
+      <p class="promo-closed__row"><span>Цена</span><b>{{ formatRub(price.listAmount) }}</b></p>
+      <p class="promo-closed__row" *ngIf="price.couponDiscount > 0"><span>Купон</span><b>−{{ formatRub(price.couponDiscount) }}</b></p>
+      <p class="promo-closed__total"><span>К оплате</span><strong>{{ formatRub(price.payable) }}</strong></p>
+      <p class="promo-closed__text">{{ price.notice || promoClosedText }}</p>
+      <a class="promo-closed__terms" *ngIf="promoCardFor(offer)?.termsPath as path" [routerLink]="path">Условия акции</a>
+      <button type="button" class="promo-closed__btn" (click)="bookPromo(offer)">Выбрать время</button>
+    </ng-container>
+    <p class="promo-closed__text" *ngIf="priceLoading(offer) && !priceView(offer)">Проверяем цену акции</p>
+    <ng-container *ngIf="priceError(offer) && !priceLoading(offer)">
+      <p class="promo-closed__text">Цену акции сейчас нельзя проверить.</p>
+      <button type="button" class="promo-closed__btn" (click)="retryPromo()">Повторить</button>
+    </ng-container>
+    <ng-container *ngIf="!priceLoading(offer) && !priceError(offer) && !priceView(offer)">
+      <p class="promo-closed__text">{{ promoClosedText }}</p>
+      <button type="button" class="promo-closed__btn" *ngIf="consultationServiceId && !welcomeFixedRub" (click)="onConsultation()">
+        Записаться на консультацию
+      </button>
+    </ng-container>
+    <p class="promo-demo-hint" *ngIf="demoHintOfferId === (offer.id || offer.serviceId || 'promo') || demoHintOfferId === 'consultation'">Это демо-страница: посмотреть можно, записаться нельзя</p>
+  </div>
+  <ng-template #offerCard>
   <app-landing-offer-card
-    *ngFor="let offer of visibleOffers; let first = first"
     [offer]="offer"
+    [bookingEnabled]="bookingEnabled"
+    [contactPhone]="contactPhone"
+    [promoSeats]="promoCardFor(offer)"
+    [promoPrice]="priceView(offer)"
+    [promoPriceLoading]="priceLoading(offer)"
+    [promoPriceError]="priceError(offer)"
+    [promoTerms]="promoCardFor(offer) ? promoTerms : null"
+    [demoHint]="demoHintOfferId != null && demoHintOfferId === offer.id"
     [promoBadgeText]="offer.badge || offer.slogan || landing?.promoBadgeText"
     [templateType]="templateFor(offer)"
     [priceText]="priceFor(offer)"
+    [priceServiceName]="priceServiceName(offer)"
     [cellingsHero]="isCellingsProfile && first"
     [citiesLine]="isCellingsProfile && first ? citiesLine : null"
+    [termsPath]="termsFor(offer)?.path ?? null"
+    [termsFragment]="termsFor(offer)?.fragment ?? null"
+    [termsMaster]="termsFor(offer)?.slug ?? null"
     (actionClick)="onAction(offer, $event)"
+    (retryPrice)="retryPromo()"
     (videoStart)="onVideoStart($event)">
   </app-landing-offer-card>
+  </ng-template>
+  </ng-container>
 </section>
 
 <!-- Видно без клика: робот читает первый HTML, плеер калькулятора в SSR не сериализуется. -->

@@ -110,7 +110,12 @@
     <div class="cont-vert-start-center wrap margin-top30" *ngIf="profile">
         <div class="margin-bottom40">
             <h3>{{ isMobileWork && !fixedLoc ? 'Города работы' : 'Как нас найти' }}</h3>
+            <span class="address-points" *ngIf="addressLines.length > 1; else oneAddress">
+              <span *ngFor="let line of addressLines">{{ line }}</span>
+            </span>
+            <ng-template #oneAddress>
             <span *ngIf="hasAddress; else noAddress">{{ addressText }}</span>
+            </ng-template>
             <ng-template #noAddress><span class="address-empty">Адрес не указан</span></ng-template>
         </div>
         <!--Карта 2GIS start -->

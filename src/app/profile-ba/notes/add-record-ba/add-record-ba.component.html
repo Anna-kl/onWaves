@@ -12,39 +12,92 @@
               <!-- Номер телефона -->
               <input  type="tel" formControlName="phone"
                   size="13"
-                  placeholder="Введите номер телефона"
+                  placeholder="Телефон, если есть"
                   mask="+X(XXX)XXX-XX-XX"
                   class="input-line cont-horiz-start margin-bottom30 w100"
                   style="margin-top: 0px; max-width: 600px;"
                     [ngClass]="{ 'input-error': isControlInvalid('phone') }">
                       <div class="error-text" *ngIf="isControlInvalid('phone')">
-                      Заполните, это важно
+                      Номер неполный
                     </div>
-              <!-- фамилию и имя -->
+              <!-- Имя клиентки: мастеру своей клиентки хватает имени -->
               <div class="input-line cont-horiz-start margin-bottom50 w100" [ngClass]="{ 'input-error': isControlInvalid('name') }"
                 style="margin-top: 0px; max-width: 600px;">
-                <input  type="text" formControlName="name" size="18" placeholder="Введите ФИО"   >
-           
+                <input  type="text" formControlName="name" size="18" placeholder="Имя" aria-label="Имя клиентки" autocomplete="off">
               </div>
                     <div class="error-text" *ngIf="isControlInvalid('name')">
-                      Заполните, это важно
+                      Укажите имя
                     </div>
             </div>
             <!-- календарь 1 Неделя END -->
             <!--Услуги start-->
+            <div class="point-chips" *ngIf="fixedPoints.length > 1">
+              <div class="margin-bottom30">Точка приёма</div>
+              <button type="button" class="point-chips__btn" *ngFor="let point of fixedPoints"
+                      [class.point-chips__btn--on]="point.id === selectedPointId"
+                      (click)="selectPoint(point.id)">
+                {{ pointLine(point) }}
+              </button>
+              <div class="error-text" *ngIf="isErrorPoint" style="color:#d46c54; margin-top:8px;">
+                *Сначала выберите точку
+              </div>
+            </div>
             <div class="cont-horiz-start wrap" >
               <div class="margin-bottom30">
                 Добавьте услугу из списка
               </div>
-              <app-accordion [isUpdate]="false" [profileId]="id" [serviceId]="serviceId"
+              <app-accordion class="record-service-list" [isUpdate]="false" [profileId]="id" [serviceId]="serviceId"
+                             [pointId]="fixedPoints.length > 1 ? selectedPointId : null"
                              (setServices)="setService($event)"></app-accordion>
             </div>
             <!--Услуги end -->
-            <div class="d-flex justify-content-between flex-wrap px-3 py-2">
-              <div class="text-start w-100 w-md-auto mb-2 mb-md-0">
-                 <b>Общее время: {{getHours(duration)}} ч. {{getMinutes(duration)}}  мин.</b></div>
-              <div class="text-end w-100 w-md-auto txt-green-bold"> Общая сумма: {{getPriceString(chooseServices)}} руб.</div>
-            </div>
+            <section *ngIf="chooseServices.length" class="booking-summary" aria-label="Итог записи">
+              <dl class="booking-summary__totals">
+                <div>
+                  <dt>Длительность</dt>
+                  <dd aria-live="polite">{{ durationError ? '—' : (duration ? formatDuration(duration) : 'Не задана') }}</dd>
+                </div>
+                <div>
+                  <dt>Итого</dt>
+                  <dd>{{ bookingTotal }} ₽</dd>
+                </div>
+              </dl>
+              <button #durationToggle type="button" class="booking-summary__action" aria-controls="booking-duration-editor"
+                      [attr.aria-expanded]="durationEditorOpen" (click)="toggleDurationEditor()">
+                {{ durationEditorOpen ? 'Готово' : 'Изменить' }}
+                <span class="booking-summary__chevron" aria-hidden="true"></span>
+              </button>
+              <div id="booking-duration-editor" [hidden]="!durationEditorOpen" role="group" aria-label="Изменить длительность"
+                   (keydown.enter)="finishDurationEditing($event, durationToggle)">
+                <div class="booking-summary__fields">
+                  <label>Часы
+                    <input type="number" min="0" max="24" step="1" inputmode="numeric"
+                           [ngModel]="durationHours" [ngModelOptions]="{standalone:true}"
+                           [attr.aria-invalid]="durationError ? 'true' : null"
+                           [attr.aria-describedby]="durationError ? 'booking-duration-error' : null"
+                           (ngModelChange)="editDuration($event, durationMinutes)">
+                  </label>
+                  <label>Минуты
+                    <input type="number" min="0" max="59" step="1" inputmode="numeric"
+                           [ngModel]="durationMinutes" [ngModelOptions]="{standalone:true}"
+                           [attr.aria-invalid]="durationError ? 'true' : null"
+                           [attr.aria-describedby]="durationError ? 'booking-duration-error' : null"
+                           (ngModelChange)="editDuration(durationHours, $event)">
+                  </label>
+                </div>
+              </div>
+              <p *ngIf="durationError" id="booking-duration-error" class="booking-summary__error" role="alert">{{durationError}}</p>
+              <div *ngIf="durationAdjusted && (duration !== calculatedDuration || durationError)" class="booking-summary__reference">
+                <span>По услугам: {{ calculatedDuration ? formatDuration(calculatedDuration) : 'не задана' }}</span>
+                <button type="button" class="booking-summary__action" (click)="useCalculatedDuration(); durationToggle.focus()">
+                  Вернуть расчётное
+                </button>
+              </div>
+              <p *ngIf="durationNotice" class="booking-summary__note" role="status">{{durationNotice}}</p>
+              <p *ngIf="start && duration" class="booking-summary__note" role="status">
+                Окончание в <strong>{{ (+start + duration * 60000) | date:'HH:mm' }}</strong>
+              </p>
+            </section>
 
             <!-- Услуги разного характера нельзя объединять -->
             <div class="error-text" *ngIf="isErrorMixedCharacter" style="color:#d46c54; margin: 0 0 16px;">
@@ -78,22 +131,17 @@
                 *Укажите адрес выезда: город, улицу и дом
               </div>
             </div>
-            <!-- Продолжительность всех услуг , сумма -->
-            <!-- <div class="cont-horiz-between" style="padding: 20px;">
-              <div *ngIf="!isTimeLimit">
-                <b>Общее время: {{getHours(duration)}} ч. {{getMinutes(duration)}}  мин.</b>
-              </div>
-             Сумма стоимости всех услуг  
-              <div class="txt-green-bold">
-                Общая сумма: {{getPriceString(chooseServices)}} руб.
-              </div>
-            </div> -->
             <!-- Свободное время -->
           
             <!-- mode=master: мастеру нужны все окна дня, без отсечения лид-тайма клиентской записи. -->
             <app-set-interval-start [id]="id" [day]="day$|async" [duration]="duration"  [start]="startAI" [errorEmpty]="slotError"
+                                    [pointId]="bookingPointId"
                                     [mode]="'master'"
                                     (setInterval)="setInterval($event)"></app-set-interval-start>
+            <div class="error-text" *ngIf="scheduleLoadError" role="alert">
+              Не удалось загрузить график выбранной точки.
+              <button type="button" class="btn-green" (click)="reloadSchedule()">Повторить</button>
+            </div>
                               
 
 <!--            <div class="cont-horiz margin-bottom30 margin-top50" style="font-weight: 500;">-->
@@ -128,6 +176,7 @@
               </div>
             </div>
             <!-- Добавить запись -->
+            <p *ngIf="bookingError" class="error-text" role="alert">{{bookingError}}</p>
             <div class="cont-horiz w100">
               <button type="submit" class="margin-bottom50" 
                       [disabled]="isAvailable()" [class]="isAvailable() ? 'btn-gray' : 'btn-green'">

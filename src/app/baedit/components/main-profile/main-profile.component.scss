@@ -184,3 +184,19 @@
   color: #9196A4;
   line-height: 1.4;
 }
+
+.promo-error {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+
+  p { margin: 0; }
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: $green-basic;
+    text-decoration: underline;
+  }
+}

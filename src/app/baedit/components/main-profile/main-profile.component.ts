@@ -11,6 +11,7 @@ import {LoginService} from "../../../auth/login.service";
 import {urlProfile} from "../../../../helpers/constant/commonConstant";
 import {Clipboard} from '@angular/cdk/clipboard';
 import { environment } from 'src/enviroments/environment';
+import { finalize, take } from 'rxjs';
 @Component({
   selector: 'app-main-profile',
   templateUrl: './main-profile.component.html',
@@ -25,6 +26,9 @@ export class MainProfileComponent implements OnInit {
   formData: any;
   imageChangedEvent: any = null;
   isEdit = false;
+  isSavingPromo = false;
+  promoError = '';
+  promoSetupRequired = false;
   TEXT_LENGTH: number = environment.TEXT_LENGTH;
 
   constructor(private store$:Store,
@@ -123,15 +127,27 @@ export class MainProfileComponent implements OnInit {
       this.clipboard.copy(`${urlProfile}${cleanLink}`);
     }
 
-    changePromo() {
-      if (!this.profile?.id) {
+    changePromo(event: Event): void {
+      const input = event.target as HTMLInputElement;
+      const requestedPromo = input.checked;
+      // Галочка показывает сохранённое состояние, пока сервер не подтвердит изменение.
+      input.checked = !!this.profile?.isPromo;
+      if (!this.profile?.id || this.isSavingPromo) {
         return;
       }
       const profileId = this.profile.id;
-      this._profileService.changeIsPromo(profileId, { isPromo: !!this.profile.isPromo }).subscribe({
+      this.isSavingPromo = true;
+      this.promoError = '';
+      this.promoSetupRequired = false;
+      this._profileService.changeIsPromo(profileId, { isPromo: requestedPromo }).pipe(
+        take(1),
+        finalize(() => this.isSavingPromo = false),
+      ).subscribe({
         next: result => {
+          if (this.profile?.id !== profileId) return;
           if (result.code === 200) {
-            if (this.profile?.isPromo) {
+            this.profile.isPromo = typeof result.data === 'boolean' ? result.data : requestedPromo;
+            if (this.profile.isPromo) {
               this.profile.isGetOrder = false;
             }
             this._loginService.updateProfile(profileId);
@@ -143,22 +159,27 @@ export class MainProfileComponent implements OnInit {
                 : 'Страница снова может быть в каталоге',
               life: 5000
             });
+          } else {
+            this.showPromoError(result.message, result.code === 400 && !requestedPromo);
           }
         },
-        error: () => {
-          this.profile!.isPromo = !this.profile!.isPromo;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Не сохранено',
-            detail: 'Не удалось изменить режим страницы',
-            life: 5000
-          });
+        error: error => {
+          if (this.profile?.id === profileId) this.showPromoError(error?.error?.message);
         }
       });
     }
 
+    private showPromoError(message: unknown, setupRequired = false): void {
+      this.promoError = typeof message === 'string' && message.trim()
+        ? message.trim()
+        : 'Не удалось изменить режим страницы. Попробуйте ещё раз.';
+      this.promoSetupRequired = setupRequired;
+      this.messageService.add({ severity: 'error', summary: 'Не сохранено', detail: this.promoError, life: 7000 });
+    }
+
     onInputChange() {
-      // Удаление пробелов из введенной строки
+      // Пробелы в slug недопустимы; любая правка адреса включает «Сохранить».
+      this.isEdit = true;
       if (this.profile?.link) {
         this.profile.link = this.profile.link.replace(/\s/g, '');
       }

@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { PromoParticipantsComponent } from './components/promo/promo-participants.component';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -32,6 +33,11 @@ import { UslugiComponent } from './components/uslugi/uslugi.component';
 import { ModalserviceComponent } from './components/uslugi/modalservice/modalservice.component';
 import { ChangeModalGroupComponent } from './components/uslugi/change-modal-group/change-modal-group.component';
 import { GrafikComponent } from './components/grafik/grafik.component';
+import { GrafikGateComponent } from './components/grafik-week/grafik-gate.component';
+import { GrafikWeekComponent } from './components/grafik-week/grafik-week.component';
+import { GrafikDayComponent } from './components/grafik-week/grafik-day.component';
+import { GrafikTemplateComponent } from './components/grafik-week/grafik-template.component';
+import { GrafikPointSwitchComponent } from './components/grafik-week/grafik-point-switch.component';
 import { OplataComponent } from './components/oplata/oplata.component';
 import { GalereyaComponent } from './components/galereya/galereya.component';
 import { CardalbombaComponent } from './components/galereya/cardalbomba/cardalbomba.component';
@@ -79,13 +85,17 @@ import { ProfileBAInfoComponent } from './profilebisacc/profile-bainfo/profile-b
     ModalserviceComponent,
     ChangeModalGroupComponent,
     GrafikComponent,
+    GrafikGateComponent,
+    GrafikWeekComponent,
+    GrafikDayComponent,
+    GrafikTemplateComponent,
+    GrafikPointSwitchComponent,
     OplataComponent,
     GalereyaComponent,
     CardalbombaComponent,
     CardalbombafotoComponent,
     DelalbumComponent,
     ColumnBAProfileEditComponent,
-    NotificationChannelsBannerComponent,
     NotificationChannelSelectModalComponent,
     CreateServiceModalComponent,
     CreateServiceCategoryModalComponent,
@@ -102,6 +112,8 @@ import { ProfileBAInfoComponent } from './profilebisacc/profile-bainfo/profile-b
     ProfileBasicComponent,
     ProfileBAInfoComponent],
   imports: [
+    NotificationChannelsBannerComponent,
+    PromoParticipantsComponent,
     CommonModule,
     NgOptimizedImage,
     FormsModule,
@@ -132,6 +144,10 @@ import { ProfileBAInfoComponent } from './profilebisacc/profile-bainfo/profile-b
     ContactsComponent,
     UslugiComponent,
     GrafikComponent,
+    GrafikGateComponent,
+    GrafikWeekComponent,
+    GrafikDayComponent,
+    GrafikTemplateComponent,
     OplataComponent,
     GalereyaComponent,
     PromoComponent,

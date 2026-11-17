@@ -1,5 +1,6 @@
 
 import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, Renderer2, ViewChild} from '@angular/core';
+import { LoginService } from '../../../auth/login.service';
 import {BusService} from "../../../../services/busService";
 import {ProfileService} from "../../../../services/profile.service";
 import {CookieService} from "ngx-cookie-service";
@@ -37,7 +38,8 @@ export class FormatsComponent implements OnChanges {
               private _router: Router,
               private renderer: Renderer2,
               private _cookie: CookieService,
-              private activeModal: NgbActiveModal) {
+              private activeModal: NgbActiveModal,
+              private readonly login: LoginService) {
     this.renderer.listen('window', 'click',(e:Event)=>{
       /**
        * Only run when toggleButton is not clicked
@@ -106,9 +108,9 @@ export class FormatsComponent implements OnChanges {
     return this.mainProfile?.userType === UserType.Business;
   }
 
-  exit() {
+  async exit() {
     this.mainProfile = undefined;
-    this._cookie.delete('auth-token-ocpio');
+    await this.login.logoutAndClearCaches();
     this._events.transferToken(null);
     this._router.navigate(['/']);
   }

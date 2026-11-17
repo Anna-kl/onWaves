@@ -1,0 +1,145 @@
+<section class="week-screen day-screen">
+  <app-grafik-point-switch [profileId]="profileId" [disabled]="saving"></app-grafik-point-switch>
+  <button type="button" class="week-screen__link back-link" (click)="back()">‹ Неделя</button>
+  <p class="week-screen__status" *ngIf="loading">Загружаю день…</p>
+  <p class="week-screen__status" *ngIf="error">{{ error }}</p>
+
+  <ng-container *ngIf="day">
+    <div class="screen-kicker">
+      <h2 class="screen-title">{{ weekdayShort(day.dayOfWeek) }} {{ formatScheduleDate(day.date) }}</h2>
+      <span class="pill" *ngIf="day.isToday">сегодня</span>
+    </div>
+    <p class="screen-lead" *ngIf="isPast">Этот день уже прошёл.</p>
+    <p class="screen-lead" *ngIf="!isPast">{{ scheduleLead }}</p>
+
+    <div class="preview">
+      <div class="preview__label">Клиенты увидят</div>
+      <div class="preview__value">{{ clientLabel }}</div>
+      <ng-container *ngIf="!isDayOff && workPeriod as work">
+        <div class="timeline" aria-hidden="true">
+          <span class="timeline__work" [style.left.%]="span(work.start, work.end).left" [style.width.%]="span(work.start, work.end).width"></span>
+          <span class="timeline__break" *ngIf="breakPeriod as dayBreak" [style.left.%]="span(dayBreak.start, dayBreak.end).left" [style.width.%]="span(dayBreak.start, dayBreak.end).width"></span>
+          <span class="timeline__closed" *ngFor="let block of closedPeriods" [style.left.%]="span(block.start, block.end).left" [style.width.%]="span(block.start, block.end).width"></span>
+          <span class="timeline__record" *ngFor="let mark of recordMarks" [style.left.%]="mark.left" [style.width.%]="mark.width"></span>
+        </div>
+        <div class="timeline__scale"><span>0:00</span><span>6:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+        <div class="legend">
+          <span><i class="legend__work"></i>работаю</span>
+          <span><i class="legend__record"></i>запись</span>
+          <span><i class="legend__break"></i>перерыв</span>
+          <span><i class="legend__closed"></i>закрыто</span>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="closures" *ngIf="!isDayOff">
+      <div class="closures__head" *ngIf="closed.length">
+        <strong>Закрытые часы</strong>
+        <span>Только эти окна. График работы остаётся с {{ startText }} до {{ endText }}.</span>
+      </div>
+      <div class="break-form" *ngFor="let block of closed; let i = index">
+        <div class="break-form__head">
+          <strong>Закрыто {{ block.startText }}–{{ block.endText }}</strong>
+          <button type="button" class="closure__remove" *ngIf="!isPast" (click)="askRelease(i)" [disabled]="saving">Открыть</button>
+        </div>
+        <p class="form-error" *ngIf="blockErrors[i]">{{ blockErrors[i] }}</p>
+        <div class="confirm-open" *ngIf="pendingRelease === i">
+          <p>Открыть {{ block.startText }}–{{ block.endText }} для записи?</p>
+          <div class="confirm-open__actions">
+            <button type="button" class="week-btn week-btn--primary" (click)="releaseBlock(i)" [disabled]="saving">Открыть</button>
+            <button type="button" class="week-btn week-btn--ghost" (click)="pendingRelease = null" [disabled]="saving">Оставить</button>
+          </div>
+        </div>
+      </div>
+      <div class="break-form" *ngIf="showCloseForm && !isPast">
+        <div class="break-form__head">
+          <strong>Закрыть часы</strong>
+          <button type="button" class="closure__remove" (click)="cancelCloseForm()" [disabled]="saving">Отмена</button>
+        </div>
+        <div class="break-form__times">
+          <label class="time-field">
+            <span>С</span>
+            <select name="closeStart" [(ngModel)]="closeStart" [disabled]="saving" aria-label="Начало закрытого времени">
+              <option value="">—</option>
+              <option *ngFor="let time of closeChoices" [value]="time">{{ time }}</option>
+            </select>
+          </label>
+          <label class="time-field">
+            <span>До</span>
+            <select name="closeEnd" [(ngModel)]="closeEnd" [disabled]="saving" aria-label="Конец закрытого времени">
+              <option value="">—</option>
+              <option *ngFor="let time of closeChoices" [value]="time">{{ time }}</option>
+            </select>
+          </label>
+        </div>
+        <p class="close-sheet__hint">Клиентка записалась по телефону? Закройте это время — онлайн его уже не займут.</p>
+        <div class="chips close-scope" role="radiogroup" aria-label="На какие даты закрыть">
+          <button type="button" class="chip" [class.chip--on]="closeScope === 'day'" [attr.aria-pressed]="closeScope === 'day'" (click)="closeScope = 'day'" [disabled]="saving">Только эта дата</button>
+          <button type="button" class="chip" [class.chip--on]="closeScope === 'weekday'" [attr.aria-pressed]="closeScope === 'weekday'" (click)="closeScope = 'weekday'" [disabled]="saving">{{ weekdayRangeLabel(day.dayOfWeek, todayDate) }}</button>
+        </div>
+        <p class="form-error" role="alert" *ngIf="closeError">{{ closeError }}</p>
+        <button type="button" class="week-btn week-btn--primary closures__add" (click)="submitClose()" [disabled]="saving">{{ saving ? 'Закрываю…' : 'Закрыть' }}</button>
+      </div>
+      <button type="button" class="week-btn week-btn--ghost closures__add" *ngIf="!showCloseForm && !isPast" (click)="openCloseForm()" [disabled]="saving">Закрыть окно</button>
+    </div>
+
+    <div class="break-form" *ngIf="!isDayOff">
+      <div class="break-form__head">
+        <strong>Часы работы</strong>
+      </div>
+      <div class="break-form__times">
+        <label class="time-field">
+          <span>С</span>
+          <input type="time" name="workStart" required [(ngModel)]="startText" [disabled]="isPast || saving" [attr.aria-invalid]="!!workError" aria-describedby="work-error" aria-label="Начало дня">
+        </label>
+        <label class="time-field">
+          <span>До</span>
+          <input type="time" name="workEnd" required [(ngModel)]="endText" [disabled]="isPast || saving" [attr.aria-invalid]="!!workError" aria-describedby="work-error" aria-label="Конец дня">
+        </label>
+      </div>
+      <p class="form-error" id="work-error" role="alert" *ngIf="workError">{{ workError }}</p>
+    </div>
+
+    <button type="button" class="week-btn week-btn--ghost break-add" *ngIf="!isDayOff && !hasBreak" (click)="addBreak()" [disabled]="isPast || saving">Добавить перерыв на эту дату</button>
+    <div class="break-form" *ngIf="!isDayOff && hasBreak">
+      <div class="break-form__head">
+        <strong>Перерыв</strong>
+        <button type="button" class="closure__remove" (click)="removeBreak()" [disabled]="isPast || saving">Убрать</button>
+      </div>
+      <p class="break-form__note">Только {{ formatScheduleDate(day.date) }}. Другие даты не изменятся.</p>
+      <div class="break-form__times">
+        <label class="time-field">
+          <span>С</span>
+          <input type="time" name="breakStart" required [(ngModel)]="breakStartText" (ngModelChange)="breakChanged = true" [disabled]="isPast || saving" [attr.aria-invalid]="!!breakError" aria-describedby="break-error" aria-label="Начало перерыва">
+        </label>
+        <label class="time-field">
+          <span>До</span>
+          <input type="time" name="breakEnd" required [(ngModel)]="breakEndText" (ngModelChange)="breakChanged = true" [disabled]="isPast || saving" [attr.aria-invalid]="!!breakError" aria-describedby="break-error" aria-label="Конец перерыва">
+        </label>
+      </div>
+      <p class="form-error" id="break-error" role="alert" *ngIf="breakError">{{ breakError }}</p>
+    </div>
+
+    <div class="break-row">
+      <div>
+        <strong>Выходной</strong>
+        <span>{{ isDayOff ? 'Клиенты не увидят окон' : 'День рабочий, окна открыты' }}</span>
+      </div>
+      <label class="ow-switch" [class.ow-switch--on]="isDayOff">
+        <input type="checkbox" [(ngModel)]="isDayOff" [disabled]="isPast || saving" aria-label="Выходной">
+        <span class="ow-switch__ui" aria-hidden="true"></span>
+      </label>
+    </div>
+
+    <p class="conflict" *ngFor="let conflict of day.conflicts">
+      <strong>Запись в закрытых часах</strong>
+      Запись в {{ conflict.start }} останется на месте. Перенесите её или напишите клиенту.
+    </p>
+
+    <div class="day-actions">
+      <button type="button" class="day-btn day-btn--primary" (click)="save('day')" [disabled]="isPast || saving">{{ saving ? 'Сохраняю…' : 'Сохранить на ' + formatScheduleDate(day.date) }}</button>
+      <p class="hint">Часы, перерыв и выходной меняются только у этой даты.</p>
+      <button type="button" class="week-screen__link" *ngIf="day.source === 2" (click)="reset()" [disabled]="isPast || saving">Вернуть обычные часы и снять разовые закрытия</button>
+    </div>
+  </ng-container>
+</section>

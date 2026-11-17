@@ -3,7 +3,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {ProfileDataEditService} from "./services/ba-edit-service";
 import {IViewBusinessProfile} from "../DTO/views/business/IViewBussinessProfile";
-import {Subject, takeUntil} from "rxjs";
+import {EMPTY, Subject, switchMap, takeUntil} from "rxjs";
 import { ProfileService } from 'src/services/profile.service';
 import { ProfileDataService } from '../profile-ba/services/profile-data.service';
 
@@ -15,7 +15,7 @@ import { ProfileDataService } from '../profile-ba/services/profile-data.service'
 export class BAEditComponent implements OnInit, OnDestroy {
   // id: string | null = null;
   destroy$: Subject<void> = new Subject<void>();
-  id: string | any;
+  id: string | null = null;
   profile: IViewBusinessProfile | null = null;
   isShowMenu = true;
   menu: string|null = null;
@@ -41,15 +41,17 @@ export class BAEditComponent implements OnInit, OnDestroy {
     if (this.profile){
     }
 
-    let link = this._activateRoute.snapshot.paramMap.get('id');
-    if (link) {
-      this._api.translateLink(link).subscribe(
-          result => {
-            this.id = result.data;
-            this._profileData.transferId(result.data);
-          }
-      );
-  }
+    this._activateRoute.paramMap.pipe(
+      switchMap(params => {
+        this.id = null;
+        const link = params.get('id');
+        return link ? this._api.translateLink(link) : EMPTY;
+      }),
+      takeUntil(this.destroy$),
+    ).subscribe(result => {
+      this.id = typeof result.data === 'string' ? result.data : null;
+      if (this.id) this._profileData.transferId(this.id);
+    });
   }
 
 

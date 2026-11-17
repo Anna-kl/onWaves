@@ -1,4 +1,5 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Inject, OnDestroy, OnInit, PLATFORM_ID} from '@angular/core';
+import {isPlatformBrowser} from '@angular/common';
 import { ToastService } from 'src/services/toast.service';
 import {environment} from '../../../enviroments/environment';
 import {IViewBusinessProfile} from "../../DTO/views/business/IViewBussinessProfile";
@@ -9,20 +10,20 @@ import {FormBuilder, FormGroup} from "@angular/forms";
 import {BackendService} from "../../../services/backend.service";
 import { Router } from '@angular/router';
 import { NavigationService } from 'src/app/navigation-service.service';
-import { Subscription } from 'rxjs';
+import { auditTime, filter, fromEvent, merge, Subscription, timeout } from 'rxjs';
 import { ConsentService } from 'src/services/consent.service';
 import { ConsentChannel } from '../../DTO/enums/consentChannel';
 import { IViewConsent } from '../../DTO/views/consent/IViewConsent';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { SubscribeChannelModalComponent } from './subscribe-channel-modal/subscribe-channel-modal.component';
 import { RevokeChannelModalComponent } from './revoke-channel-modal/revoke-channel-modal.component';
-import { PushDebugService } from 'src/services/push-notification.service';
+import { PushDebugService, PushDeviceResult } from 'src/services/push-notification.service';
 
 /**
  * Каналы с ботом (Telegram, VK, MAX): бэкенд при отзыве согласия удаляет
  * подписку, и обратно её вернёт только «Старт» в боте, а не переключатель.
  * Push сюда не входит — подписка устройства восстанавливается молча
- * (см. restorePushSubscription).
+ * при проверке именно текущего устройства.
  */
 const CHANNELS_WITH_BOT: ConsentChannel[] = [
   ConsentChannel.Telegram,
@@ -38,6 +39,7 @@ interface IConsentToggle {
   isGranted: boolean;
   /** Канал реально подключён (бот запущен, контакт указан, устройство подписано). */
   isSubscribed: boolean;
+  telegramFromPersonal?: boolean;
   /** Запрос согласия в полёте: блокирует повторные клики, иначе ползунок «дёргается». */
   isPending: boolean;
 }
@@ -51,8 +53,21 @@ interface IConsentToggle {
 export class SettingsComponent implements OnInit, OnDestroy{
 
   
-  private unsubscribe$: Subscription|null = null;
-  private consentSub$: Subscription|null = null;
+  private readonly subscriptions = new Subscription();
+  private consentSub?: Subscription;
+  private profileModal?: NgbModalRef;
+  private destroyed = false;
+  private profileRevision = 0;
+  private pushRevision = 0;
+  private consentReadRevision = 0;
+  consentWritePending = false;
+  consentReadFailed = false;
+  consentLoaded = false;
+  pushResult?: PushDeviceResult;
+  readonly pushChannel = ConsentChannel.Push;
+  readonly telegramChannel = ConsentChannel.Telegram;
+  telegramHandoffPending = false;
+  activeBusinessId: string | null = null;
   profile!: IViewBusinessProfile | undefined;
   settingsForm!: FormGroup;
 
@@ -73,7 +88,8 @@ export class SettingsComponent implements OnInit, OnDestroy{
               private _router: Router,
               private navigationService: NavigationService,
               private modalService: NgbModal,
-              private pushService: PushDebugService) {
+              private pushService: PushDebugService,
+              @Inject(PLATFORM_ID) private platformId: Object) {
     this.settingsForm = this._fb.nonNullable.group({
       phone: '',
       name: '',
@@ -92,8 +108,10 @@ export class SettingsComponent implements OnInit, OnDestroy{
   }
 
   ngOnDestroy(): void {
-    this.unsubscribe$?.unsubscribe();
-    this.consentSub$?.unsubscribe();
+    this.destroyed = true;
+    this.cancelConsentRead();
+    this.profileModal?.dismiss();
+    this.subscriptions.unsubscribe();
   }
 
   showError(text: string) {
@@ -115,7 +133,7 @@ export class SettingsComponent implements OnInit, OnDestroy{
       this.profile.phone = data['phone'];
       this.profile.name = data['name'];
       this.profile.email = data['email'];
-      this.unsubscribe$ = this._apiProfile.saveProfile(this.profile?.id!, this.profile).subscribe(
+      this.subscriptions.add(this._apiProfile.saveProfile(this.profile?.id!, this.profile).subscribe(
           result => {
             if (result.code === 200){
                 this.showSuccess();
@@ -124,7 +142,7 @@ export class SettingsComponent implements OnInit, OnDestroy{
               this.showError(result.message);
             }
           }
-      );
+      ));
     }
 
     // this.http.put(`${this.url}/update-baprofile/${this.profile?.id}`, { viewbusinell: data })
@@ -136,34 +154,68 @@ export class SettingsComponent implements OnInit, OnDestroy{
   }
 
   ngOnInit(): void {
-    
-    this.unsubscribe$ = this._apiAuth.allProfiles$.subscribe(result => {
-      let profile = result.find(_ => _.userType === UserType.User);
-      if (profile) {
-        this.profile = new IViewBusinessProfile();
-        this.profile.copyProfile(profile as IViewBusinessProfile);
-        this.settingsForm = this._fb.group({
-          phone: this.profile?.phone,
-          email: this.profile?.email,
-          name: this.profile?.name,
-          family: this.profile?.family
-        });
-        this.loadConsents();
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    this.subscriptions.add(this._apiAuth.allProfiles$.subscribe(result => {
+      const active = result.find(profile => profile.id === this._apiAuth.isProfileId());
+      this.activeBusinessId = active?.userType === UserType.Business ? active.id ?? null : null;
+      const next = result.find(profile => profile.userType === UserType.User)
+        ?? result.find(profile => profile.id === this._apiAuth.isProfileId())
+        ?? result[0];
+      const id = next?.id;
+      const previousId = this.profile?.id;
+      if (previousId !== id) {
+        ++this.profileRevision;
+        this.cancelConsentRead();
+        if (previousId) this.pushService.invalidateCheck(previousId);
+        this.invalidatePush();
+        this.profileModal?.dismiss();
+        this.profileModal = undefined;
+        this.consentWritePending = false;
+        this.consentReadFailed = false;
+        this.consentLoaded = false;
+        this.telegramHandoffPending = false;
+        this.consentItems = this.consentItems.map(item => ({
+          ...item, isGranted: false, isSubscribed: false, isPending: false, telegramFromPersonal: false,
+        }));
       }
-    });
-    this.settingsForm.get('phone')?.valueChanges.subscribe(result => {
-      if (result.length != 11){
-        this.errors.errorLink = 'Не правильно указан номер телефона';
+      this.profile = next ? new IViewBusinessProfile() : undefined;
+      if (next && this.profile) {
+        this.profile.copyProfile(next);
+        this.settingsForm.patchValue({
+          phone: this.profile.phone,
+          email: this.profile.email,
+          name: this.profile.name,
+          family: this.profile.family,
+        }, { emitEvent: false });
+        if (previousId !== id) this.loadConsents();
+      }
+    }));
+    this.subscriptions.add(this._apiConsent.getTextVersions().subscribe({
+      next: versions => { this.consentTextVersion = versions?.[0] ?? ''; },
+      error: () => { this.consentTextVersion = ''; },
+    }));
+    this.subscriptions.add(merge(
+      fromEvent(window, 'focus'), fromEvent(window, 'pageshow'), fromEvent(document, 'visibilitychange'),
+    ).pipe(
+      auditTime(150),
+      filter(() => document.visibilityState === 'visible'),
+    ).subscribe(() => {
+      if (!this.profileModal && !this.consentWritePending) this.loadConsents();
+    }));
+    this.subscriptions.add(this.settingsForm.get('phone')?.valueChanges.subscribe(result => {
+      const profileId = this.profile?.id;
+      if (!profileId) return;
+      if (result?.length !== 11) {
+        this.errors.errorLink = 'Неправильно указан номер телефона';
       } else {
-        this.unsubscribe$ = this._apiProfile.checkUserPhone(this.profile?.id!, result).subscribe(res => {
-          if (res.code === 404){
-            this.errors.errorLink = '';
-          } else {
-            this.errors.errorLink = 'Этот номер уже используется в дрцгом аккаунте';
+        this.subscriptions.add(this._apiProfile.checkUserPhone(profileId, result).subscribe(res => {
+          if (this.isCurrent(profileId) && this.settingsForm.get('phone')?.value === result) {
+            this.errors.errorLink = res.code === 404 ? '' : 'Этот номер уже используется в другом аккаунте';
           }
-        });
+        }));
       }
-    });
+    }));
   }
   goToMainPage() {
     this._router.navigate(['/']);
@@ -172,28 +224,101 @@ export class SettingsComponent implements OnInit, OnDestroy{
     this.navigationService.goToBack();
   }
 
+  private isCurrent(profileId: string): boolean {
+    return !this.destroyed && this.profile?.id === profileId;
+  }
+
+  private cancelConsentRead(): void {
+    ++this.consentReadRevision;
+    this.consentSub?.unsubscribe();
+  }
+
+  retryPushCheck(): void {
+    if (!this.consentWritePending) this.loadConsents();
+  }
+
   private loadConsents(): void {
-    if (!this.profile?.id) {
-      return;
-    }
-    this.consentSub$?.unsubscribe();
-    this.unsubscribe$ = this._apiConsent.getTextVersions().subscribe(versions => {
-      this.consentTextVersion = versions?.[0] ?? '';
-    });
-    this.consentSub$ = this._apiConsent.getProfileConsents(this.profile.id).subscribe(result => {
-      this.applyConsentStatuses(result);
+    const profileId = this.profile?.id;
+    if (!profileId || this.consentWritePending) return;
+
+    this.cancelConsentRead();
+    const revision = this.consentReadRevision;
+    const onError = () => {
+      if (!this.isCurrent(profileId) || revision !== this.consentReadRevision) return;
+      this.consentReadFailed = true;
+      this.invalidatePush();
+    };
+    this.consentSub = this._apiConsent.getProfileConsents(profileId).pipe(timeout(15000)).subscribe({
+      next: statuses => {
+        if (!this.isCurrent(profileId) || revision !== this.consentReadRevision) return;
+        if (!Array.isArray(statuses)) { onError(); return; }
+        this.consentReadFailed = false;
+        this.consentLoaded = true;
+        this.applyConsentStatuses(statuses);
+        if (this.pushItem.isGranted) this.checkPush(profileId);
+        else this.invalidatePush();
+      },
+      error: onError,
     });
   }
 
   private applyConsentStatuses(statuses: IViewConsent[]): void {
-    this.consentItems = this.consentItems.map(item => {
-      const status = statuses.find(_ => _.channel === item.channel);
-      return {
-        ...item,
-        isGranted: status ? status.isGranted : false,
-        isSubscribed: status ? status.isSubscribed : item.isSubscribed
-      };
+    for (const item of this.consentItems) {
+      const status = statuses.find(row => row.channel === item.channel);
+      item.isGranted = status?.isGranted === true;
+      // Consent status reports push for the whole account. The device has its own read-back.
+      if (item.channel !== ConsentChannel.Push) item.isSubscribed = status?.isSubscribed ?? false;
+      if (item.channel === ConsentChannel.Telegram) {
+        item.telegramFromPersonal = status?.telegramFromPersonal === true;
+        this.telegramHandoffPending = status?.telegramConnectionPending ??
+          (this.telegramHandoffPending && item.isGranted && !item.isSubscribed);
+      }
+    }
+  }
+
+  private get pushItem(): IConsentToggle {
+    return this.consentItems.find(item => item.channel === ConsentChannel.Push)!;
+  }
+
+  private invalidatePush(): void {
+    ++this.pushRevision;
+    this.pushResult = undefined;
+    this.pushItem.isSubscribed = false;
+  }
+
+  private checkPush(profileId: string, restore = true): void {
+    this.invalidatePush();
+    const revision = this.pushRevision;
+    void this.pushService.checkDevice(profileId, restore).then(result => {
+      if (!this.isCurrent(profileId) || revision !== this.pushRevision || !this.pushItem.isGranted) return;
+      if (result.isGranted === false) this.pushItem.isGranted = false;
+      this.pushResult = result;
+      this.pushItem.isSubscribed = result.state === 'connected';
     });
+  }
+
+  get pushStatusText(): string {
+    if (this.consentReadFailed) return 'Не удалось проверить согласие на уведомления';
+    if (!this.consentLoaded || !this.pushResult) return 'Проверяем подключение…';
+    switch (this.pushResult.state) {
+      case 'connected': return 'Подключено на этом устройстве';
+      case 'permission': return 'Требуется разрешение устройства';
+      case 'denied': return this.pushResult.diagnostics.isIOS
+        ? 'Разрешите OnWaves в настройках уведомлений iPhone'
+        : 'Разрешите уведомления в настройках сайта в браузере';
+      case 'install': return 'Откройте OnWaves с иконки на экране «Домой»';
+      case 'unavailable': return this.pushResult.diagnostics.errorCode === 'ios-too-old'
+        ? 'Для уведомлений нужна iOS 16.4 или новее' : 'Это устройство не поддерживает push-уведомления';
+      case 'setup': return 'Подписка на этом устройстве ещё не создана';
+      case 'not-registered': return 'Подписка этого устройства не сохранена';
+      case 'unverified': return 'Не удалось проверить подключение';
+    }
+  }
+
+  get canSetUpPush(): boolean {
+    if (!this.consentLoaded || this.consentReadFailed || this.consentWritePending) return false;
+    const state = this.pushResult?.state;
+    return state === 'permission' || state === 'setup' || state === 'install' || state === 'not-registered';
   }
 
   /**
@@ -211,7 +336,7 @@ export class SettingsComponent implements OnInit, OnDestroy{
     const checkbox = event.target as HTMLInputElement;
     const isGranted = checkbox.checked;
 
-    if (item.isPending) {
+    if (this.consentWritePending || !this.consentLoaded || this.consentReadFailed) {
       this.syncToggle(checkbox, item);
       return;
     }
@@ -240,11 +365,12 @@ export class SettingsComponent implements OnInit, OnDestroy{
   }
 
   private confirmRevoke(item: IConsentToggle, checkbox: HTMLInputElement): void {
-    const modalRef = this.modalService.open(RevokeChannelModalComponent, { centered: true });
+    const revision = this.profileRevision;
+    const modalRef = this.openProfileModal(RevokeChannelModalComponent);
     modalRef.componentInstance.channelName = item.name;
     modalRef.result.then(
       reason => {
-        if (reason === 'revoke') {
+        if (reason === 'revoke' && !this.destroyed && revision === this.profileRevision) {
           this.sendConsent(item, false, checkbox);
         }
       },
@@ -254,40 +380,56 @@ export class SettingsComponent implements OnInit, OnDestroy{
   }
 
   private sendConsent(item: IConsentToggle, isGranted: boolean, checkbox: HTMLInputElement): void {
+    const profileId = this.profile?.id;
+    if (!profileId || this.consentWritePending) return;
+    const revision = this.profileRevision;
+    this.startConsentWrite(profileId);
     item.isPending = true;
-    this.unsubscribe$ = this._apiConsent.sendConsent({
-      profileUserId: this.profile!.id!,
+    this.subscriptions.add(this._apiConsent.sendConsent({
+      profileUserId: profileId,
       channel: item.channel,
-      isGranted: isGranted,
+      isGranted,
       consentTextVersion: this.consentTextVersion,
       source: 'settings'
-    }).subscribe({
+    }).pipe(timeout(15000)).subscribe({
       next: result => {
+        if (!this.isCurrent(profileId) || revision !== this.profileRevision) return;
+        this.consentWritePending = false;
         item.isPending = false;
         if (result.code === 200) {
           item.isGranted = isGranted;
+          if (!isGranted) item.isSubscribed = false;
+          if (!isGranted && item.channel === ConsentChannel.Telegram) this.telegramHandoffPending = false;
           this.syncToggle(checkbox, item);
           this.showDone(isGranted
             ? `${item.name}: согласие сохранено`
             : `${item.name}: вы отписаны от уведомлений`);
-          if (isGranted && !item.isSubscribed) {
-            if (item.channel === ConsentChannel.Push) {
-              this.restorePushSubscription(item);
-            } else {
-              this.openSubscribeModal(item);
-            }
+          if (this.pushItem.isGranted) this.checkPush(profileId);
+          if (isGranted && item.channel !== ConsentChannel.Push && !item.isSubscribed) {
+            this.openSubscribeModal(item);
           }
         } else {
           this.syncToggle(checkbox, item);
           this.showError(result.message || 'Не удалось сохранить согласие');
+          this.loadConsents();
         }
       },
       error: () => {
+        if (!this.isCurrent(profileId) || revision !== this.profileRevision) return;
+        this.consentWritePending = false;
         item.isPending = false;
         this.syncToggle(checkbox, item);
         this.showError('Не удалось сохранить согласие, попробуйте позже');
+        this.loadConsents();
       }
-    });
+    }));
+  }
+
+  private startConsentWrite(profileId: string): void {
+    this.consentWritePending = true;
+    this.cancelConsentRead();
+    this.pushService.invalidateCheck(profileId);
+    this.invalidatePush();
   }
 
   isToggleOn(item: IConsentToggle): boolean {
@@ -296,7 +438,7 @@ export class SettingsComponent implements OnInit, OnDestroy{
 
   /** Канал разрешён, но ещё не работает — нужен второй шаг (бот, контакт, подписка устройства). */
   needsSetup(item: IConsentToggle): boolean {
-    return item.isGranted && !item.isSubscribed;
+    return item.channel !== ConsentChannel.Push && item.isGranted && !item.isSubscribed;
   }
 
   /**
@@ -308,94 +450,91 @@ export class SettingsComponent implements OnInit, OnDestroy{
     checkbox.checked = this.isToggleOn(item);
   }
 
-  /**
-   * При отзыве согласия бэкенд удаляет строки подписки, но разрешение браузера
-   * и сама подписка на устройстве остаются. Поэтому после повторной выдачи
-   * согласия канал чинится молча, без системных окон и без модалки — она
-   * открывается, только если восстановить нечего (нет разрешения или подписки).
-   */
-  private restorePushSubscription(item: IConsentToggle): void {
-    this.pushService.syncExistingSubscription(this.profile!.id!)
-      .then(sub => {
-        if (sub) {
-          item.isSubscribed = true;
-          this.showDone('Push-уведомления снова подключены на этом устройстве');
-        } else {
-          this.openSubscribeModal(item);
-        }
-      })
-      .catch(() => this.openSubscribeModal(item));
+  private openProfileModal(component: typeof RevokeChannelModalComponent | typeof SubscribeChannelModalComponent): NgbModalRef {
+    const modal = this.modalService.open(component, { centered: true, backdrop: 'static' });
+    this.profileModal = modal;
+    const clear = () => { if (this.profileModal === modal) this.profileModal = undefined; };
+    void modal.result.then(clear, clear);
+    return modal;
   }
 
   openSubscribeModal(item: IConsentToggle): void {
-    const modalRef = this.modalService.open(SubscribeChannelModalComponent, {
-      centered: true,
-      backdrop: 'static'
-    });
-    modalRef.componentInstance.profileId = this.profile!.id;
+    const profile = this.profile;
+    const profileId = profile?.id;
+    if (!profileId || this.profileModal || this.consentWritePending || !item.isGranted) return;
+    const revision = this.profileRevision;
+    const modalRef = this.openProfileModal(SubscribeChannelModalComponent);
+    modalRef.componentInstance.profileId = profileId;
     modalRef.componentInstance.channel = item.channel;
-    modalRef.componentInstance.profile = this.profile;
-    modalRef.result.then(
+    modalRef.componentInstance.profile = profile;
+    void modalRef.result.then(
       reason => {
-        switch (reason) {
-          case 'push-subscribed':
-            // Подписка сохраняется отдельным эндпоинтом (notifications/subscribe),
-            // и запись согласия для Push может ещё не существовать. Тогда
-            // applyConsentStatuses оставит наш флаг, и подсказка «канал не
-            // подключён» не вернётся, хотя устройство уже зарегистрировано.
-            item.isSubscribed = true;
-            this.showDone('Push-уведомления подключены на этом устройстве');
-            break;
-          case 'contact-saved':
-            item.isSubscribed = true;
-            this.showDone(`${item.name}: контакт сохранён`);
-            break;
-          case 'subscribed':
-            // Уход в бота ещё не значит подписку: она появится после «Старт».
-            this.showInfo(`Нажмите «Старт» в ${item.name} — статус обновится автоматически`);
-            break;
+        if (!this.isCurrent(profileId) || revision !== this.profileRevision || this.consentWritePending) return;
+        if (reason === 'push-subscribed') {
+          // Verify the POST against storage for this device before showing any success.
+          this.cancelConsentRead();
+          this.checkPush(profileId, false);
+          return;
+        }
+        if (reason === 'contact-saved') {
+          item.isSubscribed = true;
+          this.showDone(`${item.name}: контакт сохранён`);
+        } else if (reason === 'subscribed') {
+          if (item.channel === ConsentChannel.Telegram) this.telegramHandoffPending = true;
+          else this.showInfo(`Нажмите «Старт» в ${item.name} — статус обновится автоматически`);
         }
         this.loadConsents();
       },
-      // Закрыли крестиком: согласие уже сохранено, ползунок ему соответствует,
-      // подсказка «канал не подключён» останется под названием канала.
-      () => {}
+      () => {
+        if (this.isCurrent(profileId) && revision === this.profileRevision &&
+            item.channel === ConsentChannel.Push && !this.consentWritePending) {
+          this.checkPush(profileId, false);
+        }
+      }
     );
   }
 
   unsubscribeFromAll(): void {
-    if (!this.profile?.id) {
-      this.showError('Профиль ещё загружается, повторите через пару секунд');
-      return;
-    }
+    const profileId = this.profile?.id;
+    if (!profileId || this.consentWritePending || this.profileModal) return;
+    const revision = this.profileRevision;
 
-    // Массовый отзыв тоже удаляет подписки ботов — предупреждение то же.
-    const modalRef = this.modalService.open(RevokeChannelModalComponent, { centered: true });
+    const modalRef = this.openProfileModal(RevokeChannelModalComponent);
     modalRef.componentInstance.bulk = true;
-    modalRef.result.then(
+    void modalRef.result.then(
       reason => {
-        if (reason === 'revoke') {
-          this.revokeAllConsents();
+        if (reason === 'revoke' && this.isCurrent(profileId) && revision === this.profileRevision) {
+          this.revokeAllConsents(profileId);
         }
       },
       () => {}
     );
   }
 
-  private revokeAllConsents(): void {
-    this.unsubscribe$ = this._apiConsent.revokeAllConsents(this.profile!.id!).subscribe({
+  private revokeAllConsents(profileId: string): void {
+    const revision = this.profileRevision;
+    this.startConsentWrite(profileId);
+    this.subscriptions.add(this._apiConsent.revokeAllConsents(profileId).pipe(timeout(15000)).subscribe({
       next: result => {
-        // Ползунки гасим только по подтверждённому ответу: раньше тост об успехе
-        // и сброс всех каналов выполнялись при любом коде в теле ответа.
+        if (!this.isCurrent(profileId) || revision !== this.profileRevision) return;
+        this.consentWritePending = false;
         if (result.code === 200) {
-          this.consentItems = this.consentItems.map(item => ({ ...item, isGranted: false }));
+          this.applyConsentStatuses([]);
+          this.consentLoaded = true;
+          this.consentReadFailed = false;
           this.showDone(result.message || 'Вы отписаны от всех рассылок');
         } else {
           this.showError(result.message || 'Не удалось отписаться от рассылок');
+          this.loadConsents();
         }
       },
-      error: () => this.showError('Не удалось отписаться от рассылок, попробуйте позже')
-    });
+      error: () => {
+        if (!this.isCurrent(profileId) || revision !== this.profileRevision) return;
+        this.consentWritePending = false;
+        this.showError('Не удалось отписаться от рассылок, попробуйте позже');
+        this.loadConsents();
+      }
+    }));
   }
 }
 

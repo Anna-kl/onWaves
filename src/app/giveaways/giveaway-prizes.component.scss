@@ -1,0 +1,43 @@
+@import '../../assets/styles/main/color';
+
+.gw-prizes { margin: 24px 0; }
+.gw-prizes h2 { margin: 0 0 12px; color: $green-dark; }
+.gw-prize {
+  margin: 0 0 12px;
+  padding: 16px;
+  border-radius: 20px;
+  background: #f4fbfb;
+}
+.gw-prize h3 { margin: 0 0 8px; }
+.gw-prize button, .gw-prize a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: 8px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: $green-basic;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.gw-prize button:focus-visible, .gw-prize a:focus-visible { outline: 3px solid $green-dark; outline-offset: 3px; }
+
+.gw-prize__service { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 0; cursor: pointer; }
+.gw-prize__service input[type='checkbox'], .gw-prize__service input[type='radio'] {
+  display: inline-block;
+  position: static;
+  appearance: auto;
+  visibility: visible;
+  opacity: 1;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: $green-basic;
+}
+.gw-prize__selection { border-top: 1px solid #dbe9e9; margin-top: 16px; padding-top: 16px; }

@@ -22,6 +22,7 @@ import {CommonNotesComponent} from "./notes/common-notes.component";
 import {ProfileBANotesRouting} from "./notes/notes-routing.module";
 import {NotesService} from "./notes/notes-events.service";
 import { CabinetBAComponent } from './cabinet-ba/cabinet-ba.component';
+import { GiveawayMyEntriesComponent } from '../giveaways/giveaway-my-entries.component';
 import {RouterModule} from "@angular/router";
 import {CommonComponentsModule} from "../common/common.module";
 import {NgxMaskDirective, NgxMaskPipe} from "ngx-mask";
@@ -49,6 +50,11 @@ import { ShowPhoneCouponComponent } from './popup/show-phone-coupon/show-phone-c
 import { BookingContactModalComponent } from './components/booking-contact-modal/booking-contact-modal.component';
 import { LandingUiModule } from './landing-ui.module';
 import { CellingsOfferComponent } from './components/cellings-offer/cellings-offer.component';
+import { PromoTermsComponent } from './components/promo-terms/promo-terms.component';
+import { PromoSeatsTermsComponent } from './components/promo-seats-terms/promo-seats-terms.component';
+import { BookingPriceComponent } from './components/booking-price/booking-price.component';
+import { BookingBenefitsComponent } from './components/booking-benefits/booking-benefits.component';
+import { BookingSuccessComponent } from './components/booking-success/booking-success.component';
 
 
 @NgModule({
@@ -81,9 +87,15 @@ import { CellingsOfferComponent } from './components/cellings-offer/cellings-off
     CouponNewUserComponent,
     BookingContactModalComponent,
     CellingsOfferComponent,
+    PromoTermsComponent,
+    PromoSeatsTermsComponent,
     // ShowPhoneCouponComponent
   ],
     imports: [
+      GiveawayMyEntriesComponent,
+      BookingPriceComponent,
+      BookingBenefitsComponent,
+      BookingSuccessComponent,
       YMapComponent,
       // Public profile booking routes must be registered before notes/:id.
       // Otherwise a profile whose slug is "notes" opens notes/:id with
@@ -116,6 +128,7 @@ import { CellingsOfferComponent } from './components/cellings-offer/cellings-off
     SliderBAComponent,
     SliderotComponent,
     CommonNotesComponent,
+    SetIntervalStartComponent,
     ReviewsComponent,
     PageUserBAComponent,
     CouponNewUserComponent,

@@ -135,13 +135,16 @@ export class AlbumsShowComponent implements OnChanges, OnDestroy {
             }
             const requests = this.albums.map(album =>
                 this._apiImage.getImages(album.id).pipe(
-                    map(images => images.map((img: IViewImage) => this.toCard(img, album.id)))
+                    map(images => [...images]
+                        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                        .map((img: IViewImage) => this.toCard(img, album.id)))
                 )
             );
             forkJoin(requests).subscribe({
                 next: results => {
                     if (loadId !== this.mediaLoadId) return;
                     this.isLoading = false;
+                    // forkJoin сохраняет порядок альбомов: номер фото сравним только внутри альбома.
                     this.displayCards = results.flat().slice(0, 24);
                     this.pageMediaCache.warmCards(this.displayCards);
                 },
@@ -172,7 +175,8 @@ export class AlbumsShowComponent implements OnChanges, OnDestroy {
         const modalRef = this.modalService.open(CardDetailModalComponent, {
             centered: true,
             size: 'xl',
-            windowClass: 'card-detail-modal'
+            windowClass: card.isVideo ? 'card-detail-modal card-detail-modal--video' : 'card-detail-modal',
+            ariaLabelledBy: card.isVideo ? 'cdm-viewer-title' : undefined
         });
         modalRef.componentInstance.card = card;
         modalRef.componentInstance.profileId = this.profileId;

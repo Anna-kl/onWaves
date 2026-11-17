@@ -1,0 +1,43 @@
+:host { display: block; min-width: 0; }
+.participants {
+  padding: 20px; margin: 0 0 28px; background: #fff; border: 1px solid rgba(0, 97, 116, .14); border-radius: 22px; color: #043c48;
+  &__heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  &__eyebrow { margin: 0 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #006174; }
+  h3 { margin: 0; font-size: 21px; font-weight: 700; }
+  &__refresh { flex-shrink: 0; padding: 0 14px; min-height: 44px; border: 1px solid rgba(0, 97, 116, .22); border-radius: 24px; color: #006174; background: #fff; font: inherit; font-size: 12px; cursor: pointer; }
+  &__intro, &__empty { margin: 14px 0 0; font-size: 13px; line-height: 1.6; color: #5b7079; }
+  &__error { padding: 14px; border-left: 3px solid #d46c54; background: #fff7f4; border-radius: 10px; font-size: 13px; }
+}
+.campaign {
+  margin-top: 22px; border-radius: 18px; border: 1px solid rgba(0, 97, 116, .14); overflow: hidden;
+  &__heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px; background: #f0f8f8; }
+  &__limit { font-size: 11px; font-weight: 600; color: #006174; }
+  h4 { font-size: 16px; margin: 6px 0 0; font-weight: 700; overflow-wrap: anywhere; }
+  &__taken { white-space: nowrap; font-size: 26px; } &__taken span { font-size: 13px; font-weight: 500; }
+  &__progress { height: 4px; background: #e4efef; } &__progress span { display: block; height: 100%; background: #0d94a0; }
+  &__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 18px; }
+  &__stats div { display: flex; flex-direction: column; gap: 5px; } &__stats b { font-size: 23px; } &__stats span { color: #5b7079; font-size: 11px; }
+  &__stat--no-show b { color: #a7503b; }
+  &__note, &__empty { margin: 0; padding: 16px 18px; background: #fafafc; font-size: 11px; line-height: 1.6; color: #5b7079; }
+}
+.participant {
+  padding: 18px; border-top: 1px solid rgba(0, 97, 116, .1); display: flex; flex-direction: column; gap: 14px;
+  &--no-show { background: #fff9f6; }
+  &__body { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 12px; }
+  &__name { font-size: 14px; overflow-wrap: anywhere; } &__body small { color: #5b7079; font-size: 10px; }
+  &__result { display: flex; flex-direction: column; gap: 10px; }
+  &__status { font-size: 11px; color: #006174; font-weight: 600; }
+  &__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  button { min-height: 44px; border-radius: 24px; padding: 0 16px; border: 1px solid rgba(0, 97, 116, .2); background: #fff; color: #006174; font: inherit; font-size: 12px; cursor: pointer; }
+  &__arrived { background: #006174 !important; color: #fff !important; }
+  &__confirm { max-width: 330px; padding: 12px; background: #fff7f4; border-radius: 12px; }
+  &__confirm p { margin: 0 0 8px; font-size: 12px; line-height: 1.6; }
+  &__confirm button { margin: 4px 4px 0 0; }
+}
+button:disabled { opacity: .55; cursor: wait; }
+@media (min-width: 768px) {
+  .participants { padding: 26px; }
+  .campaign__stats { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .participant { flex-direction: row; align-items: flex-start; justify-content: space-between; gap: 24px; }
+  .participant__result { align-items: flex-end; }
+}

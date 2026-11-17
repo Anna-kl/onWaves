@@ -40,6 +40,8 @@ export class IViewBusinessProfile {
   isGetOrder?: boolean;
   /** Промо-страница: не в каталоге, без записи, только прямая ссылка. */
   isPromo?: boolean;
+  /** 0 — старый экран графика, 1 — неделя. Нет поля — старый экран. */
+  scheduleMode?: number;
   currency?: CurrencyType[];
   paymentMethods?: PaymentMethodType[];
   countReviews?: number;
@@ -60,6 +62,7 @@ export class IViewBusinessProfile {
         this.address = user.address;
         this.isGetOrder = user.isGetOrder;
         this.isPromo = user.isPromo;
+        this.scheduleMode = user.scheduleMode ?? 0;
         this.lastModified = user.lastModified,
         this.paymentMethods = user.paymentMethods,
         this.rating = user.rating,
@@ -94,6 +97,7 @@ export class IViewBusinessProfile {
         this.address = address;
         this.isGetOrder = user.isGetOrder;
         this.isPromo = user.isPromo;
+        this.scheduleMode = user.scheduleMode ?? 0;
         this.lastModified = user.lastModified;
         this.paymentMethods = user.paymentMethods;
         this.rating = user.rating;

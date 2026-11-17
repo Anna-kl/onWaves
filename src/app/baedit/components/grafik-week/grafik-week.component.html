@@ -1,0 +1,147 @@
+<section class="week-screen">
+  <app-grafik-point-switch [profileId]="profileId" [disabled]="pending || rhythmSaving || !!sheet?.saving"></app-grafik-point-switch>
+  <p class="week-screen__status" *ngIf="loading">Загружаю неделю…</p>
+  <p class="week-screen__status" *ngIf="error">{{ error }}</p>
+
+  <ng-container *ngIf="week">
+    <div class="orders" *ngIf="profile">
+      <span class="orders__label">Принимать заказы</span>
+      <label class="ow-switch" [class.ow-switch--on]="profile.isGetOrder">
+        <input type="checkbox" [(ngModel)]="profile.isGetOrder" (ngModelChange)="changeGetOrder()" [disabled]="!!profile.isPromo">
+        <span class="ow-switch__ui" aria-hidden="true"></span>
+      </label>
+    </div>
+    <p class="orders__hint" *ngIf="profile?.isPromo">На промо-странице запись отключена.</p>
+
+    <div class="grafik-top">
+      <header class="grafik-head">
+        <h2>График</h2>
+        <p>Часы приёма на выбранной точке</p>
+      </header>
+      <div class="grafik-nav">
+        <div class="week-switch" role="group" aria-label="Неделя графика">
+          <button type="button" class="week-switch__btn" (click)="shiftWeek(-1)" [disabled]="!canPrev || pending" aria-label="Предыдущая неделя">‹</button>
+          <span class="week-switch__label" aria-live="polite">{{ rangeLabel }}</span>
+          <button type="button" class="week-switch__btn" (click)="shiftWeek(1)" [disabled]="!canNext || pending" aria-label="Следующая неделя">›</button>
+        </div>
+        <button type="button" class="grafik-pill" *ngIf="!isCurrentWeek" (click)="showCurrent()" [disabled]="pending">Эта неделя</button>
+        <button type="button" class="grafik-pill template-link--head" (click)="openTemplate()">Постоянный график</button>
+      </div>
+    </div>
+
+    <p class="week-screen__status" *ngIf="week.lastWorkingDate">Рабочие дни добавлены до {{ formatScheduleDate(week.lastWorkingDate) }}. Свободное время зависит от услуги и записей.</p>
+    <p class="week-screen__status" *ngIf="week.lastWorkingDate === null">Будущих рабочих дат нет. Настройте постоянный график или откройте отдельный день.</p>
+    <p class="week-screen__status" *ngIf="!week.templateConfirmed">Автопродление пока выключено. Чтобы включить его, сохраните постоянный график.</p>
+    <div class="week-list" [class.week-list--pending]="pending">
+      <article class="day-card" *ngFor="let day of visibleDays" [id]="'day-' + day.date" [class.day-card--focus]="day.isNearestWorking">
+        <button type="button" class="day-card__open" (click)="openDay(day)" [disabled]="past(day)">
+          <span class="day-card__when">
+            {{ weekdayShort(day.dayOfWeek) }} {{ formatScheduleDate(day.date) }}
+            <span class="pill" *ngIf="relation(day)">{{ relation(day) }}</span>
+            <span class="pill" *ngIf="day.source === 1 && !day.isDayOff && day.work">постоянный график</span>
+            <span class="pill pill--manual" *ngIf="day.source === 2">только эта дата</span>
+          </span>
+          <span class="day-card__hours" [class.is-off]="day.isDayOff || !day.work">{{ hoursLabel(day) }}</span>
+          <span class="day-card__meta" *ngIf="!day.isDayOff && day.break">перерыв {{ clock(day.break.start) }}–{{ clock(day.break.end) }}</span>
+        </button>
+        <div class="day-card__closed" *ngFor="let block of day.blocks">
+          <span>Закрыто {{ closedRangeLabel(block) }}</span>
+          <button type="button" class="day-card__open-link" *ngIf="!past(day)" (click)="askOpen(day, block)">Открыть</button>
+        </div>
+        <div class="confirm-open" *ngIf="openingBlock(day) as picked">
+          <p>Открыть {{ closedRangeLabel(picked) }} для записи?</p>
+          <div class="confirm-open__actions">
+            <button type="button" class="week-btn week-btn--primary" (click)="confirmOpen(day, picked)" [disabled]="pending">Открыть</button>
+            <button type="button" class="week-btn week-btn--ghost" (click)="cancelOpen()" [disabled]="pending">Оставить</button>
+          </div>
+        </div>
+        <div class="day-card__actions">
+          <button type="button" class="week-btn week-btn--primary" (click)="openDay(day)" [disabled]="past(day)">Изменить</button>
+          <button type="button" class="week-btn week-btn--ghost" *ngIf="canClose(day)" (click)="openSheet(day)">Закрыть время</button>
+        </div>
+        <p class="conflict" *ngFor="let conflict of day.conflicts">
+          <strong>Запись в закрытых часах</strong>
+          Запись в {{ conflict.start }} остаётся. Перенесите её или напишите клиенту.
+        </p>
+      </article>
+    </div>
+
+    <button type="button" class="week-screen__link" *ngIf="pastDaysCount" (click)="showPast = !showPast">{{ showPast ? 'Скрыть прошедшие дни' : 'Показать прошедшие дни (' + pastDaysCount + ')' }}</button>
+    <details class="record-settings" [attr.open]="rhythmOpen ? '' : null" (toggle)="onRhythmToggle($event)">
+      <summary>Настройки записи</summary>
+      <section class="rhythm" aria-label="Ритм записи">
+        <div class="rhythm__head">
+          <strong>Ритм записи</strong>
+          <span>Для выбранной точки</span>
+        </div>
+        <div class="rhythm__grid">
+          <div class="rhythm__item">
+            <span class="rhythm__name">Интервал</span>
+            <span class="rhythm__hint rhythm__hint--lead" id="interval-hint">{{ intervalHint() }}</span>
+            <div class="chips" role="radiogroup" aria-label="Интервал начала записи" aria-describedby="interval-hint">
+              <button type="button" class="chip" *ngFor="let step of stepChoices()"
+                      [class.chip--on]="week.period === step"
+                      [attr.aria-pressed]="week.period === step"
+                      [disabled]="rhythmSaving"
+                      (click)="setRhythm(step, week.gapAfterMinutes)">{{ stepLabel(step) }}</button>
+            </div>
+          </div>
+          <div class="rhythm__item">
+            <span class="rhythm__name">Пауза между услугами</span>
+            <span class="rhythm__hint">После клиента, перед следующим. «Нет» — запись встык</span>
+            <div class="chips" role="radiogroup" aria-label="Пауза между услугами">
+              <button type="button" class="chip" *ngFor="let gap of gapChoices()"
+                      [class.chip--on]="week.gapAfterMinutes === gap"
+                      [attr.aria-pressed]="week.gapAfterMinutes === gap"
+                      [disabled]="rhythmSaving"
+                      (click)="setRhythm(week.period, gap)">{{ gapLabel(gap) }}</button>
+            </div>
+          </div>
+        </div>
+        <p class="rhythm__error" role="alert" *ngIf="rhythmError">{{ rhythmError }}</p>
+      </section>
+    </details>
+
+    <div class="close-sheet" *ngIf="sheet as draft">
+      <button type="button" class="close-sheet__backdrop" aria-label="Закрыть окно" (click)="dismissSheet()"></button>
+      <div class="close-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="close-sheet-title">
+        <div class="close-sheet__head">
+          <h3 id="close-sheet-title">Закрыть часы</h3>
+          <button type="button" class="closure__remove" (click)="dismissSheet()" [disabled]="draft.saving">Отмена</button>
+        </div>
+        <p class="close-sheet__when">{{ weekdayShort(draft.day.dayOfWeek) }} {{ formatScheduleDate(draft.day.date) }}, {{ hoursLabel(draft.day) }}</p>
+        <div class="break-form__times">
+          <label class="time-field">
+            <span>С</span>
+            <select [(ngModel)]="draft.start" [disabled]="draft.saving" aria-label="Начало закрытого времени">
+              <option value="">—</option>
+              <option *ngFor="let time of choices(draft.day)" [value]="time">{{ time }}</option>
+            </select>
+          </label>
+          <label class="time-field">
+            <span>До</span>
+            <select [(ngModel)]="draft.end" [disabled]="draft.saving" aria-label="Конец закрытого времени">
+              <option value="">—</option>
+              <option *ngFor="let time of choices(draft.day)" [value]="time">{{ time }}</option>
+            </select>
+          </label>
+        </div>
+        <p class="close-sheet__hint">Клиентка записалась по телефону? Закройте это время — онлайн его уже не займут.</p>
+        <div class="chips close-scope" role="radiogroup" aria-label="На какие даты закрыть">
+          <button type="button" class="chip" [class.chip--on]="draft.scope === 'day'" [attr.aria-pressed]="draft.scope === 'day'" (click)="draft.scope = 'day'">Только эта дата</button>
+          <button type="button" class="chip" [class.chip--on]="draft.scope === 'weekday'" [attr.aria-pressed]="draft.scope === 'weekday'" (click)="draft.scope = 'weekday'">{{ weekdayRangeLabel(draft.day.dayOfWeek, week.todayDate) }}</button>
+        </div>
+        <p class="form-error" role="alert" *ngIf="draft.error">{{ draft.error }}</p>
+        <button type="button" class="week-btn week-btn--primary close-sheet__submit" (click)="submitSheet()" [disabled]="draft.saving">{{ draft.saving ? 'Закрываю…' : 'Закрыть' }}</button>
+      </div>
+    </div>
+
+    <button type="button" class="template-card template-link--foot" (click)="openTemplate()">
+      <span>
+        <strong>Постоянный график</strong>
+        <span>Рабочие дни, часы и перерыв. Даты добавляются автоматически</span>
+      </span>
+      <span class="template-card__go" aria-hidden="true">›</span>
+    </button>
+  </ng-container>
+</section>

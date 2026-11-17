@@ -1,6 +1,8 @@
 <div #hostEl
      class="ow-video"
      [class.ow-video--compact]="compact"
+     [class.ow-video--full-frame]="fullFrame"
+     [class.ow-video--immersive]="immersive"
      [class.ow-video--expandable]="expandable"
      [class.ow-video--static]="!interactive"
      [class.is-loading]="state === 'loading'"
@@ -28,12 +30,38 @@
     </span>
 
     <span class="ow-spin" aria-hidden="true"></span>
-    <span class="ow-loading">{{ loadingLabel }}</span>
+    <span class="ow-loading" *ngIf="state === 'loading'">{{ loadingLabel }}</span>
     <span class="ow-progress" aria-hidden="true">
       <i [class.is-indeterminate]="loadedPercent === null"
          [style.width.%]="loadedPercent ?? 40"></i>
     </span>
-    <span class="ow-error">Видео недоступно — повторить</span>
     <span class="ow-logo" aria-hidden="true">Onwaves<i>.Online</i></span>
   </button>
+  <button class="ow-expand" type="button" *ngIf="interactive && expandable"
+          aria-label="Развернуть видео на весь экран" (click)="onExpandClick($event)">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" />
+    </svg>
+  </button>
+  <div class="ow-playback-controls" *ngIf="interactive && (state === 'playing' || ((fullFrame || immersive) && hasFirstFrame))">
+    <button type="button" [attr.aria-label]="state === 'playing' ? 'Приостановить видео' : 'Продолжить видео'"
+            (click)="state === 'playing' ? onPauseClick($event) : onPlayClick($event, false)">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path *ngIf="state === 'playing'" d="M8 5v14M16 5v14" />
+        <path *ngIf="state !== 'playing'" d="m8 5 11 7-11 7Z" />
+      </svg>
+    </button>
+    <span class="ow-time" *ngIf="immersive" aria-hidden="true">{{ formatPlaybackTime(playbackTime) }} / {{ formatPlaybackTime(playbackDuration) }}</span>
+    <input *ngIf="fullFrame || immersive" class="ow-seek" type="range" aria-label="Позиция видео" min="0"
+           [style.--played]="playbackPercent + '%'" [disabled]="playbackDuration <= 0"
+           [attr.aria-valuetext]="formatPlaybackTime(playbackTime) + ' из ' + formatPlaybackTime(playbackDuration)"
+           [max]="playbackDuration" step="0.1" [value]="playbackTime" (input)="seek($event)">
+    <button type="button" [attr.aria-label]="muted ? 'Включить звук' : 'Выключить звук'" [attr.aria-pressed]="!muted" (click)="toggleMuted($event)">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M11 5 6 9H3v6h3l5 4Z" />
+        <path *ngIf="muted" d="m16 9 5 6m0-6-5 6" />
+        <path *ngIf="!muted" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" />
+      </svg>
+    </button>
+  </div>
 </div>

@@ -3,51 +3,128 @@
   *ngIf="offer"
   [class.offer--campaign]="isCampaign"
   [class.offer--showcase]="isShowcase"
+  [class.offer--video-showcase]="isShowcase && cover?.kind === mediaKind.Video"
   [class.offer--minimal]="isMinimal"
-  [class.offer--hero]="cellingsHero">
+  [class.offer--hero]="cellingsHero"
+  [class.offer--entry]="isEntry"
+  [class.offer--mary]="maryOffer">
 
-  <div class="offer__cover" *ngIf="showCover">
-    <ng-container *ngIf="cover as hero">
-      <app-video-player
-        *ngIf="hero.kind === mediaKind.Video"
-        [url]="hero.url"
-        [poster]="hero.posterUrl || null"
-        [compact]="true"
-        [warmup]="false"
-        (started)="videoStart.emit(hero.url)"
-        [class.offer__frame--contain]="coverContain">
-      </app-video-player>
-      <img
-        *ngIf="hero.kind === mediaKind.Image"
-        [src]="hero.url"
-        [alt]="cellingsHero ? cellingsH1 : offer.title"
-        [class.offer__frame--contain]="coverContain"
-        (load)="onCoverLoad($event)">
-    </ng-container>
-    <span class="offer__cover-ph" *ngIf="!cover">фото работы мастера</span>
-  </div>
+  <ng-template #offerMedia>
+    <app-promo-media-carousel *ngIf="showCarousel"
+      [media]="carouselMedia" [title]="offer.title || 'Фото и видео акции'"
+      (videoStart)="videoStart.emit($event)" (videoExpand)="openVideo($event)">
+    </app-promo-media-carousel>
+
+    <div class="offer__cover" *ngIf="showCover && !showCarousel">
+      <ng-container *ngIf="cover as hero">
+        <app-video-player
+          *ngIf="hero.kind === mediaKind.Video"
+          [url]="hero.url"
+          [poster]="hero.posterUrl || null"
+          [compact]="true"
+          [immersive]="true"
+          [expandable]="true"
+          [expandOnPlay]="true"
+          (expand)="openVideo(hero)"
+          [warmup]="false"
+          (started)="videoStart.emit(hero.url)"
+          (unavailable)="onVideoUnavailable(hero.url)"
+          [class.offer__frame--contain]="coverContain || hero.kind === mediaKind.Video">
+        </app-video-player>
+        <img
+          *ngIf="hero.kind === mediaKind.Image"
+          [src]="hero.url"
+          [alt]="cellingsHero ? cellingsH1 : offer.title"
+          [class.offer__frame--contain]="coverContain"
+          (load)="onCoverLoad($event)">
+      </ng-container>
+      <span class="offer__cover-ph" *ngIf="!cover">фото работы мастера</span>
+    </div>
+  </ng-template>
+  <ng-container *ngIf="!maryOffer" [ngTemplateOutlet]="offerMedia"></ng-container>
 
   <div class="offer__body">
-    <div class="offer__chips" *ngIf="badge || validLabel">
-      <span class="offer__badge" *ngIf="badge">{{ badge }}</span>
+    <div class="offer__chips" *ngIf="headerProposals.length || badge || validLabel || promoSeats?.seatsText">
+      <span
+        class="offer__proposal"
+        *ngFor="let item of headerProposals"
+        [class.offer__proposal--sale]="item.tone === 'sale'"
+        [class.offer__proposal--coupon]="item.tone === 'coupon'">{{ item.text }}</span>
+      <span class="offer__badge" *ngIf="!headerProposals.length && badge">{{ badge }}</span>
       <span class="offer__until" *ngIf="validLabel">{{ validLabel }}</span>
+      <span class="offer__seats" *ngIf="promoSeats?.seatsText">{{ promoSeats?.seatsText }}</span>
     </div>
 
     <h1 class="offer__title" *ngIf="cellingsHero">{{ cellingsH1 }}</h1>
     <p class="offer__cities" *ngIf="cellingsHero && citiesLine">{{ citiesLine }}</p>
 
     <h2 class="offer__title" *ngIf="!cellingsHero" [innerHTML]="formattedTitle"></h2>
+    <p class="offer__lead" *ngIf="maryOffer && shownLead">{{ shownLead }}</p>
     <!-- Заявление мастера о цене идёт до лида: объявление обещает цену, первый экран её подтверждает. -->
     <p class="offer__product" *ngIf="cellingsHero && showOfferTitle" [innerHTML]="formattedTitle"></p>
 
     <p class="offer__lead" *ngIf="cellingsHero">{{ cellingsLead }}</p>
 
-    <p class="offer__price" *ngIf="priceText">
+    <div class="offer__calc" *ngIf="promoMoney">
+      <p class="offer__price-for" *ngIf="promoPrice?.serviceName || priceServiceName">{{ promoPrice?.serviceName || priceServiceName }}</p>
+      <div class="offer__calc-skel" *ngIf="promoPriceLoading" aria-live="polite">Проверяем цену акции</div>
+      <div class="offer__calc-error" *ngIf="promoPriceError && !promoPriceLoading">
+        <p>Цену акции сейчас нельзя проверить.</p>
+        <button type="button" (click)="retryPrice.emit()">Повторить</button>
+      </div>
+      <ng-container *ngIf="!promoPriceLoading && promoPrice as price">
+        <p class="offer__calc-row"><span>Цена</span><b>{{ formatRub(price.listAmount) }}</b></p>
+        <p class="offer__calc-row" *ngIf="price.promoDiscount > 0">
+          <span>{{ price.discountPercent != null ? '−' + price.discountPercent + '%' : 'Скидка по акции' }}</span>
+          <b>−{{ formatRub(price.promoDiscount) }}</b>
+        </p>
+        <p class="offer__calc-row" *ngIf="price.couponDiscount > 0">
+          <span>Купон</span><b>−{{ formatRub(price.couponDiscount) }}</b>
+        </p>
+        <p class="offer__calc-total"><span>К оплате</span><strong>{{ formatRub(price.payable) }}</strong></p>
+        <p class="offer__calc-seats" *ngIf="price.seatsLeft != null && price.seatsLimit">{{ seatsLeftText(price.seatsLeft, price.seatsLimit) }}</p>
+        <p class="offer__calc-note" *ngIf="price.notice">{{ price.notice }}</p>
+      </ng-container>
+    </div>
+
+    <p class="offer__price offer__price--stack" *ngIf="!promoMoney && seatsPrice as seats">
+      <span class="offer__price-for" *ngIf="priceServiceName">{{ priceServiceName }}</span>
+      <ng-container *ngIf="seats.pay; else seatsList">
+        <s class="offer__price-old">{{ seats.list }}</s>
+        <span class="offer__price-now">{{ seats.pay }}</span>
+      </ng-container>
+      <ng-template #seatsList>{{ seats.list }}</ng-template>
+    </p>
+    <p class="offer__price" *ngIf="priceText && !maryPrice && !seatsPrice && !promoMoney">
+      <span class="offer__price-for" *ngIf="priceServiceName && !cellingsHero && !maryOffer">{{ priceServiceName }}</span>
       {{ priceText }}
       <span class="offer__price-note" *ngIf="showPriceNote">{{ priceNote }}</span>
     </p>
+    <dl class="offer__mary-price" *ngIf="maryPrice as price">
+      <div class="offer__mary-row offer__mary-row--main">
+        <dt>{{ isEntry ? 'Первый визит онлайн' : 'Цена первого визита' }}</dt>
+        <dd>{{ formatRub(promoPriceRub(price)) }}</dd>
+      </div>
+      <div class="offer__mary-row offer__mary-row--regular">
+        <dt>Обычная цена</dt>
+        <dd><s>{{ formatRub(price.listRub) }}</s></dd>
+      </div>
+      <div class="offer__mary-row offer__mary-row--coupon" *ngIf="price.couponRub > 0">
+        <dt>Онлайн, если доступен купон OnWaves</dt>
+        <dd>{{ formatRub(onlinePayRub(price)) }}</dd>
+      </div>
+    </dl>
 
-    <p class="offer__lead" *ngIf="!cellingsHero && offer.description">{{ offer.description }}</p>
+    <ng-template #termsLink>
+      <a class="offer__terms"
+         *ngIf="termsPath"
+         [routerLink]="termsPath"
+         [fragment]="termsFragment || undefined"
+         (click)="onTermsClick()">Условия акции</a>
+    </ng-template>
+    <ng-container *ngIf="!maryOffer" [ngTemplateOutlet]="termsLink"></ng-container>
+
+    <p class="offer__lead" *ngIf="!maryOffer && !cellingsHero && shownLead">{{ shownLead }}</p>
 
     <div class="offer__actions" *ngIf="cellingsHero && actions.length">
       <button
@@ -61,8 +138,8 @@
       </button>
     </div>
 
-    <div class="offer__benefits" *ngIf="offer.benefits?.length">
-      <div class="offer__benefit" *ngFor="let benefit of offer.benefits">
+    <div class="offer__benefits" *ngIf="shownBenefits.length">
+      <div class="offer__benefit" *ngFor="let benefit of shownBenefits">
         <div class="offer__benefit-title">{{ benefit.title }}</div>
         <div class="offer__benefit-desc" *ngIf="benefit.description">{{ benefit.description }}</div>
       </div>
@@ -84,19 +161,111 @@
         {{ action.text }}
       </button>
     </div>
+    <p class="offer__demo" *ngIf="demoHint">Это демо-страница: посмотреть можно, записаться нельзя</p>
 
-    <p class="offer__note" *ngIf="footerNote && !showDiscountStrip">{{ footerNote }}</p>
+    <div class="offer__actions" *ngIf="!cellingsHero && contactHref as phone">
+      <a class="offer__btn offer__btn--primary" [href]="phone">Позвонить мне</a>
+    </div>
+
+    <ng-container *ngIf="maryOffer" [ngTemplateOutlet]="termsLink"></ng-container>
+    <p class="offer__note" *ngIf="footerNote && !showDiscountStrip && !maryOffer">
+      {{ footerNote }}
+    </p>
+
+    <details class="offer__full" *ngIf="promoTerms as seats">
+      <summary>Полные условия</summary>
+      <div class="offer__full-body">
+        <p class="offer__status" role="status" *ngIf="promoStatusNotice(seats.state) as notice">{{ notice }}</p>
+        <p>
+          <b>Организатор.</b>
+          <ng-container *ngIf="seatOrganizer(seats) as who; else seatsOrganizerLater">
+            {{ who }}
+            <ng-container *ngIf="seats.state.organizer?.details"> {{ seats.state.organizer?.details }}</ng-container>
+          </ng-container>
+          <ng-template #seatsOrganizerLater>Организатор будет указан до начала акции.</ng-template>
+          Электронная почта <a href="mailto:askme@onwaves.online">askme@onwaves.online</a>.
+        </p>
+        <p>
+          <b>Исполнитель услуг.</b>
+          {{ seats.performerName || 'Мастер' }}<ng-container *ngIf="seats.performerAddress">, {{ seats.performerAddress }}</ng-container>.
+          Организатор акции услуги не оказывает.
+        </p>
+        <p>
+          <b>Срок.</b>
+          {{ promoPeriodText(seats.state) }}
+        </p>
+        <p>
+          <b>Места.</b>
+          {{ seats.state.seatsLimit }} записей на услуги из таблицы. Одна запись — одно место, один номер телефона — не больше одного.
+          Если запись отменена до визита, место возвращается в акцию.
+          Неявка место не освобождает и следующему клиенту не передаёт.
+        </p>
+        <div class="offer__full-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Услуга</th>
+                <th>Прайс</th>
+                <th>−{{ seats.state.discountPercent }}%</th>
+                <th>Купон</th>
+                <th>Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let service of seats.state.services">
+                <td>{{ service.name }}</td>
+                <td>{{ formatRub(service.listAmount) }}</td>
+                <td>{{ formatRub(service.promoDiscount) }}</td>
+                <td>{{ formatRub(service.couponDiscount) }}</td>
+                <td>{{ formatRub(service.clientPays) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Скидка {{ seats.state.discountPercent }}% — от цены по прайсу. Купон — на первую онлайн-запись;
+          если купон не положен, цена выше на его сумму. Другие услуги в акцию не входят. <ng-container *ngIf="seats.masterSlug === 'chekanova_nails'">Дизайн оплачивается отдельно.</ng-container>
+        </p>
+        <p>
+          <b>Как получить.</b>
+          Записаться онлайн на onwaves.online/{{ seats.masterSlug }} и выбрать услугу из списка.
+          Мастеру на месте оплатить цену по акции. Запись по телефону или в мессенджере акцию не даёт.
+        </p>
+        <p>
+          <b>Ограничения.</b>
+          <ng-container *ngIf="seats.state.couponRequiresSeat">Купон доступен только вместе со скидкой в пределах тех же первых {{ seats.state.seatsLimit }} мест. </ng-container>Купон — один раз на номер телефона. Акция не суммируется с другими скидками мастера.
+          Скидка не выдаётся деньгами. Коррекция — по цене мастера, в акцию не входит.
+        </p>
+        <p>
+          <b>Противопоказания.</b>
+          Мастер обсуждает их на консультации. Если процедуру делать нельзя, запись отменяется и место возвращается в акцию.
+        </p>
+        <p>
+          <b>Вопросы.</b>
+          <a href="mailto:askme@onwaves.online">askme@onwaves.online</a>.
+          <a *ngIf="termsPath" [routerLink]="termsPath">Открыть отдельной страницей</a>
+        </p>
+      </div>
+    </details>
+
   </div>
 
-  <div class="offer__media" *ngIf="media.length">
+  <ng-container *ngIf="maryOffer" [ngTemplateOutlet]="offerMedia"></ng-container>
+
+  <div class="offer__media" *ngIf="media.length && !showCarousel">
     <ng-container *ngFor="let item of media; let i = index">
       <app-video-player
         *ngIf="item.kind === mediaKind.Video"
         [url]="item.url"
         [poster]="item.posterUrl || null"
         [compact]="true"
+        [immersive]="true"
+        [expandable]="true"
+        [expandOnPlay]="true"
+        (expand)="openVideo(item)"
         [warmup]="false"
         (started)="videoStart.emit(item.url)"
+        (unavailable)="onVideoUnavailable(item.url)"
         [class.offer__frame--contain]="extraContain.has(i)">
       </app-video-player>
       <img

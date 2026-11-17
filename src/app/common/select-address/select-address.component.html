@@ -101,7 +101,7 @@
 
     <div class="select">
       <select [ngModel]="myRegion"
-              (ngModelChange)="myRegion = $any($event); change(myRegion, 'region', true)">
+              (ngModelChange)="onRegion($any($event))">
         <option [ngValue]="null" disabled>Регион / область *</option>
         <option *ngFor="let region of allRegions$ | async" [ngValue]="region">
           {{ region }}
@@ -113,8 +113,63 @@
 
 <!-- ═══════════════ Данные по выбранным форматам ═══════════════ -->
 <div class="geo-panels" *ngIf="needsGeo">
-  <!-- ФИКСИРОВАННОЕ МЕСТО: полный адрес -->
-  <div class="geo-block geo-block--accent" *ngIf="isFixed">
+  <!-- ФИКСИРОВАННОЕ МЕСТО: несколько точек в кабинете -->
+  <div class="geo-block geo-block--accent" *ngIf="isFixed && multiplePoints">
+    <div class="geo-block__head">
+      <span class="geo-block__dot"></span> Точки приёма
+    </div>
+    <p class="geo-block__hint">У каждой точки свой адрес. Услуги и график задаются отдельно для точки.</p>
+    <ng-container *ngTemplateOutlet="locationFields"></ng-container>
+
+    <div class="point-card" *ngFor="let point of points; let i = index">
+      <div class="point-card__head">
+        <span>Точка {{ i + 1 }}</span>
+        <button type="button" class="city-row__remove" *ngIf="points.length > 1"
+                (click)="removePoint(i)" aria-label="Удалить точку">&times;</button>
+      </div>
+      <input type="text" placeholder="Название, например Студия на Ленина"
+             [ngModel]="point.title"
+             (ngModelChange)="setPoint(i, 'title', $any($event))">
+
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <input type="checkbox" class="custom-checkbox"
+               [id]="'point-another-' + i"
+               [ngModel]="point.anotherCity"
+               (ngModelChange)="setPointAnother(i, $any($event))">
+        <label class="text-first" [attr.for]="'point-another-' + i">Другой населённый пункт</label>
+      </div>
+      <div class="select" *ngIf="!point.anotherCity">
+        <select [ngModel]="point.city" (ngModelChange)="setPointCity(i, $any($event))">
+          <option [ngValue]="''" disabled>Населённый пункт *</option>
+          <option *ngFor="let city of allCity" [ngValue]="city">{{ city }}</option>
+        </select>
+      </div>
+      <div *ngIf="point.anotherCity">
+        <input type="text" placeholder="Населённый пункт *"
+               [ngModel]="point.city"
+               (ngModelChange)="setPoint(i, 'city', $any($event))">
+      </div>
+      <input type="text" placeholder="Улица *"
+             [ngModel]="point.street"
+             (ngModelChange)="setPoint(i, 'street', $any($event))">
+      <div class="geo-row">
+        <input type="text" placeholder="Дом / корпус *"
+               [ngModel]="point.house"
+               (ngModelChange)="setPoint(i, 'house', $any($event))">
+        <input type="text" placeholder="Офис / квартира"
+               [ngModel]="point.apartment"
+               (ngModelChange)="setPoint(i, 'apartment', $any($event))">
+      </div>
+    </div>
+
+    <a href="javascript:void(0)" class="add-city-link" *ngIf="weekReady" (click)="addPoint()">
+      + добавить точку
+    </a>
+    <p class="geo-block__hint" *ngIf="!weekReady">Вторую точку можно добавить, когда откроется график недели.</p>
+  </div>
+
+  <!-- ФИКСИРОВАННОЕ МЕСТО: один адрес на регистрации -->
+  <div class="geo-block geo-block--accent" *ngIf="isFixed && !multiplePoints">
     <div class="geo-block__head">
       <span class="geo-block__dot"></span> Адрес фиксированного места
     </div>

@@ -92,3 +92,13 @@
     padding: 10px;
   }
 }
+.note-review {
+  display: grid;
+  justify-items: start;
+  gap: .5rem;
+  margin: 1rem 0;
+  color: #043c48;
+}
+
+.note-review p { margin: 0; }
+.note-review button { min-height: 2.75rem; white-space: normal; text-align: left; }

@@ -67,7 +67,8 @@ export class WelcomeCouponService {
   /** Право текущего клиента; для гостя не вызывается. */
   getMine(profileId?: string | null): Observable<WelcomeCouponMe | null> {
     // Без profileId сервер берёт профиль из токена — это удобно там, где id клиента под рукой нет.
-    const key = profileId ?? 'token';
+    if (!this.isLoggedIn) return of(null);
+    const key = `${this.cookies.get('auth-token-ocpio')}|${profileId ?? 'token'}`;
     if (this.mineCache && this.mineCache.key === key && this.mineCache.expiresAt > Date.now()) {
       return this.mineCache.value$;
     }
@@ -92,6 +93,8 @@ export class WelcomeCouponService {
       })
       .pipe(catchError(() => of(null)));
   }
+
+  invalidateMine(): void { this.mineCache = null; }
 
   /**
    * События Метрики. Без телефонов, имён и id клиентов: только категория, действие и код кампании.

@@ -1,0 +1,31 @@
+:host { display: block; width: 100%; min-width: 0; text-align: left; }
+.booking-price {
+  margin: 16px 0; padding: 20px; border: 1px solid rgba(0, 97, 116, .16);
+  border-radius: 20px; background: linear-gradient(125deg, #f0f8f8, #fff); color: #043c48;
+  &__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; justify-content: space-between; }
+  &__label { font-size: 13px; font-weight: 600; }
+  &__badge { padding: 5px 9px; border-radius: 20px; background: rgba(13, 148, 160, .1); font-size: 11px; font-weight: 700; }
+  &__total { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; margin: 10px 0; }
+  &__total s { font-size: 15px; color: #62747a; }
+  &__total strong { font-size: clamp(24px, 4vw, 30px); font-weight: 750; line-height: 1.2; }
+  &__row { display: flex; justify-content: space-between; gap: 16px; padding-top: 8px; font-size: 13px; }
+  &__row b { white-space: nowrap; color: #006174; }
+  &__note, &__notice { margin: 12px 0 0; font-size: 12px; line-height: 1.6; }
+  &__note { color: #526970; }
+  &__notice { padding: 12px; border-left: 3px solid #006174; border-radius: 8px; background: #fff; }
+  &__terms { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 4px; color: #006174; font-size: 12px; font-weight: 600; text-underline-offset: 3px; }
+}
+@media (max-width: 480px) { .booking-price { padding: 16px; border-radius: 16px; } }
+.booking-price--confirmed { margin: 14px 0 0; background: #fafcfc; border-color: #e1ebed; }
+.booking-price--benefit {
+  background: linear-gradient(120deg, #006174, #043c48); border-color: transparent; color: #fff; box-shadow: 0 8px 24px rgba(0, 97, 116, .13);
+  .booking-price__label { color: #deeff0; font-size: 11px; }
+  .booking-price__badge { color: #fff; background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .16); }
+  .booking-price__total { margin: 12px 0 4px; }
+  .booking-price__total s { color: #c0dcdf; }
+  .booking-price__total strong { color: #fff; font-size: 32px; }
+  .booking-price__row { font-size: 12px; color: #deeff0; }
+  .booking-price__row b { color: #fff; }
+  .booking-price__note { color: #deeff0; font-size: 11px; }
+  .booking-price__terms { color: #fff; min-height: 36px; }
+}

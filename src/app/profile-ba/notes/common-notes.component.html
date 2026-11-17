@@ -25,7 +25,7 @@
           </div>
         </div> 
         <div class="w100 margin-bottom30" >
-          <app-calendar (onDate)="onDate($event)" [userId]="id" [today]="today" [isUpdate]="recordId">
+          <app-calendar (onDate)="onDate($event)" [userId]="id" [today]="today" [isUpdate]="(recordId || '') + ':' + calendarStamp">
           </app-calendar>
         </div>
         <div class="calendar-dayoff-label" *ngIf="!isWorkDay" role="status" aria-live="polite">

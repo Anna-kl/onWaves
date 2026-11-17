@@ -1,5 +1,17 @@
 @import "../../../assets/styles/main/color.scss";
 
+.schedule-guide-link {
+  display: block;
+  min-height: 44px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid rgba($green-basic, .2);
+  border-radius: 16px;
+  color: $green-basic;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
 
 .help-phone{
     margin-right: 30px;

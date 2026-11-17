@@ -1,0 +1,14 @@
+.review-ops { border: 1px solid #d4e0e3; border-radius: .75rem; padding: .75rem 1rem; margin: 1rem 0; color: #043c48; background: #fff; }
+.review-ops-toggle { text-align: left; }
+.review-ops-content { display: grid; gap: 1rem; margin-top: .5rem; }
+.review-ops-content h2 { font-size: 1.1rem; margin: 0; }
+.review-ops-content article { padding: .75rem 0; border-top: 1px solid #d4e0e3; margin-top: .5rem; }
+.review-ops-content p { margin: .25rem 0 .4rem; }
+.review-ops-content blockquote { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 .5rem; padding: .5rem .75rem; background: #edf6f6; border-radius: .35rem; }
+.review-ops-content small { display: block; font-size: .8rem; }
+.review-ops-actions { display: flex; flex-wrap: wrap; gap: .4rem; }
+.review-ops-decision { display: grid; margin-top: .6rem; }
+.review-ops-decision label { display: grid; max-width: 36rem; gap: .3rem; margin-bottom: .5rem; }
+.review-ops-decision textarea { width: 100%; border: 1px solid #9daeb8; border-radius: .4rem; padding: .5rem; }
+.review-ops-error { color: #9b3028; }
+.review-ops button { min-height: 2.75rem; }

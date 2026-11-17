@@ -8,6 +8,7 @@ import { OserviceComponent } from './oservice/oservice.component';
 import { PravilaComponent } from './pravila/pravila.component';
 import { StranicaComponent } from './stranica/stranica.component';
 import { PoliciesComponent } from './policies/policies.component';
+import { KuponComponent } from './kupon/kupon.component';
 import { TypographyComponent } from './typography/typography.component';
 import { LowermenuComponent } from './lowermenu/lowermenu.component';
 import { SettingsComponent } from '../profile-user/settings/settings.component';
@@ -78,6 +79,14 @@ const routes: Routes = [
     path: 'policies',
     component: PoliciesComponent,
     data: { title: 'Политика конфиденциальности | OnWaves' },
+  },
+  {
+    path: 'kupon',
+    component: KuponComponent,
+    data: {
+      title: 'Условия купона OnWaves',
+      description: 'Правила купона на первую онлайн-запись. Размер скидки и срок действия указаны в предложении мастера.',
+    },
   },
 ];
 

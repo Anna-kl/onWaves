@@ -1,4 +1,4 @@
-import {Component, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, PLATFORM_ID, SimpleChanges} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Inject, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, PLATFORM_ID, SimpleChanges, ViewChild} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
 import {Schedule} from "../../../DTO/classes/schedules/schedule";
 import {ScheduleService} from "../../../../services/schedule.service";
@@ -19,7 +19,7 @@ import { SocialType } from 'src/app/DTO/enums/socialType';
 import { WorkLocationType } from 'src/app/DTO/enums/workLocationType';
 import { IWorkLocation } from 'src/app/DTO/views/IWorkLocation';
 import { ExternalReviewSource } from 'src/app/DTO/enums/externalReviewSource';
-import { getAddressProfile, formatWorkLocations } from 'src/helpers/common/address';
+import { getAddressProfile, formatWorkLocations, workLocationLines } from 'src/helpers/common/address';
 import { resolveAvatarUrl } from 'src/helpers/common/avatar1';
 import { measure } from 'src/helpers/common/perf';
 import { getMaxUrl as buildMaxUrl, getTelegramUrl as buildTelegramUrl } from 'src/helpers/common/messenger';
@@ -27,8 +27,9 @@ import { formatRuPhone } from 'src/helpers/common/phone';
 import { isCellingsOfferSlug } from '../../helpers/cellings-offer';
 import { isOwnWebsite as urlIsOwnWebsite } from 'src/helpers/common/website';
 import { WelcomeCouponService } from 'src/services/welcome-coupon.service';
+import { AnalyticsService } from 'src/services/analytics.service';
 import { WelcomeCouponMe, WelcomeOffer } from 'src/app/DTO/views/promo/welcome-coupon';
-import { formatRub, welcomeTierList } from 'src/helpers/common/welcome-coupon';
+import { formatRub, welcomeDeadlineText, welcomeHasOffer, welcomeIsFixed, welcomeOfferLine, welcomeTierList } from 'src/helpers/common/welcome-coupon';
 import { switchMap, of } from 'rxjs';
 
 
@@ -65,6 +66,9 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
   @Input() splitForPromo = false;
   openOrNot: any; //для вспылвающего меню при нажатии- записаться Онлайн
   businessProfile: IViewBusinessProfile | null = null;
+  /** Раскрытие «О мастере» на узком экране. На десктопе кнопка скрыта стилями. */
+  aboutOpen = false;
+  aboutIsLong = false;
   protected readonly WorkLocationType = WorkLocationType;
   // GET /work-location отдаёт массив: по одной записи на формат (Fixed/Mobile/Online).
   workLocations: IWorkLocation[] = [];
@@ -87,6 +91,13 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
    * (офис — полный адрес, разъездная — регион + города, онлайн — «Онлайн»).
    * Если разбор пуст — фолбэк на готовую строку address.city от бэка.
    */
+  get addressLines(): string[] {
+    const lines = workLocationLines(this.workLocations);
+    if (lines.length) return lines;
+    const fallback = this.businessProfile?.address ? getAddressProfile(this.businessProfile.address) : '';
+    return fallback ? [fallback] : [];
+  }
+
   get addressText(): string {
     const text = formatWorkLocations(this.workLocations);
     if (text) return text;
@@ -97,6 +108,14 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
     return !!this.addressText;
   }
 
+  /** Три строки на телефоне — около 140 символов, либо явные переносы. */
+  private syncAbout(): void {
+    const text = this.businessProfile?.about?.trim() ?? '';
+    const lines = text ? text.split(/\n/).length : 0;
+    this.aboutIsLong = lines > 3 || text.length > 140;
+    this.aboutOpen = false;
+  }
+
   /** Пилот потолков: H1 услуги живёт в оффере, здесь имя не h1. Запись в колонке оставляем. */
   get isCellingsOffer(): boolean {
     return isCellingsOfferSlug(this.route.snapshot.paramMap.get('id'))
@@ -104,6 +123,8 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
   }
   scheduleToday: string | undefined;
   isHasSchedule: boolean = false;
+  /** Часы приёма на сегодня: «10:00 - 19:00», не «Сегодня не работает». */
+  hasReceptionHours = false;
   schedulesListFree: string[]|undefined = [];
   isHasRecord = true;
   isHandset = true;
@@ -118,6 +139,8 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
               private sanitizer: DomSanitizer,
               private deviceService: DeviceDetectorService,
               private _coupons: WelcomeCouponService,
+              private analytics: AnalyticsService,
+              private zone: NgZone,
               @Inject(PLATFORM_ID) private platformId: object) {
   }
 
@@ -126,7 +149,15 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
   // мастер в ней участвует и у клиента право ещё не израсходовано.
   couponOffer: WelcomeOffer | null = null;
   couponMine: WelcomeCouponMe | null = null;
+  /** Нижняя кнопка, когда билет уехал из первого экрана. Только телефон. */
+  couponDocked = false;
   private couponLoadedFor: string | null = null;
+  private couponObserver?: IntersectionObserver;
+
+  @ViewChild('maryCoupon')
+  set maryCouponRef(ref: ElementRef<HTMLElement> | undefined) {
+    this.watchMaryCoupon(ref?.nativeElement);
+  }
 
   get showCouponBadge(): boolean {
     if (!this.businessProfile?.isGetOrder || this.businessProfile.isPromo) {
@@ -135,7 +166,7 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.couponOffer?.active || !this.couponOffer.masterParticipates) {
       return false;
     }
-    if (!welcomeTierList(this.couponOffer.campaign).length) {
+    if (!welcomeHasOffer(this.couponOffer.campaign)) {
       return false;
     }
     // Вошедшему — только пока право доступно; гостю показываем как приглашение.
@@ -144,6 +175,9 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
 
   /** «200–500 ₽» по уровням кампании; одна ступень — просто её сумма. */
   get couponAmountText(): string {
+    if (welcomeIsFixed(this.couponOffer?.campaign)) {
+      return formatRub(this.couponOffer?.campaign?.fixedDiscountRub);
+    }
     const tiers = welcomeTierList(this.couponOffer?.campaign);
     if (!tiers.length) {
       return '';
@@ -159,6 +193,55 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
     return this.isAuth
       ? `Ваш купон: скидка ${this.couponAmountText}`
       : `Купон на скидку ${this.couponAmountText}`;
+  }
+
+  /**
+   * Билет «500 ₽» выключен: это ступень от 7 000 ₽. Первый экран Mary — шугаринг ног
+   * за 1 700 ₽, купон к нему 200 ₽ и стоит на карточке акции.
+   */
+  get showMaryCoupon(): boolean {
+    return false;
+  }
+
+  get couponHeroAmount(): string {
+    const tiers = welcomeTierList(this.couponOffer?.campaign);
+    const top = tiers[tiers.length - 1];
+    return top ? formatRub(top.discount) : '';
+  }
+
+  get couponHeroNote(): string {
+    const tiers = welcomeTierList(this.couponOffer?.campaign);
+    const top = tiers[tiers.length - 1];
+    return top ? `на первую запись от ${top.threshold.toLocaleString('ru-RU')} ₽` : '';
+  }
+
+  get couponTiers() {
+    return welcomeTierList(this.couponOffer?.campaign);
+  }
+
+  get couponDeadline(): string | null {
+    return welcomeDeadlineText(this.couponOffer?.campaign?.endsAt);
+  }
+
+  bookWithCoupon(): void {
+    this._coupons.track('clicked', this.couponOffer?.campaign?.code);
+    this.onlineRecord();
+  }
+
+  private watchMaryCoupon(el?: HTMLElement): void {
+    this.couponObserver?.disconnect();
+    this.couponObserver = undefined;
+    this.couponDocked = false;
+    if (!el || !isPlatformBrowser(this.platformId) || typeof IntersectionObserver === 'undefined') {
+      return;
+    }
+    this.couponObserver = new IntersectionObserver(entries => {
+      const docked = entries.every(entry => !entry.isIntersecting);
+      this.zone.run(() => {
+        this.couponDocked = docked;
+      });
+    });
+    this.couponObserver.observe(el);
   }
 
   private loadCoupon(): void {
@@ -196,6 +279,7 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
 
 
   ngOnDestroy(): void {
+    this.couponObserver?.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -204,16 +288,17 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: async _ => {
-          this.schedulesListFree = this._apiSchedule.getToday$.value?.message.split('\n');
-          if (this._apiSchedule.getToday$.value?.code === 404) {
-            this.isHasSchedule = false;
-          } else {
-            this.isHasSchedule = true;
-          }
+          const today = this._apiSchedule.getToday$.value;
+          const message = today?.message ?? '';
+          this.schedulesListFree = message ? message.split('\n') : [];
+          // Часы относятся к сегодняшней дате. Запись на будущие даты разрешает профиль.
+          this.hasReceptionHours = today?.code === 200 && /\d{1,2}:\d{2}/.test(message);
+          this.isHasSchedule = this.hasReceptionHours;
         },
         error: () => {
           this.schedulesListFree = [];
           this.isHasSchedule = false;
+          this.hasReceptionHours = false;
         }
       });
   }
@@ -250,6 +335,7 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
     this._dataService.sendProfileBA.pipe(takeUntil(this.destroy$)).subscribe(profile => {
       if (profile) {
         this.businessProfile = profile;
+        this.syncAbout();
         this.updateCanBook();
         this.loadCoupon();
       }
@@ -288,6 +374,7 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
       next: (businessProfile) => {
         if (businessProfile.code === 200) {
           this.businessProfile = businessProfile.data as IViewBusinessProfile;
+          this.syncAbout();
 
           // Имя мастера, описание и CTA отдаём в шапку сразу. Раньше здесь стоял
           // `await this.getSchedule(...)` ПЕРЕД transferProfileBA — основной контент
@@ -298,6 +385,7 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
           if (this.businessProfile.isGetOrder){
             void this.getSchedule(this.id!);
           } else {
+            this.hasReceptionHours = false;
             this.scheduleToday = 'Заказы не принимаются';
           }
         }
@@ -314,6 +402,16 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
     this.businessProfileService.sendWhoisVisit(this.businessProfile?.id!, arg0, this.profileUA ? this.profileUA.id! : null)
       .pipe(takeUntil(this.destroy$))
       .subscribe({error: () => {}});
+    if (arg0 === 'click_call') {
+      this.analytics.trackCall(this.masterSlug());
+    }
+    if (arg0 === 'click_message') {
+      this.analytics.trackMessenger(this.masterSlug());
+    }
+  }
+
+  private masterSlug(): string | undefined {
+    return this.businessProfile?.link || this.route.snapshot.paramMap.get('id') || undefined;
   }
 
 
@@ -346,6 +444,21 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
 
   readonly isOwnWebsite = urlIsOwnWebsite;
 
+  get vkProfileUrl(): string | null {
+    const value = this.businessProfile?.socialLink?.trim();
+    if (!value) return null;
+
+    try {
+      const url = new URL(value);
+      const isVk = ['vk.ru', 'vk.com', 'www.vk.ru', 'www.vk.com'].includes(url.hostname);
+      return isVk && (url.protocol === 'https:' || url.protocol === 'http:')
+        && !url.username && !url.password && !url.port && url.pathname.length > 1
+        ? value : null;
+    } catch {
+      return null;
+    }
+  }
+
   getInstagramName(url: string | undefined): string {
     if (!url) return '';
     const username = url.replace(/\/$/, '').split('/').pop() ?? '';
@@ -356,14 +469,12 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
     return !!url && /^\+\d{7,15}$/.test(url.trim());
   }
 
-  getTelegramUrl(url: string | undefined): string {
-    return buildTelegramUrl(url);
+  trackMessenger(): void {
+    this.analytics.trackMessenger(this.masterSlug());
   }
 
-  openTelegram(url: string | undefined, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    window.open(this.getTelegramUrl(url), '_blank', 'noopener,noreferrer');
+  getTelegramUrl(url: string | undefined): string {
+    return buildTelegramUrl(url);
   }
 
   getMaxUrl(url: string | undefined): string {
@@ -386,22 +497,6 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
   get writeUrl(): string {
     return this.getMaxUrl(this.businessProfile?.max)
       || this.getTelegramUrl(this.businessProfile?.telegram);
-  }
-
-  openWrite(event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    const href = this.writeUrl;
-    if (!href) return;
-    window.open(href, '_blank', 'noopener,noreferrer');
-  }
-
-  openMax(url: string | undefined, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    const href = this.getMaxUrl(url);
-    if (!href) return;
-    window.open(href, '_blank', 'noopener,noreferrer');
   }
 
 }

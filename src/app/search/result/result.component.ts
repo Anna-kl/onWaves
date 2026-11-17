@@ -1,5 +1,5 @@
 import {Component, DestroyRef, inject, OnDestroy, OnInit, Sanitizer} from '@angular/core';
-import {BehaviorSubject, catchError, concatMap, EMPTY, filter, from, map, merge, mergeMap, Observable, Observer, of, shareReplay, Subject, Subscription, switchMap, tap, toArray, withLatestFrom} from "rxjs";
+import { catchError, forkJoin, map, Observable, of, shareReplay, Subscription, switchMap, tap } from 'rxjs';
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {SearchService} from "../../../services/search.service";
 import {IResultSearch} from "../../DTO/views/search/IResultSearch";
@@ -37,7 +37,6 @@ export class ResultComponent implements OnInit, OnDestroy{
   test$: Observable<IResponse>=new Observable();
   filtered$: Observable<ICategory[]> | undefined;
   alternatives$: Observable<IResultSearch[]>|null = null;
-  private reloadTrigger = new Subject<void>();
   state: ISearchRequest|null = null;
   firstCards:  IResultSearch[]= [];
   seconsCards:  IResultSearch[] = [];
@@ -59,17 +58,19 @@ export class ResultComponent implements OnInit, OnDestroy{
 
   /** Параметры из URL — единый источник для первого захода и повторной навигации на тот же route. */
   private applyQueryParams(p: Params): void {
+    const one = (key: string) => Array.isArray(p[key]) ? p[key][0] : p[key];
+    const number = (key: string) => one(key) != null && Number.isFinite(Number(one(key))) ? Number(one(key)) : null;
+    const numbers = (key: string) => p[key] == null ? null : ([] as unknown[]).concat(p[key]).map(Number).filter(Number.isFinite);
+    const search = one('search') ?? '';
     this.state = new ISearchRequest(
-      p['address'] ?? null,
-      p['distance'] ?? null,
-      p['gender'] ?? null,
-      p['categoryId'] ?? null,
-      p['search'] ?? null,
-      p['geo'] ?? null,
+      one('address') ?? null,
+      number('distance'),
+      numbers('gender'),
+      number('categoryId'),
+      search,
+      numbers('geo'),
     );
-    const raw = p['search'];
-    const s = Array.isArray(raw) ? raw[0] : raw;
-    this.searchRequest = s != null && String(s) !== '' ? String(s) : '';
+    this.searchRequest = search;
   }
 
   getCategories(arg0: ICategory[],arg1: IResultSearch[]): ICategory[] {
@@ -91,29 +92,24 @@ export class ResultComponent implements OnInit, OnDestroy{
         // result = result.concat(filtered);
   }
 
-  getSearch(send: ISearchRequest) {
-      this.state = send;
-      this.reloadTrigger.next();
-  }
-
   ngOnInit(){
-    this.categories1Level$ =  this._dictionary.getMainCategories().pipe(
-        map(allCategories => getCategoryLevel2(allCategories)
-    ));
+    this.categories1Level$ = this._dictionary.getMainCategories().pipe(
+      map(getCategoryLevel2),
+      catchError(() => of([])),
+      shareReplay({ bufferSize: 1, refCount: true }),
+    );
 
-    merge(
-      this.activatedRoute.queryParams.pipe(tap(p => this.applyQueryParams(p))),
-      this.reloadTrigger,
-    ).pipe(
-      tap(() => {
+    this.activatedRoute.queryParams.pipe(
+      tap(p => {
+        this.applyQueryParams(p);
         this.loading = true;
       }),
-      switchMap(() =>
+      switchMap(() => forkJoin([
         this._apiSearch.search2(this.state).pipe(
           catchError(() => of(null))
-        )
-      ),
-      withLatestFrom(this.categories1Level$),
+        ),
+        this.categories1Level$,
+      ])),
       map(([resp, categories]) => {
         if (!resp || resp.code !== 200) {
           return { resp: null, filtered: [] as ICategory[] };
@@ -127,7 +123,7 @@ export class ResultComponent implements OnInit, OnDestroy{
           this.seconsCards = temp.second ?? [];
           this.thirdCards = temp.third ?? [];
           this.categories = filtered;
-          this.firstCardCategories = this.getCategories(filtered, this.firstCards);
+          this.firstCardCategories = this.state?.search?.trim() ? [] : this.getCategories(filtered, this.firstCards);
           this.secondCardCategories = this.getCategories(filtered, this.seconsCards);
         } else {
           this.firstCards = [];
@@ -252,15 +248,11 @@ export class ResultComponent implements OnInit, OnDestroy{
     }
 
     search() {
-        const send = {
-            search: this.searchRequest,
-            distance:  null ,
-            categoryId:  null,
-            address: '',
-            gender: [],
-            geo:  null,
-        } as unknown as ISearchRequest;
-        this.getSearch(send);
+        this._route.navigate([], {
+          relativeTo: this.activatedRoute,
+          queryParams: { search: this.searchRequest.trim() || null },
+          queryParamsHandling: 'merge',
+        });
     }
 
     ngOnDestroy(): void {

@@ -11,6 +11,7 @@ import {IResponse} from "./DTO/classes/IResponse";
 import { AnalyticsService } from 'src/services/analytics.service';
 import { SeoService, SeoPageData } from 'src/services/seo.service';
 import { isNoindexProfileSlug } from 'src/app/profile-ba/helpers/noindex-profiles';
+import { captureVisitSource } from 'src/app/profile-ba/helpers/visit-source';
 import { buildHomeJsonLd } from 'src/app/pages/home-jsonld';
 import {  PushDebugService } from 'src/services/push-notification.service';
 import { getDeviceCompat } from 'src/utils/device-compat';
@@ -318,7 +319,9 @@ export class AppComponent implements OnInit, AfterViewInit  {
         this.lastNavWasPopstate = event.navigationTrigger === 'popstate';
       }
       if (event instanceof NavigationEnd) {
-        this.applySeoForUrl(event.urlAfterRedirects || event.url);
+        const url = event.urlAfterRedirects || event.url;
+        this.rememberVisitSource(url);
+        this.applySeoForUrl(url);
         this.scrollPageToTop();
       }
     });
@@ -330,8 +333,19 @@ export class AppComponent implements OnInit, AfterViewInit  {
     // применяем данные текущего маршрута сразу. Повторный вызов безвреден:
     // сервис не добавляет теги, а перезаписывает их.
     if (this._route.navigated) {
+      this.rememberVisitSource(this._route.url);
       this.applySeoForUrl(this._route.url);
     }
+  }
+
+  /** ref и utm с адреса первого захода. Дальше их держит sessionStorage, query можно не тащить. */
+  private rememberVisitSource(url: string): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    const query = url.includes('?') ? url.slice(url.indexOf('?') + 1) : '';
+    captureVisitSource(new URLSearchParams(query));
+    this.analytics.noteTestLink(url);
   }
 
   /**
@@ -348,10 +362,16 @@ export class AppComponent implements OnInit, AfterViewInit  {
     return false;
   }
 
-  /** Хит для статических страниц; для динамических — пропускаем (шлёт компонент). */
-  private sendPageHit(url: string): void {
+  /**
+   * Хит только из NavigationEnd. До активации маршрута router.url ещё «/»,
+   * и ручной хит из ngOnInit записывал вход на главную у каждого захода.
+   * dynamicHit читаем уже после события: роутер обновляет state раньше,
+   * чем отдаёт NavigationEnd подписчикам. Title к этому моменту выставил
+   * обработчик SEO, подписанный в конструкторе.
+   */
+  private sendPageHit(evt: NavigationEnd): void {
     if (this.isDynamicHitRoute()) return;
-    this.analytics.trackPage(url, document.title);
+    this.analytics.trackPage(evt.urlAfterRedirects, document.title);
   }
   baProfiles: IViewBusinessProfile[] = [];
 
@@ -464,14 +484,14 @@ export class AppComponent implements OnInit, AfterViewInit  {
             // Аналитика (Яндекс.Метрика) и document.title доступны только в браузере —
             // на сервере (SSR) хиты не шлём.
             if (isPlatformBrowser(this.platformId)) {
+              // Подписка в ngOnInit успевает раньше NavigationEnd: при
+              // enabledBlocking активация ждёт конца bootstrap, а ngOnInit
+              // как раз внутри bootstrap. Ручной хит до этого события не шлём.
               this._route.events.pipe(
                 filter((evt): evt is NavigationEnd => evt instanceof NavigationEnd)
               ).subscribe(evt => {
-                this.sendPageHit(evt.urlAfterRedirects);
+                this.sendPageHit(evt);
               });
-              // initialNavigation:'enabledBlocking' завершает первый переход ДО создания
-              // AppComponent, поэтому подписка выше его не ловит — шлём initial-хит вручную.
-              this.sendPageHit(this._route.url);
             }
     // this.notification.receiveMessage();
     // this.message = this.notification.currentMessage;
@@ -479,6 +499,7 @@ export class AppComponent implements OnInit, AfterViewInit  {
     // см. login.service.ts. Повторный вызов здесь приводил бы к дублированию запроса.
 
     this.store$.select(getProfileMainClient).subscribe(result => {
+        this.analytics.setViewer(result?.profileMainClient?.userType ?? null);
         if (result){
           if  (result.profileMainClient){
             this.user = result.profileMainClient;

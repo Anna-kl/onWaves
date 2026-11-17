@@ -26,7 +26,7 @@ import { resolveAvatarUrl } from 'src/helpers/common/avatar1';
 @Component({
   selector: 'app-clients-card-list',
   templateUrl: './clients-card-list.component.html',
-  styleUrls: ['./clients-card-list.component.css'],
+  styleUrls: ['./clients-card-list.component.scss'],
   providers:[ProfileService, HistoryService, ConfirmationService]
 })
 export class ClientsCardListComponent implements OnChanges {
@@ -53,6 +53,8 @@ export class ClientsCardListComponent implements OnChanges {
   }
 
   @Input('card-business') cards: IViewBusinessProfile[]|null = null;
+  /** Пустая карточка «ваша страница» — только витрина главной для гостя. */
+  @Input() showInvite = false;
   @ViewChild(ConfirmPopup) confirmPopup!: ConfirmPopup;
 
   auth: IViewBusinessProfile | null = null;
@@ -117,24 +119,18 @@ export class ClientsCardListComponent implements OnChanges {
      * Команды routerLink для карточки мастера.
      * В SSR это становится href="/slug" — то, что Google считает внутренней ссылкой.
      */
-    profileCommands(business: IViewBusinessProfile): string[] {
-      return ['/', this.profileSegment(business)];
-    }
-
-    /**
-     * Сегмент публичного URL: сохранённый `link`, иначе id.
-     * Полные URL и мусор в `link` отбрасываем — каноникал страницы профиля
-     * тоже берёт только «чистый» сегмент без / ? # : и пробелов.
-     */
-    private profileSegment(business: IViewBusinessProfile): string {
+    profileCommands(business: IViewBusinessProfile): string[] | null {
       const stored = (business.link ?? '').trim();
-      const isPlainSegment = !!stored && !/[\/:?#\s]/.test(stored);
-      return isPlainSegment ? stored : (business.id ?? '');
+      if (!stored || stored.length > 120 || /[\\/:?#\s]/.test(stored) || stored === '.' || stored === '..' ||
+          /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i.test(stored)) {
+        return null;
+      }
+      return ['/', stored];
     }
 
     /** История просмотра — навигацию даёт href/routerLink, не этот обработчик. */
     onProfileNavigate(business: IViewBusinessProfile): void {
-      if (this.auth?.id && business.id) {
+      if (this.auth?.id && business.id && this.profileCommands(business)) {
         this._history.saveViewCard(this.auth.id, business.id).subscribe();
       }
     }
@@ -184,5 +180,29 @@ export class ClientsCardListComponent implements OnChanges {
     /** Плоский адрес по форматам работы (через запятую); фолбэк — address.city от бэка. */
     addressText(business: IViewBusinessProfile): string {
       return formatWorkLocations(business.workLocations) || (business.address?.city ?? '');
+    }
+
+    hasPhoto(business: IViewBusinessProfile): boolean {
+      return !!business.avatarUrl;
+    }
+
+    categoryOf(business: IViewBusinessProfile): string {
+      return (business.mainCategory ?? []).find(item => !!item && item.trim())?.trim() ?? '';
+    }
+
+    cityOf(business: IViewBusinessProfile): string {
+      const fromWork = business.workLocations?.find(item => !!item.city)?.city;
+      const fromMobile = business.workLocations?.find(item => item.cities?.length)?.cities?.[0];
+      return (fromWork || fromMobile || business.address?.city || '').trim();
+    }
+
+    letterOf(business: IViewBusinessProfile): string {
+      const name = (business.name ?? '').trim();
+      return name ? name.charAt(0).toUpperCase() : '•';
+    }
+
+    isSoftTone(business: IViewBusinessProfile): boolean {
+      const text = `${this.categoryOf(business)} ${business.name ?? ''}`.toLowerCase();
+      return /красот|маник|педик|бров|ресниц|волос|космет|визаж|макияж|ногт|spa|сп[аa]/.test(text);
     }
 }

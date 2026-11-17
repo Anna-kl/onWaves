@@ -215,10 +215,17 @@
             <app-service-format-select
               [profileId]="profile?.id ?? null"
               [value]="locationType"
-              (valueChange)="locationType = $event">
+              [pointIds]="fixedPointIds"
+              [invalid]="isErrorPoints"
+              (valueChange)="locationType = $event"
+              (pointIdsChange)="fixedPointIds = $event; isErrorPoints = false"
+              (pointChoiceCount)="fixedPointChoices = $event">
             </app-service-format-select>
             <div class="alert-validation" *ngIf="isErrorFormat" style="color: #d46c54; margin-bottom: 12px;">
               *Выберите формат оказания услуги
+            </div>
+            <div class="alert-validation" *ngIf="isErrorPoints" style="color: #d46c54; margin-bottom: 12px;">
+              *Выберите хотя бы одну точку
             </div>
 
             <!-- ══════════════════════════════════════════════════════════════ -->

@@ -51,6 +51,10 @@
   to { background-position: -100% 0; }
 }
 
+app-set-interval-start {
+  margin: 0 16px;
+}
+
 .free-time-table{
 
   max-width: 645PX;  

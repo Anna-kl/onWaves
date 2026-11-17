@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { WelcomeCampaign, WelcomeTier } from 'src/app/DTO/views/promo/welcome-coupon';
-import { welcomeTierList } from 'src/helpers/common/welcome-coupon';
+import { welcomeIsFixed, welcomeOfferLine, welcomeTierList } from 'src/helpers/common/welcome-coupon';
 import { WelcomeCouponService } from 'src/services/welcome-coupon.service';
 
 /**
@@ -35,9 +35,13 @@ export class CouponNewUserComponent implements OnInit, OnDestroy {
     return welcomeTierList(this.campaign);
   }
 
+  get fixedOffer(): string | null {
+    return welcomeIsFixed(this.campaign) ? welcomeOfferLine(this.campaign) : null;
+  }
+
   ngOnInit(): void {
     // На сервере окно не рисуем: SSR и индексируемый HTML остаются прежними.
-    if (!isPlatformBrowser(this.platformId) || !this.campaign?.tiers?.length) {
+    if (!isPlatformBrowser(this.platformId) || (!this.campaign?.tiers?.length && !welcomeIsFixed(this.campaign))) {
       return;
     }
     this.timer = setTimeout(() => {

@@ -1,9 +1,9 @@
-/** Соответствует DataModel.Enums.MessageType на бэке. Менять порядок значений нельзя. */
+/** Числа DataModel.Enums.ConsentChannel в API согласий и базе. MessageType отличается. */
 export enum ConsentChannel {
   Sms = 0,
-  Telegram = 1,
-  Push = 2,
-  Vk = 3,
-  Email = 4,
+  Email = 1,
+  Telegram = 2,
+  Push = 3,
+  Vk = 4,
   Max = 5
 }

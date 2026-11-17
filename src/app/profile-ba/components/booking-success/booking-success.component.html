@@ -1,0 +1,33 @@
+<section class="booking-success" aria-label="Запись создана">
+  <button class="booking-success__close" type="button" aria-label="Закрыть" (click)="done.emit()">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke-linecap="round"/></svg>
+  </button>
+  <header class="booking-success__header">
+    <span class="booking-success__check" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.3"><path d="m5 12 4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <h2>Запись создана</h2>
+    <p class="booking-success__lead">Детали визита сохранены.</p>
+  </header>
+
+  <div class="visit" *ngIf="details as d">
+    <div class="visit__service">
+      <span class="visit__label">Ваша услуга</span>
+      <h3>{{ d.services || 'Запись на услугу' }}</h3>
+      <p *ngIf="d.master">{{ d.master }}</p>
+    </div>
+    <div class="visit__row">
+      <span class="visit__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M8 14h3" stroke-linecap="round"/></svg></span>
+      <div><span class="visit__label">Дата и время</span><b>{{ d.when || 'Мастер согласует время визита' }}</b></div>
+    </div>
+    <div class="visit__row">
+      <span class="visit__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+      <div><span class="visit__label">{{ d.locationType === locationTypes.Mobile ? 'Мастер приедет к вам' : d.locationType === locationTypes.Online ? 'Формат встречи' : 'Место визита' }}</span><b>{{ d.place }}</b></div>
+    </div>
+  </div>
+
+  <app-booking-price [price]="price" [confirmed]="true"></app-booking-price>
+  <ng-content></ng-content>
+  <p class="booking-success__hint">Изменить или отменить запись можно в разделе <b>«Мои записи»</b>.</p>
+  <button class="booking-success__done" type="button" (click)="done.emit()">Готово <span aria-hidden="true">✓</span></button>
+</section>

@@ -1,0 +1,9 @@
+.wallet { margin: 1.5rem 0; color: #043c48; scroll-margin-top: 6rem; }
+.wallet h2 { margin-bottom: .5rem; font-size: 1.2rem; }
+.wallet-items { list-style: none; margin: .75rem 0; padding: 0; display: grid; gap: .6rem; }
+.wallet-item { background: #fff; padding: .875rem 1rem; border: 1px solid #d4e0e3; border-radius: .75rem; }
+.wallet-item p { margin: .25rem 0 .6rem; color: #53636b; font-size: .875rem; }
+.wallet-item dl { display: flex; flex-wrap: wrap; margin: 0; gap: .5rem 1rem; }
+.wallet-item dt { font-weight: 400; color: #53636b; font-size: .8rem; }
+.wallet-item dd { margin: 0; font-weight: 600; }
+.wallet details p { margin: .4rem 0 0; font-size: .875rem; max-width: 68ch; }

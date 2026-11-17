@@ -264,7 +264,8 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, 
       // ══════════════════════════════════════════════════════════════
       // КРИТИЧНО: Отправляем с Request ID для идемпотентности
       // ══════════════════════════════════════════════════════════════
-      this._api.createBAProfile(view, this.mainToken, this.requestId).pipe(
+      const registrationToken = this.mainToken;
+      this._api.createBAProfile(view, registrationToken, this.requestId).pipe(
         // Таймаут 15 секунд
         timeout(15000),
 
@@ -279,7 +280,17 @@ export class RegisterBusinessProfileComponent implements OnInit, AfterViewInit, 
               message: result.message || 'Не удалось создать профиль'
             }));
           }
-          return of(result.data as IViewAuthProfile);
+          // Поздний ответ регистрации не должен возвращать аккаунт после выхода/смены входа.
+          if (!this._login.session.sameSession(registrationToken, this.mainToken)) {
+            return throwError(() => ({ status: 401, message: 'Сессия изменилась во время регистрации' }));
+          }
+          const user = result.data as IViewAuthProfile;
+          if (!user?.token || !user.profileUserId) {
+            return throwError(() => ({ status: 502, message: 'Сервер не вернул данные входа для нового профиля' }));
+          }
+          // F5 возможен ещё во время загрузки фото/форматов: токен и выбор BA сохраняем сразу.
+          this._login.session.remember(user.token, user.profileUserId);
+          return of(user);
         }),
 
         // увеличиваем страницу

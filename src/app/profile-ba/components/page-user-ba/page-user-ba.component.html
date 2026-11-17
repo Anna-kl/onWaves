@@ -1,24 +1,18 @@
-<app-albums-show [isEdit]=false [profileId]="id" [canBook]="canBook"></app-albums-show>
 <app-coupon-new-user *ngIf="showWelcomeModal && welcomeCampaign"
     [campaign]="welcomeCampaign" (choose)="onWelcomeChoose()" (closed)="onWelcomeModalClosed()"></app-coupon-new-user>
-<div class="welcome-offer" *ngIf="welcomeCampaign">
-    <b>Скидка на первую запись через Onwaves</b>
-    <span class="welcome-offer__tiers">
-        <span *ngFor="let tier of welcomeTiers">{{ tier.text }}</span>
-    </span>
-    <details (toggle)="onWelcomeTermsToggle($event)">
-        <summary>Условия</summary>
-        Одна скидка на первую запись у одного мастера; применяется только наибольшая, скидки не суммируются.
-        Итоговая сумма показывается при оформлении записи.
-    </details>
-</div>
+<app-albums-show [isEdit]=false [profileId]="id" [canBook]="canBook"></app-albums-show>
 <div #servicesAnchor></div>
-<app-accordion [isUpdate] = false [canSetService]="false" [profileId]="id" (setServices)="setServices($event)">
+<app-accordion [isUpdate]="false" [canSetService]="false" [canBook]="canBook" [profileId]="id" (setServices)="setServices($event)">
 </app-accordion>
 <div class="cont-vert-start-center wrap margin-top30" *ngIf="profile" #mapAnchor>
     <div class="margin-bottom40">
         <h3>{{ isMobileWork ? 'Города работы' : 'Как нас найти' }}</h3>
+        <span class="address-points" *ngIf="addressLines.length > 1; else oneAddress">
+          <span *ngFor="let line of addressLines">{{ line }}</span>
+        </span>
+        <ng-template #oneAddress>
         <span *ngIf="hasAddress; else noAddress">{{ addressText }}</span>
+        </ng-template>
         <ng-template #noAddress><span class="address-empty">Адрес не указан</span></ng-template>
     </div>
     <!--Карта start (ленивая: SDK и геокод грузятся при попадании во вьюпорт) -->

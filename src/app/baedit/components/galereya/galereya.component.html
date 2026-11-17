@@ -56,7 +56,7 @@
                     <div class="cont-horiz-end-end ico-del-position">
                         <!-- (click)="deleteAlbum(album)" -->
                         <!-- (click)="modalopen()" -->
-                        <div class="ico-del" (click)="deleteAlbum(album)">
+                        <div class="ico-del" (click)="deleteAlbum($event, album)">
                         </div>
                     </div>
                 </div>
@@ -67,7 +67,12 @@
                     </div>
                     <!-- количество фото в альбоме -->
                     <div class="color-grey-dark">
-                        {{album.countImages}} фото
+                        {{album.countImages}} фото <span *ngIf="album.isPublished === false">· Скрыт с витрины</span>
+                    </div>
+                    <div class="presentation-controls">
+                      <button type="button" [disabled]="presentationSaving" (click)="toggleAlbum(album, $event)">{{album.isPublished === false ? 'Показать альбом' : 'Скрыть альбом'}}</button>
+                      <button type="button" [disabled]="presentationSaving || albums[0] === album" (click)="movePresentation('albums', album.id, -1, $event)" [attr.aria-label]="'Альбом выше: ' + album.name">↑</button>
+                      <button type="button" [disabled]="presentationSaving || albums[albums.length - 1] === album" (click)="movePresentation('albums', album.id, 1, $event)" [attr.aria-label]="'Альбом ниже: ' + album.name">↓</button>
                     </div>
                 </div>
             </div>
@@ -86,8 +91,8 @@
         <div class="gal-grid" *ngIf="albums.length > 0 && chooseAlbum">
 
           <!-- Карточка фото -->
+          <div class="gal-item" *ngFor="let image of images">
           <div class="gal-card"
-               *ngFor="let image of images"
                #mediaCard
                [attr.data-media-id]="image.id"
                (click)="showGalery(image)"
@@ -146,7 +151,7 @@
 
             <!-- Hover-оверлей с кнопками действий -->
             <div class="gal-card__actions">
-              <button class="gal-card__btn gal-card__btn--edit"
+              <button type="button" class="gal-card__btn gal-card__btn--edit"
                       (click)="openEditor($event, image)"
                       title="Редактировать">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -155,7 +160,7 @@
                   <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
                 </svg>
               </button>
-              <button class="gal-card__btn gal-card__btn--main"
+              <button type="button" class="gal-card__btn gal-card__btn--main"
                       [class.gal-card__btn--active]="image.isCover"
                       (click)="setMain($event, chooseAlbum.id, image)"
                       title="Сделать главным">
@@ -163,7 +168,7 @@
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                 </svg>
               </button>
-              <button class="gal-card__btn gal-card__btn--delete"
+              <button type="button" class="gal-card__btn gal-card__btn--delete"
                       (click)="deleteImage($event, image)"
                       title="Удалить">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -174,6 +179,14 @@
                   <path d="M9 6V4h6v2"></path>
                 </svg>
               </button>
+            </div>
+          </div>
+
+            <div class="presentation-controls presentation-controls--image">
+              <span *ngIf="image.isPublished === false">Скрыто с витрины</span>
+              <button type="button" [disabled]="presentationSaving" (click)="toggleImage(image, $event)">{{image.isPublished === false ? 'Показать фото' : 'Скрыть фото'}}</button>
+              <button type="button" [disabled]="presentationSaving || images[0] === image" (click)="movePresentation('images', image.id, -1, $event)" aria-label="Фото выше">↑</button>
+              <button type="button" [disabled]="presentationSaving || images[images.length - 1] === image" (click)="movePresentation('images', image.id, 1, $event)" aria-label="Фото ниже">↓</button>
             </div>
           </div>
 

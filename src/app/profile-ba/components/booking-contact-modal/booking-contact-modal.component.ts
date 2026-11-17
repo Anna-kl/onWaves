@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { finalize, Observable, switchMap, throwError } from 'rxjs';
 import { Record } from '../../../DTO/classes/records/record';
@@ -10,8 +11,12 @@ import { QuickSessionService } from '../../../../services/quick-session.service'
 import { AnalyticsService } from '../../../../services/analytics.service';
 import { WelcomeCouponService } from '../../../../services/welcome-coupon.service';
 import { formatAmount, formatRub, welcomeReasonText } from '../../../../helpers/common/welcome-coupon';
+import { getPrice } from '../../../../helpers/common/price.helpers';
+import { PromoSeatQuote } from 'src/app/DTO/views/promo/promo-seats';
 import { WelcomeQuote } from '../../../DTO/views/promo/welcome-coupon';
 import { quoteDraftComment, readCellingsQuoteDraft } from '../../helpers/cellings-offer';
+import { BookingPrice, bookingPrice, couponDiscount } from '../../helpers/booking-price';
+import { BookingSuccessDetails, bookingSuccessDetails } from '../../helpers/booking-success';
 
 /**
  * Финальный шаг записи для неавторизованного гостя: имя + телефон, лёгкая
@@ -24,8 +29,24 @@ import { quoteDraftComment, readCellingsQuoteDraft } from '../../helpers/celling
   providers: [AuthServices, RecordService],
 })
 export class BookingContactModalComponent implements OnInit {
+  @Input() priceSummary: BookingPrice | null = null;
+  @Input() successDetails: BookingSuccessDetails | null = null;
+  get savedDetails(): BookingSuccessDetails {
+    return this.successDetails ?? bookingSuccessDetails(this.summaryTitle, '', this.summaryWhen, this.record?.location);
+  }
+  @Input() promoQuote: PromoSeatQuote | null = null;
+  @Input() onCouponChanged?: (quote: WelcomeQuote) => void;
+
+  get displayedPrice(): BookingPrice {
+    const price = this.priceSummary ?? bookingPrice(this.record?.services ?? [], this.couponQuote, this.promoQuote, !this.couponDropped, this.masterLink);
+    return this.couponNotice ? { ...price, notice: null } : price;
+  }
   /** Id профиля мастера (БА) для POST records/add-user/{id}. */
   @Input() masterId!: string;
+  /** Слаг публичной страницы — в цель Метрики, не GUID и не телефон. */
+  @Input() masterLink?: string | null;
+  /** Услуга записи для параметра цели. */
+  @Input() serviceId?: string | null;
   /** Запись без clientId — проставляется после лёгкой регистрации. */
   @Input() record!: Record;
   /** Текст блока «Ваш выбор»: перечень услуг. */
@@ -33,26 +54,75 @@ export class BookingContactModalComponent implements OnInit {
   /** Текст блока «Ваш выбор»: дата и время записи. */
   @Input() summaryWhen = '';
   /** Расчёт купона с экрана подтверждения; null — купон не применяется. */
-  @Input() couponQuote: WelcomeQuote | null = null;
+  private quoteValue: WelcomeQuote | null = null;
+  /** Цена без скидки: её показываем, если сервер купон не применил. */
+  private plainAmount: number | null = null;
+  private plainIsFrom = false;
+  /** Сервер отказал в купоне — следующая отправка идёт по полной цене. */
+  couponDropped = false;
+  /** Почему купона нет. Отдельно от ошибки сети: запись при этом можно подтвердить. */
+  couponNotice: string | null = null;
+  /**
+   * Экран подтверждения за модалкой держит свою цену. Сообщаем ему, что купон снят,
+   * иначе после закрытия окна гость снова увидит скидку.
+   */
+  @Input() onCouponDropped?: (reason: string, quote?: WelcomeQuote | null) => void;
+
+  @Input()
+  set couponQuote(value: WelcomeQuote | null) {
+    this.quoteValue = value;
+    this.rememberPlainPrice(value);
+  }
+  get couponQuote(): WelcomeQuote | null {
+    return this.quoteValue;
+  }
+
+  /** Итог по акции с местами с экрана подтверждения; null — запись без акции. */
+  @Input() promoTotal: { list: number; pay: number } | null = null;
+  /** Сервер не дал место по акции: экран подтверждения пересчитывает цену и обновляет promoTotal. */
+  @Input() onPromoDropped?: (result: IResponse) => void;
+
+  get promoLine(): string | null {
+    const promo = this.promoTotal;
+    return promo ? `Акция OnWaves: к оплате ${formatRub(promo.pay)} вместо ${formatRub(promo.list)}` : null;
+  }
 
   /** Строка про купон в сводке. Суммы пришли с сервера, здесь только показ. */
   get couponLine(): string | null {
     const quote = this.couponQuote;
-    if (!quote) {
+    if (!quote || this.couponDropped || this.promoTotal) {
       return null;
     }
-    const discount = quote.couponStatus === 'available' ? quote.discountAmount : quote.potentialDiscount;
+    const discount = couponDiscount(quote);
     if (discount <= 0) {
       return null;
     }
-    return `Купон будет применён: −${formatRub(discount)} · к оплате `
+    return `${quote.couponStatus === 'login_required' ? 'Купон после проверки телефона' : 'Применён купон'}: −${formatRub(discount)} · к оплате `
       + formatAmount(quote.payableAmount, quote.amountIsFrom);
+  }
+
+  /** Цена, по которой гость запишется после отказа в купоне. */
+  get priceLine(): string | null {
+    if (!this.couponDropped || this.plainAmount == null || this.promoTotal) {
+      return null;
+    }
+    return `К оплате ${formatAmount(this.plainAmount, this.plainIsFrom)}`;
+  }
+
+  get submitLabel(): string {
+    if (this.errorMessage) {
+      return 'Повторить';
+    }
+    if (this.couponDropped) {
+      return 'Подтвердить без купона';
+    }
+    return 'Подтвердить запись';
   }
 
   step: 'form' | 'done' = 'form';
   submitting = false;
   errorMessage: string | null = null;
-  private registered = false;
+  registered = false;
 
   name = '';
   phone = '';
@@ -122,20 +192,34 @@ export class BookingContactModalComponent implements OnInit {
     request$.pipe(finalize(() => (this.submitting = false))).subscribe({
       next: result => {
         if (result.code === 201 || result.code === 202) {
+          this._welcome.invalidateMine();
+          this.priceSummary = { ...this.displayedPrice, pending: false, notice: null };
           this.step = 'done';
-          // Конверсия: услуга заказана (гость). Цель Метрики add_record.
-          this._analytics.trackEvent('booking', 'add_record', this.masterId);
+          this._analytics.trackBooking(this.masterLink, this.serviceId);
           const applied = result.data?.coupon as WelcomeQuote | null | undefined;
           if (applied) {
             this._welcome.track('booked', applied.campaignCode, applied.discountAmount);
           }
-        } else if (result.code === 409 && result.data?.couponReason) {
+        } else if (result.data?.couponReason) {
           this.onCouponRefused(result);
+        } else if (result.data?.promoReason) {
+          this.onPromoRefused(result);
         } else {
           this.setError();
         }
       },
-      error: () => this.setError(),
+      error: (err: unknown) => {
+        const refused = this.refusalFromHttp(err);
+        if (refused?.data?.couponReason) {
+          this.onCouponRefused(refused);
+          return;
+        }
+        if (refused?.data?.promoReason) {
+          this.onPromoRefused(refused);
+          return;
+        }
+        this.setError();
+      },
     });
   }
 
@@ -183,8 +267,9 @@ export class BookingContactModalComponent implements OnInit {
   }
 
   /**
-   * Сервер не применил купон и запись не создал. Ничего не гадаем: показываем причину сервера
-   * и по «Повторить» отправляем запись без скидки (или с новой суммой, если она изменилась).
+   * Сервер не применил купон и запись не создал.
+   * Смена суммы — гость подтверждает новую скидку.
+   * Купон уже использован и прочие отказы — сообщение и цена без купона, запись можно отправить сразу.
    */
   private onCouponRefused(result: IResponse): void {
     const reason = result.data?.couponReason as string;
@@ -194,14 +279,76 @@ export class BookingContactModalComponent implements OnInit {
       this.record.expectedCouponDiscount = quote.discountAmount;
       // Сводка должна показать новую сумму, а не ту, что клиент видел до отказа.
       this.couponQuote = quote;
+      if (this.promoQuote) {
+        this.promoQuote = { ...this.promoQuote, coupon: quote, couponDiscount: quote.discountAmount,
+          payableAmount: quote.payableAmount - this.promoQuote.promoDiscount };
+      }
+      this.priceSummary = bookingPrice(this.record.services, quote, this.promoQuote, true, this.masterLink);
+      this.onCouponChanged?.(quote);
+      this.couponDropped = false;
+      this.couponNotice = null;
       this.errorMessage = `Сумма скидки изменилась: теперь ${formatRub(quote.discountAmount)}. Нажмите «Повторить», чтобы подтвердить запись.`;
       return;
     }
+    this.rememberPlainPrice(quote);
     this.record.useWelcomeCoupon = false;
     this.record.expectedCouponDiscount = null;
-    // Купон не применится — убираем обещание из сводки, иначе оно спорит с текстом ошибки.
     this.couponQuote = null;
-    this.errorMessage = `${welcomeReasonText(reason)} Нажмите «Повторить», чтобы записаться без скидки.`;
+    this.couponDropped = true;
+    this.errorMessage = null;
+    this.couponNotice = welcomeReasonText(reason);
+    if (this.priceSummary) {
+      this.priceSummary = { ...this.priceSummary, payable: this.priceSummary.payable + this.priceSummary.coupon,
+        coupon: 0, pending: false, notice: null };
+    }
+    this.onCouponDropped?.(reason, quote ?? null);
+  }
+
+  /**
+   * Место по акции не досталось, запись не создана. Гость видит причину и новую цену
+   * и подтверждает запись ещё раз — без акции или с новой суммой акции.
+   */
+  private onPromoRefused(result: IResponse): void {
+    const quote = result.data?.promoQuote as PromoSeatQuote | null | undefined;
+    const amountChanged = result.data?.promoReason === 'promo_amount_changed' && !!quote;
+    this.record.usePromoSeat = amountChanged ? true : false;
+    this.record.expectedPromoDiscount = amountChanged ? quote!.promoDiscount : null;
+    this.promoTotal = null;
+    this.promoQuote = amountChanged ? quote! : null;
+    this.priceSummary = bookingPrice(this.record.services, quote?.coupon ?? this.couponQuote,
+      amountChanged ? quote! : null, !!this.record.useWelcomeCoupon, this.masterLink);
+    this.onPromoDropped?.(result);
+    this.errorMessage = `${result.message || 'Места по акции закончились.'} Нажмите «Повторить», чтобы записаться по этой цене.`;
+  }
+
+  /** HTTP 409 с телом купона или акции — тот же отказ, что и code 409 внутри успешного конверта. */
+  private refusalFromHttp(err: unknown): IResponse | null {
+    if (!(err instanceof HttpErrorResponse)) {
+      return null;
+    }
+    const body = err.error as IResponse | undefined;
+    if (!body?.data?.couponReason && !body?.data?.promoReason) {
+      return null;
+    }
+    if (err.status === 409 || body.code === 409) {
+      return body;
+    }
+    return null;
+  }
+
+  /** Полная цена услуги. Берём её из расчёта сервера, иначе из выбранных услуг. */
+  private rememberPlainPrice(quote?: WelcomeQuote | null): void {
+    if (quote?.originalAmount != null && Number.isFinite(Number(quote.originalAmount))) {
+      this.plainAmount = Number(quote.originalAmount);
+      this.plainIsFrom = !!quote.amountIsFrom;
+      return;
+    }
+    if (this.plainAmount != null || !this.record?.services?.length) {
+      return;
+    }
+    const [sum] = getPrice(this.record.services);
+    this.plainAmount = sum;
+    this.plainIsFrom = this.record.services.some(service => service.price?.isRange);
   }
 
   private setError(): void {

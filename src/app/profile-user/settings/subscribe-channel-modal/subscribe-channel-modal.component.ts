@@ -32,7 +32,7 @@ const CHANNEL_MAP: Record<number, ChannelInfo> = {
     name: 'Telegram',
     icon: 'telegram',
     color: '#2AABEE',
-    description: 'Перейдите в Telegram-бот и нажмите «Старт», чтобы получать уведомления о записях и статусах.'
+    description: 'Откройте бота, нажмите «Старт», затем «Подписаться». После этого вернитесь в OnWaves.'
   },
   [ConsentChannel.Vk]: {
     name: 'ВКонтакте',
@@ -86,6 +86,7 @@ export class SubscribeChannelModalComponent implements OnInit, OnDestroy {
   showDiagnostics = false;
 
   private sub?: Subscription;
+  private destroyed = false;
 
   private static readonly PUSH_ERROR_TEXTS: Record<PushErrorCode, string> = {
     'ios-needs-install':
@@ -96,8 +97,8 @@ export class SubscribeChannelModalComponent implements OnInit, OnDestroy {
     'unsupported':
       'Этот браузер не поддерживает push-уведомления. На iPhone используйте Safari и приложение с экрана «Домой».',
     'permission-denied':
-      'Уведомления запрещены на уровне системы. На iPhone удалите иконку OnWaves с экрана «Домой» и добавьте её заново, ' +
-      'затем разрешите уведомления. В браузере — включите их в настройках сайта.',
+      'Разрешите OnWaves в разделе «Настройки» → «Уведомления» на iPhone. ' +
+      'На компьютере или Android проверьте разрешение для сайта в настройках браузера.',
     'permission-dismissed':
       'Системный запрос не был подтверждён. Нажмите кнопку ещё раз и выберите «Разрешить» в окне устройства.',
     'sw-timeout':
@@ -107,7 +108,11 @@ export class SubscribeChannelModalComponent implements OnInit, OnDestroy {
     'subscribe-failed':
       'Браузер не смог создать подписку на уведомления. Перезапустите приложение и попробуйте снова.',
     'server':
-      'Разрешение получено, но сервер не сохранил подписку. Проверьте соединение и попробуйте снова.',
+      'Сервер не подтвердил сохранение подписки. Проверьте согласие в настройках OnWaves и попробуйте снова.',
+    'status':
+      'Не удалось проверить сохранение подписки. Проверьте соединение и повторите проверку.',
+    'session-changed':
+      'Сессия изменилась. Откройте настройки заново и повторите подключение.',
     'ssr':
       'Не удалось подключить push-уведомления. Обновите страницу и попробуйте снова.',
   };
@@ -162,18 +167,21 @@ export class SubscribeChannelModalComponent implements OnInit, OnDestroy {
    * запрос — ни диалога, ни отказа. Диагностику собираем уже после ошибки.
    */
   async enablePush(): Promise<void> {
+    if (this.isSaving) return;
     this.isSaving = true;
     this.errorMessage = null;
+    this.diagnostics = null;
 
     try {
       await this.pushService.subscribe(this.profileId);
-      this.activeModal.close('push-subscribed');
+      if (!this.destroyed) this.activeModal.close('push-subscribed');
     } catch (error) {
-      console.error('Push subscription failed', error);
+      if (this.destroyed) return;
       this.errorMessage = this.describePushError(error);
-      this.diagnostics = await this.pushService.collectDiagnostics();
+      const details = await this.pushService.collectDiagnostics(isPushError(error) ? error.code : 'subscribe-failed');
+      if (!this.destroyed) this.diagnostics = details;
     } finally {
-      this.isSaving = false;
+      if (!this.destroyed) this.isSaving = false;
     }
   }
 
@@ -229,10 +237,15 @@ export class SubscribeChannelModalComponent implements OnInit, OnDestroy {
   }
 
   openLink(): void {
-    if (this.subscribeLink) {
-      window.open(this.subscribeLink, '_blank', 'noopener,noreferrer');
-      this.activeModal.close('subscribed');
+    if (!this.subscribeLink) return;
+    const link = this.subscribeLink;
+    const external = window.open('about:blank', '_blank');
+    if (external) {
+      external.opener = null;
+      external.location.href = link;
     }
+    this.activeModal.close('subscribed');
+    if (!external) window.location.assign(link);
   }
 
   saveContact(): void {
@@ -278,6 +291,7 @@ export class SubscribeChannelModalComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.sub?.unsubscribe();
   }
 }

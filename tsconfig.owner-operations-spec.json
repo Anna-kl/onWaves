@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": ["src/services/owner-operations.service.spec.ts", "src/test.ts", "src/polyfills.ts", "src/**/*.d.ts"]
+}

@@ -25,6 +25,7 @@ import {FotoPhoneComponent} from "./components/phone/foto-phone/foto-phone.compo
 import { LandingVersion2Component } from './pages/landingVersion2/landingVersion2.component';
 import { MastersLandingComponent } from './pages/masters-landing/masters-landing.component';
 import { redirectAuthenticatedFromLandingGuard } from "./guards/redirect-authenticated-from-landing.guard";
+import { ownerOperationsGuard } from "./guards/owner-operations.guard";
 import { profileEditGuard } from "./guards/profile-edit.guard";
 import { ConfirmEmailComponent } from './pages/confirm-email/confirm-email.component';
 import { NetworkAwarePreloadStrategy } from './ssr/network-aware-preload.strategy';
@@ -40,9 +41,10 @@ const routes: Routes = [
       path: "",
       component: MainPageComponent,
       data: {
-        title: 'OnWaves — онлайн-запись к мастерам и в салоны красоты',
-        description: 'Найдите мастера или салон рядом, посмотрите свободное время ' +
-          'и запишитесь онлайн за минуту. Без звонков и комиссий.',
+        // Главная — местная витрина: услуга и город в title, запрос «мастер + город».
+        title: 'Мастера Каширы — онлайн-запись без переписки | OnWaves',
+        description: 'Маникюр, шугаринг, натяжные потолки, сантехник и другие мастера ' +
+          'Каширы и района. Работы, цены и свободное время — запись онлайн.',
       },
     },
     {
@@ -63,13 +65,36 @@ const routes: Routes = [
       path: "masters",
       component: MastersLandingComponent,
       data: {
-        title: 'Страница и реклама для мастеров бесплатно | OnWaves',
-        shareTitle: 'Страница и реклама для мастеров бесплатно',
-        description: 'Соберу страницу с работами, ценами и онлайн-записью, запущу рекламу на ваш город ' +
-          'и оплачу скидку первым клиентам. Для первых 10 мастеров.',
+        title: 'Страница, реклама и купон на запись для мастеров | OnWaves',
+        shareTitle: 'Страница, реклама и купон на запись для мастеров',
+        description: 'Соберём страницу с ценами и онлайн-записью, настроим рекламу на ваш город ' +
+          'за свой счёт и подключим купон на первую электронную запись. Для первых 10 мастеров.',
       },
     },
 
+    {
+      path: 'giveaways/:code',
+      loadComponent: () => import('./giveaways/giveaway-page.component').then(m => m.GiveawayPageComponent),
+      data: {
+        dynamicSeo: true,
+        dynamicHit: true,
+        title: 'Розыгрыш | OnWaves',
+        description: 'Призы, сроки и условия участия в розыгрыше OnWaves.',
+      },
+    },
+    {
+      path: 'admin/giveaways/preview',
+      loadComponent: () => import('./giveaways/giveaway-page.component').then(m => m.GiveawayPageComponent),
+      data: { noindex: true, dynamicSeo: true, dynamicHit: true, giveawayPreview: true, title: 'Предпросмотр розыгрыша | OnWaves' },
+    },
+    {
+      path: 'admin/giveaways',
+      canActivate: [ownerOperationsGuard],
+      loadComponent: () => import('./giveaways/giveaway-admin.component').then(m => m.GiveawayAdminComponent),
+      data: { noindex: true, dynamicHit: true, title: 'Назначение выигрыша | OnWaves' },
+    },
+    { path: 'admin/operations', pathMatch: 'full', canActivate: [ownerOperationsGuard], loadComponent: () => import('./owner-operations/owner-operations.component').then(m => m.OwnerOperationsComponent), data: { noindex: true, dynamicHit: true, title: 'Акции и выплаты | OnWaves' } },
+    { path: 'admin/operations/access', loadComponent: () => import('./owner-operations/operations-access.component').then(m => m.OperationsAccessComponent), data: { noindex: true, dynamicHit: true, title: 'Раздел недоступен | OnWaves' } },
     {path: 'cabinet-ba', component: CabinetBAComponent, canActivate: [profileEditGuard], data: { noindex: true } },
 
   { path: 'common/albums-phone', component: AlbumPhoneComponent, data: { noindex: true }},
@@ -108,6 +133,10 @@ const routes: Routes = [
   {
     path: 'static',
     loadChildren: () => import('./static/static.module').then(m => m.StaticModule),
+  },
+  {
+    path: 'help/grafik',
+    loadChildren: () => import('./static/help-grafik/help-grafik.module').then(m => m.HelpGrafikModule),
   },
   // Выдача поиска закрыта от индекса намеренно: это бесконечное множество
   // URL с одним и тем же набором карточек. Индексироваться должны сами

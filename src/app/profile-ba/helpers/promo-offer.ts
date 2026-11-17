@@ -36,7 +36,7 @@ export function offerActions(offer: ILandingOffer): IPromoAction[] {
     if (!actions.some(item => item.role === PromoActionRole.Primary)) {
       actions[0].role = PromoActionRole.Primary;
     }
-    return uniqueKinds(actions);
+    return uniqueActions(actions, offer.serviceId);
   }
 
   if (!offer.buttonText?.trim() && !offer.serviceId) {
@@ -244,15 +244,14 @@ export function offerHasCalculator(offer: ILandingOffer | null | undefined): boo
   return offerActions(offer).some(item => item.kind === PromoActionKind.Calculator);
 }
 
-export function offerPriceText(
+/** Услуга, из прайса которой взята цена на карточке. Граф калькулятора цену не показывает. */
+export function pricedServiceId(
   offer: ILandingOffer,
-  prices: Map<string, IPrice>,
   calculator?: IPromoCalculator | null
 ): string | null {
   const calc = calculator ?? offer.calculator;
   if (calc?.priceServiceId) {
-    const unit = calc.unitLabel || calcUnitLabel(calc.unit);
-    return priceFromService(prices.get(calc.priceServiceId), unit);
+    return calc.priceServiceId;
   }
   const hasGraphCalc = offerActions(offer).some(
     item => item.kind === PromoActionKind.Calculator && !!item.profileCalculatorId
@@ -261,20 +260,104 @@ export function offerPriceText(
     return null;
   }
   const booking = offerActions(offer).find(item => item.kind === PromoActionKind.Booking && item.serviceId);
-  const serviceId = booking?.serviceId ?? offer.serviceId ?? undefined;
+  return booking?.serviceId ?? offer.serviceId ?? null;
+}
+
+export function offerPriceText(
+  offer: ILandingOffer,
+  prices: Map<string, IPrice>,
+  calculator?: IPromoCalculator | null
+): string | null {
+  const calc = calculator ?? offer.calculator;
+  const serviceId = pricedServiceId(offer, calculator);
   if (!serviceId) {
     return null;
+  }
+  if (calc?.priceServiceId) {
+    const unit = calc.unitLabel || calcUnitLabel(calc.unit);
+    return priceFromService(prices.get(serviceId), unit);
   }
   return priceFromService(prices.get(serviceId));
 }
 
-function uniqueKinds(actions: IPromoAction[]): IPromoAction[] {
-  const seen = new Set<PromoActionKind>();
+/** Название услуги у цены: иначе «от 4 000 ₽» не говорит, за что платят. */
+export function offerPriceServiceName(
+  offer: ILandingOffer,
+  names: Map<string, string>,
+  calculator?: IPromoCalculator | null
+): string | null {
+  const serviceId = pricedServiceId(offer, calculator);
+  if (!serviceId) {
+    return null;
+  }
+  const fromList = names.get(serviceId)?.trim();
+  if (fromList) {
+    return fromList;
+  }
+  if (offer.serviceId === serviceId) {
+    const fromOffer = offer.serviceName?.trim();
+    return fromOffer || null;
+  }
+  return null;
+}
+
+export interface OfferHeaderChip {
+  text: string;
+  tone: 'sale' | 'coupon';
+}
+
+/**
+ * Все предложения одной акции — отдельные плашки шапки.
+ * Сначала список proposals. Если сервер его ещё не отдаёт, плашки собираются
+ * из процента скидки и упоминания купона в тексте акции.
+ */
+export function offerHeaderChips(offer: ILandingOffer | null | undefined): OfferHeaderChip[] {
+  const stored = (offer?.proposals ?? [])
+    .map(item => ({
+      text: (item?.text ?? '').trim(),
+      tone: item?.tone === 'coupon' ? 'coupon' as const : 'sale' as const,
+    }))
+    .filter(item => item.text.length > 0);
+  if (stored.length) {
+    return stored;
+  }
+  if (!offer) {
+    return [];
+  }
+
+  const chips: OfferHeaderChip[] = [];
+  const percent = offer.discountPercent;
+  if (percent != null && percent >= 1 && percent <= 90) {
+    chips.push({ text: `Скидка ${percent}%`, tone: 'sale' });
+  } else {
+    const badge = (offer.badge || offer.slogan || '').trim();
+    if (/скидк/i.test(badge)) {
+      chips.push({ text: badge, tone: 'sale' });
+    }
+  }
+
+  const blob = [
+    offer.description,
+    offer.footerNote,
+    offer.analyticsKey,
+    ...(offer.benefits ?? []).map(item => `${item.title ?? ''} ${item.description ?? ''}`),
+  ].join(' ');
+  if (/купон/i.test(blob)) {
+    chips.push({ text: 'Купон', tone: 'coupon' });
+  }
+  return chips;
+}
+
+function uniqueActions(actions: IPromoAction[], fallbackServiceId?: string | null): IPromoAction[] {
+  const seen = new Set<string>();
   return actions.filter(item => {
-    if (seen.has(item.kind)) {
+    const key = item.kind === PromoActionKind.Booking
+      ? `${item.kind}:${item.serviceId || fallbackServiceId || ''}`
+      : String(item.kind);
+    if (seen.has(key)) {
       return false;
     }
-    seen.add(item.kind);
+    seen.add(key);
     return true;
   });
 }

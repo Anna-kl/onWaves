@@ -38,6 +38,7 @@ import { CategoryTreeComponent } from './category-tree/category-tree.component';
 // поэтому объявлена в жадном общем модуле, а не в ленивом BaEditModule.
 import { LentaComponent } from './profile/lenta/lenta.component';
 import { CityAutocompleteComponent } from './city-autocomplete/city-autocomplete.component';
+import { RouterModule } from '@angular/router';
 
 
 @NgModule({
@@ -68,6 +69,7 @@ import { CityAutocompleteComponent } from './city-autocomplete/city-autocomplete
       LentaComponent,
       CityAutocompleteComponent],
   imports: [
+    RouterModule,
     YMapComponent, YMapDefaultSchemeLayerDirective, YMapMarkerDirective, YMapFeatureDirective, YMapDefaultMarkerDirective,
     YMapDefaultFeaturesLayerDirective,
     DatePipe,

@@ -140,6 +140,11 @@
         </label>
 
         <label class="pe-field">
+          <span>Дата начала</span>
+          <input class="pe-input" type="date" [(ngModel)]="validFrom" name="validFrom">
+        </label>
+
+        <label class="pe-field">
           <span>{{ needsValidTo ? 'Дата окончания — обязательна' : 'Дата окончания' }}</span>
           <input class="pe-input" type="date" [(ngModel)]="validTo" name="validTo">
         </label>
@@ -191,6 +196,7 @@
         [promoBadgeText]="badgeText"
         [templateType]="template.type"
         [priceText]="previewPrice"
+        [priceServiceName]="previewServiceName"
         [preview]="true">
       </app-landing-offer-card>
       <ng-container *ngIf="template.fields.portfolio">

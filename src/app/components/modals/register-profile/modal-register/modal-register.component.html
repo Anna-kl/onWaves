@@ -74,7 +74,7 @@
         class="button-text"
         style="max-width: 360px;"
         [ngClass]="isFormValid() ? 'btn-green' : 'btn-gray'"
-        [disabled]="!isFormValid()"
+        [disabled]="!isFormValid() || callSending || zvonokSending"
         (click)="next()">
         Далее
       </button>
@@ -87,7 +87,7 @@
       </p>
       <button type="button"
               class="zvonok__btn"
-              [disabled]="!isFormValid() || zvonokSending"
+              [disabled]="!isFormValid() || callSending || zvonokSending"
               (click)="nextZvonok()">
         {{ zvonokSending ? 'Звоним…' : 'Авторизоваться через Zvonok' }}
       </button>

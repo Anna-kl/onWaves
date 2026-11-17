@@ -6,10 +6,11 @@ import { RouterModule } from '@angular/router';
 import { MyNotesComponent } from './my-notes/my-notes.component';
 import { CommonComponentsModule } from '../common/common.module';
 import { UIModule } from '../ui/ui.module';
+import { ReviewsUserComponent } from './components/reviews-user/reviews-user.component';
 
 /** Ленивый чанк `/profile-user/:id` — список записей пользователя (только для авторизованных). */
 @NgModule({
-  declarations: [MyNotesComponent],
+  declarations: [MyNotesComponent, ReviewsUserComponent],
   imports: [
     CommonModule,
     FormsModule,

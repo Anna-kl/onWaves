@@ -1,0 +1,184 @@
+@import '../../../assets/styles/main/color';
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  background: $grey-light;
+}
+
+.schedule-guide {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  color: $green-dark;
+  line-height: 1.6;
+
+  .guide-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+
+  a {
+    color: $green-basic;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  header,
+  .section {
+    padding: 22px 18px;
+    border-radius: 20px;
+    background: #fff;
+  }
+
+  header {
+    border-top: 4px solid $green-light;
+  }
+
+  .brand {
+    color: $green-basic;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  h1 {
+    margin: 12px 0 20px;
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  h2 {
+    margin: 0 0 18px;
+    font-size: 22px;
+    line-height: 1.35;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0 0 16px;
+  }
+
+  .intro,
+  .note {
+    padding: 16px;
+    border-left: 3px solid $green-light;
+    border-radius: 0 14px 14px 0;
+    background: rgba($green-light, .07);
+  }
+
+  // Глобальный .intro — слоган витрины: 4em и line-height 60px.
+  .intro {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+    text-align: left;
+    color: inherit;
+  }
+
+  .intro p {
+    margin: 10px 0 0;
+  }
+
+  .guide-point {
+    margin: 20px 0 12px;
+  }
+
+  .guide-download {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 4px;
+    padding: 8px 16px;
+    border: 1px solid rgba($green-basic, .2);
+    border-radius: 999px;
+  }
+
+  .section {
+    margin-top: 20px;
+    // Глобальный .section фиксирует высоту экрана под scroll-snap.
+    height: auto;
+    min-height: 0;
+    scroll-snap-align: none;
+  }
+
+  .step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: $green-basic;
+    color: #fff;
+    font-size: 18px;
+  }
+
+  ol {
+    padding-left: 24px;
+  }
+
+  li {
+    padding: 4px 0 4px 4px;
+  }
+
+  .shots {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 24px;
+  }
+
+  figure {
+    width: 100%;
+    max-width: 400px;
+    min-width: 0;
+    margin: 0;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid rgba($green-basic, .12);
+    border-radius: 14px;
+  }
+
+  figcaption {
+    margin-top: 10px;
+    color: $grey-dark;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+}
+
+@media (min-width: 768px) {
+  .schedule-guide {
+    padding: 36px 24px 56px;
+
+    header,
+    .section {
+      padding: 30px;
+    }
+
+    h1 {
+      font-size: 36px;
+    }
+
+    figure {
+      width: calc(50% - 12px);
+    }
+
+    figure:only-child {
+      width: 100%;
+    }
+  }
+}

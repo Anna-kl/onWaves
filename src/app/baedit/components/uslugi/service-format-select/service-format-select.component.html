@@ -10,6 +10,7 @@
     выбрать для услуги.
   </p>
 
+  <p class="fmt__hint" *ngIf="allowDraft">В демо можно подготовить услугу до подтверждения адреса. Запись останется выключенной.</p>
   <div class="fmt-cards" *ngIf="available.length">
     <!-- Фиксированное место -->
     <button type="button" class="fmt-card"
@@ -59,5 +60,32 @@
       <span class="fmt-card__name">Онлайн</span>
       <span class="fmt-card__desc">Оказываю дистанционно</span>
     </button>
+  </div>
+
+  <div class="fmt-points"
+       *ngIf="value === WorkLocationType.Fixed && points.length"
+       [class.fmt-points--invalid]="invalid && selectedCount === 0">
+    <p class="fmt-points__label">Где оказывается услуга</p>
+    <p class="fmt-points__hint" *ngIf="points.length > 1">Можно в одном офисе или сразу в обоих</p>
+    <div class="fmt-points__cards">
+      <button type="button" class="fmt-point"
+              *ngFor="let point of points"
+              [class.fmt-point--on]="pointOn(point.id)"
+              [class.fmt-point--solo]="points.length === 1"
+              [attr.aria-pressed]="points.length > 1 ? pointOn(point.id) : null"
+              (click)="togglePoint(point.id)">
+        <span class="fmt-point__check" [class.fmt-point__check--on]="pointOn(point.id)"></span>
+        <span class="fmt-point__pin" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/>
+            <circle cx="12" cy="10" r="2.4"/>
+          </svg>
+        </span>
+        <span class="fmt-point__text">
+          <span class="fmt-point__title">{{ pointTitle(point) }}</span>
+          <span class="fmt-point__addr" *ngIf="pointAddress(point)">{{ pointAddress(point) }}</span>
+        </span>
+      </button>
+    </div>
   </div>
 </div>

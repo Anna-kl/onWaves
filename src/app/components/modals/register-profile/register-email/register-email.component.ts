@@ -113,8 +113,7 @@ export class RegisterEmailComponent implements OnInit {
       expiry.setDate(expiry.getDate() + 365);
 
       this._cookie.set('uuid-ocpio', id, expiry, '/');
-      this._cookie.set('auth-token-ocpio', response.token, expiry, '/');
-      this._cookie.set('profileId-ocpio', response.profileUserId!, expiry, '/');
+      this.loginService.session.remember(response.token, response.profileUserId);
 
       this.sendNotifyConsentIfNeeded(data['email'], response.profileUserId!);
 
@@ -183,15 +182,7 @@ export class RegisterEmailComponent implements OnInit {
                         const profileUserId = profile?.id;
                         if (profileUserId != null) {
                           // this.notification.requestPermission(result.message);
-                          let expiry = new Date();
-                          expiry.setDate(expiry.getDate()+365);
-                
-                          this._cookie.set('auth-token-ocpio', temp.token, expiry, '/');
-
-                          if(profile) {
-                            this._cookie.set('profileId-ocpio', profile.id!, expiry, '/');
-                
-                          }
+                          this.loginService.session.remember(temp.token, profile?.id);
                           this.activeModal.close();
                           this.loginService.isAutentificate$.next(true);
                           this.loginService.updateProfileUA();

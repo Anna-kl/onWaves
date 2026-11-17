@@ -286,7 +286,10 @@ app-crop-image-modal {
   }
 }
 .ico-del-position{
-  position: absolute; 
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
 }
 .ico-no-albom-mob{
   display: none;
@@ -395,3 +398,14 @@ app-crop-image-modal {
     height: 20px;
   }
 }
+
+/* Visible touch controls: publication and order are reversible, media is retained. */
+.presentation-controls { display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+.presentation-controls button { min-width:44px; min-height:44px; border:1px solid #c5d7d1; border-radius:8px; background:white; color:#226b57; padding:6px 10px; font-size:12px; cursor:pointer; }
+.presentation-controls button:disabled { opacity:.45; cursor:default; }
+.gal-item { min-width:0; }
+.presentation-controls--image { position:static; margin-top:6px; padding:4px; background:#f5f8f7; border-radius:8px; }
+.presentation-controls--image span { width:100%; background:white; padding:4px 8px; border-radius:6px; font-size:12px; }
+.card-albom-ba { height:auto; min-height:210px; }
+.card-albom-text { flex-wrap:wrap; }
+.card-albom-text .presentation-controls { flex:0 0 100%; }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'onwaves-cache-v4';
+const CACHE_NAME = 'onwaves-cache-v5';
 
 // Основные файлы для прекеша (чтобы работало без интернета)
 const PRECACHE_URLS = [
@@ -52,12 +52,14 @@ self.addEventListener('fetch', function(event) {
 
   // Стратегия 1: Network First для HTML (чтобы Ангуляр всегда обновлялся)
   if (request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html')) {
+    var privatePage = /\/(page-user|profile-user|admin|ba-edit|profilebisacc|cabinet-ba)(\/|$)/.test(requestUrl.pathname)
+      || /\/(choose-date|confirm-record2?)(\/|$)/.test(requestUrl.pathname);
     event.respondWith(
       fetch(request)
         .then(function(networkResponse) {
-          const contentType = networkResponse.headers.get('content-type') || '';
-          if (networkResponse.ok && contentType.includes('text/html')) {
-            const responseClone = networkResponse.clone();
+          var contentType = networkResponse.headers.get('content-type') || '';
+          if (!privatePage && networkResponse.ok && contentType.includes('text/html')) {
+            var responseClone = networkResponse.clone();
             caches.open(CACHE_NAME).then(function(cache) {
               cache.put(request, responseClone);
             });
@@ -65,7 +67,12 @@ self.addEventListener('fetch', function(event) {
           return networkResponse;
         })
         .catch(function() {
-          // Если нет сети, отдаем сохраненный HTML
+          if (privatePage) {
+            return new Response('<!doctype html><title>Нет сети</title><p>Страница личного кабинета недоступна без интернета.</p>', {
+              status: 503,
+              headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+            });
+          }
           return caches.match(request).then(function(cachedResponse) {
             return cachedResponse || caches.match('/index.html');
           });

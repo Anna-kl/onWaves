@@ -22,7 +22,7 @@ interface HourlyBase {
   price: number | null;
   startRange: number | null;
   endRange: number | null;
-  duration?: number;
+  duration?: number | null;
 }
 
 const baseByService = new WeakMap<object, HourlyBase>();

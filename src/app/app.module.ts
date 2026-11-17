@@ -17,7 +17,8 @@ import { SliderComponent } from './slider/slider.component';
 import { ModalEnterDataComponent } from './components/modals/register-profile/modal-enter-data/modal-enter-data.component';
 import { ModalRegisterComponent } from './components/modals/register-profile/modal-register/modal-register.component';
 import { NgbDropdown, NgbDropdownModule, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { SessionRenewalInterceptor } from './auth/session-renewal.interceptor';
 
 import { BusService } from '../services/busService';
 import { ModalNextComponent } from './components/modals/register-profile/modal-next/modal-next.component';
@@ -89,6 +90,8 @@ import { ConfirmEmailComponent } from './pages/confirm-email/confirm-email.compo
 import { RegisterEmailCodeComponent } from './components/modals/register-profile/register-email-code/register-email-code.component';
 import { EmailSanitizeDirective } from './components/modals/services/email.directive';
 import { AppToastComponent } from './ui/toast/app-toast.component';
+import { GiveawayBannerComponent } from './giveaways/giveaway-banner.component';
+import { ReviewAttendanceComponent } from './profile-ba/notes/ba-notes/review-attendance.component';
 const mapConfig: YConfig  = {
     apikey: '91ce60c3-9067-4742-9c3c-302de08cfc30',
     lang: 'ru_RU',
@@ -142,9 +145,11 @@ registerLocaleData(localeRu, 'ru');
     AppRoutingModule,
     NgbDropdownModule,
     ReactiveFormsModule,
+    ReviewAttendanceComponent,
     FormsModule,
     ImageModule,
     AppToastComponent,
+    GiveawayBannerComponent,
     UIModule,
     NgOptimizedImage,
     MainAppModule,
@@ -175,6 +180,7 @@ registerLocaleData(localeRu, 'ru');
   providers: [NgbDropdown,ProfileDataEditService, BusService,LoginService, provideClientHydration(), provideNgxMask(),
     { provide: LOCALE_ID, useValue: 'ru' }, provideYConfig(mapConfig),
     { provide: APP_INITIALIZER, useFactory: initializeAuth, deps: [LoginService], multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: SessionRenewalInterceptor, multi: true },
     // Пинч-зум в кадрировании аватара (ngx-image-cropper ищет глобальный window.Hammer).
     // Грузим лениво через HAMMER_LOADER: библиотека нужна только когда открыт кроппер,
     // в стартовый бандл и в SSR она не попадает. Под webpack hammerjs уходит в

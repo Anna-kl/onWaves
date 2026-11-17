@@ -9,7 +9,7 @@ import {subGroup} from "../../../DTO/views/services/IViewSubGroups";
 import {DictionaryService} from "../../../../services/dictionary.service";
 import {Observable, Subscription, forkJoin, of, shareReplay} from "rxjs";
 import {catchError, filter, switchMap, take} from "rxjs/operators";
-import {getAddressProfile, formatWorkLocations} from "../../../../helpers/common/address";
+import {getAddressProfile, formatWorkLocations, fixedPointGeocodeQuery, fixedPointsOf, workLocationLines} from "../../../../helpers/common/address";
 import {resolveAvatarUrl} from "../../../../helpers/common/avatar1";
 import {IViewCoordinates} from "../../../DTO/views/profile/IViewCoordinates";
 import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessProfile";
@@ -26,7 +26,7 @@ import { select, Store } from '@ngrx/store';
 import { selectProfileMainClient } from '../../../ngrx-store/mainClient/store.select';
 import { WelcomeCouponService } from 'src/services/welcome-coupon.service';
 import { WelcomeCampaign } from '../../../DTO/views/promo/welcome-coupon';
-import { welcomeTierList } from 'src/helpers/common/welcome-coupon';
+import { welcomeHasOffer, welcomeIsFixed, welcomeOfferLine, welcomeTierList } from 'src/helpers/common/welcome-coupon';
 
 @Component({
   selector: 'app-page-user-ba',
@@ -91,6 +91,14 @@ export class PageUserBAComponent implements OnInit, OnDestroy {
     return welcomeTierList(this.welcomeCampaign);
   }
 
+  get welcomeFixed(): boolean {
+    return welcomeIsFixed(this.welcomeCampaign);
+  }
+
+  get welcomeFixedText(): string {
+    return welcomeOfferLine(this.welcomeCampaign);
+  }
+
   @ViewChild('servicesAnchor') servicesAnchor?: ElementRef<HTMLElement>;
 
   onWelcomeChoose(): void {
@@ -107,8 +115,24 @@ export class PageUserBAComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** У Mary билет в колонке. Второе окно и полоска у услуг на той же странице не нужны. */
+  private isMaryProfile(): boolean {
+    const fromProfile = (this.profile?.link ?? '').replace(/\/$/, '').split('/').pop()?.toLowerCase();
+    if (fromProfile === 'mary') {
+      return true;
+    }
+    const path = this._router.url.split('?')[0].replace(/\/$/, '');
+    return path === '/mary' || path.startsWith('/mary/');
+  }
+
   /** Одна загрузка предложения на страницу мастера; условия: id известен и запись открыта. */
   private maybeLoadWelcome(): void {
+    if (this.isMaryProfile()) {
+      this.welcomeSub?.unsubscribe();
+      this.welcomeCampaign = null;
+      this.showWelcomeModal = false;
+      return;
+    }
     if (!isPlatformBrowser(this.platformId) || !this.id || !this.canBook || this.welcomeLoadedFor === this.id) {
       return;
     }
@@ -118,7 +142,7 @@ export class PageUserBAComponent implements OnInit, OnDestroy {
     this.showWelcomeModal = false;
     this.welcomeSub?.unsubscribe();
     this.welcomeSub = this._welcome.getOffer(masterId).subscribe(offer => {
-      if (!offer.active || !offer.masterParticipates || !offer.campaign?.tiers?.length) {
+      if (!offer.active || !offer.masterParticipates || !welcomeHasOffer(offer.campaign)) {
         this.welcomeCampaign = null;
         return;
       }
@@ -160,6 +184,13 @@ export class PageUserBAComponent implements OnInit, OnDestroy {
   }
 
   /** Строка адреса: плоский адрес по всем форматам (через запятую); фолбэк — address от бэка. */
+  get addressLines(): string[] {
+    const lines = workLocationLines(this.workLocations);
+    if (lines.length) return lines;
+    const fallback = this.profile?.address ? getAddressProfile(this.profile.address) : '';
+    return fallback ? [fallback] : [];
+  }
+
   get addressText(): string {
     const text = formatWorkLocations(this.workLocations);
     if (text) return text;
@@ -459,7 +490,17 @@ export class PageUserBAComponent implements OnInit, OnDestroy {
         return;
       }
       this.mapRequested = true;
-      if (this.isMobileWork) {
+      const points = fixedPointsOf(this.workLocations);
+      if (points.length > 1) {
+        this.geoPoint$ = of(null);
+        this.placeMarkers(points);
+      } else if (points.length === 1) {
+        const query = fixedPointGeocodeQuery(points[0]);
+        this.geoPoint$ = (query ? this._dictionaries.getPoint(query) : of(null)).pipe(
+          shareReplay({ bufferSize: 1, refCount: false })
+        );
+        if (this.isMobileWork) this.updateCityMarkers();
+      } else if (this.isMobileWork) {
         this.updateCityMarkers();
       } else if (this.profile.address) {
         this.geoPoint$ = this._dictionaries.getPoint(getAddressProfile(this.profile.address)).pipe(
@@ -472,6 +513,25 @@ export class PageUserBAComponent implements OnInit, OnDestroy {
       this.mapObserver?.disconnect();
       this.welcomeSub?.unsubscribe();
       this.SubscruptionBA?.unsubscribe();
+    }
+
+    /** Маркер на каждую стационарную точку и, если мастер ещё и выезжает, на города выезда. */
+    private placeMarkers(points: IWorkLocation[]): void {
+      const queries = points.map(point => fixedPointGeocodeQuery(point)).filter(query => query.length > 0);
+      const mobile = this.mobileLoc;
+      const cities = (mobile?.cities ?? []).filter(city => !!city && city.trim().length > 0);
+      cities.forEach(city => {
+        const query = [mobile?.country, mobile?.region, city].filter(part => !!part && `${part}`.trim()).join(', ');
+        if (query) queries.push(query);
+      });
+      if (!queries.length) {
+        this.geoList = [];
+        return;
+      }
+      forkJoin(queries.map(query => this._dictionaries.getPoint(query).pipe(catchError(() => of(null)))))
+        .subscribe(results => {
+          this.geoList = results.filter((item): item is IViewCoordinates => !!item);
+        });
     }
 
     /** Геокодируем каждый город (разъездная работа) и ставим маркеры на карте. */

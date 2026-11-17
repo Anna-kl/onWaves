@@ -12,7 +12,7 @@ import { GroupService } from '../../../../services/groupservice';
 import { IViewBusinessProfile } from "../../../DTO/views/business/IViewBussinessProfile";
 import { ProfileDataEditService } from "../../services/ba-edit-service";
 import { DictionaryService } from "../../../../services/dictionary.service";
-import { getAddressProfile, formatWorkLocations } from "../../../../helpers/common/address";
+import { getAddressProfile, formatWorkLocations, fixedPointGeocodeQuery, fixedPointsOf, workLocationLines } from "../../../../helpers/common/address";
 import { ProfileService } from "../../../../services/profile.service";
 import { AlbumsService } from "../../../../services/albums.service";
 import { IAlbumWithFoto } from "../../../DTO/views/images/IAlbumWithFoto";
@@ -83,6 +83,13 @@ export class ProfileBAInfoComponent implements OnInit {
   }
 
   /** Строка адреса: плоский адрес по всем форматам (через запятую); фолбэк — address от бэка. */
+  get addressLines(): string[] {
+    const lines = workLocationLines(this.workLocations);
+    if (lines.length) return lines;
+    const fallback = this.profile?.address ? getAddressProfile(this.profile.address) : '';
+    return fallback ? [fallback] : [];
+  }
+
   get addressText(): string {
     const text = formatWorkLocations(this.workLocations);
     if (text) return text;
@@ -155,7 +162,26 @@ export class ProfileBAInfoComponent implements OnInit {
 
   /** Карта: точка по офисной записи + маркеры городов по разъездной. */
   private updateGeo(): void {
-    const f = this.fixedLoc;
+    const points = fixedPointsOf(this.workLocations);
+    if (points.length > 1) {
+      this.geoPoint$ = of(null);
+      const queries = points.map(point => fixedPointGeocodeQuery(point)).filter(query => query.length > 0);
+      const mobile = this.mobileLoc;
+      (mobile?.cities ?? []).filter(city => !!city && `${city}`.trim()).forEach(city => {
+        const query = [mobile?.country, mobile?.region, city].filter(part => !!part && `${part}`.trim()).join(', ');
+        if (query) queries.push(query);
+      });
+      if (!queries.length) {
+        this.geoList = [];
+        return;
+      }
+      forkJoin(queries.map(query => this._dictionaries.getPoint(query).pipe(catchError(() => of(null)))))
+        .subscribe(results => {
+          this.geoList = results.filter((item): item is IViewCoordinates => !!item);
+        });
+      return;
+    }
+    const f = points[0] ?? this.fixedLoc;
     if (f) {
       const str = [f.country, f.region, f.city, f.street, f.house]
         .filter(v => !!v && `${v}`.trim().length > 0)

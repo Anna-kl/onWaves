@@ -1,0 +1,116 @@
+<main class="gw-admin ym-hide-content">
+  <h1>Призы розыгрыша</h1>
+  <a routerLink="/admin/operations">Вернуться в «Акции и выплаты»</a>
+  <p *ngIf="!allowed">Проверяем доступ…</p>
+
+  <ng-container *ngIf="allowed">
+    <p *ngIf="campaigns.kind === 'loading'">Загружаем кампании…</p>
+    <p *ngIf="campaigns.kind === 'failed'">Не удалось загрузить кампании. <button type="button" (click)="reload()">Повторить</button></p>
+    <p *ngIf="campaigns.kind === 'empty'">Кампаний пока нет.</p>
+    <p *ngIf="error" role="alert">{{ error }}</p>
+    <p *ngIf="notice" role="status">{{ notice }}</p>
+
+    <section *ngIf="recovery !== 'idle'" class="gw-admin__preview" aria-label="Предыдущая попытка">
+      <p *ngIf="recovery === 'unknown'">Результат предыдущего назначения пока неизвестен. Проверьте его перед продолжением.</p>
+      <p *ngIf="recovery === 'missing'">Сохранённое назначение пока не найдено. Можно повторить с теми же данными или завершить попытку и проверить историю.</p>
+      <button type="button" [disabled]="pending" (click)="recover()">Проверить предыдущую попытку</button>
+      <button *ngIf="recovery === 'missing'" type="button" (click)="clearAttempt(); resetPreview(); reload()">Завершить попытку</button>
+    </section>
+
+    <div *ngIf="campaigns.value?.length">
+      <label>Кампания
+        <select [(ngModel)]="campaignCode" name="campaign" [disabled]="locked || !!attempt" (ngModelChange)="changeCampaign()">
+          <option *ngFor="let item of campaigns.value" [value]="item.code">{{ item.title }}</option>
+        </select>
+      </label>
+      <nav *ngIf="websiteEntry && !campaign?.configured" class="gw-admin__tabs" aria-label="Управление розыгрышем">
+        <button type="button" (click)="tab = 'entries'" [attr.aria-pressed]="tab === 'entries'">Участники</button>
+        <button type="button" (click)="tab = 'assign'" [attr.aria-pressed]="tab === 'assign'">Назначить приз</button>
+      </nav>
+    </div>
+    <app-giveaway-entry-registry *ngIf="websiteEntry && tab === 'entries' && !campaign?.configured && campaign as activeCampaign" [campaign]="activeCampaign" (published)="reload()"></app-giveaway-entry-registry>
+    <p *ngIf="campaign?.configured">Реестр, импорт и публикация итогов доступны через API конструктора. Здесь можно назначить приз по номеру из зафиксированного реестра.</p>
+    <form *ngIf="campaign && (campaign.configured || !websiteEntry || tab === 'assign')" (ngSubmit)="check()">
+      <p *ngIf="campaignCode === 'svetlana-vk-2026-11'">Мастер — Светлана Бирюкова, Озёры.</p>
+
+      <fieldset *ngIf="campaign">
+        <legend>Призовое место</legend>
+        <label class="gw-admin__slot" *ngFor="let item of campaign.slots">
+          <input type="radio" name="slot" [value]="item.id" [(ngModel)]="slotId" [disabled]="item.assigned || locked || !!attempt" (ngModelChange)="resetPreview()" />
+          <span><b>{{ item.position }}. {{ item.title }} · до {{ money(item.maxAmountRub) }}</b>
+            <span *ngIf="item.assigned"> · уже назначен</span>
+            <small *ngIf="item.policy as policy">Услуг: до {{ policy.maxServices || policy.maxVisits }} · визитов: до {{ policy.maxVisits }}</small>
+            <small *ngIf="when(item.visitEndsAt)">Визиты по {{ when(item.visitEndsAt) }} включительно</small>
+          </span>
+        </label>
+      </fieldset>
+
+      <label *ngIf="slot && !slot.policy">Услуга
+        <select [(ngModel)]="serviceId" name="service" [disabled]="locked" (ngModelChange)="resetPreview()">
+          <option value="">Выберите услугу</option>
+          <option *ngFor="let service of slot.services" [value]="service.id" [disabled]="serviceDisabled(service)">{{ service.name }} · {{ money(service.price) }}</option>
+        </select>
+      </label>
+      <label *ngIf="hybrid">Площадка
+        <select name="entryPlatform" [(ngModel)]="entryPlatform" [disabled]="locked" (ngModelChange)="resetPreview()">
+          <option value="website">Сайт</option>
+          <option value="vk">VK</option>
+        </select>
+      </label>
+      <label *ngIf="websiteWinner || campaign.configured">Номер заявки
+        <input type="number" name="entryNumber" min="1" [(ngModel)]="entryNumber" [disabled]="locked" (ngModelChange)="resetPreview()" />
+      </label>
+      <label *ngIf="!websiteWinner">Телефон победительницы
+        <input name="phone" [(ngModel)]="phone" autocomplete="off" inputmode="tel" maxlength="32" [disabled]="locked" (ngModelChange)="resetPreview()" />
+      </label>
+      <label *ngIf="!websiteWinner && !campaign.configured">Ссылка на опубликованные итоги VK
+        <input name="evidence" [(ngModel)]="evidence" type="url" [disabled]="locked" (ngModelChange)="resetPreview()" />
+      </label>
+      <label>Заметка (необязательно)
+        <textarea name="note" [(ngModel)]="note" rows="2" maxlength="1000" [disabled]="locked" (ngModelChange)="resetPreview()"></textarea>
+      </label>
+      <button type="submit" [disabled]="locked">Проверить назначение</button>
+
+      <section *ngIf="preview && !preview.conflict" class="gw-admin__preview" aria-label="Подтверждение назначения">
+        <h2>{{ slot?.title }}</h2>
+        <p *ngIf="!websiteWinner">Проверьте номер: {{ normalizedPhone }}</p>
+        <p *ngIf="websiteWinner || campaign.configured">Заявка №{{ entryNumber }} · {{ preview.phoneMasked }}</p>
+        <p *ngIf="preview.policy">{{ preview.policy.description }}</p>
+        <p *ngIf="!preview.policy">{{ preview.serviceName }} · {{ money(preview.originalAmount) }}</p>
+        <p>Предел покрытия {{ money(preview.maxAmountRub) }}.</p>
+        <p *ngIf="when(preview.visitEndsAt)">Визиты по {{ when(preview.visitEndsAt) }} включительно.</p>
+        <button type="button" (click)="assign()" [disabled]="locked">Назначить приз</button>
+      </section>
+    </form>
+
+    <section *ngIf="result && (campaign?.configured || !websiteEntry || tab === 'assign')" class="gw-admin__preview" aria-label="Результат назначения">
+      <h2>{{ result.prizeTitle || 'Приз' }} · {{ labels[result.status] || result.status }}</h2>
+      <p>Телефон {{ result.phoneMasked }}. Назначение № {{ result.awardId }}.</p>
+      <p>Победительница увидит приз в «Моих выигрышах» после входа и подтверждения этого номера.</p>
+      <button type="button" (click)="copyInstructions()">Скопировать инструкцию для победительницы</button>
+    </section>
+
+    <section *ngIf="campaign && (campaign.configured || !websiteEntry || tab === 'assign')" aria-labelledby="gw-history">
+      <h2 id="gw-history">История назначений</h2>
+      <p *ngIf="history.kind === 'loading'">Загружаем историю…</p>
+      <p *ngIf="history.kind === 'failed'">Не удалось загрузить историю. <button type="button" (click)="loadHistory()">Повторить</button></p>
+      <p *ngIf="history.kind === 'ready' && !history.value?.length">Назначений пока нет.</p>
+      <article *ngFor="let award of history.value" class="gw-admin__preview">
+        <h3>{{ award.prizeTitle }} · {{ award.phoneMasked }}</h3>
+        <p>{{ labels[award.status] || award.status }} · {{ award.assignedAt | date:'dd.MM.yyyy HH:mm':'+0300' }} МСК</p>
+        <p>К компенсации {{ money(award.dueAmountRub) }} · Выплачено {{ money(award.paidAmountRub) }}</p>
+        <p *ngFor="let visit of award.bookings">{{ labels[visit.status] }} · услуг: {{ visit.services }} · {{ money(visit.originalAmount) }} · OnWaves {{ money(visit.onwavesPays) }} · клиентка {{ money(visit.clientPays) }}<small>Запись № {{ visit.recordId }}</small></p>
+        <details *ngIf="award.events.length"><summary>Действия по призу</summary><p *ngFor="let event of award.events">{{ labels[event.kind] || event.kind }} · {{ event.at | date:'dd.MM.yyyy HH:mm':'+0300' }} МСК</p></details>
+        <button *ngIf="award.canRevoke && revokeAward?.awardId !== award.awardId" type="button" [disabled]="locked" (click)="revokeAward = award; revokeReason = ''">Отозвать назначение</button>
+        <p *ngIf="!award.canRevoke && award.status !== 'revoked'">При записи, использовании или споре сначала разберите визит в «Акциях и выплатах».</p>
+        <ng-container *ngIf="revokeAward?.awardId === award.awardId">
+          <label>Причина отзыва назначения на {{ award.phoneMasked }}
+            <textarea [(ngModel)]="revokeReason" maxlength="500" [disabled]="pending"></textarea>
+          </label>
+          <button type="button" [disabled]="pending || !revokeReason.trim()" (click)="revoke()">Подтвердить отзыв</button>
+          <button type="button" [disabled]="pending" (click)="revokeAward = null">Отмена</button>
+        </ng-container>
+      </article>
+    </section>
+  </ng-container>
+</main>

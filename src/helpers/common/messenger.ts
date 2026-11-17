@@ -49,11 +49,12 @@ export function getTelegramUrl(contact: string | null | undefined): string {
 /** Фолбэк, когда ни один мессенджер не подключён: обычная SMS на номер. */
 export function getSmsUrl(phone: string | null | undefined): string {
   const digits = (phone ?? '').replace(/\D/g, '');
-  return digits ? `sms:+${digits}` : '';
+  // «+7» без номера — не ссылка: иначе мастер «пишет» в пустоту.
+  return digits.length >= 10 ? `sms:+${digits}` : '';
 }
 
-/** tel: с ровно одним «+». */
+/** tel: с ровно одним «+». Код страны без абонентской части ссылкой не является. */
 export function getTelUrl(phone: string | null | undefined): string {
   const digits = (phone ?? '').replace(/\D/g, '');
-  return digits ? `tel:+${digits}` : '';
+  return digits.length >= 10 ? `tel:+${digits}` : '';
 }

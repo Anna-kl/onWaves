@@ -4,6 +4,10 @@
   height: 100%;
 }
 
+:host.is-unavailable {
+  display: none;
+}
+
 .ow-video {
   --g1: #12909F;
   --g2: #075A66;
@@ -22,6 +26,27 @@
   border-radius: inherit;
 }
 
+.ow-expand {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  cursor: pointer;
+  svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  &:hover { background: rgba(0, 0, 0, .75); }
+  &:active { opacity: .7; }
+  &:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+}
+
 .ow-video video {
   position: absolute;
   inset: 0;
@@ -35,6 +60,30 @@
 
 :host.offer__frame--contain .ow-video video {
   object-fit: contain;
+}
+
+.ow-playback-controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  display: flex;
+  gap: 8px;
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, .55);
+    border-radius: 50%;
+    background: rgba(0, 30, 36, .78);
+    color: #fff;
+    cursor: pointer;
+    &:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  }
+
+  svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 }
 
 .ow-cover {
@@ -261,4 +310,104 @@
   .ow-progress i {
     transition: none;
   }
+}
+
+.ow-video--full-frame {
+  background: #102e34;
+  video { height: calc(100% - 56px); object-fit: contain; }
+  .ow-playback-controls {
+    top: auto; bottom: 6px; left: 8px; right: 8px; align-items: center;
+  }
+  .ow-seek { flex: 1; min-width: 0; height: 44px; accent-color: #fff; }
+}
+
+.ow-video--immersive {
+  background: #000;
+  video { height: 100%; object-fit: contain; }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, .5), transparent 20%, transparent 55%, rgba(0, 0, 0, .8) 100%);
+  }
+
+  .ow-cover {
+    z-index: 1;
+    background: transparent;
+    color: #fff;
+    &::after { display: none; }
+    &:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+  }
+  &.is-playing .ow-cover { pointer-events: auto; }
+  &.is-playing .ow-cover:focus-visible {
+    opacity: 1;
+    .ow-play { opacity: 0; }
+  }
+  .ow-ring, .ow-pulse { display: none; }
+  .ow-play { width: 68px; height: 68px; background: rgba(0, 0, 0, .45); border: 1px solid rgba(255, 255, 255, .4); box-shadow: none; backdrop-filter: blur(8px); }
+  .ow-tri { background: #fff; width: 22px; height: 26px; }
+  .ow-loading { top: calc(50% + 36px); font-size: 14px; letter-spacing: normal; text-transform: none; }
+  .ow-progress { top: calc(50% + 68px); }
+
+  .ow-playback-controls {
+    top: auto;
+    bottom: 0;
+    left: max(16px, env(safe-area-inset-left, 0px));
+    right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    gap: 0 12px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    align-items: center;
+
+    button {
+      border: 0;
+      background: rgba(0, 0, 0, .32);
+      backdrop-filter: blur(8px);
+      &:hover { background: rgba(255, 255, 255, .2); }
+      &:active { opacity: .65; }
+    }
+    button:last-child { grid-column: 3; grid-row: 1; }
+  }
+
+  .ow-time { color: #fff; font-size: 12px; font-variant-numeric: tabular-nums; text-shadow: 0 1px 6px #000; }
+
+  .ow-seek {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 44px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    touch-action: pan-x;
+
+    &::-webkit-slider-runnable-track { height: 3px; border-radius: 3px; background: linear-gradient(to right, #fff var(--played, 0%), rgba(255, 255, 255, .38) var(--played, 0%)); }
+    &::-moz-range-track { height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .38); }
+    &::-moz-range-progress { height: 3px; background: #fff; }
+    &::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 10px; height: 10px; margin-top: -3.5px; border-radius: 50%; background: #fff; }
+    &::-moz-range-thumb { width: 10px; height: 10px; border: 0; border-radius: 50%; background: #fff; }
+    &:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+  }
+
+  @media (min-width: 768px) {
+    .ow-playback-controls { left: 50%; right: auto; width: min(600px, calc(100% - 64px)); transform: translateX(-50%); }
+  }
+  @media (max-height: 500px) and (orientation: landscape) {
+    .ow-playback-controls { left: 16px; right: 16px; width: auto; transform: none; }
+  }
+}
+
+// Карточка акции использует тот же стиль, но не отступы полноэкранного окна.
+.ow-video--immersive.ow-video--compact {
+  .ow-expand { left: auto; right: 12px; }
+  .ow-playback-controls { left: 12px; right: 12px; width: auto; transform: none; padding-bottom: 0; }
+  &.is-playing.ow-video--expandable .ow-cover { bottom: 0; }
 }

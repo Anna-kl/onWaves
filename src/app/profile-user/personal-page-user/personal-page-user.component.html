@@ -123,7 +123,7 @@
                     <div class="field-row">
 
                       <input
-                     
+                        id="cabinet-phone"
                         type="text"
                         placeholder="+7(000)000-00-00"
                         [(ngModel)]="phoneInput"
@@ -261,6 +261,9 @@
                     
             </section>
     <!-- Мой купон: приветственная скидка за первую запись через Onwaves -->
+            <app-giveaway-prizes *ngIf="showPrizes" [proofTick]="phoneProofTick" [clientId]="mainProfileCleint.id" (needPhoneProof)="beginPhoneProof()"></app-giveaway-prizes>
+            <app-review-coupon-wallet id="review-coupons" *ngIf="showPrizes" [profileId]="mainProfileCleint.id"></app-review-coupon-wallet>
+            <app-giveaway-my-entries *ngIf="showPrizes"></app-giveaway-my-entries>
             <section class="coupon-banner" *ngIf="welcomeMe && welcomeMe.status !== 'none'">
               <div class="coupon-banner__text">
                 <ng-container [ngSwitch]="welcomeMe.status">
@@ -276,10 +279,11 @@
                   <ng-container *ngSwitchCase="'expired'">Срок действия скидки истёк</ng-container>
                   <ng-container *ngSwitchDefault>Скидка сейчас недоступна</ng-container>
                 </ng-container>
-                <p *ngIf="welcomeMe.campaign">
+                <p *ngIf="welcomeMe.campaign && !welcomeIsFixed(welcomeMe.campaign)">
                   <ng-container *ngFor="let tier of welcomeTierList(welcomeMe.campaign); let last = last">{{ tier.text }}{{ last ? '.' : '; ' }}</ng-container>
                   Одна скидка на первую запись у одного мастера; итоговая сумма показывается при оформлении.
                 </p>
+                <p *ngIf="welcomeIsFixed(welcomeMe.campaign)">{{ welcomeOfferLine(welcomeMe.campaign) }} Итоговая сумма показывается при оформлении.</p>
                 <p *ngIf="welcomeMe.status === 'available' && welcomeMe.expiresAt">
                   Действует до {{ welcomeMe.expiresAt | date: 'd MMMM yyyy' }}.
                 </p>

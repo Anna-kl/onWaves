@@ -25,23 +25,21 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           {{ summaryWhen }}
         </div>
-        <!-- Купон: клиент должен видеть его и в последнем окне, а не только на сводке. -->
-        <div class="sum-coupon" *ngIf="couponLine">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h13A1.5 1.5 0 0 1 20 8.5v1.6a1.9 1.9 0 0 0 0 3.8v1.6a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 15.5v-1.6a1.9 1.9 0 0 0 0-3.8V8.5Z"
-                  stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-          </svg>
-          {{ couponLine }}
-        </div>
       </div>
       <button type="button" class="sum-edit" (click)="edit()">Изменить</button>
+    </div>
+
+    <app-booking-price [price]="displayedPrice"></app-booking-price>
+    <div class="coupon-refusal" *ngIf="couponNotice" role="alert">
+      <b>Купон недоступен для этого номера</b>
+      <p>{{ couponNotice }} Запись ещё не создана. Проверьте сумму выше и подтвердите запись без купона.</p>
     </div>
 
     <form (ngSubmit)="submit()" novalidate>
       <div class="field">
         <label for="bcm-name">Как к вам обращаться</label>
         <input class="inp" type="text" id="bcm-name" name="name" placeholder="Имя"
-               autocomplete="given-name" [(ngModel)]="name" (blur)="nameTouched = true"
+               autocomplete="given-name" [readonly]="submitting || registered" [(ngModel)]="name" (blur)="nameTouched = true"
                [attr.aria-invalid]="(nameTouched || submitAttempted) && nameError ? true : null" />
         <div class="field-error" *ngIf="(nameTouched || submitAttempted) && nameError">{{ nameError }}</div>
       </div>
@@ -55,7 +53,7 @@
           </span>
           <input class="phone-input" type="tel" id="bcm-phone" name="phone" inputmode="numeric"
                  placeholder="(___) ___-__-__" autocomplete="tel"
-                 mask="(000) 000-00-00" [(ngModel)]="phone" (blur)="phoneTouched = true"
+                 [readonly]="submitting || registered" mask="(000) 000-00-00" [(ngModel)]="phone" (blur)="phoneTouched = true"
                  [attr.aria-invalid]="(phoneTouched || submitAttempted) && phoneError ? true : null" />
         </div>
         <div class="field-error" *ngIf="(phoneTouched || submitAttempted) && phoneError">{{ phoneError }}</div>
@@ -84,7 +82,7 @@
       <div class="m-error" *ngIf="errorMessage">{{ errorMessage }}</div>
 
       <button class="submit" type="submit" [disabled]="!isFormValid || submitting">
-        {{ submitting ? 'Отправка…' : (errorMessage ? 'Повторить' : 'Подтвердить запись') }}
+        {{ submitting ? 'Отправка…' : submitLabel }}
         <svg class="arr" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
 
@@ -95,15 +93,7 @@
     </form>
   </ng-container>
 
-  <div class="done-state" *ngIf="step === 'done'">
-    <div class="tick">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-    </div>
-    <h2>Запись отправлена!</h2>
-    <p>
-      Мастер подтвердит запись<ng-container *ngIf="summaryWhen"> на <b>{{ summaryWhen }}</b></ng-container>
-      и свяжется с вами в ближайшее время.
-    </p>
-    <button class="submit" type="button" (click)="finish()">Готово</button>
+  <div class="booking-done" *ngIf="step === 'done'">
+    <app-booking-success [details]="savedDetails" [price]="displayedPrice" (done)="finish()"></app-booking-success>
   </div>
 </div>

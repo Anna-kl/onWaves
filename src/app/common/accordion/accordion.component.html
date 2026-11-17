@@ -67,7 +67,9 @@
             <!-- Содержимое вкладки -->
             <div class="accordion_tab-content" [class.open]="group.isOpen">
                 <ng-container *ngFor="let subGroup of group.subGroups; trackBy: trackById">
+                    <ng-container *ngIf="offersPoint(subGroup)">
                     <ng-container *ngTemplateOutlet="serviceCard; context: {$implicit: subGroup}"></ng-container>
+                    </ng-container>
                 </ng-container>
             </div><!-- Содержимое вкладки end -->
         </div>
@@ -79,7 +81,9 @@
             <div class="line-separateur"></div>
             <div class="svc-stack" *ngIf="serviceWithout$|async as serviceWithout">
                     <ng-container *ngFor="let service of serviceWithout; trackBy: trackById">
+                        <ng-container *ngIf="offersPoint(service)">
                         <ng-container *ngTemplateOutlet="serviceCard; context: {$implicit: service}"></ng-container>
+                        </ng-container>
                     </ng-container>
             </div>
 
@@ -116,6 +120,7 @@
           <div class="svc__head-main">
             <div class="svc__title-row">
               <h3 class="svc__title">{{ svc.name }}</h3>
+              <span class="svc__badge" *ngIf="isUpdate && svc.serviceStatus === 2">В архиве</span>
               <span class="svc__badge" *ngIf="workLocationLabel(svc)">{{ workLocationLabel(svc) }}</span>
               <span class="svc__badge svc__badge--soft" *ngIf="svc.isTimeUnlimited">Без ограничений</span>
             </div>
@@ -150,11 +155,18 @@
               <h2>{{ svc.name }}</h2>
               <a (click)="changeService(svc)">Изменить услугу</a>
               <a (click)="changeGroup(svc)">Сменить группу</a>
+              <a (click)="archiveService(svc)">{{ svc.serviceStatus === 2 ? 'Восстановить' : 'В архив' }}</a>
               <a (click)="deleteService(svc)">Удалить</a>
             </div>
           </span>
         </label>
       </div>
+
+      <aside class="svc-promotion" *ngIf="promotionFor(svc) as promotion">
+        <b>{{ promotion.title }}</b>
+        <a [routerLink]="promotion.path" [fragment]="promotion.fragment"
+           [attr.aria-label]="'Условия акции: ' + svc.name" target="_blank" rel="noopener">Условия <span aria-hidden="true">↗</span></a>
+      </aside>
 
       <div class="svc__body"
            *ngIf="svc.id && isExpanded(svc.id)"
@@ -170,7 +182,8 @@
                 [compact]="true"
                 [warmup]="!posterOf(img)"
                 [expandable]="true"
-                (expand)="openGalleryMedia(svc)">
+                (expand)="openGalleryMedia(svc)"
+                (unavailable)="onVideoUnavailable(videoUrl)">
               </app-video-player>
               <img *ngIf="!isVideoImg(img) && previewOf(img) as src"
                    [src]="src"
@@ -198,8 +211,6 @@
         </div>
 
         <div class="svc__details">
-          <p class="svc__about" *ngIf="svc.about">{{ svc.about }}</p>
-
           <div class="svc__cost" *ngIf="formatPrice(svc.price)">
             <span class="svc__cost-label">Стоимость</span>
             <div class="svc__cost-row">
@@ -210,6 +221,15 @@
               <span class="svc__pay" *ngIf="!formatPriceUnit(svc)">{{ getDescribeTypePayment(svc) }}</span>
             </div>
           </div>
+
+          <button type="button"
+                  class="svc__cta"
+                  *ngIf="canBook && !isUpdate"
+                  (click)="bookService(svc, $event)">
+            Записаться
+          </button>
+
+          <p class="svc__about" *ngIf="svc.about">{{ svc.about }}</p>
 
           <ul class="svc__feats" *ngIf="isWriteTime(svc) || svc.isTimeUnlimited || workLocationLabel(svc)">
             <li *ngIf="isWriteTime(svc)">
@@ -239,8 +259,8 @@
           </ul>
 
           <button type="button"
-                  class="svc__cta"
-                  *ngIf="canSetService"
+                  class="svc__cta svc__cta--ghost"
+                  *ngIf="canSetService && !canBook"
                   [class.is-on]="svc.isChecked"
                   (click)="chooseService(svc, $event)">
             {{ svc.isChecked ? 'Выбрано' : 'Выбрать' }}

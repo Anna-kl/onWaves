@@ -1,10 +1,12 @@
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { CookieService } from 'ngx-cookie-service';
 import { firstValueFrom, timeout } from 'rxjs';
 import { environment } from 'src/enviroments/environment';
 import { IResponse } from 'src/app/DTO/classes/IResponse';
 import { getDeviceCompat } from 'src/utils/device-compat';
+import { RememberedSessionService } from 'src/app/auth/remembered-session.service';
 
 // ключ должен совпадать с тем, что используется на сервере (.NET Core)
 const VAPID_PUBLIC = environment.publicKey;
@@ -24,7 +26,9 @@ export type PushErrorCode =
   | 'sw-timeout'
   | 'vapid'
   | 'subscribe-failed'
-  | 'server';
+  | 'server'
+  | 'status'
+  | 'session-changed';
 
 /**
  * Ошибка с кодом: интерфейсу нужно объяснить пользователю не «что-то пошло не
@@ -42,17 +46,6 @@ export class PushError extends Error {
   }
 }
 
-/** Короткий хвост для сообщения об ошибке: статус и адрес, либо таймаут. */
-function describeHttpFailure(error: unknown): string {
-  if (error instanceof HttpErrorResponse) {
-    return ` (HTTP ${error.status} ${error.statusText || ''} ${error.url ?? ''})`.replace(/\s+/g, ' ').replace(' )', ')');
-  }
-  if ((error as Error)?.name === 'TimeoutError') {
-    return ` (timeout ${SERVER_TIMEOUT_MS} ms)`;
-  }
-  return '';
-}
-
 export function isPushError(error: unknown): error is PushError {
   return !!error && typeof error === 'object' && (error as PushError).name === 'PushError';
 }
@@ -66,9 +59,25 @@ export interface PushDiagnostics {
   hasPushManager: boolean;
   hasServiceWorkerApi: boolean;
   permission: string;
-  swScriptUrl: string;
+  hasActiveWorker: boolean;
   swState: string;
-  subscriptionEndpoint: string;
+  hasSubscription: boolean;
+  checkedAt: Date;
+  errorCode?: PushErrorCode;
+}
+
+export type PushDeviceState = 'connected' | 'permission' | 'denied' | 'install' | 'unavailable'
+  | 'setup' | 'not-registered' | 'unverified';
+
+export interface PushDeviceResult {
+  state: PushDeviceState;
+  diagnostics: PushDiagnostics;
+  isGranted?: boolean;
+}
+
+interface DeviceRegistrationStatus {
+  isGranted: boolean;
+  isRegistered: boolean;
 }
 
 function base64UrlToUint8Array(base64url: string): Uint8Array {
@@ -89,10 +98,13 @@ function base64UrlToUint8Array(base64url: string): Uint8Array {
 export class PushDebugService {
   constructor(
     private http: HttpClient,
+    private cookies: CookieService,
+    private session: RememberedSessionService,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
   url = environment.Uri;
+  private readonly checks = new Map<string, {token: string; request: Promise<PushDeviceResult>}>();
 
   /** iOS-приложение с экрана «Домой» (только в этом режиме WebKit даёт Web Push). */
   isStandalone(): boolean {
@@ -114,25 +126,10 @@ export class PushDebugService {
       throw new PushError('ssr', 'Push notifications are unavailable during server rendering');
     }
 
-    const compat = getDeviceCompat();
-    const standalone = this.isStandalone();
-    const hasApis = 'serviceWorker' in navigator &&
-                    'PushManager' in window &&
-                    'Notification' in window;
+    const capability = this.capability(this.initialDiagnostics());
+    if (capability) throw new PushError(capability, 'Web Push is unavailable in this mode');
 
-    if (!hasApis) {
-      // На iOS Web Push существует только для приложения с экрана «Домой»:
-      // в обычной вкладке Safari (и в любом стороннем браузере на iPhone)
-      // window.Notification/PushManager просто отсутствуют.
-      if (compat.isIOS && !standalone) {
-        throw new PushError('ios-needs-install', 'Web Push on iOS requires a Home Screen app');
-      }
-      throw new PushError('unsupported', 'Push notifications are not supported by this browser');
-    }
-
-    if (compat.isIOS && !compat.supportsPushNotifications) {
-      throw new PushError('ios-too-old', 'Web Push requires iOS 16.4 or newer');
-    }
+    const token = this.sessionToken();
 
     const permission = Notification.permission === 'granted'
       ? 'granted'
@@ -165,48 +162,63 @@ export class PushDebugService {
       }
     }
 
-    await this.sendSubscriptionToServer(idUser, sub);
+    await this.sendSubscriptionToServer(idUser, sub, token);
     return sub;
   }
 
-  /**
-   * Тихая синхронизация уже выданной подписки с сервером — вызывается на старте
-   * приложения, без системных окон и без ошибок в интерфейсе.
-   *
-   * Подписка принадлежит устройству, а не сессии: она переживает логаут, а
-   * строка в push_subscriptions живёт до 410 Gone от push-сервиса. Этот вызов
-   * восстанавливает её, если строку удалили по 410, если браузер сменил
-   * endpoint, или если на устройстве теперь другой профиль — upsert по
-   * endpoint на бэкенде просто перепривяжет владельца.
-   *
-   * Разрешение здесь НЕ запрашивается: без жеста пользователя WebKit его всё
-   * равно не покажет, а в Chrome это дало бы всплывающее окно на голой
-   * загрузке страницы. Нет разрешения — молча выходим.
-   */
-  async syncExistingSubscription(profileId: string): Promise<PushSubscription | null> {
-    if (!isPlatformBrowser(this.platformId) || !profileId) return null;
-    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return null;
-    if (Notification.permission !== 'granted') return null;
+  // Login and settings share the active check, including registration and read-back.
+  async syncExistingSubscription(profileId: string): Promise<void> {
+    if (isPlatformBrowser(this.platformId) && profileId && typeof Notification !== 'undefined'
+        && Notification.permission === 'granted') {
+      await this.checkDevice(profileId);
+    }
+  }
+
+  invalidateCheck(profileId: string): void {
+    this.checks.delete(profileId);
+  }
+
+  checkDevice(profileId: string, restore = true): Promise<PushDeviceResult> {
+    const token = this.sessionToken();
+    if (!restore) return this.readDevice(profileId, token, false);
+    const running = this.checks.get(profileId);
+    if (running?.token === token) return running.request;
+
+    const request = this.readDevice(profileId, token, true).finally(() => {
+      if (this.checks.get(profileId)?.request === request) this.checks.delete(profileId);
+    });
+    this.checks.set(profileId, { token, request });
+    return request;
+  }
+
+  private async readDevice(profileId: string, token: string, restore: boolean): Promise<PushDeviceResult> {
+    const diagnostics = this.initialDiagnostics();
+    const capability = this.capability(diagnostics);
+    if (capability) {
+      return { state: capability === 'ios-needs-install' ? 'install' : 'unavailable',
+        diagnostics: { ...diagnostics, errorCode: capability } };
+    }
 
     try {
-      const registration = await this.ensureRegistration();
-      let sub = await registration.pushManager.getSubscription();
+      const subscription = await this.readLocalSubscription(diagnostics);
+      if (diagnostics.permission === 'denied') return { state: 'denied', diagnostics };
+      if (diagnostics.permission !== 'granted') return { state: 'permission', diagnostics };
+      if (!subscription || !diagnostics.hasActiveWorker) return { state: 'setup', diagnostics };
 
-      if (!sub) {
-        // Разрешение уже выдано, поэтому подписка создаётся без жеста.
-        const appKey = base64UrlToUint8Array(VAPID_PUBLIC);
-        if (appKey.length !== 65) return null;
-        sub = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: appKey.buffer as ArrayBuffer,
-        });
+      let status = await this.readSubscriptionStatus(profileId, subscription, token);
+      if (status.isGranted && !status.isRegistered && restore) {
+        await this.sendSubscriptionToServer(profileId, subscription, token);
+        status = await this.readSubscriptionStatus(profileId, subscription, token);
       }
-
-      await this.sendSubscriptionToServer(profileId, sub);
-      return sub;
+      return {
+        state: status.isGranted && status.isRegistered ? 'connected' : 'not-registered',
+        diagnostics: { ...diagnostics, checkedAt: new Date() },
+        isGranted: status.isGranted,
+      };
     } catch (error) {
-      console.warn('Push subscription sync skipped', error);
-      return null;
+      const errorCode = isPushError(error) ? error.code : 'status';
+      return { state: errorCode === 'server' ? 'not-registered' : 'unverified',
+        diagnostics: { ...diagnostics, checkedAt: new Date(), errorCode } };
     }
   }
 
@@ -266,69 +278,98 @@ export class PushDebugService {
     ]).finally(() => clearTimeout(timer));
   }
 
-  private async sendSubscriptionToServer(userId: string, sub: PushSubscription): Promise<void> {
+  private sessionToken(): string {
+    return isPlatformBrowser(this.platformId) ? this.cookies.get('auth-token-ocpio') : '';
+  }
+
+  private headers(token: string): HttpHeaders {
+    const current = this.sessionToken();
+    if (!this.session.sameSession(token, current)) throw new PushError('session-changed', 'Push session ended');
+    return new HttpHeaders().set('Authorization', 'Bearer ' + current);
+  }
+
+  private async sendSubscriptionToServer(profileId: string, sub: PushSubscription, token: string): Promise<void> {
+    const headers = this.headers(token);
     let result: IResponse;
     try {
-      result = await firstValueFrom(
-        this.http
-          .post<IResponse>(`${this.url}notifications/subscribe/${userId}`, { userId, subscription: sub.toJSON() })
-          .pipe(timeout(SERVER_TIMEOUT_MS)),
-      );
-    } catch (error) {
-      // Без статуса и URL в сообщении эта ошибка в консоли неотличима от любой
-      // другой: HttpErrorResponse лежит в reason и в логе остаётся свёрнутым.
-      throw new PushError(
-        'server',
-        `The push subscription was not delivered to the server${describeHttpFailure(error)}`,
-        error,
-      );
+      result = await firstValueFrom(this.http.post<IResponse>(`${this.url}notifications/subscribe/${profileId}`,
+        { userId: profileId, subscription: sub.toJSON() }, { headers }).pipe(timeout(SERVER_TIMEOUT_MS)));
+    } catch {
+      // A timeout/transport error can occur after the server committed.
+      throw new PushError('status', 'Could not verify that the server saved the subscription');
     }
-
-    if (result.code !== 200) {
-      throw new PushError('server', result.message || 'The server did not save the push subscription');
+    if (result?.code !== 200 || typeof result.data !== 'string' || result.data.toLowerCase() !== profileId.toLowerCase()) {
+      throw new PushError('server', 'The server did not save the subscription for this profile');
     }
   }
 
-  /** Состояние push на устройстве: единственный способ отладки на iPhone без Mac. */
-  async collectDiagnostics(): Promise<PushDiagnostics> {
-    const empty: PushDiagnostics = {
+  private async readSubscriptionStatus(profileId: string, sub: PushSubscription, token: string): Promise<DeviceRegistrationStatus> {
+    const headers = this.headers(token);
+    try {
+      const result = await firstValueFrom(this.http.post<IResponse>(
+        `${this.url}notifications/subscription-status/${profileId}`, sub.toJSON(), { headers },
+      ).pipe(timeout(SERVER_TIMEOUT_MS)));
+      const status = result?.data as DeviceRegistrationStatus | undefined;
+      if (result?.code === 200 && typeof status?.isGranted === 'boolean' && typeof status?.isRegistered === 'boolean') {
+        return status;
+      }
+    } catch {
+      // Report an unknown state for both transport errors and failed business responses.
+    }
+    throw new PushError('status', 'Could not check current device registration');
+  }
+
+  private initialDiagnostics(): PushDiagnostics {
+    const diagnostics: PushDiagnostics = {
       isIOS: false, iosVersion: '—', isStandalone: false,
       hasNotificationApi: false, hasPushManager: false, hasServiceWorkerApi: false,
-      permission: '—', swScriptUrl: '—', swState: '—', subscriptionEndpoint: '—',
+      permission: '—', swState: '—', hasActiveWorker: false, hasSubscription: false, checkedAt: new Date(),
     };
-
-    if (!isPlatformBrowser(this.platformId)) return empty;
-
+    if (!isPlatformBrowser(this.platformId)) return diagnostics;
     const compat = getDeviceCompat();
-    const diagnostics: PushDiagnostics = {
-      ...empty,
+    return {
+      ...diagnostics,
       isIOS: compat.isIOS,
-      iosVersion: compat.iosVersion ? compat.iosVersion.join('.') : '—',
+      iosVersion: compat.iosVersion?.join('.') ?? '—',
       isStandalone: this.isStandalone(),
       hasNotificationApi: 'Notification' in window,
       hasPushManager: 'PushManager' in window,
       hasServiceWorkerApi: 'serviceWorker' in navigator,
       permission: 'Notification' in window ? Notification.permission : '—',
     };
+  }
 
-    if (diagnostics.hasServiceWorkerApi) {
-      try {
-        const registration = await navigator.serviceWorker.getRegistration('/');
-        if (registration) {
-          const worker = registration.active ?? registration.waiting ?? registration.installing;
-          diagnostics.swScriptUrl = worker?.scriptURL ?? '—';
-          diagnostics.swState = worker?.state ?? 'none';
-          const sub = await registration.pushManager?.getSubscription();
-          diagnostics.subscriptionEndpoint = sub?.endpoint ?? 'нет подписки';
-        } else {
-          diagnostics.swState = 'не зарегистрирован';
-        }
-      } catch (error) {
-        diagnostics.swState = `ошибка: ${(error as Error)?.message ?? error}`;
-      }
+  private capability(device: PushDiagnostics): 'ios-needs-install' | 'ios-too-old' | 'unsupported' | 'ssr' | null {
+    if (!isPlatformBrowser(this.platformId)) return 'ssr';
+    if (device.isIOS && !device.isStandalone) return 'ios-needs-install';
+    const [major, minor] = device.iosVersion.split('.').map(Number);
+    if (device.isIOS && (major < 16 || (major === 16 && minor < 4))) return 'ios-too-old';
+    if (!device.hasNotificationApi || !device.hasPushManager || !device.hasServiceWorkerApi) return 'unsupported';
+    return null;
+  }
+
+  private async readLocalSubscription(device: PushDiagnostics): Promise<PushSubscription | null> {
+    if (!device.hasServiceWorkerApi) return null;
+    const error = new PushError('status', 'Could not read local push state');
+    const registration = await this.withTimeout(navigator.serviceWorker.getRegistration('/'), SW_ACTIVATION_TIMEOUT_MS, error);
+    const worker = registration?.active ?? registration?.waiting ?? registration?.installing;
+    device.swState = worker?.state ?? 'не активен';
+    device.hasActiveWorker = !!registration?.active;
+    const subscription = registration?.pushManager
+      ? await this.withTimeout(registration.pushManager.getSubscription(), SW_ACTIVATION_TIMEOUT_MS, error)
+      : null;
+    device.hasSubscription = !!subscription;
+    return subscription;
+  }
+
+  async collectDiagnostics(errorCode?: PushErrorCode): Promise<PushDiagnostics> {
+    const diagnostics = this.initialDiagnostics();
+    try {
+      await this.readLocalSubscription(diagnostics);
+    } catch {
+      diagnostics.swState = 'не удалось проверить';
     }
-
-    return diagnostics;
+    return { ...diagnostics, errorCode };
   }
 
   /**

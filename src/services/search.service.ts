@@ -18,7 +18,7 @@ export class SearchService {
 
     search(send: ISearchRequest){
         const request = JSON.stringify(send);
-        return this.http.get<IResponse>(`${this.baseUrl}?request=${request}`).pipe(
+        return this.http.get<IResponse>(this.baseUrl, { params: { request } }).pipe(
             tap(data => {
                 this.getSearchBA$.next(data.data);
                 this.isResultSearch.next(data.code === 404);
@@ -26,7 +26,6 @@ export class SearchService {
     }
 
     search2(send: ISearchRequest|null){
-        const request = JSON.stringify(send) ?? null;
-        return this.http.get<IResponse>(`${this.baseUrl}?request=${request}`);
+        return this.http.get<IResponse>(this.baseUrl, { params: { request: JSON.stringify(send) } });
     }
 }

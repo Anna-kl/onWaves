@@ -32,6 +32,8 @@ import { Store } from '@ngrx/store';
 import { getProfileMainClient, selectProfileMainClient } from 'src/app/ngrx-store/mainClient/store.select';
 import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
 import { DeviceDetectorService } from 'ngx-device-detector';
+import { GiveawayCampaign, GiveawayLoad } from '../../DTO/views/giveaway/giveaway';
+import { GiveawaysService } from '../../../services/giveaways.service';
 
 
 
@@ -73,6 +75,7 @@ export class ProfileBAComponent implements OnInit, OnDestroy {
   landing: IViewLanding | null = null;
   landingState: LandingState = 'loading';
   workLocations: IWorkLocation[] = [];
+  giveaway: GiveawayLoad<GiveawayCampaign> = { kind: 'loading', value: null };
 
   constructor(private route: ActivatedRoute,
               private _api: ProfileService,
@@ -82,6 +85,7 @@ export class ProfileBAComponent implements OnInit, OnDestroy {
               private _router: Router,
               private _deviceService: DeviceDetectorService,
               private _seo: SeoService,
+              private _giveaways: GiveawaysService,
               @Optional() @Inject(RESPONSE) private _response: Response | null,
               @Inject(PLATFORM_ID) private platformId: object)
   {
@@ -169,6 +173,13 @@ export class ProfileBAComponent implements OnInit, OnDestroy {
 
     this.loadSeoKeywords(this.id);
     this.trackVisit(this.id);
+    this.loadGiveaway(this.id);
+  }
+
+  private loadGiveaway(masterId: string): void {
+    this._giveaways.publicList('master', masterId).pipe(takeUntil(this.destroy$)).subscribe(load => {
+      this.giveaway = load;
+    });
   }
 
     /**

@@ -1,0 +1,33 @@
+:host { display: block; width: 100%; min-width: 0; font-family: 'Montserrat', sans-serif; }
+.booking-success {
+  position: relative; color: #043c48; text-align: left;
+  &__close { position: absolute; top: -8px; right: -8px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: #61767b; cursor: pointer; }
+  &__close:hover { background: #f0f8f8; }
+  &__header { padding: 4px 24px 20px; text-align: center; }
+  &__check { display: grid; place-items: center; width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%; background: #e9f6f4; color: #0d94a0; box-shadow: 0 0 0 6px #f6fbfa; }
+  h2 { margin: 0; color: #043c48; font-size: clamp(23px, 5vw, 28px); font-weight: 750; letter-spacing: -.04em; line-height: 1.2; }
+  &__lead { margin: 10px 0 0; color: #61767b; font-size: 12px; line-height: 1.6; }
+  &__hint { margin: 14px 8px 18px; text-align: center; font-size: 11px; line-height: 1.7; color: #61767b; }
+  &__hint b { color: #043c48; font-weight: 600; }
+  &__done { width: 100%; min-height: 52px; display: flex; justify-content: center; align-items: center; gap: 12px; border: 0; border-radius: 28px; background: linear-gradient(105deg, #0d94a0, #006174); color: #fff; box-shadow: 0 8px 20px rgba(13, 148, 160, .18); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform .15s; }
+  &__done:active { transform: scale(.98); }
+  button:focus-visible { outline: 3px solid rgba(13, 148, 160, .3); outline-offset: 2px; }
+}
+.visit {
+  border: 1px solid #e1ebed; border-radius: 20px; overflow: hidden; background: #fff;
+  &__service { padding: 18px; background: #fafcfc; border-bottom: 1px solid #e8eff0; }
+  &__label { display: block; margin-bottom: 5px; font-size: 10px; color: #61767b; }
+  h3 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; }
+  &__service p { margin: 5px 0 0; font-size: 12px; color: #61767b; }
+  &__row { display: flex; align-items: flex-start; gap: 12px; padding: 15px 18px; }
+  &__row + &__row { padding-top: 0; }
+  &__row div { min-width: 0; }
+  &__row b { display: block; font-size: 12px; line-height: 1.6; font-weight: 600; overflow-wrap: anywhere; }
+  &__icon { display: grid; place-items: center; flex: 0 0 32px; height: 32px; margin-top: 2px; border-radius: 10px; background: #f0f8f8; color: #006174; }
+}
+@media (max-width: 380px) {
+  .booking-success__header { padding-right: 10px; padding-left: 10px; }
+  .visit__service { padding: 15px; }
+  .visit__row { padding-right: 15px; padding-left: 15px; }
+}
+@media (prefers-reduced-motion: reduce) { .booking-success__done { transition: none; } }

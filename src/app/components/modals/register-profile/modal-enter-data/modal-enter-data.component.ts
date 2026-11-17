@@ -48,6 +48,7 @@ export class ModalEnterDataComponent implements OnInit {
 
   public codeForm: FormGroup;
   public checkCode = false;
+  verifyingCode = false;
   @Input() public session = '';
   @Input() public phone = '';
   @Input() public email = '';
@@ -124,6 +125,9 @@ export class ModalEnterDataComponent implements OnInit {
   }
 
   next() {
+    if (this.verifyingCode || this.isMaxWaiting) {
+      return;
+    }
     const id = ensureDeviceUuid(this._cookieService, this.phone || 'max');
     const sendCode = this.codeForm.getRawValue();
     const send = {
@@ -132,24 +136,28 @@ export class ModalEnterDataComponent implements OnInit {
       uuid: id,
     } as ISendCode;
 
-    this._authService.checkCode(send).subscribe(result => {
-      if (result.code === 200) {
-        let user = result.data as IViewAuthProfile;
+    this.verifyingCode = true;
+    this.flagError = false;
+    this._authService.checkCode(send).subscribe({
+      next: result => {
+        this.verifyingCode = false;
+        if (result.code !== 200) {
+          this.flagError = true;
+          this.textError = result.code === 500
+            ? 'Неверный код, попробуйте ещё раз.'
+            : [204, 404, 503].includes(result.code)
+              ? 'Код больше не действует. Запросите новый.'
+              : 'Не удалось проверить код. Попробуйте ещё раз.';
+          return;
+        }
+        const user = result.data as IViewAuthProfile;
         this._busService.transferToken(user);
         this.activeModal.close();
         this.modalService.dismissAll();
 
         const profileUserId = result.data?.profileUserId;
         if (profileUserId != null) {
-          let expiry = new Date();
-          expiry.setDate(expiry.getDate()+365);
-
-          this._cookieService.set('auth-token-ocpio', user.token, expiry, '/');
-
-          if(user.profileUserId) {
-            this._cookieService.set('profileId-ocpio', user.profileUserId, expiry, '/');
-
-          }
+          this.loginService.session.remember(user.token, user.profileUserId);
           this.activeModal.close();
           this.loginService.isAutentificate$.next(true);
           this.loginService.updateProfileUA();
@@ -160,9 +168,11 @@ export class ModalEnterDataComponent implements OnInit {
           modalRef.componentInstance.token = result.data;
           modalRef.componentInstance.email = this.email;
         }
-      } else if (result.code === 500) {
+      },
+      error: () => {
+        this.verifyingCode = false;
         this.flagError = true;
-        this.textError = `Неверный код, попробуйте еще раз`;
+        this.textError = 'Не удалось проверить код. Попробуйте ещё раз.';
       }
     });
   }
@@ -334,7 +344,7 @@ export class ModalEnterDataComponent implements OnInit {
   /** Привязанный MAX: тот же код, что на экране. 409/502 — человек ещё не открыл бота. */
   private sendCodeToLinkedMax(): void {
     this.maxSending = true;
-    this._authService.sendCodeToMax(this.fullPhone, this.session).subscribe({
+    this._authService.sendCodeToMax(this.fullPhone, this.session, ensureDeviceUuid(this._cookieService)).subscribe({
       next: result => {
         this.maxSending = false;
         const code = authBodyCode(result);
@@ -480,6 +490,10 @@ export class ModalEnterDataComponent implements OnInit {
       if (status.state === MaxLoginState.Expired) {
         this.stopMaxStatusPoll();
         this.setChannelError('Ссылка устарела. Откройте бота заново');
+      }
+      if (status.state === MaxLoginState.DeliveryFailed) {
+        this.stopMaxStatusPoll();
+        this.setChannelError('MAX не подтвердил отправку. Откройте бота заново или выберите другой способ.');
       }
     });
   }

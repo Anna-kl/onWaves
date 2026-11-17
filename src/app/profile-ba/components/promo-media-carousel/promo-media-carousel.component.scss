@@ -1,0 +1,64 @@
+@import '../../../../assets/styles/main/color';
+
+:host { display: block; min-width: 0; width: 100%; }
+.promo-carousel { width: 100%; color: $green-dark; background: #fff; }
+.promo-carousel__stage {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: 480px;
+  overflow: hidden;
+  background: #e7f4f4;
+  touch-action: pan-y;
+}
+.promo-carousel__slide {
+  position: absolute;
+  inset: 0;
+  animation: promo-frame-in 260ms ease-out;
+}
+.promo-carousel__image, .promo-carousel__backdrop, app-video-player {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.promo-carousel__image { object-fit: contain; user-select: none; }
+.promo-carousel__backdrop { object-fit: cover; filter: blur(24px); opacity: .18; transform: scale(1.12); pointer-events: none; }
+.promo-carousel__controls { display: flex; align-items: center; justify-content: center; gap: 0; padding: 8px; }
+.promo-carousel__arrow, .promo-carousel__pause, .promo-carousel__dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: $green-basic;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 160ms ease, transform 160ms ease;
+}
+.promo-carousel__arrow { font-size: 32px; line-height: 1; }
+.promo-carousel__pause { font-size: 16px; margin-left: 4px; background: #edf6f6; }
+.promo-carousel__dots { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; min-width: 0; }
+.promo-carousel__dot { min-width: 26px; }
+.promo-carousel__dot span { width: 7px; height: 7px; border-radius: 99px; background: #b8d3d5; transition: width 200ms ease, background 200ms ease; }
+.promo-carousel__dot.is-active span { width: 22px; background: $green-basic; }
+button:hover { background: #edf6f6; }
+button:active { transform: scale(.96); }
+button:focus-visible { outline: 3px solid $green-light; outline-offset: 1px; }
+@keyframes promo-frame-in { from { opacity: .4; transform: translateX(7px); } to { opacity: 1; transform: translateX(0); } }
+@media (min-width: 768px) {
+  .promo-carousel__stage { aspect-ratio: 16 / 10; }
+  .promo-carousel__controls { gap: 8px; padding: 10px 20px; }
+  .promo-carousel__dot { min-width: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .promo-carousel__slide { animation: none; }
+  button, .promo-carousel__dot span { transition: none; }
+}

@@ -1,0 +1,8 @@
+<div class="point-switch" *ngIf="targets.length" role="group" aria-label="Точка графика">
+  <button type="button" class="point-switch__btn" *ngFor="let target of targets"
+          [class.point-switch__btn--on]="on(target)"
+          [disabled]="disabled"
+          (click)="pick(target.id)">
+    {{ target.label }}
+  </button>
+</div>

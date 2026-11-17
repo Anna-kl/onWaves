@@ -48,8 +48,8 @@
 }
 
 .consent-banner-actions {
-  flex-shrink: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
@@ -73,6 +73,15 @@
 
 .consent-banner-primary:hover {
   opacity: 0.85;
+}
+
+.consent-banner-link {
+  min-height: 38px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: $color-info;
+  text-decoration: underline;
 }
 
 .consent-banner-close {
@@ -110,6 +119,11 @@
 
   .consent-banner-primary {
     flex: 1;
+    min-height: 44px;
+  }
+
+  .consent-banner-link {
+    min-height: 44px;
   }
 }
 

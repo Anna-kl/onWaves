@@ -1,9 +1,27 @@
 
 <!-- Свободное время. Состояние ровно одно (status), взаимоисключающие ветки. -->
-<div class="w100 free-time-table cont-horiz" *ngIf="status !== 'idle'">
+<section class="slots" *ngIf="status !== 'idle'"
+         [class.slots--error]="errorEmpty && status === 'ready'">
 
-  <div class="slot-state" *ngIf="status === 'loading'" aria-live="polite">
-    Загружаем свободное время
+  <header class="slots__head">
+    <span class="slots__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M12 7v5l3 2"></path>
+      </svg>
+    </span>
+    <div class="slots__titles">
+      <h4 class="slots__title">Выберите время</h4>
+      <span class="slots__subtitle">
+        {{ day?.date | date:'EEEE, d MMMM' }}<ng-container *ngIf="durationLabel"> · услуга {{ durationLabel }}</ng-container>
+      </span>
+    </div>
+    <span class="slots__count" *ngIf="status === 'ready'">{{ slotsCountLabel }}</span>
+  </header>
+
+  <div class="slots__skeleton" *ngIf="status === 'loading'" aria-live="polite" aria-label="Загружаем свободное время">
+    <span class="slots__skeleton-chip" *ngFor="let _ of skeleton"></span>
   </div>
 
   <div class="slot-state slot-state--error" *ngIf="status === 'error'" role="alert">
@@ -11,24 +29,52 @@
     <button type="button" class="slot-state__retry" (click)="retry()">Повторить</button>
   </div>
 
-  <div class="w100 cont-horiz wrap slot-block" *ngIf="status === 'ready'"
-       [ngClass]="{ 'slot-block--error': errorEmpty }">
+  <ng-container *ngIf="status === 'ready'">
+    <div class="slots__group" *ngFor="let group of groups; trackBy: trackGroup">
+      <div class="slots__group-label slots__group-label--{{ group.key }}">
+        <span class="slots__group-dot" aria-hidden="true"></span>
+        {{ group.label }}
+        <span class="slots__group-count">· {{ group.slots.length }}</span>
+      </div>
+      <div class="slots__grid">
+        <button type="button" class="slot"
+                *ngFor="let slot of group.slots; let i = index; trackBy: trackSlot"
+                [class.slot--active]="slot.isChoose"
+                [attr.aria-pressed]="!!slot.isChoose"
+                [style.animation-delay.ms]="(i < 12 ? i : 12) * 30"
+                (click)="chooseInterval(slot)">
+          <span class="slot__time">{{ slot.start }}</span>
+          <span class="slot__end" *ngIf="slot.isChoose">до {{ endTime(slot) }}</span>
+        </button>
+      </div>
+    </div>
 
-    <div class="calendar_alert margin-top30 margin-bottom30 cont-horiz w100" *ngIf="duration > 0">
-      Выберите время начала
+    <div class="slots__picked" *ngIf="selectedSlot as picked" role="status">
+      <span class="slots__picked-check" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+             stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12.5l4.5 4.5L19 7.5"></path>
+        </svg>
+      </span>
+      <span>
+        {{ day?.date | date:'d MMMM' }}, <b>{{ picked.start }} – {{ endTime(picked) }}</b>
+      </span>
     </div>
-    <div [ngClass]="{'teg-white': !slot.isChoose, 'teg-green': slot.isChoose}" style="margin: 2px;"
-         (click)="chooseInterval(slot)" *ngFor="let slot of slots">
-      {{slot.start}}
-    </div>
-  </div>
+  </ng-container>
 
   <div class="slot-state slot-state--empty" *ngIf="status === 'empty'" role="status">
-    {{emptyMessage}}
+    <span class="slot-state__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3.5" y="5" width="17" height="15" rx="3"></rect>
+        <path d="M3.5 10h17M8 3v4M16 3v4M10 14.5l4 4M14 14.5l-4 4"></path>
+      </svg>
+    </span>
+    <span>{{ emptyMessage }}</span>
   </div>
 
-</div>
+</section>
 
-<div class="slot-block__error-text row" *ngIf="errorEmpty && status === 'ready'">
+<div class="slots__error-text" *ngIf="errorEmpty && status === 'ready'">
   Ничего не выбрано — выберите время, это важно
 </div>

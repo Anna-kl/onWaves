@@ -1,4 +1,5 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, DestroyRef, OnInit} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {RecordService} from "../../../services/record.service";
 import {ActivatedRoute, Route, Router} from "@angular/router";
 import {IViewRecordUser} from "../../DTO/views/records/IViewRecordUser";
@@ -19,6 +20,15 @@ import {stringToTime} from "../../../helpers/dateUtils/dateUtils";
 import { getPriceService, getPriceString } from 'src/helpers/common/price.helpers';
 import { formatAmount, formatRub } from 'src/helpers/common/welcome-coupon';
 import { getColorLine, getStatusDone } from 'src/helpers/constant/notes';
+import { ReviewEligibility } from 'src/app/DTO/views/rating/verified-review';
+import { reviewError, VerifiedReviewsService } from 'src/services/verified-reviews.service';
+
+interface ReviewState {
+  loading: boolean;
+  eligibility?: ReviewEligibility;
+  error?: string;
+  attendanceRequested?: boolean;
+}
 
 
 @Component({
@@ -31,12 +41,15 @@ export class MyNotesComponent implements OnInit {
 
   id!: string | null;
   records$: Observable<IViewRecordUser[]>|null = null;
+  reviewActions: { [recordId: string]: ReviewState | undefined } = {};
   sale: number = 0;
   constructor(private _apiRecords: RecordService,
               private route: ActivatedRoute,
               private _modal: NgbModal,
               private _router: Router,
-              private sanitizer: DomSanitizer) {
+              private sanitizer: DomSanitizer,
+              private reviews: VerifiedReviewsService,
+              private destroyRef: DestroyRef) {
   }
 
   public async getListRecords(){
@@ -48,7 +61,7 @@ export class MyNotesComponent implements OnInit {
         switch (item.status){
 
           case RecordStatus.Confirm: {
-            return "В ожидании";
+            return "Ждём встречи";
           }
           case RecordStatus.Success: {
             return "Выполнено";
@@ -90,15 +103,46 @@ export class MyNotesComponent implements OnInit {
   }
 
   addReview(record: IViewRecordUser) {
-    const modalRef = this._modal.open(ReviewsUserComponent);
+    const eligibility = this.reviewActions[record.id]?.eligibility;
+    if (!this.id || !(eligibility?.canReview || eligibility?.existingReviewId)) return;
+    const modalRef = this._modal.open(ReviewsUserComponent, {
+      centered: true, scrollable: true, backdrop: 'static', keyboard: false, ariaLabelledBy: 'review-dialog-title',
+    });
     modalRef.componentInstance.recordId = record.id;
-    modalRef.componentInstance.profileId = this.id;
-    modalRef.componentInstance.avatar = record.businessProfile.avatar;
-    modalRef.componentInstance.name = record.businessProfile.name;
-    modalRef.result.then(result => {
-      if (result){
-        record.isHasReview = true;
-      }
+    modalRef.componentInstance.clientId = this.id;
+    modalRef.componentInstance.eligibility = eligibility;
+    modalRef.componentInstance.name = eligibility.masterName || record.businessProfile.name;
+    modalRef.componentInstance.services = eligibility.services ?? record.services.map(service => service.name);
+    void modalRef.result.then(() => this.checkReview(record), () => {});
+  }
+
+  checkReview(record: IViewRecordUser): void {
+    if (record.status !== RecordStatus.Success && record.status !== RecordStatus.InWork && record.status !== RecordStatus.Pending
+      && record.status !== RecordStatus.Confirm && !record.isHasReview) return;
+    const requested = this.reviewActions[record.id]?.attendanceRequested;
+    this.reviewActions[record.id] = { loading: true, attendanceRequested: requested };
+    this.reviews.eligibility(record.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: eligibility => this.reviewActions[record.id] = { loading: false, eligibility, attendanceRequested: requested },
+      error: error => this.reviewActions[record.id] = {
+        loading: false, error: reviewError(error, 'Не удалось проверить доступность отзыва.'), attendanceRequested: requested,
+      },
+    });
+  }
+
+  requestAttendance(record: IViewRecordUser): void {
+    const state = this.reviewActions[record.id];
+    if (state?.eligibility?.reason !== 'attendance_confirmation_required' || state.loading) return;
+    state.loading = true;
+    state.error = undefined;
+    this.reviews.requestAttendance(record.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        state.loading = false;
+        state.attendanceRequested = true;
+      },
+      error: error => {
+        state.loading = false;
+        state.error = reviewError(error, 'Не удалось отправить запрос. Попробуйте ещё раз.');
+      },
     });
   }
 
@@ -107,9 +151,6 @@ export class MyNotesComponent implements OnInit {
   getAvatar(avatar: any) {
     return resolveAvatarUrl(avatar);
   }
-    checkStatus(recordStatus: RecordStatus) {
-        return recordStatus === RecordStatus.Success;
-    }
 
   protected readonly getHours = getHours;
   protected readonly getMinutes = getMinutes;

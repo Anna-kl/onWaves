@@ -1,4 +1,6 @@
-import {Component, OnInit} from "@angular/core";
+import {Component, DestroyRef, OnDestroy, OnInit} from "@angular/core";
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {Subscription} from "rxjs";
 import {ScheduleService} from "../../../services/schedule.service";
 import {RecordService} from "../../../services/record.service";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -13,36 +15,46 @@ import { parseDotDate } from "src/helpers/dateUtils/dateUtils";
   selector: 'app-common-notes',
   templateUrl: './common-notes.component.html',
   styleUrls: ['./common-notes.component.css'],
-  providers: [ScheduleService, RecordService]
+  providers: [ScheduleService, RecordService, NotesService]
 })
-export class CommonNotesComponent implements OnInit {
+export class CommonNotesComponent implements OnInit, OnDestroy {
   days: any[]  = [];
   choosedDay?: IChooseDayOfCalendar;
-  readonly id: string|null = null;
+  id: string|null = null;
   today = new Date();
   isWorkDay: boolean = true;
   recordId?: string;
+  /** Меняется после переноса, чтобы календарь заново спросил countNew. */
+  calendarStamp = '';
   currentYear: string = '';
+  private calendarSub?: Subscription;
   constructor(private location: Location,
               private route: ActivatedRoute,
               private router: Router,
               private _events: NotesService,
-              private _router: Router)
+              private _router: Router,
+              private destroyRef: DestroyRef)
                {
-    this.id = this.route.snapshot.paramMap.get('id');
-    this._events.transferId(this.id!);
-    
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      this.id = params.get('id');
+      if (this.id) this._events.transferId(this.id);
+    });
+    this.calendarSub = this._events.calendarRevision.subscribe(revision => {
+      if (revision > 0) {
+        this.calendarStamp = String(revision);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.calendarSub?.unsubscribe();
   }
    ngOnInit() {
     this.currentYear = (new Date().getFullYear()).toString();
-    this._events.recordId.subscribe(result => {
+    this._events.recordId.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(result => {
       this.recordId = result;
     });
-    this.router.routerState.root.queryParamMap.subscribe(p => {
-          
-           
-        });
-      this.route.queryParamMap.subscribe(p => {
+      this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
         const date = p.get('date');     // обрабатываешь новую дату
        
     if (date){
@@ -70,7 +82,7 @@ export class CommonNotesComponent implements OnInit {
 
   onDate($event: IChooseDayOfCalendar) {
     if ($event) {
-      // this.today = $event.date!;
+      if ($event.date) this.today = $event.date;
       this.isWorkDay = $event.ifExist;
       this.choosedDay = { ifExist: $event.ifExist, dayId: $event.dayId, date: this.today, isLast: $event.isLast, canAdd: $event.canAdd, countNew:$event.countNew } as IChooseDayOfCalendar;
       this._events.transferToday($event);

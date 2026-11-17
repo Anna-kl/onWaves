@@ -1,0 +1,42 @@
+<section #root class="promo-carousel" role="region" aria-roledescription="карусель"
+  [attr.aria-label]="title"
+  (pointerenter)="hover($event.pointerType === 'mouse')" (pointerleave)="hover(false)"
+  (focusin)="focusIn()" (focusout)="focusOut($event)" (keydown)="onKey($event)">
+  <div class="promo-carousel__stage" *ngIf="slides.length"
+    (pointerdown)="pointerDown($event)" (pointerup)="pointerUp($event)" (pointercancel)="cancelPointer()">
+    <ng-container *ngFor="let item of slides; let i = index">
+      <div *ngIf="i === activeIndex" class="promo-carousel__slide" role="group"
+        aria-roledescription="слайд" [attr.aria-label]="(i + 1) + ' из ' + slides.length">
+        <ng-container *ngIf="item.kind === mediaKind.Image">
+          <img class="promo-carousel__backdrop" [src]="item.url" alt="" aria-hidden="true" draggable="false">
+          <img class="promo-carousel__image" [src]="item.url" [alt]="title + ' — фото ' + (i + 1)"
+            draggable="false" (error)="removeUnavailable()">
+        </ng-container>
+        <app-video-player *ngIf="item.kind === mediaKind.Video" class="offer__frame--contain"
+          [url]="item.url" [poster]="item.posterUrl || null" [compact]="true" [warmup]="false"
+          [immersive]="true" [expandable]="true" [expandOnPlay]="true" (expand)="expandVideo(item)"
+          (started)="videoStart.emit(item.url)" (unavailable)="removeUnavailable()">
+        </app-video-player>
+      </div>
+    </ng-container>
+  </div>
+  <div class="promo-carousel__controls" *ngIf="slides.length > 1">
+    <button class="promo-carousel__arrow" type="button" aria-label="Предыдущий слайд" (click)="select(activeIndex - 1)">
+      <span aria-hidden="true">‹</span>
+    </button>
+    <div class="promo-carousel__dots" aria-label="Выбрать слайд">
+      <button *ngFor="let item of slides; let i = index" type="button"
+        class="promo-carousel__dot" [class.is-active]="i === activeIndex"
+        [attr.aria-label]="'Слайд ' + (i + 1)" [attr.aria-current]="i === activeIndex ? 'true' : null"
+        (click)="select(i)"><span></span></button>
+    </div>
+    <button class="promo-carousel__arrow" type="button" aria-label="Следующий слайд" (click)="select(activeIndex + 1)">
+      <span aria-hidden="true">›</span>
+    </button>
+    <button *ngIf="!reducedMotion" class="promo-carousel__pause" type="button"
+      [attr.aria-label]="paused ? 'Включить автопрокрутку' : 'Остановить автопрокрутку'"
+      [attr.aria-pressed]="paused" (click)="togglePause()">
+      <span aria-hidden="true">{{ paused ? '▶' : 'Ⅱ' }}</span>
+    </button>
+  </div>
+</section>

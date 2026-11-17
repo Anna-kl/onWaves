@@ -44,6 +44,20 @@
     </button>
   </div>
 
+  <div *ngIf="telegramSelected" class="channel-modal__list">
+    <ng-container *ngIf="telegramConsentVersion && !telegramLink">
+      <p>Разрешите OnWaves присылать уведомления о записях в Telegram.</p>
+      <details><summary>Текст согласия</summary><p style="white-space: pre-wrap">{{telegramConsentText}}</p></details>
+      <button type="button" class="channel-modal__item" [disabled]="isLoading" (click)="grantTelegramConsent()">
+        Разрешить уведомления в Telegram
+      </button>
+    </ng-container>
+    <ng-container *ngIf="telegramLink">
+      <p>В боте нажмите «Старт», затем «Подписаться».</p>
+      <button type="button" class="channel-modal__item" (click)="openTelegram()">Перейти в Telegram</button>
+    </ng-container>
+  </div>
+
   <div class="channel-modal__error" *ngIf="errorMessage">
     {{ errorMessage }}
   </div>

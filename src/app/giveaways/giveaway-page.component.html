@@ -1,0 +1,112 @@
+<main class="gw-page">
+  <div class="gw-page__inner">
+    <p *ngIf="load.kind === 'loading'">Загружаем условия розыгрыша…</p>
+
+    <section *ngIf="load.kind === 'failed'" class="gw-card">
+      <h1>Информация о розыгрыше временно недоступна</h1>
+      <p>Это не значит, что розыгрыш закончился или мест не осталось.</p>
+      <button type="button" class="gw-btn" (click)="reload()">Повторить</button>
+    </section>
+
+    <section *ngIf="load.kind === 'empty'" class="gw-card">
+      <h1>Розыгрыш сейчас не опубликован</h1>
+      <p>Страница откроется после публикации условий.</p>
+    </section>
+
+    <p class="gw-card" *ngIf="isPreview">Предпросмотр для администратора. Участие и выдача призов здесь не оформляются.</p>
+    <article *ngIf="campaign as item">
+      <section class="gw-card" *ngIf="isPreview && item.publicationGaps?.length" aria-labelledby="gw-publication-gaps">
+        <h2 id="gw-publication-gaps">До публикации нужно заполнить</h2>
+        <ul><li *ngFor="let gap of item.publicationGaps">{{ publicationGapText(gap) }}</li></ul>
+      </section>
+      <p class="gw-kicker"><ng-container *ngIf="item.city">{{ item.city }} · </ng-container>{{ item.master.name }}</p>
+      <h1>{{ headline }}</h1>
+      <p class="gw-lead">{{ item.summary || (websiteEntry ? 'Оставьте заявку и получите номер участника.' : 'Участие проходит во VK.') }}</p>
+      <p *ngIf="item.chanceRule === 'one_per_platform' && websiteEntry && vkEntry">Можно подать по одной заявке на сайте и во VK. Каждая допущенная заявка участвует в розыгрыше.</p>
+      <app-giveaway-entry-form *ngIf="websiteEntry && !isPreview" [campaign]="item" [open]="openEntry"></app-giveaway-entry-form>
+
+      <div class="gw-prizes">
+        <section class="gw-card" *ngFor="let prize of item.prizes">
+          <h2>{{ prize.title }}</h2>
+          <p>{{ prize.rewardType === 'amount_coupon' ? 'Купон до' : prize.rewardType === 'service' || websiteEntry || prize.policy?.anyMasterService === false ? 'Стоимость приза' : 'До' }} {{ prize.maxAmountRub | number:'1.0-2' }} ₽<ng-container *ngIf="prize.rewardType === 'service' || (!item.configured && websiteEntry)"> · бесплатно для победительницы</ng-container></p>
+          <p *ngIf="prize.rewardType === 'amount_coupon' && prize.policy as policy">
+            До {{ policy.maxServices }} услуг за {{ policy.maxVisits }} визита. {{ policy.allowClientTopUp ? 'Сверх остатка можно доплатить.' : 'Выберите услуги в пределах остатка.' }}
+          </p>
+          <p *ngIf="prize.policy">{{ prize.policy.description }}</p>
+          <p *ngIf="!isSvetlana && prizeEnd(prize.bookingEndsAt)">Записаться по {{ prizeEnd(prize.bookingEndsAt) }} включительно.</p>
+          <p *ngIf="prize.policy && prizeEnd(prize.policy.visitEndsAt)">Использовать по {{ prizeEnd(prize.policy.visitEndsAt) }} включительно.</p>
+          <p *ngIf="!prize.policy && prize.serviceNames?.length">{{ prize.serviceNames.join(', ') }}</p>
+          <p *ngIf="!prize.policy && !prize.serviceNames?.length">Услуга этой позиции ещё уточняется.</p>
+        </section>
+      </div>
+
+      <p *ngIf="item.phase === 'draft'">Условия готовятся к публикации. Начало будет объявлено отдельно.</p>
+      <p *ngIf="closeLabel">Приём заявок до {{ closeLabel }}</p>
+      <p *ngIf="item.resultsPlannedAt">Итоги — {{ resultsDate(item.resultsPlannedAt) }}</p>
+      <p *ngIf="item.phase === 'scheduled' && startLabel">Старт {{ startLabel }}</p>
+      <p *ngIf="item.phase === 'awaiting_results'">Приём заявок завершён. Готовим итоги.</p>
+      <p *ngIf="item.phase === 'results_published' && !websiteEntry">Итоги опубликованы.</p>
+      <section class="gw-card" *ngIf="(websiteEntry || item.configured) && item.phase === 'results_published' && item.winnerNumbers?.length">
+        <h2>Номера победительниц</h2>
+        <p *ngFor="let winner of item.winnerNumbers">{{ winner.position }} место · №{{ winner.number }}</p>
+        <a *ngIf="item.websiteResultsUrl" [href]="item.websiteResultsUrl" target="_blank" rel="noopener noreferrer">Подробности выбора</a>
+      </section>
+      <p *ngIf="item.phase === 'archived' || item.phase === 'canceled'">Розыгрыш завершён. Уже выданные призы в кабинете сохраняются.</p>
+
+      <a class="gw-btn" *ngIf="canJoinVk" [href]="item.vkPostUrl" target="_blank" rel="noopener noreferrer" (click)="onVk()">Участвовать во VK</a>
+      <a class="gw-btn gw-btn--ghost" *ngIf="vkEntry && item.phase === 'results_published' && item.vkResultsUrl" [href]="item.vkResultsUrl" target="_blank" rel="noopener noreferrer">Итоги во VK</a>
+      <p *ngIf="!websiteEntry && item.phase === 'active' && !item.vkPostUrl">Ссылка на конкурсный пост появится, когда он будет опубликован.</p>
+
+      <section class="gw-card gw-offer" *ngIf="isSvetlana; else masterBooking">
+        <h2>Можно записаться к Светлане со скидкой</h2>
+        <p *ngIf="seatsFailed">Сейчас не удалось проверить скидку. Не обещаем цену, пока сервер не ответит.</p>
+        <p *ngIf="!seatsFailed && seatsOpen && fixedCoupon">
+          Новым клиенткам без выполненных визитов через OnWaves — {{ item.bookingOffer?.fixedDiscountRub }} ₽ на первую запись.
+          Первым пяти — дополнительно 20 % на подходящую услугу.
+        </p>
+        <p *ngIf="!seatsFailed && !seatsOpen && fixedCoupon">
+          Места с дополнительными 20 % закончились. Новым клиенткам доступна скидка {{ item.bookingOffer?.fixedDiscountRub }} ₽.
+        </p>
+        <p *ngIf="!fixedCoupon && !seatsFailed">Скидка для записи появится здесь, когда сервер подтвердит предложение.</p>
+        <p *ngIf="seatsLine">{{ seatsLine }}</p>
+        <a class="gw-btn gw-btn--ghost" [routerLink]="['/', item.master.slug]" (click)="onBooking()">Посмотреть работы и выбрать время</a>
+      </section>
+      <ng-template #masterBooking>
+        <p><a class="gw-btn gw-btn--ghost" [routerLink]="['/', item.master.slug]" (click)="onBooking()">Открыть страницу мастера и действующие акции</a></p>
+      </ng-template>
+
+      <section class="gw-card" *ngIf="!item.configured && !websiteEntry">
+        <h2>Как участвовать</h2>
+        <ol>
+          <li>Откройте исходный пост OnWaves во VK.</li>
+          <li>Подпишитесь на <a href="https://vk.ru/club238581537" target="_blank" rel="noopener noreferrer">сообщество OnWaves во VK</a>. Подписка обязательна для участия.</li>
+          <li>Оставьте под исходным постом комментарий «Участвую, [ваш город]». Один человек — одна заявка.</li>
+          <li>Телефон организатору передайте лично, не в комментарии.</li>
+        </ol>
+        <p>Участницы — девушки от 18 лет, которые смогут приехать к мастеру. Покупка, запись, регистрация, репост и отметки подруг для участия не нужны.</p>
+        <p>Номер телефона победительница сообщает в личных сообщениях сообщества OnWaves. Для использования приза нужно подтвердить этот номер и записаться через OnWaves.</p>
+      </section>
+      <ng-container *ngIf="websiteEntry">
+        <section class="gw-card">
+          <h2>Как участвовать</h2>
+          <p>Подтвердите телефон и получите номер. Он появится в разделе «Мои участия». Участие бесплатное.</p>
+        </section>
+      </ng-container>
+
+      <section class="gw-card" *ngIf="item.venueText || item.master.address">
+        <h2>Место приёма</h2>
+        <p>{{ item.venueText || item.master.address }}</p>
+      </section>
+
+      <section class="gw-card gw-rules" id="rules">
+        <h2>Полные условия розыгрыша</h2>
+        <p *ngFor="let paragraph of rulesParagraphs">{{ paragraph }}</p>
+        <p *ngIf="!item.rulesText">Полный текст правил появится перед началом розыгрыша.</p>
+        <p *ngIf="item.organizerName">Организатор — {{ item.organizerName }}.</p>
+        <a *ngIf="item.rulesUrl" [href]="item.rulesUrl" target="_blank" rel="noopener noreferrer">Открыть правила</a>
+      </section>
+
+      <button *ngIf="vkEntry" type="button" class="gw-link" (click)="enterCabinet()">Победили? Войдите с указанным организатору номером, чтобы увидеть приз</button>
+    </article>
+  </div>
+</main>

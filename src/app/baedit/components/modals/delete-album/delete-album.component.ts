@@ -22,16 +22,23 @@ export class DeleteAlbumComponent {
 
   //*********************  удаление альбома  *****************//
   deleteAlbum() {
-    if(this.deleteYes){
-      console.log("модалка---"+this.deleteYes)
-      this.apiImage.deleteAlbum(this.deleteYes).subscribe(
-        result => {
-          console.log("альбом удален"+result);
-          this.deleted.emit(1);
-        }
-    );}
-    this.activeModal.close();
-}
+    if (!this.deleteYes) {
+      this.activeModal.close();
+      return;
+    }
+    this.apiImage.deleteAlbum(this.deleteYes).subscribe({
+      next: result => {
+        this.deleted.emit(result.code === 200 || result.code === 404
+          ? 1
+          : (result.message || 'Не удалось удалить альбом'));
+        this.activeModal.close();
+      },
+      error: () => {
+        this.deleted.emit('Не удалось удалить альбом');
+        this.activeModal.close();
+      }
+    });
+  }
 
   close(){  this.activeModal.close(); }
 

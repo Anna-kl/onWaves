@@ -4,6 +4,12 @@
 /dist
 /tmp
 /out-tsc
+/.tmp/
+/output/
+/docs/qa/
+/docs/guides/schedule-2026-10-30/
+/.env*
+!/.env.example
 /bazel-out
 /.git.rar
 

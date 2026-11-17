@@ -1,3 +1,31 @@
+<ng-template #paymentSummary let-record>
+  <div *ngIf="visitPayment(record) as payment" class="visit-payment">
+    <strong>{{ visitPaymentLabels[payment.kind] }}</strong>
+    <span *ngIf="payment.offerTitle">{{ payment.offerTitle }}</span>
+    <dl class="visit-payment__amounts">
+      <div>
+        <dt>{{ payment.status === 'cancelled' ? 'Оплата клиента по записи' : 'К оплате клиентом' }}</dt>
+        <dd>{{ payment.clientPays === null ? 'Уточняется' : formatAmount(payment.clientPays, payment.amountIsFrom) }}</dd>
+      </div>
+      <div>
+        <dt>{{ payment.status === 'cancelled' ? 'Компенсация по записи' : 'Компенсация OnWaves' }}</dt>
+        <dd>{{ payment.onwavesPays === null ? 'Уточняется' : formatRub(payment.onwavesPays) }}</dd>
+      </div>
+    </dl>
+    <small *ngIf="payment.masterReceives != null && payment.status !== 'cancelled' && payment.status !== 'test'">Всего мастеру {{ formatRub(payment.masterReceives) }}</small>
+    <small *ngIf="payment.kind === 'promo_seat' && payment.couponAmount">В том числе купон {{ formatRub(payment.couponAmount) }}</small>
+    <small *ngIf="payment.kind === 'legacy_coupon' && payment.couponAmount">Номинал купона {{ formatRub(payment.couponAmount) }}</small>
+    <small *ngIf="payment.masterDiscountAmount">Скидка за счёт мастера {{ formatRub(payment.masterDiscountAmount) }}</small>
+    <small *ngIf="visitPaymentStatus[payment.status]">{{ visitPaymentStatus[payment.status] }}</small>
+  </div>
+  <small *ngIf="record.reviewRewards as rewards">Купоны за отзывы {{ formatRub(rewards.discountKopecks / 100) }} · к оплате клиентом {{ formatRub(rewards.clientPayableKopecks / 100) }}</small>
+</ng-template>
+<ng-template #reviewAttendance let-record>
+  <app-review-attendance *ngIf="opened[record.recordId] && (record.status === RecordStatus.Success ||
+    record.status === RecordStatus.Pending || record.status === RecordStatus.InWork)"
+    [recordId]="record.recordId" (attendanceSaved)="getListSchedule()"></app-review-attendance>
+</ng-template>
+
 <!-- Мои записи для БА -->
 <div class="width100 container" *ngIf="schedules$|async as schedules; else loading">
   <ng-container *ngFor="let sch of schedules">
@@ -27,33 +55,18 @@
 
 
     <ng-template #timeModal>
-      <div class="w100">
-          <div class="closeModal custom-close" (click)="closeModal()"></div>
-          <div class="modal-body text-center">
-            <label for="newTime" class="form-label">Укажите длительность услуг:</label>
-            <div class="d-flex justify-content-center">
-              <input
-              style="padding: 0rem 1rem;"
-                type="number"
-                id="newTime"
-                class="input-line-mini cont-horiz-start"
-                [(ngModel)]="newTime"
-              /> 
-              <span style="padding-top: 14px; margin-left: 5px;">мин.</span>
-            </div>
-          </div>
-          <div class="w100 cont-horiz">
-            <div class="stl-cancel"  (click)="closeModal()" style="max-width: 200px; margin-right: 20px;">
-              Отменить
-            </div>
-            <div class="btn-green  margin-right40" (click)="saveTime()" style="max-width: 200px;">
-              Сохранить
-            </div>
-          </div>
- 
-    </div>
-    
-
+      <div class="modal-body">
+        <label for="newTime" class="form-label">Длительность записи, мин</label>
+        <input id="newTime" class="input-line-mini" type="number" min="1" max="1440" step="1"
+               inputmode="numeric" [(ngModel)]="newTime">
+        <p *ngIf="newTime !== null && !validDurationEdit">Введите целое число от 1 до 1440.</p>
+        <p *ngIf="timeError" class="reschedule__error" role="alert">{{timeError}}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="stl-cancel" [disabled]="timeSaving" (click)="closeModal()">Отменить</button>
+        <button type="button" class="btn-green" [disabled]="timeSaving || !validDurationEdit"
+                (click)="saveTime()">{{timeSaving ? 'Сохраняем…' : 'Сохранить'}}</button>
+      </div>
     </ng-template>
 
 
@@ -71,6 +84,7 @@
       <!-- Услуга кратко -->
       <input type="checkbox" [id]="sch.recordId"  [(ngModel)]="opened[sch.recordId]">
       <label class="accordion_tab-label_white" [for]="sch.recordId" style="gap: 10px 10px;">
+        <div class="visit-card-header">
         <div class="cont-horiz-between w100 wrap">
           <div class="cont-horiz">
             <!-- Линия времени -->
@@ -115,7 +129,7 @@
               </b>
               <!-- Синий -->
               <b *ngIf="sch.status === 1" [style.color]="getColorLine(sch)">
-                В ожидании
+                Ждём встречи
               </b>
               <!-- Зеленый -->
               <b *ngIf="sch.status === 3" [style.color]="getColorLine(sch)">
@@ -139,9 +153,12 @@
             </div>
           </div>
         </div>
+        <ng-container *ngTemplateOutlet="paymentSummary; context: { $implicit: sch }"></ng-container>
+        </div>
       </label>
       <!-- Содержимое вкладки -->
       <div class="accordion_tab-content_white">
+        <ng-container *ngTemplateOutlet="reviewAttendance; context: {$implicit: sch}"></ng-container>
         <!-- Услуга подробно -->
         <div class="str_uslugi_podcategory  ba-my-notes" *ngFor="let serv of sch.services">
           <!-- Услуги -->
@@ -193,14 +210,9 @@
                   {{getAllTimeWorking(sch.duration)}}
                 </b>
                
-                <svg *ngIf="checkStateUpdateTime(sch)" (click)="openTimeModal(sch.duration, sch.recordId)" width="30px" height="30px" viewBox="0 0 89.72 89.72" xmlns="http://www.w3.org/2000/svg" fill="#000000" style="margin-left: 10px;" class="clickable-icon">
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                  <g id="SVGRepo_iconCarrier"> <g id="Group_11" data-name="Group 11" transform="translate(-1020.3 -668.175)">
-                     <path id="Path_53" data-name="Path 53" d="M1066.1,682.8l-34.8,34.8a3.858,3.858,0,0,0-1.1,2.2l-.8,10.1a2.488,2.488,0,0,0,2.8,2.8l9.8-.8a3.857,3.857,0,0,0,2.2-1.1l35-35a3.041,3.041,0,0,0,.3-4.3l-9.1-9.1A3.052,3.052,0,0,0,1066.1,682.8Z" fill="none" stroke="#d46c54" stroke-miterlimit="10" stroke-width="7.447174999999999"></path>
-                      <path id="Path_54" data-name="Path 54" d="M1079.6,690.2l-7.8-7.8a3.684,3.684,0,0,1,0-5.3l5.8-5.8a3.684,3.684,0,0,1,5.3,0l7.8,7.8a3.684,3.684,0,0,1,0,5.3l-5.8,5.8A3.869,3.869,0,0,1,1079.6,690.2Z" fill="none" stroke="#d46c54" stroke-linecap="round" stroke-miterlimit="10" stroke-width="7.447174999999999"></path> 
-                      <path id="Path_55" data-name="Path 55" d="M1098.6,755.9h-72a4.268,4.268,0,0,1-4.3-4.3v-3.3a4.268,4.268,0,0,1,4.3-4.3h72a4.268,4.268,0,0,1,4.3,4.3v3.3A4.268,4.268,0,0,1,1098.6,755.9Z" fill="none" stroke="#0d94a0" stroke-linecap="round" stroke-miterlimit="10" stroke-width="7.447174999999999"></path> <path id="Path_56" data-name="Path 56" d="M1103.5,739.8" fill="none" stroke="#0d94a0" stroke-linecap="round" stroke-miterlimit="10" stroke-width="7.447174999999999"></path> 
-                </g> </g></svg>
+                <button *ngIf="checkStateUpdateTime(sch)" type="button" class="duration-edit" (click)="openTimeModal(sch)">
+                  Изменить длительность
+                </button>
            
               </div>
             </div>
@@ -215,7 +227,7 @@
                   d="M5.08571 8.14062C4.53255 8.14062 4.00204 8.36037 3.61089 8.75152C3.21974 9.14266 3 9.67317 3 10.2263V19.2263C3 19.7795 3.21974 20.31 3.61089 20.7012C4.00204 21.0923 4.53255 21.3121 5.08571 21.3121H17.3C17.8532 21.3121 18.3837 21.0923 18.7748 20.7012C19.166 20.31 19.3857 19.7795 19.3857 19.2263V16.8123H19.8715C20.6684 16.8123 21.3144 16.1663 21.3144 15.3695V13.4409C21.3144 12.644 20.6684 11.998 19.8715 11.998H19.3857V10.2263C19.3857 9.67317 19.166 9.14266 18.7748 8.75152C18.3837 8.36037 17.8532 8.14062 17.3 8.14062H5.08571ZM17.7857 11.998V10.2263C17.7857 10.0975 17.7345 9.97398 17.6435 9.88289C17.5524 9.7918 17.4288 9.74062 17.3 9.74062H5.08571C4.9569 9.74062 4.83335 9.7918 4.74226 9.88289C4.65117 9.97398 4.6 10.0975 4.6 10.2263V19.2263C4.6 19.3552 4.65117 19.4787 4.74226 19.5698C4.83335 19.6609 4.9569 19.7121 5.08571 19.7121H17.3C17.4288 19.7121 17.5524 19.6609 17.6435 19.5698C17.7345 19.4787 17.7857 19.3552 17.7857 19.2263V16.8123H16.6572C15.8603 16.8123 15.2144 16.1663 15.2144 15.3695V13.4409C15.2144 12.644 15.8603 11.998 16.6572 11.998H17.7857ZM18.607 15.2123C18.6 15.2121 18.5928 15.2121 18.5857 15.2121C18.5786 15.2121 18.5715 15.2121 18.5644 15.2123H16.8144V13.598H19.7144V15.2123H18.607Z"
                   fill="#67C4B2" />
               </svg>
-              <b>{{getPriceString(sch.services!)}} руб. <!--(заглушка!)--> </b>
+              <b><ng-container *ngIf="visitPayment(sch)">Стоимость услуг в записи: </ng-container>{{getPriceString(sch.services!)}} руб.</b>
             </div>
           </div>
         </div>
@@ -325,6 +337,14 @@
             <div *ngIf="getStatusDone(sch)" (click)="confirmRecord(sch, 2)" class="stl-cancel">
               <b>Отменить</b>
             </div>
+            <button type="button" class="btn-reschedule" *ngIf="canReschedule(sch)"
+              (click)="openReschedule(sch, $event)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="3.5" y="5" width="17" height="15.5" rx="3" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M8 3.5v3M16 3.5v3M3.5 9.5h17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              <span>Перенести</span>
+            </button>
             <div *ngIf="getStatusConfirm(sch)" (click)="confirmRecord(sch, 1)"
               class="btn-green w100" style="max-width: 320px;">
               <b>Подтвердить</b>
@@ -349,30 +369,11 @@
             <span>Ввести PIN купона</span>
           </button>
 
-              <div class="cb-main" *ngIf="sch.couponSnapshot as snap">
-                <div class="cb-title">Приветственная скидка Onwaves</div>
-                <div class="cb-sub">
-                  <span class="cb-chip">Клиент платит {{ formatAmount(snap.payableAmount, snap.amountIsFrom) }}</span>
-                  <span class="cb-dot" aria-hidden="true">•</span>
-                  <span class="cb-chip cb-amount">Вы получите {{ formatAmount(snap.originalAmount, snap.amountIsFrom) }}</span>
-                </div>
-                <div class="cb-sub">{{ couponCompensationText(sch) }}</div>
-              </div>
-
-              <div class="cb-main " *ngIf="checkCouponUse(sch)" >
-                <div class="cb-title">Купон применён</div>
-                <div class="cb-sub">
-                  <span class="cb-chip cb-amount">−{{sch.couponId}}&nbsp;₽</span>
-                  <span class="cb-dot" aria-hidden="true">•</span>
-                
-                </div>
-              </div>
-
           <div class="cont-horiz wrap btns-contacts" style="font-size: 0.9rem;">
             <!-- Позвонить и Написать -->
             <div class="cont-horiz-around"> <!-- style="width:210px" -->
               <!-- Позвонить ico-->
-              <a [href]="clientTelHref(sch)" class="cont-vert types_of_communication_txt" style="gap: 10px">
+              <a *ngIf="clientTelHref(sch)" [href]="clientTelHref(sch)" class="cont-vert types_of_communication_txt" style="gap: 10px">
                 <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" fill="none">
                   <rect width="36" height="36" x=".5" fill="#67C4B2" rx="18" />
                   <path fill="#fff" fill-rule="evenodd"
@@ -484,6 +485,10 @@
     </div>
   </ng-container>
 
+  <div *ngIf="canceledLoadError" class="notes-load-error" role="alert">
+    <p>Не удалось загрузить отменённые записи.</p>
+    <button type="button" class="btn-green" (click)="getListScheduleCanceled()">Повторить загрузку</button>
+  </div>
   <ng-container *ngIf="canceled$|async as canceled">
     <div class="cont-horiz-start-start w100 left-right20 margin-bottom30" *ngIf="canceled !== null">
       <h3 *ngIf="canceled.length !==0">Отмененные записи</h3>
@@ -523,6 +528,7 @@
         <!-- Услуга кратко -->
         <input type="checkbox" [id]="sch.recordId"  [(ngModel)]="opened[sch.recordId]">
         <label class="accordion_tab-label_white" [for]="sch.recordId" style="gap: 10px 10px;">
+          <div class="visit-card-header">
           <div class="cont-horiz-between w100 wrap">
             <div class="cont-horiz">
               <div class="accordion_tab_time_line" [style.background-color]="getColorLine(sch)">
@@ -558,7 +564,7 @@
                   Не подтверждено
                 </b>
                 <b *ngIf="sch.status === 1" [style.color]="getColorLine(sch)">
-                  В ожидании
+                  Ждём встречи
                 </b>
                 <b *ngIf="sch.status === 3" [style.color]="getColorLine(sch)">
                   Выполнено
@@ -576,9 +582,12 @@
               </div>
             </div>
           </div>
+          <ng-container *ngTemplateOutlet="paymentSummary; context: { $implicit: sch }"></ng-container>
+          </div>
         </label>
         <!-- Содержимое вкладки -->
         <div class="accordion_tab-content_white">
+          <ng-container *ngTemplateOutlet="reviewAttendance; context: {$implicit: sch}"></ng-container>
           <!-- Услуга подробно -->
           <div class="str_uslugi_podcategory" *ngFor="let serv of sch.services">
             <!-- Услуги -->
@@ -619,6 +628,9 @@
                   <b *ngIf="sch.duration">
                     {{getAllTimeWorking(sch.duration)}}
                   </b>
+                  <button *ngIf="checkStateUpdateTime(sch)" type="button" class="duration-edit" (click)="openTimeModal(sch)">
+                    Изменить длительность
+                  </button>
                 </div>
               </div>
               <!-- Деньги -->
@@ -632,7 +644,7 @@
                     d="M5.08571 8.14062C4.53255 8.14062 4.00204 8.36037 3.61089 8.75152C3.21974 9.14266 3 9.67317 3 10.2263V19.2263C3 19.7795 3.21974 20.31 3.61089 20.7012C4.00204 21.0923 4.53255 21.3121 5.08571 21.3121H17.3C17.8532 21.3121 18.3837 21.0923 18.7748 20.7012C19.166 20.31 19.3857 19.7795 19.3857 19.2263V16.8123H19.8715C20.6684 16.8123 21.3144 16.1663 21.3144 15.3695V13.4409C21.3144 12.644 20.6684 11.998 19.8715 11.998H19.3857V10.2263C19.3857 9.67317 19.166 9.14266 18.7748 8.75152C18.3837 8.36037 17.8532 8.14062 17.3 8.14062H5.08571ZM17.7857 11.998V10.2263C17.7857 10.0975 17.7345 9.97398 17.6435 9.88289C17.5524 9.7918 17.4288 9.74062 17.3 9.74062H5.08571C4.9569 9.74062 4.83335 9.7918 4.74226 9.88289C4.65117 9.97398 4.6 10.0975 4.6 10.2263V19.2263C4.6 19.3552 4.65117 19.4787 4.74226 19.5698C4.83335 19.6609 4.9569 19.7121 5.08571 19.7121H17.3C17.4288 19.7121 17.5524 19.6609 17.6435 19.5698C17.7345 19.4787 17.7857 19.3552 17.7857 19.2263V16.8123H16.6572C15.8603 16.8123 15.2144 16.1663 15.2144 15.3695V13.4409C15.2144 12.644 15.8603 11.998 16.6572 11.998H17.7857ZM18.607 15.2123C18.6 15.2121 18.5928 15.2121 18.5857 15.2121C18.5786 15.2121 18.5715 15.2121 18.5644 15.2123H16.8144V13.598H19.7144V15.2123H18.607Z"
                     fill="#67C4B2" />
                 </svg>
-                <b>{{getPriceString(sch.services!)}} руб. <!--(заглушка!)--> </b>
+                <b><ng-container *ngIf="visitPayment(sch)">Стоимость услуг в записи: </ng-container>{{getPriceString(sch.services!)}} руб.</b>
               </div>
             </div>
           </div>
@@ -642,13 +654,13 @@
             <div class="cont-vert-start-center w100 margin-bottom20">
               <div class="margin-bottom20">
                 <b>
-                  Возможные способы оплаты: купон
+                  Возможные способы оплаты:
                 </b>
               </div>
        
               <div class="cont-horiz-start wrap w100" style="gap: 10px 30px">
           
-                <div class="cont-horiz-start type-of-pay" style="gap: 10px 10px">
+                <div class="cont-horiz-start type-of-pay" style="gap: 10px 10px" *ngIf="checkPaymentMethod(PaymentMethodType.CASH)">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path fill-rule="evenodd" clip-rule="evenodd"
                       d="M15.6013 4.59363L15.5982 4.59449L15.6013 4.59363ZM15.4319 4.638L8.29643 6.50053C7.86893 6.61212 7.43191 6.35602 7.32032 5.92852C7.20873 5.50101 7.46483 5.06399 7.89234 4.9524L15.1764 3.0511C15.3596 3.00076 15.5511 2.98743 15.7396 3.01193C15.9311 3.03683 16.1157 3.10029 16.282 3.19847C16.4484 3.29666 16.5932 3.42753 16.7076 3.5832C16.8205 3.73692 16.9016 3.91166 16.946 4.09713L17.3048 5.53244C17.4119 5.96107 17.1513 6.39542 16.7227 6.50258C16.2941 6.60974 15.8597 6.34913 15.7526 5.9205L15.4319 4.638Z"
@@ -662,7 +674,7 @@
                   </div>
                 </div>
           
-                <div class="cont-horiz-start type-of-pay" style="gap: 10px 10px">
+                <div class="cont-horiz-start type-of-pay" style="gap: 10px 10px" *ngIf="checkPaymentMethod(PaymentMethodType.CARD)">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path fill-rule="evenodd" clip-rule="evenodd"
                       d="M19.5992 4.69922H4.39922C3.19922 4.69922 2.19922 5.69922 2.19922 6.89922V17.1992C2.19922 18.3992 3.19922 19.3992 4.39922 19.3992H19.5992C20.7992 19.3992 21.7992 18.3992 21.7992 17.1992V6.89922C21.7992 5.69922 20.7992 4.69922 19.5992 4.69922ZM20.1992 17.0992C20.1992 17.3992 19.8992 17.6992 19.5992 17.6992H4.39922C4.09922 17.6992 3.79922 17.3992 3.79922 17.0992V11.0992H20.1992V17.0992ZM20.1992 9.49922H3.79922V6.89922C3.79922 6.59922 4.09922 6.29922 4.39922 6.29922H19.5992C19.8992 6.29922 20.1992 6.59922 20.1992 6.89922V9.49922Z"
@@ -676,7 +688,7 @@
                   </div>
                 </div>
           
-                <div class="cont-horiz-start type-of-pay" style="gap: 10px 10px">
+                <div class="cont-horiz-start type-of-pay" style="gap: 10px 10px" *ngIf="checkPaymentMethod(PaymentMethodType.ONLINE)">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="20" viewBox="0 0 14 20" fill="none">
                     <path fill-rule="evenodd" clip-rule="evenodd"
                       d="M2.33255 1.79922C2.06619 1.79922 1.79922 2.03223 1.79922 2.38383V17.6146C1.79922 17.9662 2.06619 18.1992 2.33255 18.1992H11.6659C11.9322 18.1992 12.1992 17.9662 12.1992 17.6146V2.38383C12.1992 2.03223 11.9322 1.79922 11.6659 1.79922H2.33255ZM0.199219 2.38383C0.199219 1.20603 1.12616 0.199219 2.33255 0.199219H11.6659C12.8723 0.199219 13.7992 1.20603 13.7992 2.38383V17.6146C13.7992 18.7924 12.8723 19.7992 11.6659 19.7992H2.33255C1.12616 19.7992 0.199219 18.7924 0.199219 17.6146V2.38383Z"
@@ -690,7 +702,7 @@
                   </div>
                 </div>
          
-                <div class="cont-horiz-start type-of-pay" style="gap: 10px 10px">
+                <div class="cont-horiz-start type-of-pay" style="gap: 10px 10px" *ngIf="checkPaymentMethod(PaymentMethodType.FAST_TRANSFER)">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path fill-rule="evenodd" clip-rule="evenodd"
                       d="M11.9992 16.9C11.5992 16.9 11.1992 17.3 11.1992 17.7V20.7C11.1992 21.1 11.5992 21.5 11.9992 21.5C12.3992 21.5 12.7992 21.1 12.7992 20.7V17.7C12.7992 17.3 12.3992 16.9 11.9992 16.9Z"
@@ -737,7 +749,7 @@
               <!-- Позвонить и Написать -->
               <div class="cont-horiz-around"> <!-- style="width:210px" -->
                 <!-- Позвонить ico-->
-                <a [href]="clientTelHref(sch)" class="cont-vert types_of_communication_txt" style="gap: 10px">
+                <a *ngIf="clientTelHref(sch)" [href]="clientTelHref(sch)" class="cont-vert types_of_communication_txt" style="gap: 10px">
                   <svg xmlns="http://www.w3.org/2000/svg" width="37" height="36" fill="none">
                     <rect width="36" height="36" x=".5" fill="#67C4B2" rx="18" />
                     <path fill="#fff" fill-rule="evenodd"
@@ -848,10 +860,55 @@
     </ng-container>
   </ng-container>
 </div>
-<ng-template #loading fxLayout="row" class="width100" fxLayoutAlign="center center" flx>
-  <div style="width: 100%;   display: flex;
-    justify-content: center;">
-    <span class="app-spinner"></span>
+<ng-template #rescheduleModal>
+  <div class="reschedule" *ngIf="rescheduleRecord as record" role="dialog" aria-labelledby="reschedule-title">
+    <button type="button" class="reschedule__close" (click)="closeReschedule()" aria-label="Закрыть"></button>
+    <div class="reschedule__head">
+      <h2 id="reschedule-title">Перенести запись</h2>
+      <p class="reschedule__who">{{ record.name }}</p>
+      <p class="reschedule__now" *ngIf="record.start">
+        Сейчас {{ toLocale(record.start) | date:'d MMMM, HH:mm' }}
+        <span *ngIf="record.duration"> · {{ getAllTimeWorking(record.duration) }}</span>
+      </p>
+      <p class="reschedule__hint">Выберите свободный день и время. Клиенту уйдёт уведомление.</p>
+    </div>
+    <app-calendar
+      (onDate)="onRescheduleDate($event)"
+      (clearInterval)="onRescheduleCleared()"
+      [type]="'User'"
+      [today]="rescheduleToday"
+      [serviceId]="rescheduleServiceId()"
+      [duration]="record.duration"
+      [pointId]="reschedulePointId"
+      [userId]="notesProfileId">
+    </app-calendar>
+    <app-set-interval-start
+      [id]="notesProfileId"
+      [day]="rescheduleDay"
+      [duration]="record.duration"
+      [mode]="'client'"
+      [voice]="'master'"
+      [pointId]="reschedulePointId"
+      (setInterval)="onRescheduleSlot($event)">
+    </app-set-interval-start>
+    <p class="reschedule__error" *ngIf="rescheduleError" role="alert">{{ rescheduleError }}</p>
+    <div class="reschedule__footer">
+      <button type="button" class="reschedule__submit"
+        [disabled]="!rescheduleChoice?.date || rescheduleSaving"
+        (click)="submitReschedule()">
+        {{ rescheduleSubmitLabel() }}
+      </button>
+    </div>
   </div>
-
+</ng-template>
+<ng-template #loading fxLayout="row" class="width100" fxLayoutAlign="center center" flx>
+  <div *ngIf="scheduleLoadError; else waiting" class="notes-load-error" role="alert">
+    <p>Не удалось загрузить записи. Проверьте соединение и повторите попытку.</p>
+    <button type="button" class="btn-green" (click)="getListSchedule()">Повторить загрузку</button>
+  </div>
+  <ng-template #waiting>
+    <div style="width: 100%; display: flex; justify-content: center;" role="status" aria-label="Загружаем записи">
+      <span class="app-spinner"></span>
+    </div>
+  </ng-template>
 </ng-template>

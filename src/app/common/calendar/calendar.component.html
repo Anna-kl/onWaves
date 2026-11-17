@@ -16,6 +16,7 @@
       </div>
     </div>
 
+    <div class="calendar-state" *ngIf="isLoading" role="status">Загружаю расписание…</div>
     <div class="calendar-state calendar-state--error" *ngIf="loadError" role="alert">
       <span>Не удалось загрузить расписание на {{getNameMonth(month)}}</span>
       <button type="button" class="calendar-state__retry" (click)="retryMonth()">Повторить</button>

@@ -3,6 +3,8 @@ import {TypeImage} from "../../enums/typeImage";
 export interface IViewImage {
   id: string;
   name: string;
+  isPublished?: boolean;
+  sortOrder?: number;
   dateCreated: Date;
   albumId?: string;
   typeImage: TypeImage;

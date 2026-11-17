@@ -1,0 +1,54 @@
+<article class="terms" *ngIf="promos as campaign">
+  <p class="terms__flag" *ngIf="ended">Акция завершена</p>
+  <p class="terms__flag" *ngIf="!organizerReady">Реквизиты организатора ещё не внесены. Эту страницу нельзя указывать в рекламе.</p>
+
+  <h1>Акции мастера {{ campaign.masterName }} <span *ngIf="campaign.place">({{ campaign.place }})</span></h1>
+
+  <p>
+    Организатор:
+    <ng-container *ngIf="organizerReady; else organizerMissing">
+      {{ organizer.name }}<ng-container *ngIf="organizer.status">, {{ organizer.status }}</ng-container>.
+      ИНН {{ organizer.inn }}<ng-container *ngIf="organizer.ogrn">, ОГРН(ИП) {{ organizer.ogrn }}</ng-container>.
+    </ng-container>
+    <ng-template #organizerMissing>данные появятся здесь, когда их внесут.</ng-template>
+  </p>
+  <p>Срок: до {{ campaign.validThroughLabel }} включительно.</p>
+
+  <section class="terms__offer" *ngFor="let offer of campaign.offers" [id]="offer.anchor">
+    <h2 [id]="offer.anchor + '-text'">{{ offer.title }}</h2>
+    <dl class="terms__prices">
+      <div><dt>Обычная цена</dt><dd>{{ formatRub(offer.listRub) }}</dd></div>
+      <div>
+        <dt>По акции · {{ offer.masterScope === 'online' ? 'при онлайн-записи' : 'при любой записи' }}</dt>
+        <dd>{{ formatRub(promoPriceRub(offer)) }}</dd>
+      </div>
+      <div *ngIf="offer.couponRub > 0">
+        <dt>Онлайн, если доступен купон OnWaves</dt><dd>{{ formatRub(onlinePayRub(offer)) }}</dd>
+      </div>
+    </dl>
+    <p *ngIf="offer.note">{{ offer.note }}</p>
+  </section>
+
+  <h2>Общие условия</h2>
+  <p>
+    Только первый визит к мастеру, одна скидка на один номер телефона. Скидки не суммируются
+    с другими предложениями мастера и не обмениваются на деньги. Итоговая цена видна до подтверждения записи.
+  </p>
+  <p>
+    Отмена и перенос: через онлайн-запись<ng-container *ngIf="profilePhone as phone"> или по телефону мастера
+    <a [href]="'tel:+' + phone">{{ formatRuPhone(phone) }}</a></ng-container>.
+    При отмене скидку можно использовать при новой записи до конца срока акции.
+    Вопросы: <a [href]="'mailto:' + organizer.email">{{ organizer.email }}</a>.
+  </p>
+  <p>
+    Купон OnWaves считается от цены до скидки мастера. Его условия — на странице
+    <a routerLink="/static/kupon">«Условия купона»</a>.
+  </p>
+  <p class="terms__updated">Дата последнего изменения: {{ campaign.updatedLabel }}.</p>
+</article>
+
+<article class="terms" *ngIf="!promos">
+  <h1>Условия акций</h1>
+  <p *ngIf="missing">У этого мастера нет опубликованных акций.</p>
+  <p *ngIf="!missing">Условия акций {{ profileName || 'мастера' }} появятся здесь, когда акция будет заведена.</p>
+</article>

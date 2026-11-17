@@ -1,6 +1,7 @@
 import {Injectable} from "@angular/core";
 import {environment} from "../enviroments/environment";
-import {HttpClient} from "@angular/common/http";
+import {CookieService} from "ngx-cookie-service";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {IViewNotification} from "../app/DTO/views/notifications/IViewNotification";
 import {IChangeNotification} from "../app/DTO/views/notifications/IChangeNotification";
 import {IChangeNotificationByRecord} from "../app/DTO/views/notifications/IChangeNotificationByRecord";
@@ -11,29 +12,31 @@ import {IResponse} from "../app/DTO/classes/IResponse";
 })
 export class MessageNotificationService {
   private url = environment.Uri + 'notifications/';
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private cookies: CookieService) {}
 
+  private auth() {
+    const token = this.cookies.get("auth-token-ocpio");
+    return { headers: token ? new HttpHeaders({ Authorization: "Bearer " + token }) : new HttpHeaders() };
   }
-
   readNotifications(id: string){
-      return this.http.get(`${this.url}update-status/${id}`);
+      return this.http.get(`${this.url}update-status/${id}`, this.auth());
   }
 
   getNotifications(profileId: string){
-    return this.http.get<IViewNotification[]>(`${this.url}${profileId}`);
+    return this.http.get<IViewNotification[]>(`${this.url}${profileId}`, this.auth());
   }
 
   changeStatus(id: string, state: IChangeNotification){
-    return this.http.put<IResponse>(`${this.url}change-status/${id}`, state);
+    return this.http.put<IResponse>(`${this.url}change-status/${id}`, state, this.auth());
   }
 
   /** Пометка по записи: те же поля, что в change-status, плюс recordId. */
   changeStatusByRecord(state: IChangeNotificationByRecord) {
-    return this.http.put<IResponse>(`${this.url}change-status-by-record/`, state);
+    return this.http.put<IResponse>(`${this.url}change-status-by-record/`, state, this.auth());
   }
 
   getCountNotifications(id: string){
-    return this.http.get<number>(`${this.url}get-count-notifications/${id}`);
+    return this.http.get<number>(`${this.url}get-count-notifications/${id}`, this.auth());
   }
 
   // putReadNotifications(profileId: string, type:any){

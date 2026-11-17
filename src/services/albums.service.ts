@@ -1,3 +1,4 @@
+import { CookieService } from 'ngx-cookie-service';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {catchError, Observable, shareReplay, tap, throwError} from 'rxjs';
@@ -33,7 +34,7 @@ export class AlbumsService {
   private static readonly albumsCache = new Map<string, AlbumCacheEntry<IAlbumWithFoto[]>>();
   private static readonly imagesCache = new Map<string, AlbumCacheEntry<IViewImage[]>>();
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient, private cookies: CookieService) {}
 
   getImagesService(id: string): Observable<IViewImage[]> {
     return this.http.get<IViewImage[]>(`${this.url}get-service/${id}`);
@@ -51,9 +52,9 @@ export class AlbumsService {
   }
 
   /** `force = true` — строго с сервера, мимо всех кешей (после загрузки/удаления медиа). */
-  getAlbums(id: string, force = false): Observable<IAlbumWithFoto[]> {
-    return this.cached(AlbumsService.albumsCache, id, () =>
-      this.http.get<IAlbumWithFoto[]>(`${this.url}${id}`, this.freshOptions(force))
+  getAlbums(id: string, force = false, includeHidden = false): Observable<IAlbumWithFoto[]> {
+    return this.cached(AlbumsService.albumsCache, `${id}:${includeHidden}`, () =>
+      this.http.get<IAlbumWithFoto[]>(`${this.url}${id}`, this.ownerOptions(force, includeHidden))
     , force);
   }
 
@@ -72,9 +73,9 @@ export class AlbumsService {
   }
 
   /** `force = true` — строго с сервера, мимо всех кешей (после загрузки/удаления медиа). */
-  getImages(albumId: string, force = false): Observable<IViewImage[]> {
-    return this.cached(AlbumsService.imagesCache, albumId, () =>
-      this.http.get<IViewImage[]>(`${this.url}image/${albumId}`, this.freshOptions(force))
+  getImages(albumId: string, force = false, includeHidden = false): Observable<IViewImage[]> {
+    return this.cached(AlbumsService.imagesCache, `${albumId}:${includeHidden}`, () =>
+      this.http.get<IViewImage[]>(`${this.url}image/${albumId}`, this.ownerOptions(force, includeHidden))
     , force);
   }
 
@@ -140,6 +141,16 @@ export class AlbumsService {
    * кеша не может ни один из них. Заголовок Cache-Control намеренно не ставим:
    * он превратил бы простой GET в preflight.
    */
+  updatePresentation(profileId: string, change: {albums?: Array<{id: string; isPublished?: boolean; sortOrder?: number}>; images?: Array<{id: string; isPublished?: boolean; sortOrder?: number}>}): Observable<IResponse> {
+    return this.http.put<IResponse>(`${this.url}${profileId}/presentation`, {albums: [], images: [], ...change},
+      {headers: new HttpHeaders({Authorization: 'Bearer ' + this.cookies.get('auth-token-ocpio')})})
+      .pipe(tap(result => { if (result.code === 200) this.clearCache(); }));
+  }
+  private ownerOptions(force: boolean, includeHidden: boolean) {
+    const options = this.freshOptions(force);
+    return includeHidden ? {...options, headers: new HttpHeaders({Authorization: 'Bearer ' + this.cookies.get('auth-token-ocpio')}), params: (options.params ?? new HttpParams()).set('includeHidden', 'true')} : options;
+  }
+
   private freshOptions(force: boolean): { headers?: HttpHeaders; params?: HttpParams } {
     if (!force) return {};
     return {params: new HttpParams().set('_', Date.now().toString())};

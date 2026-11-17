@@ -25,7 +25,7 @@ import { getNameCurrency, priceUnitOf } from "src/helpers/common/price.helpers";
 import { BehaviorSubject, Subject, takeUntil, tap, catchError, timeout, switchMap, of, forkJoin } from "rxjs";
 import { environment } from "src/enviroments/environment";
 import { WorkLocationType } from "../../../../DTO/enums/workLocationType";
-import { serviceWorkLocationType } from "src/helpers/common/address";
+import { serviceFixedPointIds, serviceWorkLocationType } from "src/helpers/common/address";
 import { ServicePriceUnit } from "../../../../DTO/enums/servicePriceUnit";
 
 @Component({
@@ -72,6 +72,9 @@ export class ArendaComponent implements OnInit, OnDestroy {
   isErrorFormat = false;
   /** Формат оказания услуги (radio). */
   locationType: WorkLocationType | null = null;
+  fixedPointIds: string[] = [];
+  fixedPointChoices = 0;
+  isErrorPoints = false;
 
   // ══════════════════════════════════════════════════════════════
   // КРИТИЧНО: Флаги состояния загрузки и идемпотентность
@@ -206,6 +209,7 @@ export class ArendaComponent implements OnInit, OnDestroy {
 
       // Характер услуги — для редактирования (устойчиво к регистру ключа).
       this.locationType = serviceWorkLocationType(this.service) ?? null;
+      this.fixedPointIds = serviceFixedPointIds(this.service);
     } else {
       this.serviceGroup = this.builder.group({
         name: ['', [Validators.required, Validators.minLength(3)]],
@@ -351,6 +355,7 @@ export class ArendaComponent implements OnInit, OnDestroy {
     this.isErrorName = false;
     this.isErrorPrice = false;
     this.isErrorFormat = false;
+    this.isErrorPoints = false;
     let data = this.serviceGroup.getRawValue();
     let gender: Gender[] = [];
 
@@ -377,6 +382,10 @@ export class ArendaComponent implements OnInit, OnDestroy {
       this.isErrorFormat = true;
       flagValidation = false;
     }
+    if (this.locationType === WorkLocationType.Fixed && this.fixedPointChoices > 1 && !this.fixedPointIds.length) {
+      this.isErrorPoints = true;
+      flagValidation = false;
+    }
 
     if (!flagValidation) return;
 
@@ -401,6 +410,7 @@ export class ArendaComponent implements OnInit, OnDestroy {
     );
     // Характер услуги (backend 2026-07-19).
     service.workLocationType = this.locationType;
+    service.fixedPointIds = this.locationType === WorkLocationType.Fixed ? this.fixedPointIds : [];
 
     // ══════════════════════════════════════════════════════════════
     // КРИТИЧНО: Передаем requestId для идемпотентности

@@ -12,7 +12,7 @@
 
   display: block;
   width: 100%;
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   color: var(--ink);
 }
 
@@ -25,8 +25,8 @@
   position: absolute;
   top: -6px;
   right: -6px;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: 50%;
   background: var(--bg);
@@ -82,6 +82,7 @@
 }
 
 .summary {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -109,6 +110,7 @@
   }
 
   .sum-label {
+    padding-right: 80px;
     font-size: .75rem;
     font-weight: 700;
     color: var(--g2);
@@ -131,6 +133,22 @@
     font-size: .88rem;
   }
 
+  .sum-notice {
+    margin-top: 8px;
+    font-size: .85rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--g2);
+  }
+
+  .sum-price {
+    margin-top: 4px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--g2);
+  }
+
   .sum-coupon {
     display: flex;
     // По первой строке: строка переносится на две, и по центру иконка уезжала вниз.
@@ -149,6 +167,10 @@
   }
 
   .sum-edit {
+    position: absolute;
+    top: 7px;
+    right: 10px;
+    min-height: 44px;
     flex-shrink: 0;
     border: none;
     background: none;
@@ -426,4 +448,11 @@ input[aria-invalid="true"] {
   .done-state h2 {
     font-size: 1.15rem;
   }
+}
+
+.coupon-refusal {
+  margin: 0 0 20px; padding: 16px; border-radius: 14px; border: 1px solid rgba(212, 108, 84, .4);
+  background: rgba(212, 108, 84, .08); color: #043c48;
+  b { font-size: 14px; }
+  p { margin: 6px 0 0; font-size: 13px; line-height: 1.6; }
 }

@@ -55,14 +55,26 @@
 }
 
 .ba-profile-layout__promo {
+    order: 3;
+    width: 100%;
+}
+
+.ba-profile-layout__giveaway {
     order: 2;
     width: 100%;
 }
 
 .ba-profile-layout__main {
-    order: 4;
+    order: 5;
     width: 100%;
     min-width: 0;
+}
+
+@media screen and (max-width: 768px) {
+    .ba-profile-layout {
+        padding-inline: 16px;
+        box-sizing: border-box;
+    }
 }
 
 @media screen and (min-width: 769px) {
@@ -90,7 +102,8 @@
     }
 
     .ba-profile-layout__promo,
-    .ba-profile-layout__main {
+    .ba-profile-layout__main,
+    .ba-profile-layout__giveaway {
         order: unset;
         margin: 0;
     }

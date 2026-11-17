@@ -17,7 +17,7 @@ export class Service implements subGroup{
   paymentForType: PaymentForType;
   prepayment?: boolean;
   about?: string;
-  duration?: number;
+  duration?: number | null;
   groupServiceId: string|null;
   id: string|null;
   message?: string;
@@ -26,9 +26,11 @@ export class Service implements subGroup{
   isTimeUnlimited?: boolean;
   /** Характер услуги (backend 2026-07-19): один из форматов работы профиля. */
   workLocationType?: WorkLocationType | null;
+  /** Точки, где оказывается услуга «на месте». Пусто — все точки профиля, пока их одна. */
+  fixedPointIds?: string[] | null;
   constructor(id: string|null, name: string, gender: Gender[],profileUserId: string, price: IPrice,
               paymentForType: PaymentForType,groupServiceId: string|null,
-              about?: string,  duration?: number, isTimeUnlimited?: boolean, categoryId?: number, isChecked?: boolean  ) {
+              about?: string,  duration?: number | null, isTimeUnlimited?: boolean, categoryId?: number, isChecked?: boolean  ) {
     this.serviceStatus = ServiceStatus.Active;
     this.prepayment = false;
     this.dateModified = new Date();

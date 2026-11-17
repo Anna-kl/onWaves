@@ -39,6 +39,7 @@ export class ModalRegisterComponent implements OnInit {
   consentText: string = '';
   consentTextVersion: string = '';
   showConsentModal = false;
+  callSending = false;
   zvonokSending = false;
 
   iconsFlags: any[] = [
@@ -115,42 +116,33 @@ export class ModalRegisterComponent implements OnInit {
     this.activeModal.close();
   }
   next() {
-   let tempPhone = `${this.chCountry.code?.replace('+','')}${this.phone}`;
-   this.authService.register(tempPhone).subscribe(
-     result => {
-        if (result.code === 200){
-          this.sendNotifyConsentIfNeeded(tempPhone);
-          this.activeModal.close(); // добавил Муконин. Чтобы закрывалось предыдущее окно.
-          const modalRef = this.modalService.open(ModalEnterDataComponent);
-          modalRef.componentInstance.session = result.data;
-          modalRef.componentInstance.phone = this.phone;
-          modalRef.componentInstance.code = this.chCountry.code;
-          modalRef.componentInstance.mask = this.chCountry.mask;
-        }
-        if (result.code === 500){
-          this.flagError = true;
-          this.messageError = `Превышено число запросов`;
-        }
-        if (result.code === 204){
-          this.flagError = true;
-          let validateError = result.data.toString().split('.')[0];
-          this.messageError = `Повторно запросить код можно будет через ${validateError}`;
-        }
-        // if (result.code === 204){
-        //
-        //   this.flagError = true;
-        // }
-     }
-   )
+    if (!this.isFormValid() || this.callSending || this.zvonokSending) {
+      return;
+    }
+    const tempPhone = `${this.chCountry.code?.replace('+','')}${this.phone}`;
+    this.callSending = true;
+    this.flagError = false;
+    this.authService.register(tempPhone).subscribe({
+      next: result => {
+        this.callSending = false;
+        this.handleCodeSession(result, tempPhone, 'call');
+      },
+      error: () => {
+        this.callSending = false;
+        this.flagError = true;
+        this.messageError = 'Не удалось запросить код. Попробуйте ещё раз или войдите по email.';
+      }
+    });
   }
 
   /** Запасной flash-call: Plusofon часто «успешен», а звонок до абонента не доходит. */
   nextZvonok() {
-    if (!this.isFormValid() || this.zvonokSending) {
+    if (!this.isFormValid() || this.callSending || this.zvonokSending) {
       return;
     }
     const tempPhone = `${this.chCountry.code?.replace('+','')}${this.phone}`;
     this.zvonokSending = true;
+    this.flagError = false;
     this.authService.sendZvonok(tempPhone).subscribe({
       next: result => {
         this.zvonokSending = false;
@@ -165,7 +157,7 @@ export class ModalRegisterComponent implements OnInit {
   }
 
   private handleCodeSession(result: { code?: number; data?: unknown }, tempPhone: string, channel: 'call' | 'zvonok') {
-    if (result.code === 200) {
+    if (result.code === 200 && typeof result.data === 'string' && result.data) {
       this.sendNotifyConsentIfNeeded(tempPhone);
       this.activeModal.close();
       const modalRef = this.modalService.open(ModalEnterDataComponent);
@@ -176,15 +168,11 @@ export class ModalRegisterComponent implements OnInit {
       modalRef.componentInstance.lastChannel = channel;
       return;
     }
-    if (result.code === 500) {
-      this.flagError = true;
-      this.messageError = `Превышено число запросов`;
-    }
-    if (result.code === 204) {
-      this.flagError = true;
-      const validateError = result.data?.toString().split('.')[0];
-      this.messageError = `Повторно запросить код можно будет через ${validateError}`;
-    }
+    this.flagError = true;
+    const waitSeconds = result.code === 204 ? result.data?.toString().split('.')[0] : null;
+    this.messageError = waitSeconds
+      ? `Повторно запросить код можно будет через ${waitSeconds} с.`
+      : 'Не удалось запросить код. Попробуйте ещё раз или войдите по email.';
   }
 
   // back() {

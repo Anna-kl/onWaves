@@ -51,8 +51,18 @@
                 </div>
               </div>
               <!-- Цена услуги -->
-              <div class="txt-green-light">
-                {{getPriceService(service.price)}}₽
+              <div class="txt-green-light" *ngIf="!prizeAwardId">
+                <ng-container *ngIf="skinLine(service) as skinPrice; else legsServicePrice">
+                  <span class="total-old">{{ skinListText }}</span>
+                  {{ skinPrice }}
+                </ng-container>
+                <ng-template #legsServicePrice>
+                  <ng-container *ngIf="legsLine(service) as salePrice; else plainServicePrice">
+                    <span class="total-old">{{ getPriceService(service.price) }}₽</span>
+                    {{ salePrice }}
+                  </ng-container>
+                  <ng-template #plainServicePrice>{{ getPriceService(service.price) }}₽</ng-template>
+                </ng-template>
               </div>
             </div>
 
@@ -66,38 +76,48 @@
               <!-- Дата начала услуги -->
             </div>
             <!-- Цена услуги -->
-            <div class="txt-green-light">
-              <ng-container *ngIf="showDiscountedTotal; else plainTotal">
-                Общая сумма:
-                <span class="total-old">{{ formatAmount(welcomeQuote!.originalAmount, welcomeQuote!.amountIsFrom) }}</span>
-                <span class="total-new">{{ formatAmount(welcomeQuote!.payableAmount, welcomeQuote!.amountIsFrom) }}</span>
-                <span class="total-badge">{{ totalBadgeText }}</span>
-              </ng-container>
-              <ng-template #plainTotal>Общая сумма: {{getPrice(chooseServices)}}₽</ng-template>
+            <p *ngIf="quoteLoading" role="status">Проверяем скидки для вашей записи…</p>
+            <app-booking-price *ngIf="!quoteLoading && !rewardQuoteLoading && !isRecordView && !prizeBlocked" [price]="priceSummary"></app-booking-price>
+            <p *ngIf="!quoteLoading && !prizeBlocked && prizeQuote?.policy?.description">{{ prizeQuote?.policy?.description }}</p>
+            <p *ngIf="!quoteLoading && promoApplies && promoQuote?.termsNote">{{ promoQuote?.termsNote }}</p>
+            <div *ngIf="!quoteLoading && prizeBlocked" role="status">
+              <p>{{ couponRefusal }}</p>
+              <button type="button" class="btn-transparent" (click)="retryBookingQuote()">Проверить ещё раз</button>
             </div>
-
-            <!-- Приветственная скидка: сумму и право считает сервер -->
-            <!-- Купон: говорим о праве клиента, а не о новой цене. Суммы считает сервер. -->
-            <div class="welcome-coupon margin-top20" *ngIf="!isRecordView && (welcomeOffered || welcomeHint || couponRefusal)">
-              <div class="coupon-ticket" *ngIf="welcomeOffered" [class.coupon-ticket--off]="!applyWelcome">
-                <span class="coupon-ticket__ic" aria-hidden="true">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h13A1.5 1.5 0 0 1 20 8.5v1.6a1.9 1.9 0 0 0 0 3.8v1.6a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 15.5v-1.6a1.9 1.9 0 0 0 0-3.8V8.5Z"
-                          stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-                    <path d="M14.5 8.4v7.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="1.8 2.4"/>
-                  </svg>
-                </span>
-                <div class="coupon-ticket__body">
-                  <b class="coupon-ticket__title">{{ welcomeTitle }}</b>
-                  <span class="coupon-ticket__note">{{ welcomeNote }}</span>
-                  <button type="button" class="coupon-ticket__toggle" (click)="toggleWelcome()">
-                    {{ applyWelcome ? 'Не использовать купон' : 'Использовать купон' }}
-                  </button>
-                </div>
+            <p *ngIf="ultrasoundFlow && promoApplies && rewardCoupons.length">С этой акцией можно использовать купоны за отзывы.</p>
+            <div *ngIf="ultrasoundUnavailable">
+              <p>Запись за полцены сейчас недоступна.</p>
+              <button type="button" class="btn-transparent" (click)="retryUltrasoundQuote()">Проверить акцию ещё раз</button>
+              <button type="button" class="btn-transparent" (click)="chooseOrdinaryUltrasound()">Выбрать обычную запись</button>
+            </div>
+            <div *ngIf="profilePromoUnavailable" role="status">
+              <p>{{ profilePromoRefusalText }}</p>
+              <button type="button" class="btn-transparent" (click)="retryBookingQuote()">Проверить акцию ещё раз</button>
+              <button type="button" class="btn-transparent" (click)="chooseOrdinaryProfileBooking()">Выбрать обычную запись</button>
+            </div>
+            <div *ngIf="isRecordView">Общая сумма: {{getPrice(chooseServices)}}₽</div>
+            <p class="promo-terms" *ngIf="promoTermsLine as terms">
+              <a [routerLink]="terms.path" [fragment]="terms.fragment" (click)="trackPromoTerms(terms.slug)">Цена со скидкой по условиям акции</a>
+            </p>
+            <button type="button" class="coupon-choice" *ngIf="!isRecordView && welcomeOffered"
+                    [attr.aria-pressed]="applyWelcome" (click)="toggleWelcome()">
+              {{ applyWelcome ? 'Не использовать купон' : 'Использовать купон' }}
+            </button>
+            <fieldset class="reward-coupon-selector" *ngIf="!isRecordView && !prizeBlocked && !ultrasoundUnavailable && !profilePromoUnavailable && rewardCoupons.length">
+              <legend>Купоны за отзывы</legend>
+              <label *ngFor="let coupon of rewardCoupons">
+                <input type="checkbox" [checked]="selectedRewardIds.includes(coupon.id)"
+                  [disabled]="quoteLoading || saveInProgress" (change)="toggleReward(coupon.id, choice.checked)" #choice>
+                <span>{{ formatRub(coupon.availableKopecks / 100) }} · до {{ coupon.expiresAt | date:'d MMM HH:mm':'+0300' }} МСК</span>
+              </label>
+              <p *ngIf="rewardQuoteLoading" role="status">Проверяем итог с купонами…</p>
+              <p *ngIf="rewardQuote && !rewardQuote.discountKopecks" role="status">Стоимость записи уже покрыта. Купоны за отзывы останутся в кабинете.</p>
+              <p class="reward-coupon-error" *ngIf="rewardQuoteError" role="alert">{{ rewardQuoteError }}</p>
+              <div *ngIf="rewardQuoteError && rewardQuoteBlocksBooking" class="reward-coupon-actions">
+                <button type="button" class="btn-transparent" (click)="refreshRewardsQuote()">Пересчитать</button>
+                <button type="button" class="btn-transparent" (click)="clearRewards()">Снять купоны</button>
               </div>
-              <div class="welcome-coupon__note" *ngIf="!welcomeOffered && welcomeHint">{{ welcomeHint }}</div>
-              <div class="welcome-coupon__error" *ngIf="couponRefusal">{{ couponRefusal }}</div>
-            </div>
+            </fieldset>
 
             <!-- Запись на услугу END -->
 
@@ -164,11 +184,9 @@
                   </div>
                 </div>
                 <!-- Адрес БА (для фиксированного места / онлайн; при выезде показываем адрес клиента ниже) -->
-                <div class="cont-horiz" style="gap: 10px 10px;" *ngIf="!isMobileBooking && !recordLocationText(record)">
+                <div class="cont-horiz" style="gap: 10px 10px;" *ngIf="!isMobileBooking && visitPlace">
                   <img src="/assets/img/ba-edit/ico_location_pc_24.svg" alt="">
-                  <div *ngIf="businessProfile">
-                    {{getAddressProfile(businessProfile.address!)}}
-                  </div>
+                  <div>{{ visitPlace }}</div>
                 </div>
                 <!-- Адрес выезда сохранённой записи (режим редактирования, разъездная) -->
                 <div class="cont-horiz" style="gap: 10px 10px;" *ngIf="recordLocationText(record) as addr">
@@ -257,15 +275,16 @@
               </div>
             </div>
 
-            <div class="w100 cont-horiz margin-bottom50" *ngIf="!record"
+            <div class="w100 cont-horiz margin-bottom50" *ngIf="!record && !ultrasoundUnavailable && !profilePromoUnavailable"
                  [style.margin-top.px]="isMobileBooking ? 28 : 0">
-              <div
+              <button type="button"
                 class="btn-green margin-left40 margin-right40"
-                [class.record-action--disabled]="saveInProgress"
+                [class.record-action--disabled]="saveInProgress || quoteLoading || prizeBlocked || rewardQuoteBlocksBooking"
+                [disabled]="saveInProgress || quoteLoading || prizeBlocked || rewardQuoteBlocksBooking"
                 style="max-width: 200px;"
                 (click)="onConfirm()">
-                {{ saveInProgress ? 'Отправка…' : 'Далее' }}
-              </div>
+                {{ saveInProgress ? 'Отправка…' : quoteLoading || rewardQuoteLoading ? 'Проверяем стоимость…' : prizeBlocked ? 'Запись недоступна' : prizeAwardId ? (priceSummary.payable === 0 ? 'Записаться бесплатно' : 'Записаться за ' + formatRub(priceSummary.payable)) : promoPhoneRequired ? 'Подтвердить телефон' : 'Далее' }}
+              </button>
             </div>
             <div class="around_1024-beetween_large сommunication" *ngIf="getStatusConfirm()">
               <div class="cont-horiz-start w100" style="gap: 10px 10px ; max-width: 600px;">

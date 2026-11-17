@@ -5,12 +5,16 @@ import { Router } from "@angular/router";
 import {IViewBusinessProfile} from "../../../DTO/views/business/IViewBussinessProfile";
 import {UserType} from "../../../DTO/classes/profiles/profile-user.model";
 import { ProfileDataService } from "../../services/profile-data.service";
+import { BookingPrice } from '../../helpers/booking-price';
+import { BookingSuccessDetails } from '../../helpers/booking-success';
 @Component({
   selector: 'app-confirm-modal',
   templateUrl: './confirm-modal.component.html',
   styleUrls: ['./confirm-modal.component.css']
 })
 export class ConfirmModalComponent implements OnInit {
+  @Input() priceSummary: BookingPrice | null = null;
+  @Input() successDetails: BookingSuccessDetails | null = null;
   typeUserForEquels: UserType | undefined = UserType.User;
   @Input() baProfile: IViewBusinessProfile|null = null;
   auth: IViewBusinessProfile | null = null;

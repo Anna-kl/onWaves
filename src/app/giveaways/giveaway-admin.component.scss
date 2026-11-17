@@ -1,0 +1,42 @@
+@import '../../assets/styles/main/color';
+
+.gw-admin { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { color: $green-dark; font-size: 28px; }
+label, fieldset { display: block; margin: 0 0 14px; }
+input, select, textarea {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 6px;
+  box-sizing: border-box;
+  font: inherit;
+}
+button {
+  min-height: 48px;
+  margin: 6px 8px 6px 0;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: $green-basic;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:disabled { opacity: .55; cursor: default; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid $green-dark;
+  outline-offset: 2px;
+}
+.gw-admin__preview { margin-top: 16px; padding: 16px; border-radius: 16px; background: #f4fbfb; }
+
+.gw-admin form, .gw-admin section { margin-top: 18px; }
+.gw-admin__slot {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-height: 44px;
+}
+.gw-admin__slot input { width: 20px; min-height: 20px; flex: 0 0 auto; }
+.gw-admin small { display: block; margin-top: 4px; }
+.gw-admin__preview { overflow-wrap: anywhere; }

@@ -38,13 +38,21 @@
         <div class="text-block-promo">
           Промо-страница
           <label>
-            <input type="checkbox" [(ngModel)]="profile.isPromo" (ngModelChange)="changePromo()"/>
+            <input type="checkbox" [checked]="profile.isPromo" (change)="changePromo($event)"
+              [disabled]="isSavingPromo" aria-label="Промо-страница" aria-describedby="promo-status-hint"/>
             <i></i>
           </label>
         </div>
-        <p class="hint-promo">
-          Страница не показывается на главной и в поиске. Клиент открывает её только по вашей ссылке, записаться нельзя.
+        <p class="hint-promo" id="promo-status-hint">
+          {{ profile.isPromo
+            ? 'Страница не показывается на главной и в поиске. Клиент открывает её только по вашей ссылке, записаться нельзя.'
+            : 'Промо-режим выключен. Онлайн-запись включается отдельно в разделе «График».' }}
         </p>
+        <p class="hint-promo" *ngIf="isSavingPromo" role="status">Сохраняем режим страницы…</p>
+        <div class="promo-error" *ngIf="promoError" role="alert">
+          <p>{{ promoError }}</p>
+          <a *ngIf="promoSetupRequired" [routerLink]="['/ba-edit', profile.id, 'uslugi']">Проверить услуги</a>
+        </div>
       </div>
 
       <!-- <div class="input-website">

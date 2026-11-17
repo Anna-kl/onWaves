@@ -8,7 +8,19 @@
         <app-column-baprofile [id]="businessProfile?.id!" ></app-column-baprofile>
         </section>
         <!-- Правая колонка start-->
-        <section class="w100">
+        <section class="services-col">
+          <a class="back-master" *ngIf="masterPath as path" [routerLink]="path">
+            <span class="back-master__arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <img class="back-master__avatar" [src]="masterAvatar" alt="">
+            <span class="back-master__text">
+              <span class="back-master__title">Вернуться к странице мастера</span>
+              <span class="back-master__name" *ngIf="businessProfile?.name">{{ businessProfile?.name }}</span>
+            </span>
+          </a>
           <section #pickBar class="pick-bar" aria-live="polite">
             <div class="pick-bar__row">
               <div class="pick-bar__info">
@@ -16,15 +28,18 @@
                   <span class="pick-bar__badge" aria-hidden="true">{{ countService }}</span>
                   <span class="pick-bar__count-text">{{ servicesWord }}</span>
                 </div>
-                <div class="pick-bar__meta">
-                  <span class="pick-bar__price" *ngIf="countService > 0">{{ selectionPrice }}</span>
-                  <span class="pick-bar__time" *ngIf="durationLabel">
-                    <svg class="pick-bar__time-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                      <circle cx="12" cy="12" r="8"/>
-                      <path d="M12 8v5l3 2" stroke-linecap="round"/>
-                    </svg>
-                    {{ durationLabel }}
-                  </span>
+                <div class="pick-bar__line" *ngIf="selectionNames || countService > 0">
+                  <p class="pick-bar__service" *ngIf="selectionNames">{{ selectionNames }}</p>
+                  <div class="pick-bar__meta">
+                    <span class="pick-bar__price" *ngIf="countService > 0">{{ selectionPrice }}</span>
+                    <span class="pick-bar__time" *ngIf="durationLabel">
+                      <svg class="pick-bar__time-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <circle cx="12" cy="12" r="8"/>
+                        <path d="M12 8v5l3 2" stroke-linecap="round"/>
+                      </svg>
+                      {{ durationLabel }}
+                    </span>
+                  </div>
                 </div>
               </div>
               <button type="button"
@@ -41,11 +56,22 @@
             </div>
           </section>
           <section class="service-list-section" *ngIf="businessProfile">
+            <app-booking-benefits [masterId]="businessProfile.id" [slug]="businessProfile.link" [services]="chooseServices" (priceChange)="onSelectionPrice($event)"></app-booking-benefits>
+            <div class="point-chips" *ngIf="fixedPoints.length > 1">
+              <p class="point-chips__label">Куда прийти</p>
+              <button type="button" class="point-chips__btn" *ngFor="let point of fixedPoints"
+                      [class.point-chips__btn--on]="point.id === selectedPointId"
+                      (click)="selectPoint(point.id)">
+                {{ pointLine(point) }}
+              </button>
+            </div>
             <article>
               <app-accordion
-                [isUpdate] = false
+                [isUpdate]="false"
                 [profileId]="businessProfile.id!"
                 [serviceId]="preSelectedServiceId"
+                [pointId]="fixedPoints.length > 1 ? selectedPointId : null"
+                [canBook]="!businessProfile.isPromo"
                 (setServices)="setService($event)">
               </app-accordion>
             </article>
