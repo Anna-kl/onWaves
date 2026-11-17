@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject, catchError, distinctUntilChanged, exhaustMap, filter, forkJoin, map, of, scan, shareReplay, startWith, switchMap } from 'rxjs';
+import { Observable, Subject, catchError, distinctUntilChanged, exhaustMap, filter, forkJoin, map, of, shareReplay, startWith, switchMap } from 'rxjs';
 import { environment } from 'src/enviroments/environment';
-import { IViewBusinessProfile } from 'src/app/DTO/views/business/IViewBussinessProfile';
 import { IViewImage } from 'src/app/DTO/views/images/IViewImage';
 import { IViewPost } from 'src/app/DTO/views/posts/IViewPost';
 import { IResponse } from 'src/app/DTO/classes/IResponse';
@@ -11,11 +10,10 @@ import { WelcomeOffer } from 'src/app/DTO/views/promo/welcome-coupon';
 import { Service } from 'src/app/DTO/classes/services/Service';
 import { Group } from 'src/app/DTO/views/services/IViewGroups';
 import { TypeImage } from 'src/app/DTO/enums/typeImage';
-import { WorkLocationType } from 'src/app/DTO/enums/workLocationType';
 import { displayPriceUnit, isPriceBoundSet } from 'src/helpers/common/price.helpers';
 import { resolveAvatarUrl } from 'src/helpers/common/avatar1';
 import {
-  HOME_FEATURED, HOME_FEED_STOP_WORDS, HomeFeaturedMaster, HomeGroup,
+  HOME_CARD_DETAILS, HOME_FEED_STOP_WORDS, HomeGroup,
 } from 'src/app/pages/home/home-showcase.config';
 
 export interface HomeMaster {
@@ -35,6 +33,8 @@ export interface HomeMaster {
   feedAlbums?: string[];
   priceText?: string;
   showPromo: boolean;
+  hasCardDetails: boolean;
+  bookingEnabled: boolean;
 }
 
 export interface HomePrice {
@@ -48,9 +48,27 @@ export interface HomeMastersLoad {
   masters: HomeMaster[];
 }
 
+interface HomeProfile {
+  id: string;
+  link: string | null;
+  name: string | null;
+  city: string | null;
+  address: string | null;
+  avatarUrl: string | null;
+  group: HomeGroup;
+  category: string | null;
+  bookingEnabled: boolean;
+}
+
+interface HomeProfilePage {
+  items: HomeProfile[];
+  nextCursor: string | null;
+}
+
 interface HomeProfilesLoad {
-  profiles: IViewBusinessProfile[];
+  profiles: HomeProfile[];
   failed: boolean;
+  cursor: string | null;
 }
 
 /** Что сейчас действует у мастера: приветственный купон Onwaves и акция с его промо-страницы. */
@@ -78,17 +96,9 @@ interface AlbumView {
   countImages: number;
 }
 
-const PROFILE_PAGE_SIZE = 12;
-
 /**
- * Данные новой главной.
- *
- * Отдельного агрегата «витрины» на бэке пока нет (запрос —
- * BACKEND-REQUEST-2026-09-27-home-showcase.md), поэтому:
- * - мастера — существующий список `profiles?type=1`, с дозагрузкой страниц до сбора подборки;
- * - цены и лента — только в браузере и только когда до блока долистали:
- *   это десятки мелких GET, им не место в серверном рендере.
- * Всё кешируется на жизнь вкладки: возврат на главную не повторяет запросы.
+ * Главная читает публичные карточки с сервера. Цены и медиа редакторской подборки
+ * загружаются отдельно в браузере. Экземпляр сервиса живёт на странице главной.
  */
 @Injectable({ providedIn: 'root' })
 export class HomeShowcaseService {
@@ -113,24 +123,17 @@ export class HomeShowcaseService {
   getMastersLoad(): Observable<HomeMastersLoad> {
     if (!this.mastersLoad$) {
       const loading: HomeMastersLoad = { kind: 'loading', masters: [] };
+      let progress: HomeProfilesLoad = { profiles: [], failed: false, cursor: null };
       this.mastersLoad$ = this.reloadMasters$.pipe(
         startWith(undefined),
-        exhaustMap(() => this.loadFeaturedProfiles().pipe(
-          map(({ profiles, failed }): HomeMastersLoad => ({
-            kind: failed ? 'error' : 'loaded', masters: this.pickFeatured(profiles),
-          })),
-          startWith(loading),
+        exhaustMap(() => this.loadProfiles(progress.failed ? progress.cursor : null, progress.failed ? progress.profiles : []).pipe(
+          map((result): HomeMastersLoad => {
+            progress = result;
+            return { kind: result.failed ? 'error' : 'loaded', masters: result.profiles.map(profile => this.toMaster(profile)) };
+          }),
+          startWith({ ...loading, masters: progress.profiles.map(profile => this.toMaster(profile)) }),
         )),
-        // Повторная попытка не убирает уже показанные карточки.
-        scan((previous: HomeMastersLoad, current: HomeMastersLoad) => {
-          if (current.kind === 'loading') return { ...current, masters: previous.masters };
-          if (current.kind === 'error' && previous.masters.length) {
-            const byId = new Map([...previous.masters, ...current.masters].map(master => [master.id, master]));
-            return { ...current, masters: [...byId.values()] };
-          }
-          return current;
-        }, loading),
-        shareReplay({ bufferSize: 1, refCount: false }),
+        shareReplay({ bufferSize: 1, refCount: true }),
       );
     }
     return this.mastersLoad$;
@@ -140,25 +143,22 @@ export class HomeShowcaseService {
     this.reloadMasters$.next();
   }
 
-  private loadFeaturedProfiles(skip = 0, loaded: IViewBusinessProfile[] = []): Observable<HomeProfilesLoad> {
-    return this.http.get<IViewBusinessProfile[]>(`${this.api}profiles/`, {
-      params: { type: 1, isRecommend: false, skip },
+  private loadProfiles(cursor: string | null, loaded: HomeProfile[]): Observable<HomeProfilesLoad> {
+    return this.http.get<HomeProfilePage>(`${this.api}profiles/home-masters`, {
+      params: cursor ? { after: cursor } : {},
     }).pipe(
       // Ошибка отличается от пустой страницы; предыдущие страницы сохраняем.
       catchError(() => of(null)),
       switchMap(page => {
-        if (page === null) return of({ profiles: loaded, failed: true });
-        const batch = page;
+        if (!page || !Array.isArray(page.items) || (page.nextCursor && (!page.items.length || (cursor && page.nextCursor <= cursor)))) {
+          return of({ profiles: loaded, failed: true, cursor });
+        }
         const byId = new Map(loaded.map(profile => [profile.id, profile]));
-        for (const profile of batch) {
+        for (const profile of page.items) {
           if (profile.id) byId.set(profile.id, profile);
         }
         const profiles = [...byId.values()];
-        if (batch.length < PROFILE_PAGE_SIZE || profiles.length === loaded.length
-          || this.pickFeatured(profiles).length === HOME_FEATURED.length) {
-          return of({ profiles, failed: false });
-        }
-        return this.loadFeaturedProfiles(skip + batch.length, profiles);
+        return page.nextCursor ? this.loadProfiles(page.nextCursor, profiles) : of({ profiles, failed: false, cursor: null });
       }),
     );
   }
@@ -264,6 +264,7 @@ export class HomeShowcaseService {
 
   /** Лента: посты и работы из портфолио подборки, свежие сверху. */
   getFeed(masters: HomeMaster[]): Observable<HomeFeedItem[]> {
+    masters = masters.filter(master => master.hasCardDetails);
     const mastersKey = masters.map(master => master.id).join(',');
     if (!this.feed$ || this.feedMastersKey !== mastersKey) {
       this.feedMastersKey = mastersKey;
@@ -284,45 +285,28 @@ export class HomeShowcaseService {
     return this.feed$;
   }
 
-  private pickFeatured(list: IViewBusinessProfile[]): HomeMaster[] {
-    const byLink = new Map(list.filter(p => p.link && p.id).map(p => [p.link!.toLowerCase(), p]));
-    return HOME_FEATURED
-      .map(cfg => {
-        const p = byLink.get(cfg.link.toLowerCase());
-        return p ? this.toMaster(p, cfg) : null;
-      })
-      .filter((m): m is HomeMaster => !!m);
-  }
-
-  private toMaster(p: IViewBusinessProfile, cfg: HomeFeaturedMaster): HomeMaster {
-    const mobile = (p.workLocations ?? []).find(l => l.locationType === WorkLocationType.Mobile && l.cities?.length);
-    const home = (p.address?.home ?? '').replace(/^дом\s*/i, '');
-    const street = [p.address?.street, home].filter(Boolean).join(', ');
-    const cities = mobile?.cities ?? [];
-    const city = cities[0] ?? p.address?.city?.split(',')[0]?.trim() ?? 'Кашира';
-
-    let where = street;
-    if (!where && cities.length) {
-      where = cities.length > 3 ? `${cities.slice(0, 3).join(', ')} и ещё ${cities.length - 3}` : cities.join(', ');
-    }
-    const subtitle = [cfg.person, where].filter(Boolean).join(' · ');
-    const place = cities.length > 1 ? `${city} и ещё ${cities.length - 1}` : city;
-    const label = cfg.person || cfg.title;
+  private toMaster(p: HomeProfile): HomeMaster {
+    const slug = p.link?.trim();
+    const link = slug && !/[\/:?#\s]/.test(slug) ? slug : p.id;
+    const cfg = HOME_CARD_DETAILS.find(item => item.link.toLowerCase() === slug?.toLowerCase());
+    const title = p.name?.trim() || 'Мастер OnWaves';
 
     return {
-      id: p.id!,
-      link: p.link!,
-      group: cfg.group,
-      title: cfg.title,
-      name: label,
-      subtitle,
-      place,
-      tags: cfg.tags,
+      id: p.id,
+      link,
+      group: p.group,
+      title,
+      name: title,
+      subtitle: [p.category || cfg?.title, p.address].filter(Boolean).join(' · '),
+      place: p.city || '',
+      tags: cfg?.tags ?? [],
       avatar: p.avatarUrl ? resolveAvatarUrl(p.avatarUrl) : null,
-      initial: label.trim().charAt(0).toUpperCase(),
-      feedAlbums: cfg.feedAlbums,
-      priceText: cfg.priceText,
-      showPromo: cfg.showPromo !== false,
+      initial: title.charAt(0).toUpperCase(),
+      feedAlbums: cfg?.feedAlbums,
+      priceText: cfg?.priceText,
+      showPromo: !!cfg && cfg.showPromo !== false,
+      hasCardDetails: !!cfg,
+      bookingEnabled: p.bookingEnabled === true,
     };
   }
 

@@ -1,140 +1,87 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { IViewBusinessProfile } from '../app/DTO/views/business/IViewBussinessProfile';
-import { HOME_FEATURED } from '../app/pages/home/home-showcase.config';
-import { HomeMaster, HomeMastersLoad, HomeShowcaseService } from './home-showcase.service';
+import { HomeMastersLoad, HomeShowcaseService } from './home-showcase.service';
 
-describe('Подборка главной при пагинации каталога', () => {
+describe('Главная: список мастеров', () => {
   let service: HomeShowcaseService;
   let http: HttpTestingController;
-
-  const svetlana: IViewBusinessProfile = {
-    id: '8bb0b62b-2ada-441c-adfe-e6e07acf94f8', link: 'permanent_ozery', name: 'Светлана Бирюкова',
-    address: { city: 'Озёры' },
-  } as IViewBusinessProfile;
-  const others = HOME_FEATURED.filter(cfg => cfg.link !== svetlana.link).map((cfg, i) => ({
-    id: 'featured-' + i, link: cfg.link,
-  } as IViewBusinessProfile));
-  const firstPage = [...others, ...Array.from({ length: 12 - others.length }, (_, i) => ({
-    id: 'other-' + i, link: 'other-' + i,
-  } as IViewBusinessProfile))];
+  let load: HomeMastersLoad;
+  const row = (n: number, extras = {}) => ({
+    id: String(n).padStart(3, '0'), link: 'master-' + n, name: 'Мастер ' + n,
+    city: null, address: null, group: 'other', category: null, avatarUrl: null,
+    bookingEnabled: false, ...extras,
+  });
+  const batch = Array.from({ length: 12 }, (_, i) => row(i + 1));
+  const page = (after: string | null = null) => http.expectOne(
+    req => req.url.endsWith('/profiles/home-masters') && req.params.get('after') === after);
 
   beforeEach(() => {
     TestBed.configureTestingModule({ imports: [HttpClientTestingModule] });
     service = TestBed.inject(HomeShowcaseService);
     http = TestBed.inject(HttpTestingController);
   });
-
   afterEach(() => http.verify());
 
-  const pageAt = (skip: number) => http.expectOne(request =>
-    request.url.endsWith('/profiles/') && request.params.get('skip') === String(skip));
-
-  it('показывает Светлану со второй страницы и сохраняет результат при возврате на главную', () => {
-    let masters: HomeMaster[] = [];
-    service.getMasters().subscribe(value => masters = value);
-    pageAt(0).flush(firstPage);
-    pageAt(12).flush([svetlana]);
-    expect(masters.length).toBe(HOME_FEATURED.length);
-    expect(masters.find(master => master.link === svetlana.link)?.place).toBe('Озёры');
-    service.getMasters().subscribe(value => expect(value).toBe(masters));
-    http.expectNone(request => request.url.endsWith('/profiles/'));
+  it('читает все страницы и показывает новые карточки без дублирования и чужих данных', () => {
+    const sub = service.getMastersLoad().subscribe(value => load = value);
+    page().flush({ items: batch, nextCursor: '012' });
+    page('012').flush({ items: [batch[11], row(13, { link: 'soblazn_ozery', name: 'Соблазн', city: 'Озёры', group: 'beauty', bookingEnabled: true }),
+      row(14, { link: null, name: null })], nextCursor: null });
+    expect(load.kind).toBe('loaded');
+    expect(load.masters.length).toBe(14);
+    expect(load.masters[12]).toEqual(jasmine.objectContaining({
+      title: 'Соблазн', place: 'Озёры', link: 'soblazn_ozery', group: 'beauty', bookingEnabled: true, showPromo: false,
+    }));
+    expect(load.masters[13]).toEqual(jasmine.objectContaining({
+      link: '014', group: 'other', title: 'Мастер OnWaves', place: '', bookingEnabled: false,
+      tags: [], avatar: null, priceText: undefined,
+    }));
+    sub.unsubscribe();
   });
 
-  it('останавливается после сбора подборки, даже если последняя страница полная', () => {
-    service.getMasters().subscribe();
-    pageAt(0).flush([...others, svetlana, ...firstPage.slice(0, 12 - HOME_FEATURED.length)]);
-    http.expectNone(request => request.params.get('skip') === '12');
-  });
-
-  it('сохраняет найденные карточки при ошибке следующей страницы', () => {
-    let masters: HomeMaster[] = [];
-    let load: HomeMastersLoad | undefined;
-    service.getMastersLoad().subscribe(value => load = value);
-    service.getMasters().subscribe(value => masters = value);
-    pageAt(0).flush(firstPage);
-    pageAt(12).flush({}, { status: 503, statusText: 'Unavailable' });
-    expect(masters.length).toBe(others.length);
-    expect(load?.kind).toBe('error');
-
+  it('сохраняет первую страницу и повторяет запрос с курсора отказавшей страницы', () => {
+    const sub = service.getMastersLoad().subscribe(value => load = value);
+    page().flush({ items: batch, nextCursor: '012' });
+    page('012').flush(null, { status: 503, statusText: 'Unavailable' });
+    expect(load.kind).toBe('error');
+    expect(load.masters.length).toBe(12);
     service.retryMasters();
-    expect(load?.kind).toBe('loading');
-    expect(load?.masters.length).toBe(others.length);
-    pageAt(0).flush(firstPage);
-    pageAt(12).flush([svetlana]);
-    expect(load?.kind).toBe('loaded');
-    expect(masters.length).toBe(HOME_FEATURED.length);
+    expect(load.kind).toBe('loading');
+    expect(load.masters.length).toBe(12);
+    page('012').flush({ items: [row(13)], nextCursor: null });
+    expect(load.kind).toBe('loaded');
+    expect(load.masters.length).toBe(13);
+    sub.unsubscribe();
   });
 
-  it('отличает 500 от пустого каталога и повторяет загрузку без F5', () => {
-    let load: HomeMastersLoad | undefined;
-    service.getMastersLoad().subscribe(value => load = value);
-    expect(load?.kind).toBe('loading');
-    pageAt(0).flush({}, { status: 500, statusText: 'Internal Server Error' });
-    expect(load?.kind).toBe('error');
-    expect(load?.masters).toEqual([]);
-
-    service.retryMasters();
-    expect(load?.kind).toBe('loading');
-    pageAt(0).flush([svetlana]);
-    expect(load?.kind).toBe('loaded');
-    expect(load?.masters.map(master => master.link)).toEqual([svetlana.link!]);
-  });
-
-  it('пустой успешный ответ не показывает ошибку', () => {
-    let load: HomeMastersLoad | undefined;
-    service.getMastersLoad().subscribe(value => load = value);
-    pageAt(0).flush([]);
+  it('обновляет состав при повторном входе и разделяет пустую выдачу и отказ API', () => {
+    const first = service.getMastersLoad().subscribe(value => load = value);
+    page().flush({ items: [row(1)], nextCursor: null });
+    expect(load.masters.length).toBe(1);
+    first.unsubscribe();
+    const second = service.getMastersLoad().subscribe(value => load = value);
+    page().flush({ items: [], nextCursor: null });
     expect(load).toEqual({ kind: 'loaded', masters: [] });
+    second.unsubscribe();
+    const third = service.getMastersLoad().subscribe(value => load = value);
+    page().flush(null, { status: 404, statusText: 'Not Found' });
+    expect(load).toEqual({ kind: 'error', masters: [] });
+    third.unsubscribe();
   });
 
-  it('не теряет старые карточки, если повтор загрузил меньше страниц и завершился ошибкой', () => {
-    let load: HomeMastersLoad | undefined;
-    service.getMastersLoad().subscribe(value => load = value);
-    pageAt(0).flush([...others, svetlana]);
-    expect(load?.masters.length).toBe(HOME_FEATURED.length);
-    service.retryMasters();
-    pageAt(0).flush([svetlana, ...Array.from({ length: 11 }, (_, i) => ({
-      id: 'not-featured-' + i, link: 'not-featured-' + i,
-    }))]);
-    pageAt(12).flush({}, { status: 503, statusText: 'Unavailable' });
-    expect(load?.kind).toBe('error');
-    expect(load?.masters.length).toBe(HOME_FEATURED.length);
-  });
-
-  it('сетевой сбой можно повторить; несколько подписок и кликов не дублируют запрос', () => {
-    let load: HomeMastersLoad | undefined;
-    service.getMastersLoad().subscribe(value => load = value);
-    service.getMasters().subscribe();
-    pageAt(0).error(new ProgressEvent('error'));
-    expect(load?.kind).toBe('error');
-    service.retryMasters();
-    service.retryMasters();
-    pageAt(0).flush([svetlana]);
-    expect(load?.kind).toBe('loaded');
-  });
-
-  it('после восстановления мастеров загружает ленту вместо сохранённой пустоты', () => {
-    let masters: HomeMaster[] = [];
-    service.getFeed([]).subscribe(feed => expect(feed).toEqual([]));
-    service.getMasters().subscribe(value => masters = value);
-    pageAt(0).flush([svetlana]);
-    let feedCount = 0;
-    service.getFeed(masters).subscribe(feed => feedCount = feed.length);
-    http.expectOne(request => request.url.includes('/posts/posts-profile/')).flush([
-      { id: 'post-1', text: 'Новая работа', dateCreated: '2026-11-16T08:00:00Z' },
+  it('оставляет личные ограничения Mary и не запрашивает работы новых мастеров', () => {
+    const sub = service.getMastersLoad().subscribe(value => load = value);
+    page().flush({ items: [row(1, { link: 'mary' }), row(2)], nextCursor: null });
+    const mary = load.masters[0];
+    expect(mary.showPromo).toBeFalse();
+    expect(mary.feedAlbums).toEqual(['Депиляция']);
+    service.getFeed(load.masters).subscribe();
+    http.expectOne(req => req.url.includes('posts-profile/001')).flush([]);
+    http.expectOne(req => req.url.endsWith('/albums/001')).flush([
+      { id: 'approved', name: 'Депиляция', countImages: 1 },
+      { id: 'private', name: 'Другой альбом', countImages: 1 },
     ]);
-    http.expectOne(request => request.url.endsWith('/albums/' + svetlana.id)).flush([]);
-    expect(feedCount).toBe(1);
-    service.getFeed(masters).subscribe(feed => expect(feed.length).toBe(1));
-  });
-
-  it('не запрашивает каталог бесконечно, если API повторяет предыдущую страницу', () => {
-    let masters: HomeMaster[] = [];
-    service.getMasters().subscribe(value => masters = value);
-    pageAt(0).flush(firstPage);
-    pageAt(12).flush(firstPage);
-    expect(masters.length).toBe(others.length);
-    http.expectNone(request => request.params.get('skip') === '24');
+    http.expectOne(req => req.url.endsWith('/albums/image/approved')).flush([]);
+    sub.unsubscribe();
   });
 });

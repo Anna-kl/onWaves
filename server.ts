@@ -78,7 +78,7 @@ function ssrCacheKey(url: string): string {
 }
 
 function isSsrCacheable(url: string): boolean {
-  return !SSR_CACHE_SKIP.some(pattern => pattern.test(url));
+  return ssrPathname(url) !== '/' && !SSR_CACHE_SKIP.some(pattern => pattern.test(url));
 }
 
 /** Пустой первый HTML /cellings минуту кормил бы бота каталожным title. */
@@ -650,6 +650,7 @@ export function app(): express.Express {
   server.get('*', (req, res) => {
     const startedAt = Date.now();
     const cacheKey = ssrCacheKey(req.originalUrl);
+    if (ssrPathname(cacheKey) === '/') res.set('Cache-Control', 'no-store');
     const cacheable = isSsrCacheable(cacheKey);
     const cached = cacheable ? readSsrCache(cacheKey) : null;
     if (cached) {

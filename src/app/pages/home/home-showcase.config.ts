@@ -1,25 +1,18 @@
 /**
- * Подборка мастеров на главной.
- *
- * Отдельного API «витрины» у бэка нет, поэтому порядок и состав задаём здесь,
- * а имя, фото, адрес и цены берём из API. Заглушки (`developer`, `user-example`,
- * `Bussiness`) и московские стенды `favorit-stands` сюда сознательно не входят:
- * главная — местная витрина, а тестовые профили на ней выглядят как пустой сайт.
+ * Редакторские дополнения к карточкам. Состав витрины и публичные имена определяет API.
  *
  * Теги — пересказ фактов со страницы самого мастера, ничего нового не придумываем.
  * `feedAlbums` — какие альбомы портфолио пускать в ленту главной. У Mary это
  * только «Депиляция»: косметология без лицензии не должна рекламироваться
  * с главной (правовой контур рекламы, скилл onwaves-seo §8).
  */
-export type HomeGroup = 'beauty' | 'home';
+export type HomeGroup = 'beauty' | 'home' | 'other';
+export const HOME_GROUPS: HomeGroup[] = ['beauty', 'home', 'other'];
 
-export interface HomeFeaturedMaster {
+export interface HomeCardDetails {
   link: string;
-  group: HomeGroup;
-  /** Услуга крупно в карточке: карточка ранжируется и продаёт по услуге, не по имени. */
+  /** Подпись, если в текущих данных мастера нет рубрики. */
   title: string;
-  /** Имя человека, если в профиле вместо него название услуги. */
-  person?: string;
   tags: string[];
   feedAlbums?: string[];
   /**
@@ -32,28 +25,29 @@ export interface HomeFeaturedMaster {
   showPromo?: boolean;
 }
 
-export const HOME_FEATURED: HomeFeaturedMaster[] = [
-  { link: 'Manikure_kashira', group: 'beauty', title: 'Маникюр и педикюр', person: 'Лиана',
+export const HOME_CARD_DETAILS: HomeCardDetails[] = [
+  { link: 'Manikure_kashira', title: 'Маникюр и педикюр',
     tags: ['Стаж 10+ лет', 'Гель-лак'] },
-  { link: 'Manikure_design', group: 'beauty', title: 'Маникюр и Smart-педикюр',
+  { link: 'Manikure_design', title: 'Маникюр и Smart-педикюр',
     tags: ['Наращивание', 'Парафинотерапия'] },
-  { link: 'Victoria', group: 'beauty', title: 'Маникюр с дизайном', person: 'Вика',
+  { link: 'Victoria', title: 'Маникюр с дизайном',
     tags: ['Стерилизация в 3 этапа', 'Носка 3–4 недели'] },
-  { link: 'mary', group: 'beauty', title: 'Шугаринг и воск', person: 'Mary',
+  { link: 'mary', title: 'Шугаринг и воск',
     tags: ['Сахарная паста', 'Полимерный воск'], feedAlbums: ['Депиляция'], showPromo: false },
-  { link: 'permanent_ozery', group: 'beauty', title: 'Брови, ресницы и перманент', person: 'Светлана Бирюкова',
+  { link: 'permanent_ozery', title: 'Брови, ресницы и перманент',
     tags: ['Перманент бровей и губ', 'Ламинирование ресниц'], feedAlbums: ['Брови', 'Губы', 'Веки и ресницы', 'Ролики'] },
-  { link: 'cellings', group: 'home', title: 'Натяжные потолки',
+  { link: 'cellings', title: 'Натяжные потолки',
     tags: ['Замер бесплатно', 'Гарантия 10 лет'], priceText: 'от 900\u00a0₽/м²' },
-  { link: 'plumber', group: 'home', title: 'Сантехник и мастер на час',
+  { link: 'plumber', title: 'Сантехник и мастер на час',
     tags: ['Смесители и раковины', 'Мелкие заказы'] },
-  { link: 'conditioner-master', group: 'home', title: 'Кондиционеры', person: 'Богдан',
+  { link: 'conditioner-master', title: 'Кондиционеры',
     tags: ['Вакуумирование трассы', 'Гарантия 1 год'] },
 ];
 
 export const HOME_GROUP_LABEL: Record<HomeGroup, string> = {
-  beauty: 'Красота · Кашира и Озёры',
-  home: 'Для дома · Кашира и район',
+  beauty: 'Красота',
+  home: 'Для дома',
+  other: 'Другие услуги',
 };
 
 /** Быстрые услуги под поиском: только те, по которым на витрине реально есть мастер. */

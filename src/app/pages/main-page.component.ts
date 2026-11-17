@@ -20,7 +20,7 @@ import { AnalyticsService } from 'src/services/analytics.service';
 import {
   HomeFeedItem, HomeMaster, HomeMastersLoad, HomePerks, HomePrice, HomeShowcaseService,
 } from 'src/services/home-showcase.service';
-import { HOME_GROUP_LABEL, HOME_QUICK_SERVICES, HomeGroup } from './home/home-showcase.config';
+import { HOME_GROUP_LABEL, HOME_GROUPS, HOME_QUICK_SERVICES, HomeGroup } from './home/home-showcase.config';
 import { GiveawayCampaign, GiveawayLoad } from '../DTO/views/giveaway/giveaway';
 import { GiveawaysService } from '../../services/giveaways.service';
 import { PromoSeatsService } from '../../services/promo-seats.service';
@@ -42,7 +42,7 @@ const FEED_PAGE = 6;
   selector: 'app-menu',
   templateUrl: './main-page.component.html',
   styleUrls: ['./main-page.component.scss'],
-  providers: [ProfileService, BackendService, DictionaryService]
+  providers: [ProfileService, BackendService, DictionaryService, HomeShowcaseService]
 })
 export class MainPageComponent implements OnInit, AfterViewInit {
   search = '';
@@ -51,6 +51,7 @@ export class MainPageComponent implements OnInit, AfterViewInit {
 
   readonly quickServices = HOME_QUICK_SERVICES;
   readonly groupLabel = HOME_GROUP_LABEL;
+  readonly homeGroups = HOME_GROUPS;
   readonly isBrowser: boolean;
 
   /** Пример записи на первом экране: дни от сегодняшнего, время — иллюстрация, не живые слоты. */
@@ -200,23 +201,24 @@ export class MainPageComponent implements OnInit, AfterViewInit {
       all: list.length,
       beauty: list.filter(m => m.group === 'beauty').length,
       home: list.filter(m => m.group === 'home').length,
+      other: list.filter(m => m.group === 'other').length,
     })));
 
     this.groups$ = combineLatest([this.masters$, this.filter$]).pipe(
-      map(([list, f]) => (['beauty', 'home'] as HomeGroup[])
+      map(([list, f]) => HOME_GROUPS
         .filter(g => f === 'all' || f === g)
         .map(g => ({ group: g, label: HOME_GROUP_LABEL[g], masters: list.filter(m => m.group === g) }))
         .filter(v => v.masters.length > 0))
     );
 
     this.demo$ = this.masters$.pipe(
-      map(list => list.find(m => m.group === 'beauty' && !!m.avatar) ?? null)
+      map(list => list.find(m => m.group === 'beauty' && m.bookingEnabled && !!m.avatar) ?? null)
     );
 
     // Цены — отдельные запросы прайса на каждого мастера; на сервере их не ждём.
     this.prices$ = this.isBrowser
       ? this.masters$.pipe(
-        switchMap(list => merge(...list.map(m => this.showcase.getMinPrice(m.id, m.priceText).pipe(
+        switchMap(list => merge(...list.filter(m => m.hasCardDetails && m.bookingEnabled).map(m => this.showcase.getMinPrice(m.id, m.priceText).pipe(
           map(price => ({ id: m.id, price }))
         )))),
         scan((acc, { id, price }) => ({ ...acc, [id]: price }), {} as Record<string, HomePrice | null>),
@@ -229,7 +231,7 @@ export class MainPageComponent implements OnInit, AfterViewInit {
     // закончиться, а HTML главной живёт в 60-секундном SSR-кеше.
     this.perks$ = this.isBrowser
       ? this.masters$.pipe(
-        switchMap(list => merge(...list.map(m => this.showcase.getPerks(m).pipe(
+        switchMap(list => merge(...list.filter(m => m.hasCardDetails && m.bookingEnabled).map(m => this.showcase.getPerks(m).pipe(
           map(perks => ({ id: m.id, perks }))
         )))),
         scan((acc, { id, perks }) => ({ ...acc, [id]: perks }), {} as Record<string, HomePerks>),

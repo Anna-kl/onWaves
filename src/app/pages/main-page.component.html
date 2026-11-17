@@ -89,13 +89,15 @@
     <div class="hs-section__head">
       <div>
         <h2 id="hs-masters-title">Мастера рядом</h2>
-        <p>Работы, цены и свободное время — на странице каждого мастера.</p>
+        <p>Посмотрите профили, услуги и условия записи.</p>
       </div>
       <div class="hs-section__tools" *ngIf="counts$ | async as counts">
-        <div class="hs-tabs" role="tablist" aria-label="Категории" *ngIf="counts.beauty && counts.home">
+        <div class="hs-tabs" role="tablist" aria-label="Категории" *ngIf="(counts.beauty > 0 ? 1 : 0) + (counts.home > 0 ? 1 : 0) + (counts.other > 0 ? 1 : 0) > 1">
           <button type="button" role="tab" [attr.aria-selected]="(filter$ | async) === 'all'" [class.is-active]="(filter$ | async) === 'all'" (click)="setFilter('all')">Все · {{ counts.all }}</button>
-          <button type="button" role="tab" [attr.aria-selected]="(filter$ | async) === 'beauty'" [class.is-active]="(filter$ | async) === 'beauty'" (click)="setFilter('beauty')">Красота · {{ counts.beauty }}</button>
-          <button type="button" role="tab" [attr.aria-selected]="(filter$ | async) === 'home'" [class.is-active]="(filter$ | async) === 'home'" (click)="setFilter('home')">Для дома · {{ counts.home }}</button>
+          <ng-container *ngFor="let group of homeGroups">
+            <button *ngIf="counts[group]" type="button" role="tab" [attr.aria-selected]="(filter$ | async) === group"
+              [class.is-active]="(filter$ | async) === group" (click)="setFilter(group)">{{ groupLabel[group] }} · {{ counts[group] }}</button>
+          </ng-container>
         </div>
         <a class="hs-more" routerLink="/catalog">Весь каталог
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
@@ -120,7 +122,7 @@
              [class.hs-card--promo]="!!(perks$ | async)?.[m.id]?.promo"
              [routerLink]="['/', m.link]" (click)="track('home_card_open', m.link)">
             <div class="hs-card__band">
-              <span class="hs-card__place">
+              <span class="hs-card__place" *ngIf="m.place">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
                 {{ m.place }}
               </span>
@@ -131,7 +133,8 @@
             </div>
             <div class="hs-card__body">
               <h3>{{ m.title }}</h3>
-              <p class="hs-card__sub">{{ m.subtitle }}</p>
+              <p class="hs-card__sub hs-card__city" *ngIf="m.place">{{ m.place }}</p>
+              <p class="hs-card__sub" *ngIf="m.subtitle">{{ m.subtitle }}</p>
               <ng-container *ngIf="(perks$ | async)?.[m.id] as perks">
                 <div class="hs-perks" *ngIf="perks.coupon || perks.promo">
                   <span class="hs-perk hs-perk--coupon" *ngIf="perks.coupon as coupon" [attr.title]="coupon.hint">
@@ -144,12 +147,12 @@
                   </p>
                 </div>
               </ng-container>
-              <ul class="hs-tags">
+              <ul class="hs-tags" *ngIf="m.tags.length">
                 <li *ngFor="let t of m.tags">{{ t }}</li>
               </ul>
               <div class="hs-card__foot">
-                <span class="hs-price" [class.is-empty]="!(prices$ | async)?.[m.id]">{{ (prices$ | async)?.[m.id]?.text }}</span>
-                <span class="hs-btn hs-btn--primary hs-btn--sm">Записаться</span>
+                <span class="hs-price" *ngIf="(prices$ | async)?.[m.id] as price">{{ price.text }}</span>
+                <span class="hs-btn hs-btn--primary hs-btn--sm">{{ m.bookingEnabled ? 'Записаться' : 'Смотреть профиль' }}</span>
               </div>
             </div>
           </a>
