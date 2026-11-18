@@ -23,9 +23,10 @@ import { CELLINGS_CALC_BUTTON, CELLINGS_HERO_H1, CELLINGS_HERO_LEAD } from '../.
 import { AnalyticsService } from 'src/services/analytics.service';
 import { PromoPriceView, PromoSeatCard, organizerLine, promoSeatBenefits, promoSeatLead, seatsLeftText } from '../../helpers/promo-seats';
 import { BenefitIconType } from '../../../DTO/enums/benefitIconType';
-import { PromoSeatTerms } from '../../../DTO/views/promo/promo-seats';
+import { PromoSeatState, PromoSeatTerms } from '../../../DTO/views/promo/promo-seats';
 import { formatRub } from 'src/helpers/common/welcome-coupon';
-import { promoPeriodText, promoStatusNotice } from '../../helpers/promo-seat-terms-text';
+import { promoMoscowDate, promoPeriodText, promoStatusNotice } from '../../helpers/promo-seat-terms-text';
+import { profilePromoServiceName, profilePromoShortNote } from '../../helpers/profile-promo-presentation';
 import { ruPhoneOrNull } from 'src/helpers/common/phone';
 import {
   PromoOffer,
@@ -97,6 +98,27 @@ export class LandingOfferCardComponent implements OnDestroy {
   @Input() promoPriceError = false;
   /** Полные условия акции с местами. Раскрываются плашкой на карточке. */
   @Input() promoTerms: PromoSeatTerms | null = null;
+  @Input() profileCampaign: PromoSeatState | null = null;
+  @Input() profileCampaignPending = false;
+  @Input() profileCampaignError = false;
+  @Output() profileServiceClick = new EventEmitter<string>();
+  readonly promoMoscowDate = promoMoscowDate;
+  readonly profilePromoShortNote = profilePromoShortNote;
+  readonly profilePromoServiceName = profilePromoServiceName;
+  get profileCampaignStatus(): string {
+    const state = this.profileCampaign;
+    if (this.profileCampaignError) return 'Наличие мест сейчас не подтверждено';
+    if (!state) return '';
+    if (state.closedReason === 'not_started') return `Старт ${promoMoscowDate(state.startsAt, false)}`;
+    if (state.closedReason === 'seats_exhausted') return 'Места закончились';
+    if (state.closedReason === 'ended') return 'Акция завершена';
+    if (state.status !== 'open') return 'Запись по акции недоступна';
+    return `Свободных мест: ${state.seatsLeft} из ${state.seatsLimit}`;
+  }
+  get profileCampaignPeriod(): string {
+    const state = this.profileCampaign;
+    return state ? `Запись до ${promoMoscowDate(Date.parse(state.endsAt) - 1, false)} · Визит до ${promoMoscowDate(state.visitDeadline, false)}` : '';
+  }
   readonly formatRub = formatRub;
   readonly promoPeriodText = promoPeriodText;
   readonly promoStatusNotice = promoStatusNotice;
@@ -202,6 +224,11 @@ export class LandingOfferCardComponent implements OnDestroy {
 
   /** В одной акции несколько предложений, и каждое выносится в шапку своей плашкой. */
   get headerProposals(): { text: string; tone: 'sale' | 'coupon' }[] {
+    if (this.profileCampaign) {
+      const state = this.profileCampaign;
+      return !this.profileCampaignError && (state.status === 'open' || state.closedReason === 'not_started')
+        ? [{ text: `−${state.discountPercent}%`, tone: 'sale' }] : [];
+    }
     if (this.maryOffer) {
       return [];
     }
@@ -332,7 +359,7 @@ export class LandingOfferCardComponent implements OnDestroy {
   }
 
   get showDiscountStrip(): boolean {
-    return !this.cellingsHero && !this.maryOffer && this.isCampaign && !!this.discountStrip;
+    return !this.profileCampaign && !this.cellingsHero && !this.maryOffer && this.isCampaign && !!this.discountStrip;
   }
 
   get showOfferTitle(): boolean {

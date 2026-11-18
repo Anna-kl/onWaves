@@ -4,6 +4,7 @@ export interface WelcomeTier {
   threshold: number;
   discount: number;
   text: string;
+  thresholdInclusive?: boolean;
 }
 
 export interface WelcomeCampaign {

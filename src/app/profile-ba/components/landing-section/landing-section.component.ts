@@ -54,6 +54,7 @@ import { PromoSeatQuote, PromoSeatState, PromoSeatTerms } from '../../../DTO/vie
 import { LandingState, resolveLandingState } from '../../helpers/landing-state';
 import { liftStageToBody, lockPageScroll, pinCalculatorStage, restoreStageHome } from '../../helpers/calculator-stage';
 import { getMaxUrl } from '../../../../helpers/common/messenger';
+import { profilePromoOffer } from '../../helpers/profile-promo-presentation';
 
 @Component({
   selector: 'app-landing-section',
@@ -116,6 +117,20 @@ export class LandingSectionComponent implements OnInit, OnChanges, AfterViewChec
   get profilePromoTermsPath(): string | null {
     const slug = this.bookingSlug();
     return slug ? `/${slug}/usloviya` : null;
+  }
+  get profilePromoTerms(): PromoSeatTerms | null {
+    const state = this.profilePromo;
+    return state ? { ...this.promoTerms, state, masterSlug: this.bookingSlug(), performerName: this.masterName } : null;
+  }
+  private profileOfferState: PromoSeatState | null = null;
+  private profileOffer: ILandingOffer | null = null;
+  get profilePromoOffer(): ILandingOffer | null {
+    const state = this.profilePromo;
+    if (state !== this.profileOfferState) {
+      this.profileOfferState = state;
+      this.profileOffer = state ? profilePromoOffer(state) : null;
+    }
+    return this.profileOffer;
   }
   ultrasoundCard: { offer: ILandingOffer; price: PromoPriceView | null } | null = null;
   ultrasoundLoadFailed = false;
