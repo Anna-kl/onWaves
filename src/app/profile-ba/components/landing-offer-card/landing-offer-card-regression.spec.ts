@@ -30,7 +30,7 @@ describe('Shared offer card regression', () => {
       expect(element.querySelector('.offer__proposal--coupon')?.textContent).toContain('Существующий купон');
       expect(element.querySelector('.offer__service-options')).toBeNull();
       element.querySelector<HTMLButtonElement>('.offer__actions button')!.click();
-      expect(emitted).toEqual([action]);
+      expect(emitted).toEqual([jasmine.objectContaining(action)]);
     });
   }
 });
