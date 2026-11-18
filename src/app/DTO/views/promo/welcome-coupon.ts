@@ -17,6 +17,18 @@ export interface WelcomeCampaign {
   amountMode?: 'fixed' | 'tiers' | null;
   fixedDiscountRub?: number | null;
   offerText?: string | null;
+  policyId?: string | null;
+  policyVersion?: number | null;
+  masterId?: string | null;
+  masterName?: string | null;
+  eligibilityMode?: 0 | 1 | null;
+  serviceScope?: 0 | 1 | null;
+  serviceIds?: string[];
+  eligibleServiceIds?: string[];
+  serviceNames?: string[];
+  minEligibleAmountRub?: number | null;
+  visitDeadline?: string | null;
+  maxRedemptions?: number | null;
 }
 
 export interface WelcomeOffer {
@@ -34,12 +46,21 @@ export interface WelcomeCouponMe {
   recordId?: string | null;
   discount?: number | null;
   expiresAt?: string | null;
+  masterOffers?: WelcomeCouponMe[] | null;
 }
 
 export type WelcomeQuoteStatus =
   'available' | 'reserved' | 'redeemed' | 'expired' | 'unavailable' | 'login_required' | 'none';
 
 export interface WelcomeQuote {
+  amountKnown?: boolean;
+  eligibleAmount?: number | null;
+  policyId?: string | null;
+  policyVersion?: number | null;
+  eligibilityMode?: 0 | 1 | null;
+  serviceScope?: 0 | 1 | null;
+  minEligibleAmountRub?: number | null;
+  offerText?: string | null;
   originalAmount: number;
   discountAmount: number;
   payableAmount: number;

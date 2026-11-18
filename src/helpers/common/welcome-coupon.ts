@@ -86,6 +86,16 @@ export function welcomeReasonText(reason?: string | null): string {
     case 'below_threshold': return 'Сумма записи ниже порога скидки.';
     case 'zero_amount': return 'Запись бесплатная, купон не требуется.';
     case 'expired': return 'Срок действия скидки истёк.';
+    case 'quantity_exhausted': return 'Все купоны программы уже закреплены за записями.';
+    case 'policy_paused': return 'Программа купонов приостановлена.';
+    case 'policy_not_started': return 'Программа купонов ещё не началась.';
+    case 'policy_expired': return 'Срок программы купонов закончился.';
+    case 'not_first_platform_visit': return 'Купон доступен до первого выполненного визита через OnWaves.';
+    case 'not_first_master_visit': return 'Купон доступен до первого выполненного визита к этому мастеру через OnWaves.';
+    case 'price_requires_confirmation': return 'Для расчёта купона мастер должен подтвердить стоимость подходящих услуг.';
+    case 'services_not_eligible': return 'Выбранные услуги не подходят для этого купона.';
+    case 'visit_deadline_exceeded': return 'Выберите дату в пределах срока купона.';
+    case 'incompatible_promotion': return 'Купон не суммируется с выбранной акцией.';
     case 'budget_exhausted': return 'Лимит акции исчерпан.';
     case 'master_not_participating': return 'Этот мастер не участвует в акции.';
     case 'not_first_booking': return 'Скидка действует на первую выполненную запись через Onwaves.';

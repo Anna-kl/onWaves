@@ -31,6 +31,11 @@ describe('Подтверждение скидки авторизованным �
     component.onConfirm();
     expect(component.submitRecord.calls.mostRecent().args[1]).toEqual(jasmine.objectContaining({ useWelcomeCoupon: true, expectedCouponDiscount: 500 }));
   });
+  it('передаёт серверную версию индивидуального правила', () => {
+    component.welcomeQuote = { ...quote, policyId: 'policy', policyVersion: 3 };
+    component.onConfirm();
+    expect(component.submitRecord.calls.mostRecent().args[1].expectedWelcomePolicyVersion).toBe(3);
+  });
   it('не отправляет недоступный купон, даже если есть потенциальная сумма', () => {
     component.welcomeQuote = { ...quote, couponStatus: 'unavailable', reason: 'already_used', discountAmount: 0, payableAmount: 8000 };
     component.onConfirm();

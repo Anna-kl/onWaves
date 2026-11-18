@@ -15,7 +15,7 @@ import { filter, forkJoin, mergeMap, Observable, of, skipWhile, Subscription, sw
 import { ProfileService } from 'src/services/profile.service';
 import { WelcomeCouponMe } from 'src/app/DTO/views/promo/welcome-coupon';
 import { WelcomeCouponService } from 'src/services/welcome-coupon.service';
-import { formatRub, welcomeIsFixed, welcomeOfferLine, welcomeTierList } from 'src/helpers/common/welcome-coupon';
+import { formatRub, welcomeIsFixed, welcomeOfferLine, welcomeReasonText, welcomeTierList } from 'src/helpers/common/welcome-coupon';
 import { Md5 } from 'ts-md5';
 import { AuthService } from 'src/services/auth.service';
 import { DictionaryService } from 'src/services/dictionary.service';
@@ -152,6 +152,7 @@ export class PersonalPageUserComponent implements OnInit, OnDestroy {
   protected readonly welcomeTierList = welcomeTierList;
   protected readonly welcomeIsFixed = welcomeIsFixed;
   protected readonly welcomeOfferLine = welcomeOfferLine;
+  protected readonly welcomeReasonText = welcomeReasonText;
   phoneInput: string|undefined = undefined;
   emailInput: string|undefined = undefined;
   

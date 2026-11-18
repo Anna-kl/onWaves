@@ -410,7 +410,7 @@ export class CalculatorPlayerComponent implements OnInit, OnChanges, AfterViewIn
     forkJoin({
       offer: this.coupons.getOffer(masterId),
       quote: serviceId ? this.coupons.quote(masterId, [serviceId]) : of(null),
-      mine: this.coupons.isLoggedIn ? this.coupons.getMine() : of(null),
+      mine: this.coupons.isLoggedIn ? this.coupons.getMine(null, masterId) : of(null),
     })
       .pipe(takeUntil(this.destroy$))
       .subscribe(({ offer, quote, mine }) => {

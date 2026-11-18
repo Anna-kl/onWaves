@@ -264,37 +264,43 @@
             <app-giveaway-prizes *ngIf="showPrizes" [proofTick]="phoneProofTick" [clientId]="mainProfileCleint.id" (needPhoneProof)="beginPhoneProof()"></app-giveaway-prizes>
             <app-review-coupon-wallet id="review-coupons" *ngIf="showPrizes" [profileId]="mainProfileCleint.id"></app-review-coupon-wallet>
             <app-giveaway-my-entries *ngIf="showPrizes"></app-giveaway-my-entries>
-            <section class="coupon-banner" *ngIf="welcomeMe && welcomeMe.status !== 'none'">
+            <ng-container *ngIf="welcomeMe as wallet">
+            <ng-container *ngFor="let coupon of (wallet.masterOffers?.length ? wallet.masterOffers : [wallet])">
+            <section class="coupon-banner" *ngIf="coupon && coupon.status !== 'none'">
               <div class="coupon-banner__text">
-                <ng-container [ngSwitch]="welcomeMe.status">
+                <h3 *ngIf="coupon.campaign?.masterName">{{ coupon.campaign?.masterName }}</h3>
+                <ng-container [ngSwitch]="coupon.status">
                   <ng-container *ngSwitchCase="'available'">
-                    Скидка на первую запись через Onwaves — доступна
+                    Приветственный купон доступен
                   </ng-container>
                   <ng-container *ngSwitchCase="'reserved'">
-                    Скидка закреплена за вашей записью{{ welcomeMe.discount ? ': ' + formatRub(welcomeMe.discount) : '' }}
+                    Скидка закреплена за вашей записью{{ coupon.discount ? ': ' + formatRub(coupon.discount) : '' }}
                   </ng-container>
                   <ng-container *ngSwitchCase="'redeemed'">
-                    Скидка использована{{ welcomeMe.discount ? ': ' + formatRub(welcomeMe.discount) : '' }}
+                    Скидка использована{{ coupon.discount ? ': ' + formatRub(coupon.discount) : '' }}
                   </ng-container>
                   <ng-container *ngSwitchCase="'expired'">Срок действия скидки истёк</ng-container>
                   <ng-container *ngSwitchDefault>Скидка сейчас недоступна</ng-container>
                 </ng-container>
-                <p *ngIf="welcomeMe.campaign && !welcomeIsFixed(welcomeMe.campaign)">
-                  <ng-container *ngFor="let tier of welcomeTierList(welcomeMe.campaign); let last = last">{{ tier.text }}{{ last ? '.' : '; ' }}</ng-container>
+                <p *ngIf="coupon.campaign && !welcomeIsFixed(coupon.campaign)">
+                  <ng-container *ngFor="let tier of welcomeTierList(coupon.campaign); let last = last">{{ tier.text }}{{ last ? '.' : '; ' }}</ng-container>
                   Одна скидка на первую запись у одного мастера; итоговая сумма показывается при оформлении.
                 </p>
-                <p *ngIf="welcomeIsFixed(welcomeMe.campaign)">{{ welcomeOfferLine(welcomeMe.campaign) }} Итоговая сумма показывается при оформлении.</p>
-                <p *ngIf="welcomeMe.status === 'available' && welcomeMe.expiresAt">
-                  Действует до {{ welcomeMe.expiresAt | date: 'd MMMM yyyy' }}.
+                <p *ngIf="welcomeIsFixed(coupon.campaign)">{{ welcomeOfferLine(coupon.campaign) }} Итоговая сумма показывается при оформлении.</p>
+                <p *ngIf="coupon.status === 'unavailable' && coupon.reason">{{ welcomeReasonText(coupon.reason) }}</p>
+                <p *ngIf="coupon.status === 'available' && coupon.expiresAt">
+                  Действует до {{ coupon.expiresAt | date: 'd MMMM yyyy' }}.
                 </p>
-                <p *ngIf="welcomeMe.status === 'expired' && welcomeMe.expiresAt">
-                  Действовала до {{ welcomeMe.expiresAt | date: 'd MMMM yyyy' }}.
+                <p *ngIf="coupon.status === 'expired' && coupon.expiresAt">
+                  Действовала до {{ coupon.expiresAt | date: 'd MMMM yyyy' }}.
                 </p>
               </div>
-              <a class="coupon-banner__btn" routerLink="/masters" *ngIf="welcomeMe.status === 'available'">
-                Найти мастера
+              <a class="coupon-banner__btn" [routerLink]="coupon.campaign?.masterId ? ['/', coupon.campaign?.masterId, 'choose-service'] : ['/search/extsearch']" *ngIf="coupon.status === 'available'">
+                Выбрать услуги
               </a>
             </section>
+            </ng-container>
+            </ng-container>
 
             <!-- Основной контент кабинета -->
             

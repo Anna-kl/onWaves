@@ -158,7 +158,7 @@ export class PageUserBAComponent implements OnInit, OnDestroy {
         select(selectProfileMainClient),
         filter(user => !!user?.id),
         take(1),
-        switchMap(user => this._welcome.getMine(user!.id!)),
+        switchMap(user => this._welcome.getMine(user!.id!, this.id)),
       ).subscribe(me => {
         this.welcomeCampaign = me?.status === 'available' ? (me.campaign ?? offer.campaign) : null;
       });

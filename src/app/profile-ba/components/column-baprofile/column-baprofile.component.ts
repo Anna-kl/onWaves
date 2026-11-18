@@ -176,7 +176,7 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
   /** «200–500 ₽» по уровням кампании; одна ступень — просто её сумма. */
   get couponAmountText(): string {
     if (welcomeIsFixed(this.couponOffer?.campaign)) {
-      return formatRub(this.couponOffer?.campaign?.fixedDiscountRub);
+      return `${this.couponOffer?.campaign?.policyId ? 'до ' : ''}${formatRub(this.couponOffer?.campaign?.fixedDiscountRub)}`;
     }
     const tiers = welcomeTierList(this.couponOffer?.campaign);
     if (!tiers.length) {
@@ -254,7 +254,7 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
       switchMap(offer => {
         this.couponOffer = offer;
         const worthChecking = offer.active && offer.masterParticipates && this._coupons.isLoggedIn;
-        return worthChecking ? this._coupons.getMine() : of(null);
+        return worthChecking ? this._coupons.getMine(null, masterId) : of(null);
       }),
       takeUntil(this.destroy$),
     ).subscribe(mine => this.couponMine = mine);

@@ -78,6 +78,9 @@
             <!-- Цена услуги -->
             <p *ngIf="quoteLoading" role="status">Проверяем скидки для вашей записи…</p>
             <app-booking-price *ngIf="!quoteLoading && !rewardQuoteLoading && !isRecordView && !prizeBlocked" [price]="priceSummary"></app-booking-price>
+            <p *ngIf="!quoteLoading && welcomeQuote?.policyId && welcomeQuote?.eligibleAmount != null && welcomeQuote?.amountKnown !== false">
+              Сумма подходящих услуг {{ welcomeQuote?.eligibleAmount | number:'1.0-2' }} ₽
+            </p>
             <p *ngIf="!quoteLoading && !prizeBlocked && prizeQuote?.policy?.description">{{ prizeQuote?.policy?.description }}</p>
             <p *ngIf="!quoteLoading && promoApplies && promoQuote?.termsNote">{{ promoQuote?.termsNote }}</p>
             <div *ngIf="!quoteLoading && prizeBlocked" role="status">
@@ -103,7 +106,7 @@
                     [attr.aria-pressed]="applyWelcome" (click)="toggleWelcome()">
               {{ applyWelcome ? 'Не использовать купон' : 'Использовать купон' }}
             </button>
-            <fieldset class="reward-coupon-selector" *ngIf="!isRecordView && !prizeBlocked && !ultrasoundUnavailable && !profilePromoUnavailable && rewardCoupons.length">
+            <fieldset class="reward-coupon-selector" *ngIf="!isRecordView && !prizeBlocked && !ultrasoundUnavailable && !profilePromoUnavailable && rewardCoupons.length && !(welcomeQuote?.policyId && welcomeApplies)">
               <legend>Купоны за отзывы</legend>
               <label *ngFor="let coupon of rewardCoupons">
                 <input type="checkbox" [checked]="selectedRewardIds.includes(coupon.id)"

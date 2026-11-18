@@ -11,7 +11,7 @@
       <li *ngFor="let tier of tiers">{{ tier.text }}</li>
     </ul>
     <p class="note" *ngIf="fixedOffer">{{ fixedOffer }}</p>
-    <p class="note">
+    <p class="note" *ngIf="!campaign?.policyId">
       Одна скидка на первую запись у одного мастера.
     </p>
     <div class="actions">

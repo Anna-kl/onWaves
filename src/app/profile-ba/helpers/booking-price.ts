@@ -21,6 +21,8 @@ export interface BookingPrice {
   couponLabel?: string | null;
   totalLabel?: string | null;
   pendingNote?: string | null;
+  couponTerms?: string | null;
+  unpriced?: boolean;
   prize?: boolean;
   prizeDiscount?: number;
   reviewRewardDiscount?: number;
@@ -46,7 +48,6 @@ export function couponDiscount(quote: WelcomeQuote | null): number {
   // В старом ответе API бесплатная запись могла содержать номинал купона. Цену не пересчитываем.
   if (!quote || quote.originalAmount <= 0) return 0;
   if (quote?.couponStatus === 'available') return quote.discountAmount;
-  if (quote?.couponStatus === 'login_required') return quote.potentialDiscount;
   return 0;
 }
 
@@ -73,7 +74,8 @@ export function bookingPrice(
   const hasPromo = !!promo && ['available', 'login_required'].includes(promo.status) && promo.promoDiscount > 0;
   // Ответ акции включает её собственный расчёт купона. Не смешиваем его с параллельным quote.
   const couponQuote = promo && promo.status !== 'none' ? promo.coupon : quote;
-  const coupon = applyCoupon ? Math.max(0, couponDiscount(couponQuote)) : 0;
+  const historicalPreview = hasPromo && !couponQuote?.policyId && couponQuote?.couponStatus === 'login_required';
+  const coupon = applyCoupon ? Math.max(0, historicalPreview ? promo!.couponDiscount : couponDiscount(couponQuote)) : 0;
   const pricedQuote = couponQuote && couponQuote.couponStatus !== 'none'
     && !['price_not_fixed', 'services_not_found'].includes(couponQuote.reason ?? '')
     ? couponQuote : null;
@@ -83,14 +85,17 @@ export function bookingPrice(
   const payable = hasPromo
     ? promo!.payableAmount + (coupon > 0 ? 0 : promo!.couponDiscount)
     : pricedQuote ? pricedQuote.payableAmount + (applyCoupon ? 0 : quotedCoupon) : original;
-  const fixed = couponQuote?.amountMode === 'fixed' || promo?.coupon?.amountMode === 'fixed';
+  const fixed = !!couponQuote?.policyId || couponQuote?.amountMode === 'fixed' || promo?.coupon?.amountMode === 'fixed';
   return {
+    ...(couponQuote?.policyId ? { couponTerms: couponQuote.offerText, unpriced: couponQuote.amountKnown === false } : {}),
     ...(hasPromo ? { seats: { limit: promo!.seatsLimit, left: promo!.seatsLeft } } : {}),
     original, payable, coupon: hasPromo && coupon > 0 ? promo!.couponDiscount : coupon,
     promo: (hasPromo ? promo!.promoDiscount : 0) + masterDiscount,
     pending: (hasPromo && promo!.status === 'login_required') || (coupon > 0 && couponQuote?.couponStatus === 'login_required'),
     isFrom: !!couponQuote?.amountIsFrom || services.some(s => !!s.price?.isRange),
-    notice: promo?.status === 'unavailable'
+    notice: couponQuote?.couponStatus === 'login_required' && couponQuote.potentialDiscount > 0
+      ? `Возможен купон до ${formatRub(couponQuote.potentialDiscount)} после входа и проверки условий.`
+      : promo?.status === 'unavailable'
       ? (promo.exclusive && promo.reason === 'promo_seats_exhausted'
         ? 'Все места по акции на УЗ-чистку заняты.'
         : promo.reason === 'promo_seats_exhausted' && coupon > 0
@@ -100,7 +105,7 @@ export function bookingPrice(
           : promoReasonText(promo.reason))
       : couponQuote?.reason && couponQuote.couponStatus !== 'login_required' && coupon <= 0
       && couponQuote.couponStatus !== 'none' ? welcomeReasonText(couponQuote.reason) : null,
-    termsPath: hasPromo && slug && !promo?.exclusive ? promoTermsPath(slug) : coupon > 0 ? '/static/kupon' : null,
+    termsPath: hasPromo && slug && !promo?.exclusive ? promoTermsPath(slug) : coupon > 0 && !couponQuote?.policyId ? '/static/kupon' : null,
     promoLabel: hasPromo ? (promo?.exclusive ? 'Скидка OnWaves 50 %' : 'Скидка OnWaves 20 %') : null,
     couponLabel: fixed && coupon > 0 ? `Купон OnWaves ${formatRub(hasPromo ? promo!.couponDiscount : coupon)}` : null,
     totalLabel: fixed ? 'Вы платите' : null,

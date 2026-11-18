@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
-import { Observable, catchError, of, shareReplay } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 import { environment } from '../enviroments/environment';
 import { AnalyticsService } from './analytics.service';
 import { WelcomeCouponMe, WelcomeOffer, WelcomeQuote } from '../app/DTO/views/promo/welcome-coupon';
@@ -15,12 +15,6 @@ import { WelcomeCouponMe, WelcomeOffer, WelcomeQuote } from '../app/DTO/views/pr
 export class WelcomeCouponService {
   private readonly url = environment.Uri + 'coupons/welcome/';
   private static readonly NO_STORE = { 'Cache-Control': 'no-store' };
-
-  // Условия спрашивают сразу несколько мест страницы мастера (колонка, блок услуг,
-  // калькулятор). Короткий кеш склеивает это в один запрос, не переживая перезагрузку.
-  private static readonly CACHE_TTL = 60_000;
-  private readonly offerCache = new Map<string, { expiresAt: number; value$: Observable<WelcomeOffer> }>();
-  private mineCache: { key: string; expiresAt: number; value$: Observable<WelcomeCouponMe | null> } | null = null;
 
   constructor(
     private http: HttpClient,
@@ -47,42 +41,28 @@ export class WelcomeCouponService {
 
   /** Публичное предложение мастера. Ничего личного. */
   getOffer(masterId: string): Observable<WelcomeOffer> {
-    const hit = this.offerCache.get(masterId);
-    if (hit && hit.expiresAt > Date.now()) {
-      return hit.value$;
-    }
-    const value$ = this.http
+    return this.http
       .get<WelcomeOffer>(`${this.url}offer`, {
         params: { masterId },
         headers: new HttpHeaders(WelcomeCouponService.NO_STORE),
       })
       .pipe(
         catchError(() => of<WelcomeOffer>({ active: false, masterParticipates: false, campaign: null })),
-        shareReplay({ bufferSize: 1, refCount: false }),
       );
-    this.offerCache.set(masterId, { expiresAt: Date.now() + WelcomeCouponService.CACHE_TTL, value$ });
-    return value$;
   }
 
   /** Право текущего клиента; для гостя не вызывается. */
-  getMine(profileId?: string | null): Observable<WelcomeCouponMe | null> {
+  getMine(profileId?: string | null, masterId?: string | null): Observable<WelcomeCouponMe | null> {
     // Без profileId сервер берёт профиль из токена — это удобно там, где id клиента под рукой нет.
     if (!this.isLoggedIn) return of(null);
-    const key = `${this.cookies.get('auth-token-ocpio')}|${profileId ?? 'token'}`;
-    if (this.mineCache && this.mineCache.key === key && this.mineCache.expiresAt > Date.now()) {
-      return this.mineCache.value$;
-    }
-    const options = profileId
-      ? { params: { profileId }, headers: this.authHeaders() }
-      : { headers: this.authHeaders() };
-    const value$ = this.http
-      .get<WelcomeCouponMe>(`${this.url}me`, options)
+    const params: Record<string, string> = {};
+    if (profileId) params['profileId'] = profileId;
+    if (masterId) params['masterId'] = masterId;
+    return this.http
+      .get<WelcomeCouponMe>(`${this.url}me`, { params, headers: this.authHeaders() })
       .pipe(
         catchError(() => of(null)),
-        shareReplay({ bufferSize: 1, refCount: false }),
       );
-    this.mineCache = { key, expiresAt: Date.now() + WelcomeCouponService.CACHE_TTL, value$ };
-    return value$;
   }
 
   /** Расчёт по выбранным услугам. Ответ null = сервер расчёт не дал, скидку не показываем. */
@@ -94,7 +74,7 @@ export class WelcomeCouponService {
       .pipe(catchError(() => of(null)));
   }
 
-  invalidateMine(): void { this.mineCache = null; }
+  invalidateMine(): void {}
 
   /**
    * События Метрики. Без телефонов, имён и id клиентов: только категория, действие и код кампании.

@@ -249,8 +249,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   get welcomeHint(): string | null {
     const q = this.welcomeQuote;
     if (!q || this.welcomeOffered) return null;
-    const show = ['below_threshold', 'already_used', 'already_reserved', 'not_first_booking', 'price_not_fixed', 'expired'];
-    return q.reason && show.includes(q.reason) ? welcomeReasonText(q.reason) : null;
+    return q.reason && q.couponStatus !== 'none' ? welcomeReasonText(q.reason) : null;
   }
   get isRecordView(): boolean {
     return !!this.recordId;
@@ -266,10 +265,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     if (!this.welcomeApplies || !quote) {
       return false;
     }
-    // Гостю тоже показываем зачёркнутую цену: сумму считает сервер, а подпись рядом
-    // честно говорит, что скидка появится после входа.
-    return (quote.couponStatus === 'available' && quote.discountAmount > 0)
-      || (quote.couponStatus === 'login_required' && quote.potentialDiscount > 0);
+    return quote.couponStatus === 'available' && quote.discountAmount > 0;
   }
 
   /**
@@ -430,6 +426,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
 
   onToggleWelcome(): void {
     this._welcome.track(this.applyWelcome ? 'applied' : 'removed', this.welcomeQuote?.campaignCode);
+    if (this.welcomeApplies && this.welcomeQuote?.policyId) this.selectedRewardIds = [];
     this.refreshRewardsQuote();
   }
 
@@ -569,6 +566,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
       // Акция и входящий в неё купон должны относиться к одному ответу сервера.
       const q = promo && promo.status !== 'none' ? promo.coupon : welcome;
       this.welcomeQuote = q;
+      if (this.welcomeApplies && q?.policyId) this.selectedRewardIds = [];
       this.couponRefusal = null;
       this.promoRefusal = null;
       if (q && (q.couponStatus === 'available' || q.couponStatus === 'login_required') && q.potentialDiscount > 0) {
@@ -1076,6 +1074,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
       serverTime: new Date().toLocaleString(),
       useWelcomeCoupon: this.prizeAwardId ? undefined : (this.welcomeApplies ? true : undefined),
       expectedCouponDiscount: this.prizeAwardId ? undefined : (this.welcomeApplies ? this.welcomeDiscount : undefined),
+      expectedWelcomePolicyVersion: this.welcomeApplies ? this.welcomeQuote?.policyVersion : undefined,
       usePromoSeat: this.prizeAwardId ? undefined : (this.promoApplies ? true : undefined),
       promoCampaignCode: !this.prizeAwardId && this.promoApplies ? this.promoQuote?.campaignCode ?? undefined : undefined,
       expectedPromoDiscount: this.prizeAwardId ? undefined : (this.promoApplies ? this.promoQuote?.promoDiscount : undefined),
