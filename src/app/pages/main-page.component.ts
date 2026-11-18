@@ -5,8 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { select, Store } from '@ngrx/store';
 import {
-  BehaviorSubject, EMPTY, Observable, ReplaySubject, combineLatest, expand, filter, fromEvent, map, merge, of, scan,
-  shareReplay, startWith, switchMap, take, timer,
+  BehaviorSubject, EMPTY, Observable, ReplaySubject, combineLatest, expand, filter, from, fromEvent, map, merge, mergeMap, of, scan,
+  shareReplay, startWith, switchMap, take, throttleTime, timer,
 } from 'rxjs';
 import { ProfileService } from '../../services/profile.service';
 import { selectProfileMainClient } from '../ngrx-store/mainClient/store.select';
@@ -84,6 +84,7 @@ export class MainPageComponent implements OnInit, AfterViewInit {
   readonly ultrasoundCampaign = ULTRASOUND_PROMO;
   readonly ultrasoundCover = ULTRASOUND_COVER;
   private readonly feedRequested$ = new ReplaySubject<void>(1);
+  private readonly refreshPerks$ = new BehaviorSubject<void>(undefined);
   private feedObserver?: IntersectionObserver;
 
   /** Аватар не загрузился — рисуем монограмму, а не битую картинку. */
@@ -128,11 +129,23 @@ export class MainPageComponent implements OnInit, AfterViewInit {
     }
 
     this.initShowcase();
+    this.initPerksRefresh();
     this.initUltrasoundOffer();
     this.giveaways.publicList('home').pipe(takeUntilDestroyed(this.destroyRef)).subscribe(load => {
       this.giveaway = load;
     });
     this.initAuthGeo();
+  }
+
+  private initPerksRefresh(): void {
+    if (!this.isBrowser) return;
+    this.zone.runOutsideAngular(() => merge(
+      timer(60_000, 60_000), fromEvent(window, 'focus'), fromEvent(document, 'visibilitychange'),
+    ).pipe(filter(() => !document.hidden), throttleTime(1000), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.zone.run(() => {
+        this.showcase.invalidatePerks();
+        this.refreshPerks$.next();
+      })));
   }
 
   private initUltrasoundOffer(): void {
@@ -230,12 +243,12 @@ export class MainPageComponent implements OnInit, AfterViewInit {
     // Купон и акция — тоже по запросу на мастера и только в браузере: условия могут
     // закончиться, а HTML главной живёт в 60-секундном SSR-кеше.
     this.perks$ = this.isBrowser
-      ? this.masters$.pipe(
-        switchMap(list => merge(...list.filter(m => m.hasCardDetails && m.bookingEnabled).map(m => this.showcase.getPerks(m).pipe(
-          map(perks => ({ id: m.id, perks }))
-        )))),
-        scan((acc, { id, perks }) => ({ ...acc, [id]: perks }), {} as Record<string, HomePerks>),
-        startWith({} as Record<string, HomePerks>),
+      ? combineLatest([this.masters$, this.refreshPerks$]).pipe(
+        switchMap(([list]) => from(list.filter(m => m.bookingEnabled)).pipe(
+          mergeMap(m => this.showcase.getPerks(m).pipe(map(perks => ({ id: m.id, perks }))), 3),
+          scan((acc, { id, perks }) => ({ ...acc, [id]: perks }), {} as Record<string, HomePerks>),
+          startWith({} as Record<string, HomePerks>),
+        )),
         shareReplay({ bufferSize: 1, refCount: true })
       )
       : of({});

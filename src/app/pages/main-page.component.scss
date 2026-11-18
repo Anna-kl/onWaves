@@ -493,6 +493,15 @@ $cta-shadow: 0 10px 22px rgba(13, 148, 160, 0.28);
     overflow: hidden;
   }
 }
+.hs-perk--seats {
+  width: 100%;
+  box-sizing: border-box;
+  > span { display: block; -webkit-line-clamp: unset; overflow: visible; }
+  i { display: inline-flex; margin-bottom: 5px; padding: 3px 9px; border-radius: 7px; background: #ff2d3a; color: #fff; font-size: 20px; line-height: 1.2; letter-spacing: 0; }
+  b, .hs-perk__status { display: block; }
+  .hs-perk__status { margin-top: 5px; }
+}
+.hs-perks__separate { margin: 0; font-size: 12px; line-height: 1.4; color: #52676d; }
 .hs-tags {
   display: flex;
   flex-wrap: wrap;

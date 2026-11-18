@@ -4,6 +4,10 @@ import { PromoMediaKind } from '../../DTO/enums/promoMediaKind';
 import { ILandingOffer } from '../../DTO/views/landing/ILandingOffer';
 import { PromoSeatState } from '../../DTO/views/promo/promo-seats';
 
+export function profilePromoShortTitle(state: PromoSeatState): string {
+  return state.code === 'soblazn-nails-60-2026-11' ? 'Маникюр или педикюр' : state.title.trim();
+}
+
 /** Approved editorial content. Prices, dates, service IDs and availability always come from state. */
 export function profilePromoOffer(state: PromoSeatState): ILandingOffer {
   const studioNails = state.code === 'soblazn-nails-60-2026-11';

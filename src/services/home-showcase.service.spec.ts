@@ -30,7 +30,7 @@ describe('Главная: список мастеров', () => {
     expect(load.kind).toBe('loaded');
     expect(load.masters.length).toBe(14);
     expect(load.masters[12]).toEqual(jasmine.objectContaining({
-      title: 'Соблазн', place: 'Озёры', link: 'soblazn_ozery', group: 'beauty', bookingEnabled: true, showPromo: false,
+      title: 'Соблазн', place: 'Озёры', link: 'soblazn_ozery', group: 'beauty', bookingEnabled: true, showPromo: true,
     }));
     expect(load.masters[13]).toEqual(jasmine.objectContaining({
       link: '014', group: 'other', title: 'Мастер OnWaves', place: '', bookingEnabled: false,

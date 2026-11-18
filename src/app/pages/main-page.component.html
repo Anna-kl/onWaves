@@ -120,7 +120,8 @@
         <div class="hs-grid">
           <a class="hs-card" *ngFor="let m of g.masters; trackBy: trackById" [class.hs-card--home]="m.group === 'home'"
              [class.hs-card--promo]="!!(perks$ | async)?.[m.id]?.promo"
-             [routerLink]="['/', m.link]" (click)="track('home_card_open', m.link)">
+             [routerLink]="['/', m.link]" [fragment]="(perks$ | async)?.[m.id]?.promo?.fragment"
+             (click)="track('home_card_open', m.link)">
             <div class="hs-card__band">
               <span class="hs-card__place" *ngIf="m.place">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
@@ -141,10 +142,12 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2.5"/></svg>
                     <span><b>{{ coupon.text }}</b> на первую запись<small *ngIf="coupon.until"> · до {{ coupon.until | date:'d MMMM' }}</small></span>
                   </span>
-                  <p class="hs-perk hs-perk--promo" *ngIf="perks.promo as promo" [attr.title]="promo.title">
+                  <p class="hs-perk hs-perk--promo" *ngIf="perks.promo as promo" [attr.title]="promo.title"
+                     [class.hs-perk--seats]="promo.fragment === 'promo-seats'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-                    <span><i>{{ promo.badge }}</i><b>{{ promo.title }}</b><small *ngIf="promo.until"> · до {{ promo.until | date:'d MMMM' }}</small></span>
+                    <span><i>{{ promo.badge }}</i><b>{{ promo.title }}</b><small class="hs-perk__status" *ngIf="promo.statusText">{{ promo.statusText }}</small><small *ngIf="promo.until"> · до {{ promo.until | date:'d MMMM':'+0300' }}</small></span>
                   </p>
+                  <p class="hs-perks__separate" *ngIf="perks.coupon && perks.promo?.excludesCoupon">Купон и акция не суммируются</p>
                 </div>
               </ng-container>
               <ul class="hs-tags" *ngIf="m.tags.length">
@@ -152,7 +155,7 @@
               </ul>
               <div class="hs-card__foot">
                 <span class="hs-price" *ngIf="(prices$ | async)?.[m.id] as price">{{ price.text }}</span>
-                <span class="hs-btn hs-btn--primary hs-btn--sm">{{ m.bookingEnabled ? 'Записаться' : 'Смотреть профиль' }}</span>
+                <span class="hs-btn hs-btn--primary hs-btn--sm">{{ (perks$ | async)?.[m.id]?.promo?.fragment ? 'Смотреть акцию' : m.bookingEnabled ? 'Записаться' : 'Смотреть профиль' }}</span>
               </div>
             </div>
           </a>

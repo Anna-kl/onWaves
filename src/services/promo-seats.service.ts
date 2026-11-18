@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { Observable, catchError, map, of } from 'rxjs';
 import { environment } from '../enviroments/environment';
@@ -22,7 +22,10 @@ export class PromoSeatsService {
   private readonly url = environment.Uri + 'promos/seats/';
   private static readonly NO_STORE = { 'Cache-Control': 'no-store' };
 
-  constructor(private http: HttpClient, private cookies: CookieService) {}
+  private readonly liveHttp: HttpClient;
+  constructor(private http: HttpClient, private cookies: CookieService, backend: HttpBackend) {
+    this.liveHttp = new HttpClient(backend);
+  }
 
   getReports(masterId: string): Observable<PromoSeatReport[]> {
     return this.http.get<PromoSeatReport[]>(`${this.url}master/${masterId}/reports`, { headers: this.authHeaders() });
@@ -61,8 +64,8 @@ export class PromoSeatsService {
    * Для экранов розыгрыша: пустой ответ и ошибка сервера — разные состояния.
    * Старый getState по-прежнему схлопывает сбой в «акции нет», чтобы не обещать место.
    */
-  readState(masterId: string, campaignCode?: string): Observable<GiveawayLoad<PromoSeatState>> {
-    return this.http
+  readState(masterId: string, campaignCode?: string, fresh = false): Observable<GiveawayLoad<PromoSeatState>> {
+    return (fresh ? this.liveHttp : this.http)
       .get<PromoSeatState | null>(`${this.url}${masterId}`, {
         headers: new HttpHeaders(PromoSeatsService.NO_STORE),
         ...(campaignCode ? { params: { campaignCode } } : {}),

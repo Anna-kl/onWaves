@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Observable, Subject, catchError, distinctUntilChanged, exhaustMap, filter, forkJoin, map, of, shareReplay, startWith, switchMap } from 'rxjs';
 import { environment } from 'src/enviroments/environment';
 import { IViewImage } from 'src/app/DTO/views/images/IViewImage';
@@ -7,6 +7,11 @@ import { IViewPost } from 'src/app/DTO/views/posts/IViewPost';
 import { IResponse } from 'src/app/DTO/classes/IResponse';
 import { IViewLanding } from 'src/app/DTO/views/landing/IViewLanding';
 import { WelcomeOffer } from 'src/app/DTO/views/promo/welcome-coupon';
+import { PromoSeatState } from 'src/app/DTO/views/promo/promo-seats';
+import { PromoSeatsService } from './promo-seats.service';
+import { promoMoscowDate } from 'src/app/profile-ba/helpers/promo-seat-terms-text';
+import { seatsLeftText } from 'src/app/profile-ba/helpers/promo-seats';
+import { profilePromoShortTitle } from 'src/app/profile-ba/helpers/profile-promo-presentation';
 import { Service } from 'src/app/DTO/classes/services/Service';
 import { Group } from 'src/app/DTO/views/services/IViewGroups';
 import { TypeImage } from 'src/app/DTO/enums/typeImage';
@@ -74,7 +79,7 @@ interface HomeProfilesLoad {
 /** Что сейчас действует у мастера: приветственный купон Onwaves и акция с его промо-страницы. */
 export interface HomePerks {
   coupon: { text: string; hint: string; until: Date | null } | null;
-  promo: { badge: string; title: string; until: Date | null } | null;
+  promo: { badge: string; title: string; until: Date | null; statusText?: string; fragment?: string; excludesCoupon?: boolean } | null;
 }
 
 export type HomeFeedKind = 'video' | 'photo' | 'post';
@@ -108,9 +113,14 @@ export class HomeShowcaseService {
   private readonly prices = new Map<string, Observable<HomePrice | null>>();
   private feed$?: Observable<HomeFeedItem[]>;
   private feedMastersKey?: string;
-  private readonly perks = new Map<string, Observable<HomePerks>>();
+  private readonly perks = new Map<string, { expiresAt: number; load: Observable<HomePerks> }>();
 
-  constructor(private http: HttpClient) {}
+  private readonly liveHttp: HttpClient;
+  constructor(private http: HttpClient, private promoSeats: PromoSeatsService, backend: HttpBackend) {
+    // Public, browser-only financial reads must bypass Angular16's transfer cache,
+    // which can remain active while unrelated timers keep the app unstable.
+    this.liveHttp = new HttpClient(backend);
+  }
 
   getMasters(): Observable<HomeMaster[]> {
     return this.getMastersLoad().pipe(
@@ -140,8 +150,11 @@ export class HomeShowcaseService {
   }
 
   retryMasters(): void {
+    this.invalidatePerks();
     this.reloadMasters$.next();
   }
+
+  invalidatePerks(): void { this.perks.clear(); }
 
   private loadProfiles(cursor: string | null, loaded: HomeProfile[]): Observable<HomeProfilesLoad> {
     return this.http.get<HomeProfilePage>(`${this.api}profiles/home-masters`, {
@@ -200,26 +213,62 @@ export class HomeShowcaseService {
    * не показать бейдж, чем пообещать скидку, которой при записи не будет.
    */
   getPerks(master: HomeMaster): Observable<HomePerks> {
-    let cached = this.perks.get(master.id);
+    const entry = this.perks.get(master.id);
+    let cached = entry && entry.expiresAt > Date.now() ? entry.load : undefined;
     if (!cached) {
       const none: HomePerks = { coupon: null, promo: null };
+      if (!master.bookingEnabled) return of(none);
       cached = forkJoin({
-        offer: this.http.get<WelcomeOffer>(`${this.api}coupons/welcome/offer`, { params: { masterId: master.id } })
+        offer: this.liveHttp.get<WelcomeOffer>(`${this.api}coupons/welcome/offer`, {
+          params: { masterId: master.id }, headers: { 'Cache-Control': 'no-store' },
+        })
           .pipe(catchError(() => of(null))),
-        landing: master.showPromo
-          ? this.http.get<IResponse>(`${this.api}landing/${master.id}`).pipe(catchError(() => of(null)))
-          : of(null),
+        promo: master.showPromo ? this.promoSeats.readState(master.id, undefined, true).pipe(
+          switchMap(load => {
+            if (load.kind === 'failed') return of(null);
+            const campaign = load.kind === 'ready' ? load.value : null;
+            const seatOffer = this.seatPromoOf(campaign);
+            if (seatOffer) return of(seatOffer);
+            // Suppress the campaign's own offers, while keeping an independent active landing offer.
+            return this.liveHttp.get<IResponse>(`${this.api}landing/${master.id}`, { headers: { 'Cache-Control': 'no-store' } }).pipe(
+              map(landing => landing?.code === 200 ? this.promoOf(landing.data as IViewLanding, campaign) : null),
+              catchError(() => of(null)),
+            );
+          }),
+        ) : of(null),
       }).pipe(
-        map(({ offer, landing }) => ({
+        map(({ offer, promo }) => ({
           coupon: this.couponOf(offer),
-          promo: landing?.code === 200 ? this.promoOf(landing.data as IViewLanding) : null,
+          promo: promo ? { ...promo, excludesCoupon: promo.excludesCoupon || !!offer?.campaign?.policyId } : null,
         })),
         catchError(() => of(none)),
-        shareReplay({ bufferSize: 1, refCount: false })
+        shareReplay({ bufferSize: 1, refCount: true })
       );
-      this.perks.set(master.id, cached);
+      this.perks.set(master.id, { expiresAt: Date.now() + 60_000, load: cached });
     }
     return cached;
+  }
+
+  private seatPromoOf(state: PromoSeatState | null): HomePerks['promo'] {
+    if (!state || !state.services?.length || state.seatsLimit <= 0
+      || !Number.isFinite(state.discountPercent) || state.discountPercent <= 0 || state.discountPercent > 100
+      || HOME_FEED_STOP_WORDS.test([state.title, ...state.services.map(service => service.name)].join(' '))) return null;
+    const now = Date.now();
+    const start = state.startsAt ? Date.parse(state.startsAt) : null;
+    const end = Date.parse(state.endsAt);
+    if (!Number.isFinite(end) || end <= now) return null;
+    const future = state.status === 'closed' && state.closedReason === 'not_started'
+      && start !== null && Number.isFinite(start) && start > now;
+    const open = state.status === 'open' && !state.closedReason && state.seatsLeft > 0
+      && (start === null || (Number.isFinite(start) && start <= now));
+    if (!future && !open) return null;
+    return {
+      badge: `−${state.discountPercent}%`, title: profilePromoShortTitle(state), until: new Date(end - 1),
+      statusText: future ? `С ${promoMoscowDate(state.startsAt, false)} · ${state.seatsLimit} места на все услуги`
+        : seatsLeftText(state.seatsLeft, state.seatsLimit),
+      fragment: state.showOnProfile ? 'promo-seats' : undefined,
+      excludesCoupon: state.excludeWelcomeCoupon === true || state.exclusive === true,
+    };
   }
 
   private couponOf(offer: WelcomeOffer | null): HomePerks['coupon'] {
@@ -245,11 +294,13 @@ export class HomeShowcaseService {
     };
   }
 
-  private promoOf(landing: IViewLanding | null): HomePerks['promo'] {
+  private promoOf(landing: IViewLanding | null, excludedCampaign: PromoSeatState | null = null): HomePerks['promo'] {
     if (!landing?.isActive) return null;
     const now = Date.now();
     const offer = (landing.offers ?? [])
       .filter(o => o.isActive
+        && (!excludedCampaign?.heroOfferId || o.id !== excludedCampaign.heroOfferId)
+        && (!o.serviceId || !excludedCampaign?.services.some(service => service.serviceId === o.serviceId))
         && (!o.validFrom || new Date(o.validFrom).getTime() <= now)
         && (!o.validTo || new Date(o.validTo).getTime() >= now)
         && !HOME_FEED_STOP_WORDS.test(`${o.title} ${o.description ?? ''}`))
@@ -304,7 +355,7 @@ export class HomeShowcaseService {
       initial: title.charAt(0).toUpperCase(),
       feedAlbums: cfg?.feedAlbums,
       priceText: cfg?.priceText,
-      showPromo: !!cfg && cfg.showPromo !== false,
+      showPromo: cfg?.showPromo !== false,
       hasCardDetails: !!cfg,
       bookingEnabled: p.bookingEnabled === true,
     };
