@@ -41,8 +41,9 @@
             </label>
             <label class="time-field">
               <span>До</span>
-              <input type="time" required [ngModel]="workTimes[day.dayOfWeek].end" (ngModelChange)="setWorkTime(day, 'end', $event)" [name]="'end' + day.dayOfWeek" [attr.aria-label]="weekdayName(day.dayOfWeek) + ': конец приёма'">
+              <input type="time" required [disabled]="workTimes[day.dayOfWeek].end === '24:00'" [ngModel]="workTimes[day.dayOfWeek].end === '24:00' ? '00:00' : workTimes[day.dayOfWeek].end" (ngModelChange)="setWorkTime(day, 'end', $event)" [name]="'end' + day.dayOfWeek" [attr.aria-label]="weekdayName(day.dayOfWeek) + ': конец приёма'">
             </label>
+            <label class="midnight-choice"><input type="checkbox" [ngModel]="workTimes[day.dayOfWeek].end === '24:00'" [ngModelOptions]="{standalone: true}" (ngModelChange)="setWorkTime(day, 'end', $event ? '24:00' : '23:59')"> До полуночи — 00:00 следующего дня</label>
           </div>
         </div>
 
@@ -61,8 +62,9 @@
             </label>
             <label class="time-field">
               <span>До</span>
-              <input type="time" required [ngModel]="breakTimes[day.dayOfWeek].end" (ngModelChange)="setBreakTime(day, 'end', $event)" [name]="'breakEnd' + day.dayOfWeek" [attr.aria-invalid]="timeError.includes('перерыв') ? true : null" [attr.aria-label]="weekdayName(day.dayOfWeek) + ': конец перерыва'">
+              <input type="time" required [disabled]="breakTimes[day.dayOfWeek].end === '24:00'" [ngModel]="breakTimes[day.dayOfWeek].end === '24:00' ? '00:00' : breakTimes[day.dayOfWeek].end" (ngModelChange)="setBreakTime(day, 'end', $event)" [name]="'breakEnd' + day.dayOfWeek" [attr.aria-invalid]="timeError.includes('перерыв') ? true : null" [attr.aria-label]="weekdayName(day.dayOfWeek) + ': конец перерыва'">
             </label>
+            <label class="midnight-choice"><input type="checkbox" [ngModel]="breakTimes[day.dayOfWeek].end === '24:00'" [ngModelOptions]="{standalone: true}" (ngModelChange)="setBreakTime(day, 'end', $event ? '24:00' : '23:59')"> До полуночи — 00:00 следующего дня</label>
           </div>
         </div>
         <p class="form-error" role="alert" *ngIf="timeError.startsWith(weekdayName(day.dayOfWeek))">{{ timeError }}</p>

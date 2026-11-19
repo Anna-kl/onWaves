@@ -128,7 +128,7 @@ export class GrafikTemplateComponent implements OnInit, OnDestroy {
   setWorkTime(day: IViewScheduleWeekday, edge: 'start' | 'end', value: string): void {
     this.saved = false;
     this.workTimes[day.dayOfWeek][edge] = value;
-    const time = parseClock(value || '');
+    const time = parseClock(value || '', edge === 'end');
     if (!time || !day.work) {
       return;
     }
@@ -162,7 +162,7 @@ export class GrafikTemplateComponent implements OnInit, OnDestroy {
     }
     this.breakTimes[day.dayOfWeek][edge] = value;
     const start = parseClock(this.breakTimes[day.dayOfWeek].start);
-    const end = parseClock(this.breakTimes[day.dayOfWeek].end);
+    const end = parseClock(this.breakTimes[day.dayOfWeek].end, true);
     day.break = start && end && minutesOf(end) > minutesOf(start) ? { start, end } : null;
   }
 
@@ -293,7 +293,7 @@ export class GrafikTemplateComponent implements OnInit, OnDestroy {
       }
       const times = this.workTimes[day.dayOfWeek];
       const start = parseClock(times?.start);
-      const end = parseClock(times?.end);
+      const end = parseClock(times?.end, true);
       let message = '';
       if (!start || !end) {
         message = 'Укажите время в полях «С» и «До».';
@@ -302,7 +302,7 @@ export class GrafikTemplateComponent implements OnInit, OnDestroy {
       } else if (this.breakOn[day.dayOfWeek]) {
         const pause = this.breakTimes[day.dayOfWeek];
         const breakStart = parseClock(pause?.start);
-        const breakEnd = parseClock(pause?.end);
+        const breakEnd = parseClock(pause?.end, true);
         if (!breakStart || !breakEnd) {
           message = 'Укажите время перерыва в полях «С» и «До».';
         } else if (minutesOf(breakEnd) <= minutesOf(breakStart)) {

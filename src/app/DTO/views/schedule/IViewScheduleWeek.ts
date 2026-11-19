@@ -174,14 +174,14 @@ export function clock(time: IViewTime | null | undefined): string {
   return `${String(time.hour).padStart(2, '0')}:${String(time.minutes).padStart(2, '0')}`;
 }
 
-export function parseClock(value: string): IViewTime | null {
-  const match = /^(\d{2}):(\d{2})/.exec(value ?? '');
+export function parseClock(value: string, allowEndOfDay = false): IViewTime | null {
+  const match = /^(\d{2}):(\d{2})$/.exec(value ?? '');
   if (!match) {
     return null;
   }
   const hour = Number(match[1]);
   const minutes = Number(match[2]);
-  if (hour > 23 || minutes > 59) {
+  if (hour > 24 || minutes > 59 || (hour === 24 && (!allowEndOfDay || minutes !== 0))) {
     return null;
   }
   return { hour: match[1], minutes: match[2] };

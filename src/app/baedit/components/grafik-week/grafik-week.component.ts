@@ -500,7 +500,7 @@ export class GrafikWeekComponent implements OnInit, OnDestroy {
 
 function periodFrom(startText: string, endText: string): IViewPeriod | null {
   const start = parseClock(startText);
-  const end = parseClock(endText);
+  const end = parseClock(endText, true);
   if (!start || !end) {
     return null;
   }

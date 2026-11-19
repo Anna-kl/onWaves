@@ -94,8 +94,9 @@
         </label>
         <label class="time-field">
           <span>До</span>
-          <input type="time" name="workEnd" required [(ngModel)]="endText" [disabled]="isPast || saving" [attr.aria-invalid]="!!workError" aria-describedby="work-error" aria-label="Конец дня">
+          <input type="time" name="workEnd" required [ngModel]="endText === '24:00' ? '00:00' : endText" (ngModelChange)="endText = $event" [disabled]="isPast || saving" [attr.aria-invalid]="!!workError" aria-describedby="work-error" aria-label="Конец дня">
         </label>
+        <label class="midnight-choice"><input type="checkbox" [ngModel]="endText === '24:00'" [ngModelOptions]="{standalone: true}" (ngModelChange)="endText = $event ? '24:00' : '23:59'" [disabled]="isPast || saving"> До полуночи — 00:00 следующего дня</label>
       </div>
       <p class="form-error" id="work-error" role="alert" *ngIf="workError">{{ workError }}</p>
     </div>
@@ -114,8 +115,9 @@
         </label>
         <label class="time-field">
           <span>До</span>
-          <input type="time" name="breakEnd" required [(ngModel)]="breakEndText" (ngModelChange)="breakChanged = true" [disabled]="isPast || saving" [attr.aria-invalid]="!!breakError" aria-describedby="break-error" aria-label="Конец перерыва">
+          <input type="time" name="breakEnd" required [ngModel]="breakEndText === '24:00' ? '00:00' : breakEndText" (ngModelChange)="breakEndText = $event; breakChanged = true" [disabled]="isPast || saving" [attr.aria-invalid]="!!breakError" aria-describedby="break-error" aria-label="Конец перерыва">
         </label>
+        <label class="midnight-choice"><input type="checkbox" [ngModel]="breakEndText === '24:00'" [ngModelOptions]="{standalone: true}" (ngModelChange)="breakEndText = $event ? '24:00' : '23:59'; breakChanged = true" [disabled]="isPast || saving"> До полуночи — 00:00 следующего дня</label>
       </div>
       <p class="form-error" id="break-error" role="alert" *ngIf="breakError">{{ breakError }}</p>
     </div>

@@ -394,7 +394,7 @@ export class GrafikDayComponent implements OnInit, OnDestroy {
 
 function periodOf(startText: string, endText: string): IViewPeriod | null {
   const start = parseClock(startText);
-  const end = parseClock(endText);
+  const end = parseClock(endText, true);
   if (!start || !end || minutesOf(end) <= minutesOf(start)) {
     return null;
   }
@@ -402,7 +402,7 @@ function periodOf(startText: string, endText: string): IViewPeriod | null {
 }
 
 function periodError(start: string, end: string, work?: IViewPeriod | null): string {
-  if (!parseClock(start) || !parseClock(end)) {
+  if (!parseClock(start) || !parseClock(end, true)) {
     return 'Укажите время в полях «С» и «До».';
   }
   const period = periodOf(start, end);
