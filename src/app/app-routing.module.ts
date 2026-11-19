@@ -36,6 +36,7 @@ import { NetworkAwarePreloadStrategy } from './ssr/network-aware-preload.strateg
 // разделы. Публичных страниц у сервиса мало, поэтому у каждой заголовок задан
 // вручную под запрос, а не собирается из шаблона.
 const routes: Routes = [
+    {path:'promotions/:id',loadComponent:()=>import('./promotions/promotion-terms.component').then(m=>m.PromotionTermsComponent),data:{title:'Условия предложения | OnWaves',description:'Актуальные условия акции и купонов OnWaves.',noindex:true}},
 
     {
       path: "",

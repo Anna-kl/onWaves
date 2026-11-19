@@ -1,0 +1,49 @@
+<ng-container *ngIf="state$ | async as state">
+  <p class="publication-error" *ngIf="state.failed && !compact && placement !== 'coupon_popup'">РџСЂРµРґР»РѕР¶РµРЅРёСЏ СЃРµР№С‡Р°СЃ РЅРµ СѓРґР°Р»РѕСЃСЊ РїСЂРѕРІРµСЂРёС‚СЊ.</p>
+  <ng-container *ngFor="let p of items(state)">
+    <app-giveaway-featured-post *ngIf="placement === 'home_featured' && p.facts.giveaway?.featuredPost; else promotion"
+      [campaign]="p.facts.giveaway!"></app-giveaway-featured-post>
+    <ng-template #promotion>
+      <div class="publication-overlay" *ngIf="placement === 'coupon_popup'" (click)="closed.emit()"></div>
+      <article class="publication" [class.publication--compact]="compact" [class.publication--popup]="placement === 'coupon_popup'"
+        [attr.data-publication]="p.id" [attr.data-revision]="p.version" [attr.id]="'publication-' + p.id">
+        <button type="button" class="publication__close" *ngIf="placement === 'coupon_popup'" aria-label="Р—Р°РєСЂС‹С‚СЊ" (click)="closed.emit()">Г—</button>
+        <figure *ngIf="image(p) as url" class="publication__media">
+          <img *ngIf="!imageErrors.has(p.id + url)" [src]="url" [alt]="p.content.imageAlt || ''" loading="lazy" (error)="imageErrors.add(p.id + url)">
+        </figure>
+        <div class="publication__body">
+          <p class="publication__badge">{{ badge(p) }}</p>
+          <h3>{{ compact ? (p.content.shortTitle || p.content.offer.title) : p.content.offer.title }}</h3>
+          <p class="publication__lead" *ngIf="!compact && p.content.offer.description">{{ p.content.offer.description }}</p>
+          <p class="publication__status">{{ status(p) }}</p>
+          <ng-container *ngIf="!compact">
+            <div class="publication__gallery" *ngIf="gallery(p).length"><ng-container *ngFor="let url of gallery(p)"><img *ngIf="!imageErrors.has(p.id + url)" [src]="url" [alt]="p.content.imageAlt || ''" loading="lazy" (error)="imageErrors.add(p.id + url)"></ng-container></div>
+            <div class="publication__prices" *ngIf="p.facts.seats as seats">
+              <div *ngFor="let service of seats.services"><span>{{ service.name }}</span><span><s>{{ rub(service.listAmount) }}</s> <strong>{{ rub(service.clientPays) }}</strong></span></div>
+            </div>
+            <p class="publication__note" *ngIf="p.content.offer.footerNote">{{ p.content.offer.footerNote }}</p>
+            <details class="publication__terms"><summary>РЈСЃР»РѕРІРёСЏ РїСЂРµРґР»РѕР¶РµРЅРёСЏ</summary>
+              <p *ngFor="let line of p.mandatoryTerms">{{ line }}</p>
+              <a [routerLink]="p.termsUrl">РћС‚РґРµР»СЊРЅР°СЏ СЃС‚СЂР°РЅРёС†Р° СѓСЃР»РѕРІРёР№</a>
+            </details>
+            <div class="publication__actions">
+              <ng-container *ngIf="p.canBook">
+                <a *ngFor="let action of p.content.offer.actions" class="publication__button" [class.publication__button--secondary]="action.role === 1"
+                  [routerLink]="actionPath(p, action)" [queryParams]="bookQuery(p, action)" (click)="act(p, action, $event)">{{ action.text }}</a>
+                <a *ngIf="!p.content.offer.actions?.length" class="publication__button" [routerLink]="['/', p.masterSlug, 'choose-service']" [queryParams]="bookQuery(p)"
+                  (click)="chooseDefault($event)">Р’С‹Р±СЂР°С‚СЊ СѓСЃР»СѓРіСѓ</a>
+              </ng-container>
+              <a *ngIf="p.facts.giveaway as draw" class="publication__button" [routerLink]="['/giveaways', draw.code]">РЈСЃР»РѕРІРёСЏ СЂРѕР·С‹РіСЂС‹С€Р°</a>
+              <a class="publication__profile" [routerLink]="['/', p.masterSlug]">РЎС‚СЂР°РЅРёС†Р° РјР°СЃС‚РµСЂР°</a>
+            </div>
+            <ng-container *ngIf="video(p) as video">
+              <app-video-player *ngIf="!videoErrors.has(p.id + video.url)" [url]="video.url" [poster]="video.posterUrl || ''"
+                [autoplay]="false" [viewportAutoplay]="false" [warmup]="false" [fullFrame]="true" (unavailable)="videoErrors.add(p.id + video.url)"></app-video-player>
+              <p *ngIf="videoErrors.has(p.id + video.url)">Р’РёРґРµРѕ СЃРµР№С‡Р°СЃ РЅРµРґРѕСЃС‚СѓРїРЅРѕ.</p>
+            </ng-container>
+          </ng-container>
+        </div>
+      </article>
+    </ng-template>
+  </ng-container>
+</ng-container>

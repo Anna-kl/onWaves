@@ -1,4 +1,5 @@
-import { AfterViewInit, Component, DestroyRef, ElementRef, HostListener, Inject, NgZone, OnInit, PLATFORM_ID, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { PromotionPublicationsService, PublicationBatch } from '../../services/promotion-publications.service';
+import { AfterViewInit, Component, DestroyRef, ElementRef, HostListener, Inject, NgZone, OnInit, Optional, PLATFORM_ID, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -24,8 +25,6 @@ import { HOME_GROUP_LABEL, HOME_GROUPS, HOME_QUICK_SERVICES, HomeGroup } from '.
 import { GiveawayCampaign, GiveawayLoad } from '../DTO/views/giveaway/giveaway';
 import { GiveawaysService } from '../../services/giveaways.service';
 import { PromoSeatsService } from '../../services/promo-seats.service';
-import { lastPromoBookingAt, seatsLeftText, ULTRASOUND_COVER, ULTRASOUND_MASTER_ID, ULTRASOUND_PROMO } from '../profile-ba/helpers/promo-seats';
-import { formatRub } from '../../helpers/common/welcome-coupon';
 
 type GroupFilter = 'all' | HomeGroup;
 
@@ -73,16 +72,6 @@ export class MainPageComponent implements OnInit, AfterViewInit {
   feed$!: Observable<HomeFeedItem[] | null>;
   feedLimit = FEED_PAGE;
   giveaway: GiveawayLoad<GiveawayCampaign> = { kind: 'loading', value: null };
-  ultrasoundOffer: {
-    serviceId: string;
-    price: string;
-    originalPrice: string;
-    remaining: string;
-    lastBookingAt: number;
-    visitDeadline: string;
-  } | null = null;
-  readonly ultrasoundCampaign = ULTRASOUND_PROMO;
-  readonly ultrasoundCover = ULTRASOUND_COVER;
   private readonly feedRequested$ = new ReplaySubject<void>(1);
   private readonly refreshPerks$ = new BehaviorSubject<void>(undefined);
   private feedObserver?: IntersectionObserver;
@@ -115,9 +104,11 @@ export class MainPageComponent implements OnInit, AfterViewInit {
               private promoSeats: PromoSeatsService,
               private destroyRef: DestroyRef,
               private zone: NgZone,
-              @Inject(PLATFORM_ID) platformId: object) {
+              @Inject(PLATFORM_ID) platformId: object, @Optional() private publications:PromotionPublicationsService|null=null) {
     this.isBrowser = isPlatformBrowser(platformId);
   }
+
+  readonly hasPublicationFeatured$ = (this.publications?.state$ ?? of<PublicationBatch>({items:[],managedSources:[]})).pipe(map(state=>state.items.some(p=>p.content.placements.includes('home_featured'))));
 
   ngOnInit(): void {
     this.dictionary.getMainCategories().pipe(take(1)).subscribe(result => {
@@ -130,7 +121,6 @@ export class MainPageComponent implements OnInit, AfterViewInit {
 
     this.initShowcase();
     this.initPerksRefresh();
-    this.initUltrasoundOffer();
     this.giveaways.publicList('home').pipe(takeUntilDestroyed(this.destroyRef)).subscribe(load => {
       this.giveaway = load;
     });
@@ -146,41 +136,6 @@ export class MainPageComponent implements OnInit, AfterViewInit {
         this.showcase.invalidatePerks();
         this.refreshPerks$.next();
       })));
-  }
-
-  private initUltrasoundOffer(): void {
-    // Остаток меняется при брони и отмене. Не сохраняем его в SSR-кеше главной.
-    if (!this.isBrowser) return;
-    const readOffer = () => this.promoSeats.readState(ULTRASOUND_MASTER_ID, ULTRASOUND_PROMO).pipe(
-      map(load => {
-        const state = load.value;
-        const service = state?.services[0];
-        if (!state || state.code !== ULTRASOUND_PROMO || !state.exclusive || state.status !== 'open'
-          || state.seatsLeft <= 0 || !service) return null;
-        const lastBookingAt = lastPromoBookingAt(state.endsAt);
-        if (!Number.isFinite(lastBookingAt) || lastBookingAt < Date.now()) return null;
-        return {
-          serviceId: service.serviceId,
-          price: formatRub(service.clientPays),
-          originalPrice: formatRub(service.listAmount),
-          remaining: seatsLeftText(state.seatsLeft, state.seatsLimit),
-          lastBookingAt,
-          visitDeadline: state.visitDeadline,
-        };
-      }),
-    );
-    // Минутный таймер не должен мешать Angular завершить гидрацию.
-    this.zone.runOutsideAngular(() => fromEvent(window, 'focus').pipe(
-      startWith(null),
-      switchMap(() => readOffer().pipe(expand(offer => {
-        if (!offer) return EMPTY;
-        const endsAt = offer.lastBookingAt + 1;
-        return timer(Math.min(60_000, Math.max(0, endsAt - Date.now()))).pipe(
-          switchMap(() => endsAt <= Date.now() ? of(null) : readOffer()),
-        );
-      }))),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(offer => this.zone.run(() => this.ultrasoundOffer = offer)));
   }
 
   ngAfterViewInit(): void {

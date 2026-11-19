@@ -31,7 +31,7 @@ const ssrCache = new Map<string, { html: string; expiresAt: number }>();
  * а браузер после гидрации дорисовывал «нет доступных слотов» — на экране оказывались
  * оба состояния сразу.
  */
-const SSR_CACHE_SKIP = [/\/choose-date(\/|\?|$)/, /\/confirm-record2?(\/|\?|$)/, /\/page-user(\/|\?|$)/, /\/profile-user(\/|\?|$)/, /\/admin(\/|\?|$)/, /^\/giveaways(\/|\?|$)/];
+const SSR_CACHE_SKIP = [/^\/promotions(\/|\?|$)/, /\/choose-date(\/|\?|$)/, /\/confirm-record2?(\/|\?|$)/, /\/page-user(\/|\?|$)/, /\/profile-user(\/|\?|$)/, /\/admin(\/|\?|$)/, /^\/giveaways(\/|\?|$)/];
 const INDEX_HTML_TITLE = 'OnWaves — онлайн-запись к мастерам и в салоны красоты';
 const CELLINGS_SHELL_TITLE =
   'Натяжные потолки — Кашира, Ступино, Озёры, Коломна и Домодедово — OnWaves';
@@ -40,7 +40,7 @@ const CELLINGS_SHELL_DESCRIPTION =
 const RESERVED_PROFILE_SLUGS = new Set([
   'catalog', 'landing', 'masters', 'search', 'static', 'ba-edit',
   'profilebisacc', 'cabinet-ba', 'sitemap.xml', 'robots.txt',
-  'giveaways', 'admin',
+  'giveaways', 'admin', 'promotions',
 ]);
 // Демо-slug (developer, user-example, bussiness) — в NOINDEX_PROFILE_SLUGS.
 // Тот же модуль читает карточка для meta robots. Список временный, до isTest на бэке.

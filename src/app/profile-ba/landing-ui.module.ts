@@ -1,3 +1,5 @@
+import { PromotionPublicationsComponent } from '../promotions/promotion-publications.component';
+import { PromotionLegacyDirective } from '../promotions/promotion-legacy.directive';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +13,7 @@ import { PromoMediaCarouselComponent } from './components/promo-media-carousel/p
 /** Карточка акции: публичный профиль и превью «как видит клиент». Без роутов. */
 @NgModule({
   declarations: [LandingOfferCardComponent, LandingSectionComponent, CalculatorPlayerComponent, PromoMediaCarouselComponent],
-  imports: [CommonModule, FormsModule, RouterModule, CommonComponentsModule],
+  imports: [PromotionPublicationsComponent, PromotionLegacyDirective,CommonModule, FormsModule, RouterModule, CommonComponentsModule],
   exports: [LandingOfferCardComponent, LandingSectionComponent, CalculatorPlayerComponent],
 })
 export class LandingUiModule {}

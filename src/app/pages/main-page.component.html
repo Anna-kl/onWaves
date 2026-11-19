@@ -60,29 +60,12 @@
     </div>
   </section>
 
-  <app-giveaway-banner *ngIf="giveaway.value?.featuredPost?.pinned" variant="home" [load]="giveaway"></app-giveaway-banner>
+  <app-promotion-publications placement="home_featured"></app-promotion-publications>
+  <app-giveaway-banner *ngIf="!(hasPublicationFeatured$ | async) && giveaway.value?.featuredPost?.pinned" variant="home" [load]="giveaway"></app-giveaway-banner>
 
-  <section *ngIf="ultrasoundOffer as offer" class="hs-promo" aria-labelledby="hs-promo-title">
-    <figure class="hs-promo__cover">
-      <img [src]="ultrasoundCover" alt="" loading="lazy" decoding="async" />
-      <figcaption>Иллюстрация процедуры</figcaption>
-    </figure>
-    <div class="hs-promo__body">
-      <p class="hs-promo__place">Озёры · Светлана Бирюкова</p>
-      <h2 id="hs-promo-title">Ультразвуковая чистка лица за полцены</h2>
-      <p class="hs-promo__terms">OnWaves оплачивает вторую половину. Без дополнительных купонов.</p>
-      <p class="hs-promo__terms">Запись по {{ offer.lastBookingAt | date:'d MMMM':'+0300' }}, визит по {{ offer.visitDeadline | date:'d MMMM':'+0300' }} включительно.</p>
-    </div>
-    <div class="hs-promo__action">
-      <p class="hs-promo__price"><strong>{{ offer.price }}</strong> вместо <s>{{ offer.originalPrice }}</s></p>
-      <p class="hs-promo__seats">{{ offer.remaining }}</p>
-      <a class="hs-btn hs-btn--primary" [routerLink]="['/permanent_ozery', 'choose-date']"
-         [queryParams]="{ serviceId: offer.serviceId, promoCampaign: ultrasoundCampaign }"
-         (click)="track('home_card_open', ultrasoundCampaign)">Записаться за {{ offer.price }}</a>
-    </div>
-  </section>
+  <app-promotion-publications placement="home"></app-promotion-publications>
 
-  <app-giveaway-banner *ngIf="!giveaway.value?.featuredPost?.pinned" variant="home" [load]="giveaway"></app-giveaway-banner>
+  <app-giveaway-banner *ngIf="!(hasPublicationFeatured$ | async) && !giveaway.value?.featuredPost?.pinned" variant="home" [load]="giveaway"></app-giveaway-banner>
 
   <app-rubric-menu *ngIf="isRubricOpen" [isOpen]="isRubricOpen" (setCategory)="setCategory($event)"></app-rubric-menu>
 
@@ -139,12 +122,13 @@
               <p class="hs-card__sub hs-card__city" *ngIf="m.place">{{ m.place }}</p>
               <p class="hs-card__sub" *ngIf="m.subtitle">{{ m.subtitle }}</p>
               <ng-container *ngIf="(perks$ | async)?.[m.id] as perks">
+                <app-promotion-publications [masterId]="m.id" placement="home_master_card"></app-promotion-publications>
                 <div class="hs-perks" *ngIf="perks.coupon || perks.promo">
-                  <span class="hs-perk hs-perk--coupon" *ngIf="perks.coupon as coupon" [attr.title]="coupon.hint">
+                  <span [promotionLegacy]="m.id" legacyType="welcome" class="hs-perk hs-perk--coupon" *ngIf="perks.coupon as coupon" [attr.title]="coupon.hint">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2.5"/></svg>
                     <span><b>{{ coupon.text }}</b> на первую запись<small *ngIf="coupon.until"> · до {{ coupon.until | date:'d MMMM' }}</small></span>
                   </span>
-                  <p class="hs-perk hs-perk--promo" *ngIf="perks.promo as promo" [attr.title]="promo.title"
+                  <p [promotionLegacy]="m.id" legacyType="promo_seats" class="hs-perk hs-perk--promo" *ngIf="perks.promo as promo" [attr.title]="promo.title"
                      [class.hs-perk--seats]="promo.fragment === 'promo-seats'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
                     <span><i>{{ promo.badge }}</i><b>{{ promo.title }}</b><small class="hs-perk__status" *ngIf="promo.statusText">{{ promo.statusText }}</small><small *ngIf="promo.until"> · до {{ promo.until | date:'d MMMM':'+0300' }}</small></span>

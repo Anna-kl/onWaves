@@ -1,3 +1,5 @@
+import { PromotionPublicationsComponent } from '../promotions/promotion-publications.component';
+import { PromotionLegacyDirective } from '../promotions/promotion-legacy.directive';
 import {NgModule} from "@angular/core";
 import { RouterModule } from '@angular/router';
 import { UABeforeComponent } from './uabefore/uabefore.component';
@@ -23,7 +25,7 @@ import { MastersLandingComponent } from "./masters-landing/masters-landing.compo
     LandingVersion2Component,
     MasterBookingLandingSectionComponent,
     MastersLandingComponent],
-  imports: [NgIf, NgForOf, AsyncPipe, MainAppModule,
+  imports: [PromotionPublicationsComponent, PromotionLegacyDirective,NgIf, NgForOf, AsyncPipe, MainAppModule,
     RouterModule,
     PaginatorModule,
     ConfirmPopupModule,

@@ -1,3 +1,4 @@
+<app-promotion-publications [masterId]="profileId" placement="profile" [handleActions]="true" (actionClick)="onAction($event.offer, $event.action)"></app-promotion-publications>
 <div class="landing-skel" *ngIf="showLandingSkeleton" aria-hidden="true">
   <span class="landing-skel__line landing-skel__line--badge"></span>
   <span class="landing-skel__line landing-skel__line--title"></span>
@@ -5,7 +6,7 @@
   <span class="landing-skel__line landing-skel__line--btn"></span>
 </div>
 
-<app-landing-offer-card *ngIf="ultrasoundCard as card" class="ultrasound-offer" [id]="ultrasoundAnchor"
+<app-landing-offer-card [promotionLegacy]="profileId" legacyType="promo_seats" *ngIf="ultrasoundCard as card" class="ultrasound-offer" [id]="ultrasoundAnchor"
   [offer]="card.offer" [promoPrice]="card.price" [bookingEnabled]="bookingEnabled"
   (actionClick)="bookUltrasound($event.serviceId)">
 </app-landing-offer-card>
@@ -14,14 +15,14 @@
   <button type="button" (click)="retryPromo()">Повторить</button>
 </div>
 
-<ng-container *ngIf="profilePromo as campaign">
+<div [promotionLegacy]="profileId" legacyType="promo_seats"><ng-container *ngIf="profilePromo as campaign">
   <app-landing-offer-card *ngIf="profilePromoOffer as offer" class="profile-campaign" id="promo-seats"
     [offer]="offer" [profileCampaign]="campaign" [bookingEnabled]="bookingEnabled"
     [profileCampaignPending]="profilePromoPending" [profileCampaignError]="profilePromoError"
     [promoTerms]="profilePromoTerms" [termsPath]="profilePromoTermsPath"
     (profileServiceClick)="bookProfilePromo($event)" (retryPrice)="refreshProfilePromo()">
   </app-landing-offer-card>
-</ng-container>
+</ng-container></div>
 
 <div class="promo-check" *ngIf="promoLoadFailed && !profilePromo && !visibleOffers.length" role="status">
   <p>Не удалось проверить наличие мест по акции.</p>
@@ -59,7 +60,7 @@
     <p class="promo-demo-hint" *ngIf="demoHintOfferId === (offer.id || offer.serviceId || 'promo') || demoHintOfferId === 'consultation'">Это демо-страница: посмотреть можно, записаться нельзя</p>
   </div>
   <ng-template #offerCard>
-  <app-landing-offer-card
+  <app-landing-offer-card [promotionLegacy]="profileId" legacyType="landing_offer" [legacySourceId]="offer.id"
     [offer]="offer"
     [bookingEnabled]="bookingEnabled"
     [contactPhone]="contactPhone"

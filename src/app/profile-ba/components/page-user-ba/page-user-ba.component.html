@@ -1,4 +1,6 @@
-<app-coupon-new-user *ngIf="showWelcomeModal && welcomeCampaign"
+<app-promotion-publications [masterId]="id" placement="coupon_popup" [popupAllowed]="showWelcomeModal" (choose)="onWelcomeChoose()" (closed)="onWelcomeModalClosed()"></app-promotion-publications>
+<app-promotion-publications [masterId]="id" placement="services"></app-promotion-publications>
+<app-coupon-new-user [promotionLegacy]="id" legacyType="welcome" *ngIf="showWelcomeModal && welcomeCampaign"
     [campaign]="welcomeCampaign" (choose)="onWelcomeChoose()" (closed)="onWelcomeModalClosed()"></app-coupon-new-user>
 <app-albums-show [isEdit]=false [profileId]="id" [canBook]="canBook"></app-albums-show>
 <div #servicesAnchor></div>

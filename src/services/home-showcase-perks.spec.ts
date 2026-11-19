@@ -62,7 +62,7 @@ describe('Главная: серверные акции вне ручной по
     service.getPerks(master).subscribe(value => result=value);
     coupon().flush(offer());seats().flush(state({seatsLeft:1}));
     expect(result.coupon?.text).toContain('500');
-    expect(result.promo).toEqual(jasmine.objectContaining({badge:'−60%',title:'Маникюр или педикюр',fragment:'promo-seats',excludesCoupon:true}));
+    expect(result.promo).toEqual(jasmine.objectContaining({badge:'−60%',title:state().title,fragment:'promo-seats',excludesCoupon:true}));
     expect(result.promo?.statusText).toBe('Осталось одно место');
     service.getPerks(master).subscribe();http.expectNone(req => req.url.includes('/welcome/offer') || req.url.includes('/promos/seats/'));
   });

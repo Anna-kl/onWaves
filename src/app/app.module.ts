@@ -1,3 +1,5 @@
+import { PromotionPublicationsComponent } from './promotions/promotion-publications.component';
+import { PromotionLegacyDirective } from './promotions/promotion-legacy.directive';
 import {APP_INITIALIZER, LOCALE_ID, NgModule} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AppRoutingModule } from './app-routing.module';
@@ -132,7 +134,7 @@ registerLocaleData(localeRu, 'ru');
     ConfirmEmailComponent,
     RegisterEmailCodeComponent
   ],
-    imports: [
+    imports: [PromotionPublicationsComponent, PromotionLegacyDirective,
     NgxMaskDirective,
     NgxMaskPipe,
     BrowserModule,

@@ -1,3 +1,5 @@
+import { PromotionPublicationsComponent } from '../promotions/promotion-publications.component';
+import { PromotionLegacyDirective } from '../promotions/promotion-legacy.directive';
 import {NgModule} from "@angular/core";
 import {GroupServiceComponent} from "./components/group-service/group-service.component";
 import {ConfirmRecordComponent} from "./components/confirm-record/confirm-record.component";
@@ -91,7 +93,7 @@ import { BookingSuccessComponent } from './components/booking-success/booking-su
     PromoSeatsTermsComponent,
     // ShowPhoneCouponComponent
   ],
-    imports: [
+    imports: [PromotionPublicationsComponent, PromotionLegacyDirective,
       GiveawayMyEntriesComponent,
       BookingPriceComponent,
       BookingBenefitsComponent,

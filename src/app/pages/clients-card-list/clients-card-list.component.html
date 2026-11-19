@@ -22,6 +22,7 @@
       </div>
 
       <div class="mc-body">
+        <app-promotion-publications [masterId]="bisiness.id" placement="catalog_master_card"></app-promotion-publications>
         <div class="mc-title" [title]="bisiness.name">{{ titleWithBreakOpportunities(bisiness.name) }}</div>
         <div class="mc-sub" *ngIf="prepareAbout(bisiness.about)">{{ prepareAbout(bisiness.about) }}</div>
 
