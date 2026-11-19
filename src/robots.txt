@@ -47,3 +47,5 @@ Allow: /assets/
 Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid&action
 
 Sitemap: https://onwaves.online/sitemap.xml
+
+Disallow: /static/promotions/

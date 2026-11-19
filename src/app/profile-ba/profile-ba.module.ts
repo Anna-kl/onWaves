@@ -57,6 +57,7 @@ import { PromoSeatsTermsComponent } from './components/promo-seats-terms/promo-s
 import { BookingPriceComponent } from './components/booking-price/booking-price.component';
 import { BookingBenefitsComponent } from './components/booking-benefits/booking-benefits.component';
 import { BookingSuccessComponent } from './components/booking-success/booking-success.component';
+import { WelcomeOfferBannerComponent } from './components/welcome-offer-banner/welcome-offer-banner.component';
 
 
 @NgModule({
@@ -94,6 +95,7 @@ import { BookingSuccessComponent } from './components/booking-success/booking-su
     // ShowPhoneCouponComponent
   ],
     imports: [PromotionPublicationsComponent, PromotionLegacyDirective,
+      WelcomeOfferBannerComponent,
       GiveawayMyEntriesComponent,
       BookingPriceComponent,
       BookingBenefitsComponent,
@@ -120,6 +122,7 @@ import { BookingSuccessComponent } from './components/booking-success/booking-su
         CommonModule,
         LandingUiModule],
   exports: [
+    WelcomeOfferBannerComponent,
     ProfileBARouting,
     ProfileBANotesRouting,
     GroupServiceComponent,

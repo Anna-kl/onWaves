@@ -11,6 +11,7 @@ import { CarouselModule } from 'primeng/carousel';
 import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
+import { NavigationFailureComponent } from './components/navigation-failure/navigation-failure.component';
 
 import { BrowserModule, HAMMER_LOADER, provideClientHydration } from '@angular/platform-browser';
 
@@ -151,6 +152,7 @@ registerLocaleData(localeRu, 'ru');
     FormsModule,
     ImageModule,
     AppToastComponent,
+    NavigationFailureComponent,
     GiveawayBannerComponent,
     UIModule,
     NgOptimizedImage,

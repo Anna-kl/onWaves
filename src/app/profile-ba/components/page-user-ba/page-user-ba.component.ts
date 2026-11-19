@@ -27,6 +27,7 @@ import { selectProfileMainClient } from '../../../ngrx-store/mainClient/store.se
 import { WelcomeCouponService } from 'src/services/welcome-coupon.service';
 import { WelcomeCampaign } from '../../../DTO/views/promo/welcome-coupon';
 import { welcomeHasOffer, welcomeIsFixed, welcomeOfferLine, welcomeTierList } from 'src/helpers/common/welcome-coupon';
+import { usesWelcomeCampaignBanner } from '../../helpers/welcome-campaign-presentation';
 
 @Component({
   selector: 'app-page-user-ba',
@@ -99,6 +100,12 @@ export class PageUserBAComponent implements OnInit, OnDestroy {
     return welcomeOfferLine(this.welcomeCampaign);
   }
 
+  private promotionPopupClosedFor:string|null=null;
+  get promotionPopupAllowed():boolean {
+    return isPlatformBrowser(this.platformId)&&this.canBook&&!this._welcome.isLoggedIn&&this.promotionPopupClosedFor!==this.id;
+  }
+  onPromotionPopupClosed():void {this.promotionPopupClosedFor=this.id;}
+
   @ViewChild('servicesAnchor') servicesAnchor?: ElementRef<HTMLElement>;
 
   onWelcomeChoose(): void {
@@ -127,7 +134,8 @@ export class PageUserBAComponent implements OnInit, OnDestroy {
 
   /** Одна загрузка предложения на страницу мастера; условия: id известен и запись открыта. */
   private maybeLoadWelcome(): void {
-    if (this.isMaryProfile()) {
+    if (this.isMaryProfile() || usesWelcomeCampaignBanner(this.profile?.link)
+        || usesWelcomeCampaignBanner(this._router.url.split(/[?#]/)[0].split('/')[1])) {
       this.welcomeSub?.unsubscribe();
       this.welcomeCampaign = null;
       this.showWelcomeModal = false;

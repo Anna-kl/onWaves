@@ -56,7 +56,7 @@ export function promoReasonText(reason?: string | null): string {
     case 'promo_visit_too_late': return 'Выбранная дата позже срока акции. Выберите более раннюю дату или подтвердите запись по обычной цене.';
     case 'promo_already_used': return 'На этот номер уже занято место по акции. Для этой записи действует обычная цена.';
     case 'promo_ended': return 'Акция завершилась. Запись доступна по обычной цене.';
-    case 'promo_seats_exhausted': return 'Места с дополнительными 20 % закончились. Запись — по цене без этой скидки.';
+    case 'promo_seats_exhausted': return 'Места по акции закончились. Запись — по цене без этой скидки.';
     case 'not_first_booking': return 'Скидка действует на первую выполненную запись через OnWaves.';
     case 'phone_required': return 'Для участия в акции нужен номер телефона в профиле.';
     case 'promo_phone_unverified': return 'Подтвердите номер телефона для записи по акции.';
@@ -99,14 +99,15 @@ export function bookingPrice(
       ? (promo.exclusive && promo.reason === 'promo_seats_exhausted'
         ? 'Все места по акции на УЗ-чистку заняты.'
         : promo.reason === 'promo_seats_exhausted' && coupon > 0
-        ? 'Места с дополнительными 20 % закончились. В сумме остался только купон.'
+        ? 'Места по акции закончились. В сумме остался только купон.'
         : promo.reason === 'not_first_booking'
           ? 'Скидка действует на первую выполненную запись через OnWaves.'
           : promoReasonText(promo.reason))
       : couponQuote?.reason && couponQuote.couponStatus !== 'login_required' && coupon <= 0
       && couponQuote.couponStatus !== 'none' ? welcomeReasonText(couponQuote.reason) : null,
     termsPath: hasPromo && slug && !promo?.exclusive ? promoTermsPath(slug) : coupon > 0 && !couponQuote?.policyId ? '/static/kupon' : null,
-    promoLabel: hasPromo ? (promo?.exclusive ? 'Скидка OnWaves 50 %' : 'Скидка OnWaves 20 %') : null,
+    // Quote не содержит процент: не подменяем условия акции фиксированными 20/50 %.
+    promoLabel: hasPromo ? 'Скидка по акции' : null,
     couponLabel: fixed && coupon > 0 ? `Купон OnWaves ${formatRub(hasPromo ? promo!.couponDiscount : coupon)}` : null,
     totalLabel: fixed ? 'Вы платите' : null,
     pendingNote: fixed ? 'Сумма действует при выполнении условий. Вход сам по себе место не резервирует.' : null,

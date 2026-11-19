@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 import { environment } from '../enviroments/environment';
 import { AnalyticsService } from './analytics.service';
 import { WelcomeCouponMe, WelcomeOffer, WelcomeQuote } from '../app/DTO/views/promo/welcome-coupon';
@@ -9,7 +9,7 @@ import { WelcomeCouponMe, WelcomeOffer, WelcomeQuote } from '../app/DTO/views/pr
 /**
  * Приветственный купон. Клиент только показывает то, что посчитал сервер:
  * суммы, уровни и статусы сюда приходят готовыми и в запись не доверяются.
- * Ошибка сети = «предложения нет» (fail-closed): лучше ничего не обещать, чем показать неверное.
+ * Витрина при ошибке скрывает обещание, но расчёт записи обязан сообщить о сбое.
  */
 @Injectable({ providedIn: 'root' })
 export class WelcomeCouponService {
@@ -65,13 +65,17 @@ export class WelcomeCouponService {
       );
   }
 
-  /** Расчёт по выбранным услугам. Ответ null = сервер расчёт не дал, скидку не показываем. */
-  quote(masterId: string, serviceIds: string[], clientId?: string | null): Observable<WelcomeQuote | null> {
+  /** Отсутствие купона — штатный ответ; технический сбой должен остановить подтверждение суммы. */
+  quote(masterId: string, serviceIds: string[], clientId?: string | null): Observable<WelcomeQuote> {
     return this.http
       .post<WelcomeQuote>(`${this.url}quote`, { masterId, serviceIds, clientId: clientId ?? null }, {
         headers: this.authHeaders(),
       })
-      .pipe(catchError(() => of(null)));
+      .pipe(map(quote => {
+        // Отсутствие права приходит DTO 200, а не 404 или пустым ответом.
+        if (!quote) throw new Error('Сервер не вернул расчёт купона');
+        return quote;
+      }));
   }
 
   invalidateMine(): void {}

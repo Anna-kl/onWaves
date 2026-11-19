@@ -31,6 +31,7 @@ import { AnalyticsService } from 'src/services/analytics.service';
 import { WelcomeCouponMe, WelcomeOffer } from 'src/app/DTO/views/promo/welcome-coupon';
 import { formatRub, welcomeDeadlineText, welcomeHasOffer, welcomeIsFixed, welcomeOfferLine, welcomeTierList } from 'src/helpers/common/welcome-coupon';
 import { switchMap, of } from 'rxjs';
+import { usesWelcomeCampaignBanner } from '../../helpers/welcome-campaign-presentation';
 
 
 
@@ -160,6 +161,7 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get showCouponBadge(): boolean {
+    if (this.splitForPromo && usesWelcomeCampaignBanner(this.businessProfile?.link)) return false;
     if (!this.businessProfile?.isGetOrder || this.businessProfile.isPromo) {
       return false;
     }
@@ -245,6 +247,8 @@ export class ColumnBAProfileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private loadCoupon(): void {
+    // Соблазн показывает публичную акцию в шапке; второй запрос и личная плашка не нужны.
+    if (this.splitForPromo && usesWelcomeCampaignBanner(this.businessProfile?.link)) return;
     const masterId = this.businessProfile?.id ?? this.id;
     if (!isPlatformBrowser(this.platformId) || !masterId || this.couponLoadedFor === masterId) {
       return;

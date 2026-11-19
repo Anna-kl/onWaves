@@ -110,6 +110,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   private quoteKey = '';
   private quoteSub?: Subscription;
   quoteLoading = false;
+  quoteError = '';
   private readonly sessionSubscriptions = new Subscription();
   rewardCoupons: ReviewRewardCoupon[] = [];
   selectedRewardIds: string[] = [];
@@ -155,11 +156,11 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   }
 
   get ultrasoundUnavailable(): boolean {
-    return this.ultrasoundFlow && !this.quoteLoading && !this.promoApplies;
+    return this.ultrasoundFlow && !this.quoteLoading && !this.quoteError && !this.promoApplies;
   }
 
   get profilePromoUnavailable(): boolean {
-    return !!this.selectedPromoCampaign && !this.ultrasoundSelected && !this.quoteLoading && !this.promoApplies;
+    return !!this.selectedPromoCampaign && !this.ultrasoundSelected && !this.quoteLoading && !this.quoteError && !this.promoApplies;
   }
 
   get promoPhoneRequired(): boolean {
@@ -458,7 +459,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     this.rewardQuoteSub?.unsubscribe();
     this.rewardQuote = null;
     this.rewardQuoteError = '';
-    if (!this.selectedRewardIds?.length || this.prizeBlocked) return;
+    if (!this.selectedRewardIds?.length || this.prizeBlocked || this.quoteError) return;
     const masterId = this.getMasterId();
     const clientId = this.profile?.id;
     const serviceIds = this.chooseServices.map(service => service.id).filter((id): id is string => !!id);
@@ -525,6 +526,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     this.rewardQuoteError = '';
     this.loadRewardWallet(this.profile?.userType === UserType.User ? clientId : null);
     this.quoteLoading = true;
+    this.quoteError = '';
     this.welcomeQuote = null;
     this.promoQuote = null;
     this.prizeAwardId = null;
@@ -543,8 +545,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
         return this._giveaways.prizeQuote(awardId, ids, clientId, dayId).pipe(tap(load => this.applyPrizeQuote(load)));
       }),
       catchError(() => {
-        this.prizeBlocked = true;
-        this.couponRefusal = 'Не удалось проверить условия записи. Попробуйте ещё раз.';
+        this.quoteError = 'Не удалось проверить стоимость записи и скидки. Попробуйте ещё раз.';
         return of(null);
       }),
       finalize(() => this.quoteLoading = false),
@@ -556,7 +557,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     const campaign = this.selectedPromoCampaign;
     return forkJoin({
       welcome: campaign ? of(null) : this._welcome.quote(masterId, ids, clientId),
-      promo: this.ordinaryProfilePromo ? of(null) : this._promoSeats.quote(masterId, ids, clientId, dayId, campaign),
+      promo: this.ordinaryProfilePromo ? of(null) : this._promoSeats.quoteForBooking(masterId, ids, clientId, dayId, campaign),
     }).pipe(tap(({ welcome, promo: response }) => {
       let promo = response;
       if (this.ordinaryUltrasound && response?.exclusive) promo = null;
@@ -1005,6 +1006,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
     this.price = 0;
     this.welcomeQuote = null;
     this.quoteKey = '';
+    this.quoteError = '';
     this.couponRefusal = null;
     this.promoQuote = null;
     this.promoRefusal = null;
@@ -1030,7 +1032,7 @@ export class ConfirmRecordComponent implements OnInit, OnDestroy {
   }
 
   onConfirm() {
-    if (this.saveInProgress || this.quoteLoading || this.rewardQuoteBlocksBooking) {
+    if (this.saveInProgress || this.quoteLoading || this.quoteError || this.rewardQuoteBlocksBooking) {
       return;
     }
     if (this.ultrasoundUnavailable || this.profilePromoUnavailable) return;

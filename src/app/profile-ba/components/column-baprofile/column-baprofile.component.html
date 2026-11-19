@@ -91,21 +91,6 @@
       </div>
     </div>
 
-    <div class="ba-profile-layout__coupon" *ngIf="showMaryCoupon">
-    <section class="mary-coupon" #maryCoupon>
-      <p class="mary-coupon__kicker">Первый визит к {{ businessProfile.name }}</p>
-      <p class="mary-coupon__sum">{{ couponHeroAmount }}</p>
-      <p class="mary-coupon__note">{{ couponHeroNote }}</p>
-      <ul class="mary-coupon__tiers">
-        <li *ngFor="let tier of couponTiers">{{ tier.text }}</li>
-      </ul>
-      <p class="mary-coupon__who">Для новых клиентов в Кашире. Скидку оплачивает OnWaves</p>
-      <p class="mary-coupon__until" *ngIf="couponDeadline">{{ couponDeadline }}</p>
-      <button type="button" class="mary-coupon__btn" (click)="bookWithCoupon()">Записаться со скидкой</button>
-      <p class="mary-coupon__fine">Одна скидка на человека, на первую запись. Итог посчитаем при оформлении.</p>
-    </section>
-    </div>
-
     <div class="ba-profile-layout__aside">
     <!--- Карточка "О мастере" --->
     <div class="about-card" *ngIf="businessProfile.about" [class.is-open]="aboutOpen">
@@ -235,31 +220,10 @@
     <div class="promo-hint" *ngIf="businessProfile.isPromo">
       Это демо-страница: посмотреть можно, записаться нельзя
     </div>
-    <!-- Купон мастера: условия с сервера, плашка стоит прямо над кнопкой записи —
-         это момент решения. Гостю показываем как приглашение, вошедшему — только
-         пока право не израсходовано. -->
-    <div class="coupon-card" *ngIf="showCouponBadge && !showMaryCoupon">
-      <span class="coupon-card__ic" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h13A1.5 1.5 0 0 1 20 8.5v1.6a1.9 1.9 0 0 0 0 3.8v1.6a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 15.5v-1.6a1.9 1.9 0 0 0 0-3.8V8.5Z"
-                stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-          <path d="M14.5 8.4v7.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="1.8 2.4"/>
-        </svg>
-      </span>
-      <span class="coupon-card__body">
-        <b class="coupon-card__title">{{ couponBadgeTitle }}</b>
-        <span class="coupon-card__note">Действует у этого мастера на первую запись онлайн</span>
-        <a class="coupon-card__terms" routerLink="/static/kupon">Условия</a>
-      </span>
-    </div>
-
     <div class="btn-green margin-top20" style=" width: 100%; max-width: none;"
      data-testid="book-online" *ngIf="businessProfile.isGetOrder && !businessProfile.isPromo" (click)="onlineRecord()">
       Записаться онлайн
     </div>
     </div>
-  </div>
-  <div class="mary-coupon-dock" *ngIf="showMaryCoupon && couponDocked">
-    <button type="button" class="mary-coupon__btn" (click)="bookWithCoupon()">Записаться со скидкой</button>
   </div>
   <!-- Правая колонка start-->

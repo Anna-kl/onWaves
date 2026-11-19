@@ -13,7 +13,7 @@ describe('Стоимость на всех шагах записи', () => {
   it('показывает 20 % и купон отдельными строками с суммой сервера 5 900', () => {
     expect(bookingPrice(services, eligible, promo(), true, 'permanent_ozery')).toEqual(jasmine.objectContaining({
       original: 8000, payable: 5900, promo: 1600, coupon: 500, pending: false,
-      promoLabel: 'Скидка OnWaves 20 %', termsPath: '/permanent_ozery/usloviya',
+      promoLabel: 'Скидка по акции', termsPath: '/permanent_ozery/usloviya',
     }));
   });
 

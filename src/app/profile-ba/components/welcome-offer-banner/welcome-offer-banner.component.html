@@ -1,0 +1,38 @@
+<section class="welcome-campaign" *ngIf="campaign as offer" aria-labelledby="welcome-campaign-title">
+  <header class="welcome-campaign__header">
+    <span class="welcome-campaign__brand">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M3 7h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V7Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M15 7v12" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3"/>
+      </svg>
+      Акция OnWaves
+    </span>
+    <span class="welcome-campaign__deadline" *ngIf="deadlineText(offer.endsAt) as deadline">Запись · {{ deadline }}</span>
+  </header>
+
+  <div class="welcome-campaign__body">
+    <div class="welcome-campaign__intro">
+      <p class="welcome-campaign__studio">{{ profile?.name }}</p>
+      <h2 id="welcome-campaign-title">Скидка до <strong>{{ maximumDiscount }}</strong></h2>
+      <p class="welcome-campaign__lead">{{ offer.eligibilityMode === 1 ? 'На первый визит к этому мастеру через OnWaves' : 'На первый визит через OnWaves' }}</p>
+    </div>
+
+    <ul class="welcome-campaign__tiers" *ngIf="tierList(offer).length">
+      <li *ngFor="let tier of tierList(offer)" [attr.aria-label]="tier.text">
+        <strong>{{ formatRub(tier.discount) }}</strong>
+        <span>{{ tier.thresholdInclusive === false ? 'Больше' : 'От' }} <b class="welcome-campaign__threshold">{{ formatRub(tier.threshold) }}</b></span>
+      </li>
+    </ul>
+
+    <div class="welcome-campaign__action">
+      <button type="button" (click)="book()">Выбрать услугу с купоном <span aria-hidden="true">→</span></button>
+      <p>Скидку проверим в клиентском профиле перед подтверждением записи.</p>
+    </div>
+
+    <details class="welcome-campaign__terms">
+      <summary>Условия акции</summary>
+      <p *ngIf="offer.offerText">{{ offer.offerText }}</p>
+      <a routerLink="/static/kupon">Как работает купон OnWaves</a>
+    </details>
+  </div>
+</section>

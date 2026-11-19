@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { PromotionPublicationsComponent } from '../promotions/promotion-publications.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxMaskDirective } from 'ngx-mask';
@@ -52,7 +53,7 @@ import {
     SettingsComponent,
     SubscribeChannelModalComponent,
     RevokeChannelModalComponent],
-  imports: [
+  imports: [PromotionPublicationsComponent,
     NotificationChannelsBannerComponent,
     CommonModule,
     FormsModule,

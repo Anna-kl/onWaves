@@ -28,8 +28,8 @@ export class PromotionPublicationsComponent {
   constructor(private publications:PromotionPublicationsService){}
   get compact():boolean{return this.placement==='home_master_card'||this.placement==='catalog_master_card';}
   items(state:PublicationBatch):PromotionPublication[] {
-    if(this.placement==='terms'?!this.publicationId:this.placement!=='home_featured'&&this.placement!=='home'&&!this.masterId)return [];
-    return state.items.filter(p=>p.content?.schemaVersion===1&&(this.placement==='terms'||p.content.placements.includes(this.placement))
+    if(this.placement==='terms'?!this.publicationId:!['home_featured','home','conditions'].includes(this.placement)&&!this.masterId)return [];
+    return state.items.filter(p=>p.content?.schemaVersion===1&&(this.placement==='conditions'?p.sourceType.startsWith('welcome_'):this.placement==='terms'||p.content.placements.includes(this.placement))
       &&(!this.masterId||p.masterId===this.masterId)&&(!this.publicationId||p.id===this.publicationId)
       && (this.placement!=='coupon_popup'||this.popupAllowed&&p.canBook)).slice(0,this.placement==='home_featured'?1:20);
   }
@@ -46,6 +46,8 @@ export class PromotionPublicationsComponent {
   }
   status(p:PromotionPublication):string {
     const seats=p.facts.seats;
+    if(p.status==='open'&&!p.canBook)return 'На этой странице запись недоступна';
+    if(p.status==='policy_not_started'||p.status==='campaign_not_started')return 'Скоро начнётся';
     if(seats?.closedReason==='not_started')return 'Скоро начнётся';
     if(seats&&p.status==='open')return `Осталось ${seats.seatsLeft} из ${seats.seatsLimit} мест`;
     if(p.status==='open')return 'Доступно';

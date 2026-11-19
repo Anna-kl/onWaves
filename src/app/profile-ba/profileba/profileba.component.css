@@ -49,6 +49,8 @@
     width: 100%;
 }
 
+.profile-welcome-banner { width: 100%; }
+
 .ba-profile-layout__left,
 .ba-profile-layout__right {
     display: contents;
@@ -71,6 +73,10 @@
 }
 
 @media screen and (max-width: 768px) {
+    .profile-welcome-banner {
+        padding-inline: 16px;
+        box-sizing: border-box;
+    }
     .ba-profile-layout {
         padding-inline: 16px;
         box-sizing: border-box;

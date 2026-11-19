@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Subject, forkJoin, of, takeUntil } from 'rxjs';
+import { Subject, catchError, forkJoin, of, takeUntil } from 'rxjs';
 import { CalculatorAnswerKind } from '../../../DTO/enums/calculatorAnswerKind';
 import { WelcomeCouponMe, WelcomeOffer, WelcomeQuote } from '../../../DTO/views/promo/welcome-coupon';
 import { WelcomeCouponService } from 'src/services/welcome-coupon.service';
@@ -412,8 +412,20 @@ export class CalculatorPlayerComponent implements OnInit, OnChanges, AfterViewIn
       quote: serviceId ? this.coupons.quote(masterId, [serviceId]) : of(null),
       mine: this.coupons.isLoggedIn ? this.coupons.getMine(null, masterId) : of(null),
     })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(({ offer, quote, mine }) => {
+      .pipe(
+        // Купон здесь — необязательная заметка: сбой не меняет смету и кнопку записи.
+        catchError(() => of(null)),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(note => {
+        if (!note) {
+          this.couponOffer = null;
+          this.couponQuote = null;
+          this.couponMine = null;
+          this.couponKey = '';
+          return;
+        }
+        const { offer, quote, mine } = note;
         this.couponOffer = offer;
         this.couponQuote = quote;
         this.couponMine = mine;

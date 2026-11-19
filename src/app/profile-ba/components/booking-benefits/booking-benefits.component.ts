@@ -14,7 +14,11 @@ import { BookingPriceComponent } from '../booking-price/booking-price.component'
 /** Предварительная стоимость на выборе услуг и даты; финальный шаг перепроверяет её. */
 @Component({
   selector: 'app-booking-benefits', standalone: true, imports: [BookingPriceComponent, NgIf],
-  template: '<app-booking-price [price]="price"></app-booking-price><p *ngIf="notice" role="status">{{ notice }}</p>',
+  template: `
+    <app-booking-price [price]="price"></app-booking-price>
+    <p *ngIf="notice" role="status">{{ notice }}</p>
+    <button *ngIf="failed" type="button" class="btn-transparent" (click)="ngOnChanges()">Проверить стоимость ещё раз</button>
+  `,
 })
 export class BookingBenefitsComponent implements OnChanges {
   @Input() masterId: string | null | undefined;
@@ -25,6 +29,7 @@ export class BookingBenefitsComponent implements OnChanges {
   @Output() priceChange = new EventEmitter<BookingPrice | null>();
   price: BookingPrice | null = null;
   notice: string | null = null;
+  failed = false;
   private request?: Subscription;
 
   constructor(
@@ -36,6 +41,8 @@ export class BookingBenefitsComponent implements OnChanges {
     this.request?.unsubscribe();
     this.price = null;
     this.notice = null;
+    this.failed = false;
+    this.priceChange.emit(null);
     const ids = this.services.map(s => s.id).filter((id): id is string => !!id);
     if (!isPlatformBrowser(this.platform) || !this.masterId || !ids.length) return;
     const masterId = this.masterId;
@@ -46,6 +53,7 @@ export class BookingBenefitsComponent implements OnChanges {
       tap(() => {
         this.price = null;
         this.notice = null;
+        this.failed = false;
         this.priceChange.emit(null);
       }),
       switchMap(clientId => (awardId ? of(awardId) : this.giveaways.findBookingPrize(masterId, ids, clientId)).pipe(
@@ -56,10 +64,11 @@ export class BookingBenefitsComponent implements OnChanges {
           }))
           : forkJoin({
             welcome: this.welcome.quote(masterId, ids, clientId),
-            promo: this.promos.quote(masterId, ids, clientId, dayId),
+            promo: this.promos.quoteForBooking(masterId, ids, clientId, dayId),
           }).pipe(map(({ welcome, promo }) => bookingPrice(services, welcome, promo, true, slug)))),
         catchError(() => {
-          this.notice = 'Не удалось проверить стоимость записи.';
+          this.failed = true;
+          this.notice = 'Не удалось проверить стоимость записи и скидки. Попробуйте ещё раз.';
           return of(null);
         }),
       )),

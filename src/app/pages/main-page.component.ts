@@ -120,22 +120,10 @@ export class MainPageComponent implements OnInit, AfterViewInit {
     }
 
     this.initShowcase();
-    this.initPerksRefresh();
     this.giveaways.publicList('home').pipe(takeUntilDestroyed(this.destroyRef)).subscribe(load => {
       this.giveaway = load;
     });
     this.initAuthGeo();
-  }
-
-  private initPerksRefresh(): void {
-    if (!this.isBrowser) return;
-    this.zone.runOutsideAngular(() => merge(
-      timer(60_000, 60_000), fromEvent(window, 'focus'), fromEvent(document, 'visibilitychange'),
-    ).pipe(filter(() => !document.hidden), throttleTime(1000), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.zone.run(() => {
-        this.showcase.invalidatePerks();
-        this.refreshPerks$.next();
-      })));
   }
 
   ngAfterViewInit(): void {
@@ -195,18 +183,20 @@ export class MainPageComponent implements OnInit, AfterViewInit {
       )
       : of({});
 
-    // Купон и акция — тоже по запросу на мастера и только в браузере: условия могут
-    // закончиться, а HTML главной живёт в 60-секундном SSR-кеше.
-    this.perks$ = this.isBrowser
-      ? combineLatest([this.masters$, this.refreshPerks$]).pipe(
-        switchMap(([list]) => from(list.filter(m => m.bookingEnabled)).pipe(
-          mergeMap(m => this.showcase.getPerks(m).pipe(map(perks => ({ id: m.id, perks }))), 3),
-          scan((acc, { id, perks }) => ({ ...acc, [id]: perks }), {} as Record<string, HomePerks>),
-          startWith({} as Record<string, HomePerks>),
-        )),
-        shareReplay({ bufferSize: 1, refCount: true })
-      )
-      : of({});
+    // Publication visibility is independent of the financial program's enabled flag.
+    // One shared public batch serves all cards; draft/unpublished sources never revive a legacy badge.
+    this.perks$ = (this.publications?.state$ ?? of<PublicationBatch>({items:[],managedSources:[]})).pipe(
+      map(batch=>{
+        const result:Record<string,HomePerks>={};
+        for(const p of batch.items.filter(item=>item.content.placements.includes('home_master_card'))){
+          const perks=result[p.masterId]??(result[p.masterId]={coupon:null,promo:null});
+          if(p.sourceType.startsWith('welcome_'))perks.coupon={text:p.badgeText,hint:p.mandatoryTerms.join(' '),until:null};
+          else perks.promo={badge:p.badgeText,title:p.content.shortTitle||p.content.offer.title,until:null,
+            fragment:p.content.placements.includes('profile')?'publication-'+p.id:undefined,excludesCoupon:p.facts.seats?.excludeWelcomeCoupon};
+        }
+        return result;
+      }),shareReplay({bufferSize:1,refCount:true}),
+    );
 
     this.feed$ = this.feedRequested$.pipe(
       take(1),

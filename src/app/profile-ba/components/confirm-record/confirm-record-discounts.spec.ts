@@ -1,6 +1,6 @@
 import { ConfirmRecordComponent } from './confirm-record.component';
 import { WelcomeQuote } from '../../../DTO/views/promo/welcome-coupon';
-import { of } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 describe('Подтверждение скидки авторизованным клиентом', () => {
   let component: any;
@@ -73,6 +73,88 @@ describe('Подтверждение скидки авторизованным �
   });
   it('не отправляет запись во время проверки цены', () => {
     component.quoteLoading = true;
+    component.onConfirm();
+    expect(component.submitRecord).not.toHaveBeenCalled();
+  });
+
+  for (const loggedIn of [false, true]) {
+    it(`блокирует подтверждение после 500 и сохраняет выбор при повторе (${loggedIn ? 'клиент' : 'гость'})`, () => {
+      const date = new Date(2026, 10, 19, 10, 0);
+      const request = jasmine.createSpy('quote').and.returnValues(
+        throwError(() => new Error('HTTP 500')), of(quote));
+      Object.assign(component, {
+        dayId: 'day', dayChoose: date,
+        _welcome: { isLoggedIn: loggedIn, quote: request, track: () => undefined },
+        _giveaways: { findBookingPrize: () => of(null) },
+        _promoSeats: { quoteForBooking: () => of(null) },
+      });
+      component.refreshWelcomeQuote();
+      expect(component.quoteLoading).toBeFalse();
+      expect(component.quoteError).toContain('Не удалось проверить');
+      expect(component.welcomeQuote).toBeNull();
+      component.onConfirm();
+      expect(component.submitRecord).not.toHaveBeenCalled();
+      component.retryBookingQuote();
+      expect(component.quoteError).toBe('');
+      expect(component.welcomeQuote).toEqual(quote);
+      expect(component.dayId).toBe('day');
+      expect(component.dayChoose).toBe(date);
+      expect(component.chooseServices[0].id).toBe('s');
+      expect(request.calls.mostRecent().args[2]).toBe(loggedIn ? 'client' : null);
+    });
+  }
+
+  it('явное отсутствие права после успешного расчёта разрешает обычную запись', () => {
+    const unavailable = { ...quote, couponStatus: 'unavailable', reason: 'master_not_participating', discountAmount: 0, payableAmount: 8000 };
+    Object.assign(component, {
+      _welcome: { isLoggedIn: true, quote: () => of(unavailable) },
+      _giveaways: { findBookingPrize: () => of(null) },
+      _promoSeats: { quoteForBooking: () => of(null) },
+    });
+    component.refreshWelcomeQuote();
+    component.onConfirm();
+    expect(component.quoteError).toBe('');
+    expect(component.submitRecord.calls.mostRecent().args[1].useWelcomeCoupon).toBeUndefined();
+  });
+
+  it('поздний ответ старой услуги не затирает новую сумму', () => {
+    const old = new Subject<WelcomeQuote>();
+    Object.assign(component, {
+      _welcome: { isLoggedIn: true, quote: jasmine.createSpy().and.returnValues(old, of(quote)), track: () => undefined },
+      _giveaways: { findBookingPrize: () => of(null) },
+      _promoSeats: { quoteForBooking: () => of(null) },
+    });
+    component.refreshWelcomeQuote();
+    component.chooseServices = [{ id: 'new-service', price: { price: 8000 } }];
+    component.refreshWelcomeQuote();
+    old.next({ ...quote, payableAmount: 1 }); old.complete();
+    expect(component.welcomeQuote.payableAmount).toBe(7500);
+  });
+
+  it('выбранная акция не запускает независимый welcome quote и не суммирует скидки', () => {
+    Object.assign(component, {
+      activatedRoute: { snapshot: { queryParamMap: { get: (key: string) => key === 'promoCampaign' ? 'soblazn' : null } } },
+      _welcome: { isLoggedIn: true, quote: jasmine.createSpy('welcome') },
+      _giveaways: { findBookingPrize: () => of(null) },
+      _promoSeats: { quoteForBooking: () => of({ status: 'available', campaignCode: 'soblazn',
+        recordAmount: 2200, promoDiscount: 1320, payableAmount: 880, couponDiscount: 0, coupon: null }) },
+    });
+    component.refreshWelcomeQuote();
+    expect(component._welcome.quote).not.toHaveBeenCalled();
+    expect(component.welcomeQuote).toBeNull();
+    expect(component.priceSummary.payable).toBe(880);
+    expect(component.priceSummary.promoLabel).toBe('Скидка по акции');
+  });
+
+  it('сбой проверки выбранной акции не предлагает перейти на полную цену', () => {
+    Object.assign(component, {
+      activatedRoute: { snapshot: { queryParamMap: { get: (key: string) => key === 'promoCampaign' ? 'soblazn' : null } } },
+      _welcome: { isLoggedIn: true }, _giveaways: { findBookingPrize: () => of(null) },
+      _promoSeats: { quoteForBooking: () => throwError(() => new Error('HTTP 500')) },
+    });
+    component.refreshWelcomeQuote();
+    expect(component.quoteError).toBeTruthy();
+    expect(component.profilePromoUnavailable).toBeFalse();
     component.onConfirm();
     expect(component.submitRecord).not.toHaveBeenCalled();
   });

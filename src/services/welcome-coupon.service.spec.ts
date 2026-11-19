@@ -1,5 +1,5 @@
-import { of } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { AnalyticsService } from './analytics.service';
 import { WelcomeCouponService } from './welcome-coupon.service';
@@ -40,5 +40,35 @@ describe('Право на купон при смене сессии', () => {
     service.invalidateMine();
     service.getMine().subscribe(result => expect(result?.status).toBe('reserved'));
     expect(get).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('Ошибки расчёта приветственного купона', () => {
+  const cookies = { check: () => false } as unknown as CookieService;
+  function serviceWith(response: any): WelcomeCouponService {
+    return new WelcomeCouponService({ post: () => response } as unknown as HttpClient, cookies, {} as AnalyticsService);
+  }
+
+  for (const status of [0, 401, 404, 500]) {
+    it(`передаёт технический отказ ${status} экрану записи вместо null`, () => {
+      const error = new HttpErrorResponse({ status });
+      serviceWith(throwError(() => error)).quote('master', ['service']).subscribe({
+        next: () => fail('Нельзя подменять сбой успешным расчётом'),
+        error: actual => expect(actual).toBe(error),
+      });
+    });
+  }
+
+  it('сохраняет явный отказ в праве штатным ответом', () => {
+    const quote = { couponStatus: 'unavailable' as const, reason: 'master_not_participating',
+      originalAmount: 2200, payableAmount: 2200, discountAmount: 0, potentialDiscount: 0, currency: 'RUB' };
+    serviceWith(of(quote)).quote('master', ['service']).subscribe(actual => expect(actual).toEqual(quote));
+  });
+
+  it('пустой HTTP-ответ не считается проверенной ценой без купона', () => {
+    serviceWith(of(null)).quote('master', ['service']).subscribe({
+      next: () => fail('Ожидался DTO расчёта'),
+      error: actual => expect(actual.message).toContain('не вернул расчёт'),
+    });
   });
 });

@@ -67,6 +67,7 @@ export interface GiveawayBookingOffer {
 }
 
 export interface GiveawayCampaign {
+  campaignId?: string | null;
   featuredPost?: GiveawayFeaturedPost | null;
   code: string;
   version: number;

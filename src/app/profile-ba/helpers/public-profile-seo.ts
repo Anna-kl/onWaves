@@ -13,6 +13,8 @@ export interface PublicProfileSeoSource {
   city?: string | null;
   /** Рубрика этого мастера. Чужую услугу сюда не подставляем. */
   category?: string | null;
+  /** У демо-профиля запись выключена, даже если у него есть прайс и работы. */
+  isPromo?: boolean;
   link?: string | null;
   workLocations?: IWorkLocation[] | null;
   fallbackPath?: string;
@@ -75,6 +77,9 @@ export function buildPublicProfileTitle(source: PublicProfileSeoSource): string 
   if (category && who) {
     return `${category} — ${who} | OnWaves`;
   }
+  if (source.isPromo) {
+    return [who, 'услуги и цены | OnWaves'].filter(Boolean).join(' — ');
+  }
   return [who, 'онлайн-запись | OnWaves'].filter(Boolean).join(' — ');
 }
 
@@ -92,7 +97,7 @@ function masterCategory(category: string | null | undefined, name: string): stri
 
 /**
  * Description сниппета. На `/cellings` — расчёт по прайсу и бесплатный замер,
- * не каталог салонов. Обычная карточка держит призыв записаться в первых ~160.
+ * не каталог салонов. Демо описывает содержимое карточки без обещания записи.
  */
 export function buildPublicProfileDescription(source: PublicProfileSeoSource): string {
   const name = (source.name ?? '').trim();
@@ -104,12 +109,17 @@ export function buildPublicProfileDescription(source: PublicProfileSeoSource): s
     const label = cellingsMasterLabel(name);
     const who = label ? `мастера ${label} ` : '';
     // Список городов в именительном. Предлог «в» давал «в Кашира».
-    return `Натяжные потолки ${who}— ${geo}. Онлайн-калькулятор сметы по прайсу мастера и запись на бесплатный замер.`;
+    const offer = source.isPromo
+      ? 'Онлайн-калькулятор сметы по прайсу мастера.'
+      : 'Онлайн-калькулятор сметы по прайсу мастера и запись на бесплатный замер.';
+    return `Натяжные потолки ${who}— ${geo}. ${offer}`;
   }
   const SNIPPET_LIMIT = 160;
   const head = [
     [name, city].filter(Boolean).join(', '),
-    'запись онлайн: свободное время, услуги и цены.',
+    source.isPromo
+      ? 'демо-страница: услуги, цены и работы мастера.'
+      : 'запись онлайн: свободное время, услуги и цены.',
   ].filter(Boolean).join(' — ');
 
   const rest = about.replace(/\s+/g, ' ').trim();
@@ -135,6 +145,7 @@ export function publicProfileSeoFrom(
     about: profile.about,
     city: profile.address?.city,
     category: profile.mainCategory?.[0],
+    isPromo: profile.isPromo,
     link: profile.link,
     workLocations,
     fallbackPath: fallbackUrl,

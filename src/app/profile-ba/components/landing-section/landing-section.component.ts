@@ -591,7 +591,7 @@ export class LandingSectionComponent implements OnInit, OnChanges, AfterViewChec
     }
     const id = action?.profileCalculatorId;
     if (id) {
-      return this.graphs.find(item => item.profileCalculatorId === id) ?? this.graphs[0];
+      return this.graphs.find(item => item.profileCalculatorId === id) ?? null;
     }
     return this.graphs[0];
   }

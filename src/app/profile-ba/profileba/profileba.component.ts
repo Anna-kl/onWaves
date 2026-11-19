@@ -76,6 +76,7 @@ export class ProfileBAComponent implements OnInit, OnDestroy {
   landingState: LandingState = 'loading';
   workLocations: IWorkLocation[] = [];
   giveaway: GiveawayLoad<GiveawayCampaign> = { kind: 'loading', value: null };
+  welcomeProfile: IViewBusinessProfile | null = null;
 
   constructor(private route: ActivatedRoute,
               private _api: ProfileService,
@@ -136,6 +137,7 @@ export class ProfileBAComponent implements OnInit, OnDestroy {
   }
 
   private applyResolved(resolved: PublicProfileResolved | undefined): void {
+    this.welcomeProfile = resolved?.profile ?? null;
     this.offerSlug = this.route.snapshot.paramMap.get('id');
     this.profileLink = null;
     this.notFound = false;

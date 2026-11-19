@@ -77,7 +77,11 @@
             </div>
             <!-- Цена услуги -->
             <p *ngIf="quoteLoading" role="status">Проверяем скидки для вашей записи…</p>
-            <app-booking-price *ngIf="!quoteLoading && !rewardQuoteLoading && !isRecordView && !prizeBlocked" [price]="priceSummary"></app-booking-price>
+            <div *ngIf="quoteError" role="alert" class="booking-quote-error">
+              <p>{{ quoteError }}</p>
+              <button type="button" class="btn-transparent" (click)="retryBookingQuote()">Проверить стоимость ещё раз</button>
+            </div>
+            <app-booking-price *ngIf="!quoteLoading && !quoteError && !rewardQuoteLoading && !isRecordView && !prizeBlocked" [price]="priceSummary"></app-booking-price>
             <p *ngIf="!quoteLoading && welcomeQuote?.policyId && welcomeQuote?.eligibleAmount != null && welcomeQuote?.amountKnown !== false">
               Сумма подходящих услуг {{ welcomeQuote?.eligibleAmount | number:'1.0-2' }} ₽
             </p>
@@ -106,7 +110,7 @@
                     [attr.aria-pressed]="applyWelcome" (click)="toggleWelcome()">
               {{ applyWelcome ? 'Не использовать купон' : 'Использовать купон' }}
             </button>
-            <fieldset class="reward-coupon-selector" *ngIf="!isRecordView && !prizeBlocked && !ultrasoundUnavailable && !profilePromoUnavailable && rewardCoupons.length && !(welcomeQuote?.policyId && welcomeApplies)">
+            <fieldset class="reward-coupon-selector" *ngIf="!isRecordView && !prizeBlocked && !quoteError && !ultrasoundUnavailable && !profilePromoUnavailable && rewardCoupons.length && !(welcomeQuote?.policyId && welcomeApplies)">
               <legend>Купоны за отзывы</legend>
               <label *ngFor="let coupon of rewardCoupons">
                 <input type="checkbox" [checked]="selectedRewardIds.includes(coupon.id)"
@@ -282,11 +286,11 @@
                  [style.margin-top.px]="isMobileBooking ? 28 : 0">
               <button type="button"
                 class="btn-green margin-left40 margin-right40"
-                [class.record-action--disabled]="saveInProgress || quoteLoading || prizeBlocked || rewardQuoteBlocksBooking"
-                [disabled]="saveInProgress || quoteLoading || prizeBlocked || rewardQuoteBlocksBooking"
+                [class.record-action--disabled]="saveInProgress || quoteLoading || quoteError || prizeBlocked || rewardQuoteBlocksBooking"
+                [disabled]="saveInProgress || quoteLoading || !!quoteError || prizeBlocked || rewardQuoteBlocksBooking"
                 style="max-width: 200px;"
                 (click)="onConfirm()">
-                {{ saveInProgress ? 'Отправка…' : quoteLoading || rewardQuoteLoading ? 'Проверяем стоимость…' : prizeBlocked ? 'Запись недоступна' : prizeAwardId ? (priceSummary.payable === 0 ? 'Записаться бесплатно' : 'Записаться за ' + formatRub(priceSummary.payable)) : promoPhoneRequired ? 'Подтвердить телефон' : 'Далее' }}
+                {{ saveInProgress ? 'Отправка…' : quoteLoading || rewardQuoteLoading ? 'Проверяем стоимость…' : quoteError ? 'Проверьте стоимость' : prizeBlocked ? 'Запись недоступна' : prizeAwardId ? (priceSummary.payable === 0 ? 'Записаться бесплатно' : 'Записаться за ' + formatRub(priceSummary.payable)) : promoPhoneRequired ? 'Подтвердить телефон' : 'Далее' }}
               </button>
             </div>
             <div class="around_1024-beetween_large сommunication" *ngIf="getStatusConfirm()">

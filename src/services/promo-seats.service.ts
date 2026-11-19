@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpBackend, HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, throwError } from 'rxjs';
 import { environment } from '../enviroments/environment';
 import { GiveawayLoad } from '../app/DTO/views/giveaway/giveaway';
 import { PromoSeatQuote, PromoSeatReport, PromoSeatState, PromoSeatTerms } from '../app/DTO/views/promo/promo-seats';
@@ -15,7 +15,7 @@ import { IResponse } from '../app/DTO/classes/IResponse';
 /**
  * Акция с ограниченным числом мест. Счётчик и суммы приходят с сервера без кеша:
  * витрина спрашивает их при открытии страницы и ещё раз перед подтверждением записи.
- * Ошибка сети = «акции нет»: лучше не обещать место, которого может не быть.
+ * На витрине ошибка скрывает обещание; при записи проверка цены обязательна.
  */
 @Injectable({ providedIn: 'root' })
 export class PromoSeatsService {
@@ -96,7 +96,16 @@ export class PromoSeatsService {
     );
   }
 
-  /** Пустой ответ и сбой сети здесь разные: сбой нельзя показывать как «мест нет». */
+  /** В записи недоступность проверки нельзя превращать в подтверждённую цену без акции. */
+  quoteForBooking(masterId: string, serviceIds: string[], clientId?: string | null, daysOfScheduleId?: string | null, campaignCode?: string | null): Observable<PromoSeatQuote | null> {
+    return this.quoteDetailed(masterId, serviceIds, clientId, daysOfScheduleId, campaignCode).pipe(
+      switchMap(result => result.kind === 'ready' && result.value
+        ? of(result.value)
+        : throwError(() => new Error('Не удалось проверить скидку на запись'))),
+    );
+  }
+
+  /** POST quote всегда возвращает DTO, в том числе при отсутствии акции. */
   quoteDetailed(masterId: string, serviceIds: string[], clientId?: string | null, daysOfScheduleId?: string | null, campaignCode?: string | null): Observable<PromoQuoteLoad> {
     return this.http
       .post<PromoSeatQuote | null>(`${this.url}quote`, {
@@ -109,7 +118,7 @@ export class PromoSeatsService {
       .pipe(
         map(quote => quote
           ? { kind: 'ready' as const, value: quote }
-          : { kind: 'empty' as const, value: null }),
+          : { kind: 'failed' as const, value: null }),
         catchError(() => of({ kind: 'failed' as const, value: null })),
       );
   }

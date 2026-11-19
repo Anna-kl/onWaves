@@ -20,12 +20,14 @@
 <!-- List start -->
 <div class="parent-grey-light" *ngIf="!notFound">
     <div class="disp1 top170" >
+        <app-welcome-offer-banner [promotionLegacy]="id" legacyType="welcome" class="profile-welcome-banner" [profile]="welcomeProfile"
+          (choose)="profileColumn.onlineRecord()"></app-welcome-offer-banner>
         <div class="ba-profile-layout">
             <div class="ba-profile-layout__left">
-              <app-column-baprofile [id]="id" [splitForPromo]="true"></app-column-baprofile>
+              <app-column-baprofile #profileColumn [id]="id" [splitForPromo]="true"></app-column-baprofile>
             </div>
             <div class="ba-profile-layout__right ba122-right-column">
-              <app-giveaway-banner id="giveaway" class="ba-profile-layout__giveaway" variant="master" [load]="giveaway"></app-giveaway-banner>
+              <app-giveaway-banner [promotionLegacy]="id" legacyType="giveaway" [legacySourceId]="giveaway.value?.campaignId || undefined" id="giveaway" class="ba-profile-layout__giveaway" variant="master" [load]="giveaway"></app-giveaway-banner>
               <app-landing-section
                 class="ba-profile-layout__promo"
                 [profileId]="id"
