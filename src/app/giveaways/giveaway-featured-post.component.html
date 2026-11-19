@@ -1,0 +1,46 @@
+<article class="draw-post" aria-labelledby="draw-post-title" *ngIf="post as item">
+  <header class="draw-post__header">
+    <p class="draw-post__eyebrow">OnWaves × {{ campaign.master.name || 'Мастер' }}</p>
+    <h2 id="draw-post-title">{{ item.title }}</h2>
+    <p class="draw-post__subtitle" *ngIf="item.subtitle">{{ item.subtitle }}</p>
+    <p class="draw-post__status" role="status">{{ status }}</p>
+  </header>
+  <div class="draw-post__grid">
+    <figure class="draw-post__cover" *ngIf="item.imageUrl && !imageFailed; else neutralCover">
+      <img [src]="item.imageUrl" [alt]="item.imageAlt || 'Карточка розыгрыша'" width="1122" height="1402" decoding="async" (error)="imageFailed=true" />
+    </figure>
+    <ng-template #neutralCover><div class="draw-post__neutral"><span aria-hidden="true">✦</span><p>{{ published ? 'Итоги розыгрыша' : 'Участницы розыгрыша' }}</p><b>{{ campaign.master.name }}</b></div></ng-template>
+    <div class="draw-post__details">
+      <section class="draw-post__registry" *ngIf="item.registryVisible" aria-label="Участницы розыгрыша">
+        <h3>Участницы <span>{{ item.participants.totalCount }}</span></h3>
+        <ol class="draw-post__participants" *ngIf="participants.length; else emptyRegistry">
+          <li *ngFor="let person of participants"><b>№ {{ person.number }}</b><span>{{ person.phoneMask || 'Заявка на участие' }}</span></li>
+        </ol>
+        <ng-template #emptyRegistry><p class="draw-post__muted">Список участниц пока пуст.</p></ng-template>
+        <button class="draw-post__more" type="button" *ngIf="nextAfter !== null" [disabled]="loadingMore" (click)="more()">{{ loadingMore ? 'Загружаем…' : 'Показать ещё участниц' }}</button>
+        <p *ngIf="registryError" class="draw-post__muted" role="status">Не удалось загрузить продолжение. Попробуйте ещё раз.</p>
+      </section>
+      <section class="draw-post__results" aria-label="Номера победительниц">
+        <h3>{{ published ? 'Поздравляем победительниц!' : 'Здесь появятся победительницы' }}</h3>
+        <div class="draw-post__prize" *ngFor="let prize of prizes">
+          <span class="draw-post__position">Приз {{ prize.position }}</span><h4>{{ prize.title }}</h4>
+          <p class="draw-post__amount">{{ prize.maxAmountRub | number:'1.0-2' }} ₽</p>
+          <ng-container *ngIf="published && winner(prize.position)?.number as number; else awaitingNumber">
+            <p class="draw-post__winner">№ {{ number }}</p><p class="draw-post__phone" *ngIf="winner(prize.position)?.phoneMask as mask">{{ mask }}</p>
+          </ng-container>
+          <ng-template #awaitingNumber><p class="draw-post__awaiting">{{ published ? 'Результат уточняется' : 'Номер объявим после розыгрыша' }}</p></ng-template>
+        </div>
+      </section>
+      <a class="draw-post__rules" [routerLink]="['/giveaways', campaign.code]">Условия и страница розыгрыша <span aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+  <section class="draw-post__video" aria-label="Видео розыгрыша">
+    <h3>Видео розыгрыша</h3>
+    <app-video-player *ngIf="item.videoUrl && !videoFailed; else videoPlaceholder" [url]="item.videoUrl" [poster]="item.videoPosterUrl"
+      [autoplay]="false" [viewportAutoplay]="false" [warmup]="false" [fullFrame]="true" (unavailable)="videoFailed=true"></app-video-player>
+    <ng-template #videoPlaceholder><div class="draw-post__video-empty"><span aria-hidden="true">▷</span>
+      <p>{{ videoFailed ? 'Видео временно недоступно' : published ? 'Видео скоро добавим' : 'Видео розыгрыша появится здесь' }}</p>
+      <small>{{ videoFailed ? 'Результаты остаются доступны выше.' : 'Сохраним здесь запись выбора победительниц.' }}</small>
+    </div></ng-template>
+  </section>
+</article>

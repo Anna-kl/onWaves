@@ -1,3 +1,5 @@
+<app-giveaway-featured-post *ngIf="isFeatured && campaign; else regularBanner" [campaign]="campaign!"></app-giveaway-featured-post>
+<ng-template #regularBanner>
 <section class="gw-banner" *ngIf="shown" [attr.data-giveaway-phase]="campaign?.phase" [class.gw-banner--master]="variant === 'master'" [class.gw-banner--failed]="load?.kind === 'failed'" [class.gw-banner--with-rules]="rulesParagraphs.length > 0" [class.gw-banner--with-media]="hasWorkPhotos || campaign?.banner?.imageUrl" aria-labelledby="gw-banner-title">
   <div class="gw-banner__copy" *ngIf="load?.kind === 'failed'">
     <h2 id="gw-banner-title">Информация о розыгрыше временно недоступна</h2>
@@ -55,3 +57,5 @@
     <a *ngIf="vkEntry && campaign?.vkPostUrl && campaign?.phase !== 'scheduled'" [href]="campaign?.vkPostUrl" target="_blank" rel="noopener noreferrer">Исходный конкурсный пост во VK</a>
   </div>
 </details>
+
+</ng-template>

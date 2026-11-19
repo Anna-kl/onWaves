@@ -67,6 +67,7 @@ export interface GiveawayBookingOffer {
 }
 
 export interface GiveawayCampaign {
+  featuredPost?: GiveawayFeaturedPost | null;
   code: string;
   version: number;
   title: string;
@@ -97,6 +98,15 @@ export interface GiveawayCampaign {
   websiteResultsUrl?: string | null;
   winnerNumbers?: { position: number; number: number }[] | null;
   bookingOffer?: GiveawayBookingOffer | null;
+}
+
+export interface GiveawayFeaturedParticipant { number: number; phoneMask: string | null; }
+export interface GiveawayFeaturedRegistry { totalCount: number; items: GiveawayFeaturedParticipant[]; nextAfter: number | null; }
+export interface GiveawayFeaturedPost {
+  template: 'giveaway_results_v1'; version: number; pinned: boolean; title: string; subtitle: string | null;
+  imageUrl: string | null; imageAlt: string | null; videoUrl: string | null; videoType: string | null; videoPosterUrl: string | null;
+  registryVisible: boolean; participants: GiveawayFeaturedRegistry;
+  winners: { position: number; number: number | null; phoneMask: string | null }[];
 }
 
 export interface GiveawayList {

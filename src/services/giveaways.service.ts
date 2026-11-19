@@ -1,7 +1,7 @@
 import { GiveawayOwnerAward } from '../app/DTO/views/giveaway/giveaway';
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, NgZone, PLATFORM_ID, TransferState, makeStateKey } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { Observable, Subscription, catchError, map, of, switchMap, tap } from 'rxjs';
 import { environment } from '../enviroments/environment';
@@ -15,6 +15,7 @@ import {
   GiveawayMine,
   GiveawayPreview,
   GiveawayPrizeQuote,
+  GiveawayFeaturedRegistry,
 } from '../app/DTO/views/giveaway/giveaway';
 
 /**
@@ -27,7 +28,11 @@ export class GiveawaysService {
   private static readonly NO_STORE = { 'Cache-Control': 'no-store' };
 
   constructor(private http: HttpClient, private cookies: CookieService, private zone: NgZone,
-    @Inject(PLATFORM_ID) private platformId: object, private transfer: TransferState) {}
+    @Inject(PLATFORM_ID) private platformId: object, private transfer: TransferState, backend: HttpBackend) {
+      this.liveHttp = new HttpClient(backend);
+    }
+  private readonly liveHttp: HttpClient;
+  private get publicHttp(): HttpClient { return isPlatformBrowser(this.platformId) ? this.liveHttp : this.http; }
 
   get isLoggedIn(): boolean {
     try {
@@ -42,7 +47,7 @@ export class GiveawaysService {
     if (masterId) {
       params['masterId'] = masterId;
     }
-    return this.publicState(() => this.http.get<unknown>(this.url.replace(/\/$/, ''), {
+    return this.publicState(() => this.publicHttp.get<unknown>(this.url.replace(/\/$/, ''), {
       params,
       headers: new HttpHeaders(GiveawaysService.NO_STORE),
     }).pipe(
@@ -61,7 +66,7 @@ export class GiveawaysService {
 
   getCampaign(code: string, preview = false): Observable<GiveawayLoad<GiveawayCampaign>> {
     const path = preview ? `admin/campaigns/${encodeURIComponent(code)}/preview` : encodeURIComponent(code);
-    return this.publicState(() => this.http.get<unknown>(`${this.url}${path}`, {
+    return this.publicState(() => (preview ? this.http : this.publicHttp).get<unknown>(`${this.url}${path}`, {
       headers: preview ? this.authHeaders() : new HttpHeaders(GiveawaysService.NO_STORE),
     }).pipe(
       map(body => {
@@ -72,6 +77,12 @@ export class GiveawaysService {
       }),
       catchError((error: HttpErrorResponse) => of(this.failedOrEmpty<GiveawayCampaign>(error))),
     ), preview ? undefined : `campaign:${code}`);
+  }
+
+  featuredParticipants(code: string, after: number): Observable<GiveawayFeaturedRegistry> {
+    return this.publicHttp.get<GiveawayFeaturedRegistry>(`${this.url}${encodeURIComponent(code)}/featured-post/participants`, {
+      params: { after, size: 25 }, headers: new HttpHeaders(GiveawaysService.NO_STORE),
+    });
   }
 
   /** Личные выигрыши. Доказательство телефона проверяет сервер, номер в запрос не кладём. */
@@ -240,11 +251,13 @@ export class GiveawaysService {
       };
       const visible = () => { if (document.visibilityState === 'visible') this.zone.run(load); };
       this.zone.runOutsideAngular(() => document.addEventListener('visibilitychange', visible));
+      this.zone.runOutsideAngular(() => window.addEventListener('focus', visible));
       load();
       return () => {
         pending?.unsubscribe();
         if (timer) clearTimeout(timer);
         document.removeEventListener('visibilitychange', visible);
+        window.removeEventListener('focus', visible);
       };
     });
   }

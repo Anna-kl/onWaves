@@ -60,6 +60,8 @@
     </div>
   </section>
 
+  <app-giveaway-banner *ngIf="giveaway.value?.featuredPost?.pinned" variant="home" [load]="giveaway"></app-giveaway-banner>
+
   <section *ngIf="ultrasoundOffer as offer" class="hs-promo" aria-labelledby="hs-promo-title">
     <figure class="hs-promo__cover">
       <img [src]="ultrasoundCover" alt="" loading="lazy" decoding="async" />
@@ -80,7 +82,7 @@
     </div>
   </section>
 
-  <app-giveaway-banner variant="home" [load]="giveaway"></app-giveaway-banner>
+  <app-giveaway-banner *ngIf="!giveaway.value?.featuredPost?.pinned" variant="home" [load]="giveaway"></app-giveaway-banner>
 
   <app-rubric-menu *ngIf="isRubricOpen" [isOpen]="isRubricOpen" (setCategory)="setCategory($event)"></app-rubric-menu>
 

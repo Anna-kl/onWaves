@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpBackend, HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { NgZone, TransferState, makeStateKey } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
@@ -19,7 +19,7 @@ describe('Обновление публичной фазы розыгрыша', 
     TestBed.configureTestingModule({ imports: [HttpClientTestingModule] });
     http = TestBed.inject(HttpTestingController);
     service = new GiveawaysService(TestBed.inject(HttpClient), { check: () => false } as unknown as CookieService,
-      zone, 'browser' as unknown as object, TestBed.inject(TransferState));
+      zone, 'browser' as unknown as object, TestBed.inject(TransferState), TestBed.inject(HttpBackend));
   });
   afterEach(() => http.verify());
 
@@ -60,7 +60,7 @@ describe('Обновление публичной фазы розыгрыша', 
   it('сохраняет на SSR также ошибку, которую HTTP transfer cache не передаёт', () => {
     const transfer = TestBed.inject(TransferState);
     const server = new GiveawaysService(TestBed.inject(HttpClient), { check: () => false } as unknown as CookieService,
-      zone, 'server' as unknown as object, transfer);
+      zone, 'server' as unknown as object, transfer, TestBed.inject(HttpBackend));
     server.publicList('home').subscribe();
     http.expectOne(r => r.url === environment.Uri + 'giveaways').flush(null, { status: 503, statusText: 'Unavailable' });
     expect(transfer.get(makeStateKey<any>('giveaway:list:home:'), null)).toEqual({ kind: 'failed', value: null });
@@ -69,7 +69,7 @@ describe('Обновление публичной фазы розыгрыша', 
   it('не переносит административное превью в публичный HTML', () => {
     const transfer = TestBed.inject(TransferState);
     const server = new GiveawaysService(TestBed.inject(HttpClient), { check: () => false } as unknown as CookieService,
-      zone, 'server' as unknown as object, transfer);
+      zone, 'server' as unknown as object, transfer, TestBed.inject(HttpBackend));
     server.getCampaign(active.code, true).subscribe();
     http.expectOne(environment.Uri + 'giveaways/admin/campaigns/' + active.code + '/preview').flush(active);
     expect(transfer.hasKey(makeStateKey<any>('giveaway:campaign:' + active.code))).toBeFalse();

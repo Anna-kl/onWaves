@@ -6,11 +6,12 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { GiveawayCampaign, GiveawayLoad, GiveawayPrizePublic } from '../DTO/views/giveaway/giveaway';
 import { bannerVisible, formatMsk, giveawayHasVk, giveawayHasWebsite, phaseHeadline, prizeDeadline } from '../../helpers/giveaway';
 import { AnalyticsService } from '../../services/analytics.service';
+import { GiveawayFeaturedPostComponent } from './giveaway-featured-post.component';
 
 @Component({
   selector: 'app-giveaway-banner',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, GiveawayFeaturedPostComponent],
   templateUrl: './giveaway-banner.component.html',
   styleUrls: ['./giveaway-banner.component.scss'],
 })
@@ -32,6 +33,7 @@ export class GiveawayBannerComponent implements OnChanges, AfterViewInit, OnDest
   get campaign(): GiveawayCampaign | null {
     return this.load?.kind === 'ready' ? this.load.value : null;
   }
+  get isFeatured(): boolean {return this.variant==='home'&&this.campaign?.featuredPost?.pinned===true;}
 
   get shown(): boolean {
     if (this.load?.kind === 'failed') {
